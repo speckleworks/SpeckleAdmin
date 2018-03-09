@@ -39,6 +39,12 @@
     </md-card>
     <div class="md-layout md-alignment-center-center spk-push-down">
       <div class="md-layout-item md-size-80">
+        <div v-if='streamsCount == 0'>
+          <br>&nbsp
+          <br>
+          <div class="md-display-1">No streams here.</div>
+          <div class="md-subheading">You haven't created any streams or none match your search.</div>
+        </div>
         <md-table v-model="paginatedStreams">
           <md-table-row slot="md-table-row" slot-scope="{ item }">
             <md-table-cell md-label="Stream Id">{{ item.streamId }}</md-table-cell>

@@ -20,7 +20,7 @@ window.bus = new Vue( )
 
 Vue.filter( 'formatDate', function( value ) {
   if ( value ) {
-    return moment( String( value ) ).format( 'MM/DD/YYYY hh:mm' )
+    return moment( String( value ) ).format( 'DD/MM/YYYY hh:mm' )
   }
 } )
 
@@ -28,7 +28,7 @@ Vue.filter( 'formatDate', function( value ) {
 if ( !window.location.href.includes( 'dev' ) )
   Store.state.server = 'https://s003.speckle.works/api'
 else
-  Store.state.server = window.location.origin + '/api'
+  Store.state.server = 'http://localhost:3000/api'
 
 let token = window.localStorage.getItem( "token" )
 let email = window.localStorage.getItem( "email" )
@@ -52,18 +52,18 @@ new Vue( {
   render: h => h( App )
 } )
 
-function debounce(func, wait, immediate) {
+function debounce( func, wait, immediate ) {
   var timeout;
-  return function() {
-    var context = this, args = arguments;
-    var later = function() {
+  return function( ) {
+    var context = this,
+      args = arguments;
+    var later = function( ) {
       timeout = null;
-      if (!immediate) func.apply(context, args);
+      if ( !immediate ) func.apply( context, args );
     };
     var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
+    clearTimeout( timeout );
+    timeout = setTimeout( later, wait );
+    if ( callNow ) func.apply( context, args );
   };
 };
-

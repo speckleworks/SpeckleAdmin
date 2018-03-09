@@ -14,6 +14,24 @@ export default new Vuex.Store( {
   },
   getters: {},
   actions: {
+    register( context, credentials ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( this.state.server + '/accounts/register', { email: credentials.email, password: credentials.password, name: credentials.name, surname: credentials.surname, company: credentials.company } )
+          .then( res => {
+            if ( !res.data.success ) return reject( res.data.message )
+            context.commit( 'setCredentials', { token: res.data.token, auth: true } )
+            window.localStorage.setItem( 'token', res.data.token )
+            return Axios.get( this.state.server + '/accounts/profile', { headers: { Authorization: res.data.token } } )
+          } )
+          .then( res => {
+            context.commit( 'setUser', res.data.user )
+            resolve( )
+          })
+          .catch( err => {
+            reject( "Failed to register. Maybe you've used this email before?" )
+          } )
+      } )
+    },
     login( context, credentials ) {
       return new Promise( ( resolve, reject ) => {
         Axios.post( this.state.server + '/accounts/login', { email: credentials.email, password: credentials.password } )
@@ -24,7 +42,6 @@ export default new Vuex.Store( {
             return Axios.get( this.state.server + '/accounts/profile', { headers: { Authorization: res.data.token } } )
           } )
           .then( res => {
-            console.log( res.data.user )
             context.commit( 'setUser', res.data.user )
             resolve( )
           } )
@@ -37,14 +54,14 @@ export default new Vuex.Store( {
       Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
         .then( res => {
           console.log( res )
-          context.commit( 'addStreamsBulk', res.data.streams.reverse() )
+          context.commit( 'addStreamsBulk', res.data.streams.reverse( ) )
         } )
         .catch( err => {
 
         } )
     },
     setStreamPrivate( context, state ) {
-      console.log("YOLO")
+      console.log( "YOLO" )
     },
     setStreamName( context, state ) {
 
