@@ -36,13 +36,12 @@ let email = window.localStorage.getItem( "email" )
 if ( token ) {
   Axios.get( Store.state.server + '/accounts/profile', { headers: { Authorization: token } } )
     .then( res => {
-      console.log( res )
       Store.state.auth = true
       Store.state.token = token
       Store.state.user = res.data.user
     } )
     .catch( err => {
-      console.log( err )
+      window.localStorage.clear()
     } )
 }
 

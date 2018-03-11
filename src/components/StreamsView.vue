@@ -45,27 +45,37 @@
           <div class="md-display-1">No streams here.</div>
           <div class="md-subheading">You haven't created any streams or none match your search.</div>
         </div>
-        <md-table v-model="paginatedStreams">
+        <md-table v-model="paginatedStreams" v-else>
           <md-table-row slot="md-table-row" slot-scope="{ item }">
             <md-table-cell md-label="Stream Id">{{ item.streamId }}</md-table-cell>
-            <md-table-cell md-label="Name"><strong>{{ item.name }}</strong></md-table-cell>
-            <md-table-cell md-label="Private">
-              <md-switch v-model="item.private" class="md-primary" @change='updateStream(item)'></md-switch>
-              <md-button :disabled='!item.private' class='md-dense md-icon-button md-raised' style='margin-top: 10px;'>
-                <md-icon>group_add</md-icon>
-                <md-tooltip md-direction="bottom">Manage permissions</md-tooltip>
-              </md-button>
+            <md-table-cell md-label="Name">
+              <!-- <div class='spk-stream-name'><strong>{{ item.name }}</strong></div> -->
+              <editable v-model='item.name' :stream-id='item.streamId'></editable>
+            </md-table-cell>
+            <md-table-cell md-label="Ownership & Rights">
+              <div v-if='item.isOwner'>
+                <md-switch v-model="item.private" class="md-primary" @change='setStreamPrivate(item)'></md-switch>
+                <md-button :disabled='!item.private' class='md-dense md-icon-button md-raised' style='margin-top: 10px;' @click='showPermissions=true'>
+                  <md-icon>group_add</md-icon>
+                  <md-tooltip md-direction="bottom">Manage permissions</md-tooltip>
+                </md-button>
+              </div>
+              <div v-else>
+                <div class="md-caption">You are not the owner of this stream.</div>
+              </div>
             </md-table-cell>
             <md-table-cell md-label="Last updated">{{ item.updatedAt | formatDate }}</md-table-cell>
             <md-table-cell md-label="Created at">{{ item.createdAt | formatDate }}</md-table-cell>
-            <md-table-cell md-label="View online">
+            <md-table-cell md-label="Extras">
               <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
                 <md-icon>3d_rotation</md-icon>
                 <md-tooltip md-direction="bottom">View 3d</md-tooltip>
               </md-button>
-            </md-table-cell>
-            <md-table-cell md-label="Delete">
               <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
+                <md-icon>filter_list</md-icon>
+                <md-tooltip md-direction="bottom">Query</md-tooltip>
+              </md-button>
+              <md-button class='md-dense md-icon-button md-accent' style='margin-top: 10px;'>
                 <md-icon>delete</md-icon>
                 <md-tooltip md-direction="bottom">Delete stream</md-tooltip>
               </md-button>
@@ -74,10 +84,24 @@
         </md-table>
       </div>
     </div>
+    <md-dialog :md-active.sync="showPermissions">
+      <md-dialog-title>Stream ownership and rights</md-dialog-title>
+      <md-content>
+        <md-field>
+          <md-icon>search</md-icon>
+          <md-input></md-input>
+        </md-field>
+      </md-content>
+    </md-dialog>
   </div>
 </template>
 <script>
+import Editable from './Editable.vue'
+
 export default {
+  components: {
+    Editable
+  },
   computed: {
     streamsCount( ) { return this.filteredStreams.length },
     filteredStreams( ) {
@@ -104,13 +128,13 @@ export default {
       searchfilter: null,
       startIndex: 0,
       itemsPerPage: 15,
-      fruits: [ 'banana', 'apple', 'pie' ]
+      showPermissions: false
     }
   },
   methods: {
-    updateStream( stream ) {
-      console.log( stream.private )
-      // this.$store.dispatch( "setStreamPrivate", item )
+    setStreamPrivate( item ) {
+      // console.log( stream.private )
+      this.$store.dispatch( "setStreamPrivate", { streamId: item.streamId, private: item.private } )
     }
   },
   mounted( ) {
@@ -120,6 +144,8 @@ export default {
 
 </script>
 <style lang="scss">
+
+
 .spk-padding {
   box-sizing: border-box;
   padding-left: 10px;

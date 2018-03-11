@@ -26,7 +26,7 @@ export default new Vuex.Store( {
           .then( res => {
             context.commit( 'setUser', res.data.user )
             resolve( )
-          })
+          } )
           .catch( err => {
             reject( "Failed to register. Maybe you've used this email before?" )
           } )
@@ -51,26 +51,55 @@ export default new Vuex.Store( {
       } )
     },
     getStreams( context ) {
-      Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
-        .then( res => {
-          console.log( res )
-          context.commit( 'addStreamsBulk', res.data.streams.reverse( ) )
-        } )
-        .catch( err => {
-
-        } )
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
+          .then( res => {
+            console.log( res )
+            context.commit( 'addStreamsBulk', res.data.streams.reverse( ) )
+            resolve( )
+          } )
+          .catch( err => {
+            reject( err )
+          } )
+      } )
     },
-    setStreamPrivate( context, state ) {
-      console.log( "YOLO" )
+    setStreamPrivate( context, payload ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.patch( this.state.server + '/streams/' + payload.streamId, { private: payload.private }, { headers: { Authorization: this.state.token } } )
+          .then( res => {
+            context.commit( 'setStreamPrivate', payload )
+            resolve( )
+          } )
+          .catch( err => {
+            console.log( err )
+            reject( )
+          } )
+      } )
     },
-    setStreamName( context, state ) {
-
+    setStreamName( context, payload ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.patch( this.state.server + '/streams/' + payload.streamId, { name: payload.name }, { headers: { Authorization: this.state.token } } )
+          .then( res => {
+            context.commit( 'setStreamName', payload )
+            resolve( )
+          } )
+          .catch( err => {
+            console.log( err )
+            reject( )
+          } )
+      } )
     },
     setStreamDeleted( context, state ) {
 
     }
   },
   mutations: {
+    setStreamName( state, payload ) {
+      state.streams.find( stream => stream.streamId === payload.streamId ).name = payload.name
+    },
+    setStreamPrivate( state, payload ) {
+      state.streams.find( stream => stream.streamId === payload.streamId ).private = payload.private
+    },
     setCredentials( state, payload ) {
       state.auth = payload.auth
       state.token = payload.token
@@ -80,6 +109,9 @@ export default new Vuex.Store( {
     },
     addStreamsBulk( state, streams ) {
       state.streams = streams
+      state.streams.forEach( stream => {
+        stream.isOwner = state.user._id == stream.owner
+      } )
     }
   }
 } )
