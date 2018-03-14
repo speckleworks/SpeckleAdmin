@@ -12,7 +12,11 @@ export default new Vuex.Store( {
     token: null,
     streams: [ ]
   },
-  getters: {},
+  getters: {
+    streamById: ( state ) => ( streamId ) => {
+      return state.streams.find( stream => stream.streamId === streamId )
+    }
+  },
   actions: {
     register( context, credentials ) {
       return new Promise( ( resolve, reject ) => {
@@ -55,7 +59,7 @@ export default new Vuex.Store( {
         Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
           .then( res => {
             console.log( res )
-            context.commit( 'addStreamsBulk', res.data.streams.reverse( ) )
+            context.commit( 'addStreamsBulk', res.data.streams )
             resolve( )
           } )
           .catch( err => {
@@ -89,11 +93,24 @@ export default new Vuex.Store( {
           } )
       } )
     },
-    setStreamDeleted( context, state ) {
-
+    setStreamArchived( context, payload ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.patch( this.state.server + '/streams/' + payload.streamId, { deleted: payload.deleted }, { headers: { Authorization: this.state.token } } )
+          .then( res => {
+            context.commit( 'setStreamArchived', payload )
+            resolve( )
+          } )
+          .catch( err => {
+            console.log( err )
+            reject( )
+          } )
+      } )
     }
   },
   mutations: {
+    setStreamArchived( state, payload ) {
+      state.streams.find( stream => stream.streamId === payload.streamId ).deleted = payload.deleted
+    },
     setStreamName( state, payload ) {
       state.streams.find( stream => stream.streamId === payload.streamId ).name = payload.name
     },

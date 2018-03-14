@@ -4,9 +4,12 @@
       <md-app-toolbar class="md-primary md-dense" style='z-index: 10' v-if='$store.state.auth'>
         <div class="md-toolbar-row">
           <div class="md-toolbar-section-start">
-            <!-- <h3 class="md-subheading">Speckle Admin</h3> -->
             
-            <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button>
+            <md-button class='md-dense md-icon-button'>
+              <md-icon>account_circle</md-icon>
+            </md-button>
+            <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': false}" @click='changeView( route )'>{{route.name}}</md-button>
+            <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button> -->
           </div>
           <div class="md-toolbar-section-end">
             Hello {{$store.state.user.name}}!
@@ -41,14 +44,9 @@ export default {
   data( ) {
     return {
       routes: [ {
-          name: "streams",
+          name: "your streams",
           component: "streams-view",
           selected: true
-        },
-        {
-          name: "profile",
-          component: "profile-view",
-          selected: false
         }
       ],
       currentView: 'streams-view'
@@ -104,12 +102,12 @@ export default {
   border-bottom: 2px solid white;
 }
 
-@import "~vue-material/dist/theme/engine"; // Import the theme engine
-@include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
-accent: md-get-palette-color(red, A400), // The accent or secondary color
-// theme: dark
-));
+// @import "~vue-material/dist/theme/engine"; // Import the theme engine
+// @include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
+// accent: md-get-palette-color(red, A400), // The accent or secondary color
+// // theme: dark
+// ));
 
-@import "~vue-material/dist/theme/all"; // Apply the theme
+// @import "~vue-material/dist/theme/all"; // Apply the theme
 
 </style>

@@ -4,7 +4,7 @@ import Axios from 'axios'
 import VueMaterial from 'vue-material'
 import VeeValidate from 'vee-validate'
 import moment from 'moment'
-
+import VueTimeago from 'vue-timeago'
 
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
@@ -17,6 +17,15 @@ Vue.use( VeeValidate )
 
 Vue.prototype.$http = Axios
 window.bus = new Vue( )
+
+Vue.use( VueTimeago, {
+  name: 'timeago', // component name, `timeago` by default
+  locale: 'en-US',
+  locales: {
+    // you will need json-loader in webpack 1
+    'en-US': require( 'vue-timeago/locales/en-US.json' )
+  }
+} )
 
 Vue.filter( 'formatDate', function( value ) {
   if ( value ) {
@@ -41,7 +50,7 @@ if ( token ) {
       Store.state.user = res.data.user
     } )
     .catch( err => {
-      window.localStorage.clear()
+      window.localStorage.clear( )
     } )
 }
 
