@@ -4,9 +4,16 @@
 
 <script>
 export default {
+  props: [],
+  computed: {
+  },
   data( ) {
     return {
     }
+  },
+  methods: {
+  },
+  mounted() {
   }
 }
 </script>

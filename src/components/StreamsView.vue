@@ -2,51 +2,55 @@
   <div>
     <!-- header & search, options, etc. -->
     <md-card class='spk-search-card md-elevation-8'>
-      <div class="md-layout md-alignment-center-left">
-        <!-- <div class="md-layout-item md-size-5 spk-padding"></div> -->
-        <div class="md-layout-item md-size-30 spk-padding">
-          <md-field md-clearable>
-            <md-icon>search</md-icon>
-            <md-input v-model="searchfilter"></md-input>
-          </md-field>
-        </div>
-        <div class="md-layout-item md-size-70 spk-padding">
-          <div class="md-layout md-alignment-center-right">
-            <div class="md-layout-item">
-              <md-switch v-model='showArchived' class='md-primary'><span class="md-caption"></span>Show Archived ({{archivedCount}})</span>
-              </md-switch>
+      <div class="md-layout md-alignment-center-center">
+        <div class="md-layout-item md-size-80">
+          <div class="md-layout md-alignment-center-left">
+            <div class="md-layout-item md-size-30 spk-padding">
+              <md-field md-clearable>
+                <md-icon>search</md-icon>
+                <md-input v-model="searchfilter"></md-input>
+              </md-field>
             </div>
-            <div class="md-layout-item">
-              <md-switch v-model='showShared' class='md-primary'>Show Shared</md-switch>
-            </div>
-            <div class="md-layout-item">
-              <div class="md-caption">Showing {{startIndex}} - {{startIndex + itemsPerPage}} out of <strong> {{filteredStreams.length}} </strong> streams.</div>
-            </div>
-            <div class="md-layout-item md-size-20">
-              <div class="md-layout md-alignment-center-center">
-                <div class="md-layout-item md-text-center">
-                  <md-button :disabled='startIndex==0' class='md-dense md-icon-button md-raised md-primary' @click='startIndex -= startIndex != 0 ? itemsPerPage : 0'>
-                    <md-icon>chevron_left</md-icon>
-                  </md-button>
+            <div class="md-layout-item md-size-70 spk-padding">
+              <div class="md-layout md-alignment-center-right">
+                <div class="md-layout-item">
+                  <md-switch v-model='showArchived' class='md-primary'><span class="md-caption"></span>Show Archived ({{archivedCount}})</span>
+                  </md-switch>
                 </div>
-                <div class="md-layout-item md-text-center">
-                  <div class='md-caption md-text-center'>{{currentPage}} / {{pageCount}}</div>
+                <div class="md-layout-item">
+                  <md-switch v-model='showShared' class='md-primary'>Show Shared</md-switch>
                 </div>
-                <div class="md-layout-item md-text-center">
-                  <md-button :disabled='currentPage == pageCount' class='md-dense md-icon-button md-raised md-primary' @click='startIndex += currentPage == pageCount ? 0 : itemsPerPage '>
-                    <md-icon>chevron_right</md-icon>
-                  </md-button>
+                <div class="md-layout-item">
+                  <div class="md-caption">Showing {{startIndex}} - {{startIndex + itemsPerPage}} out of <strong> {{filteredStreams.length}} </strong> streams.</div>
+                </div>
+                <div class="md-layout-item md-size-20">
+                  <div class="md-layout md-alignment-center-center">
+                    <div class="md-layout-item md-text-center">
+                      <md-button :disabled='startIndex==0' class='md-dense md-icon-button md-raised md-primary' @click='startIndex -= startIndex != 0 ? itemsPerPage : 0'>
+                        <md-icon>chevron_left</md-icon>
+                      </md-button>
+                    </div>
+                    <div class="md-layout-item md-text-center">
+                      <div class='md-caption md-text-center'>{{currentPage}} / {{pageCount}}</div>
+                    </div>
+                    <div class="md-layout-item md-text-center">
+                      <md-button :disabled='currentPage == pageCount' class='md-dense md-icon-button md-raised md-primary' @click='startIndex += currentPage == pageCount ? 0 : itemsPerPage '>
+                        <md-icon>chevron_right</md-icon>
+                      </md-button>
+                    </div>
+                  </div>
                 </div>
               </div>
+              <div>
+              </div>
             </div>
-          </div>
-          <div>
           </div>
         </div>
       </div>
     </md-card>
     <!-- main body -->
     <div class="md-layout md-alignment-center-center spk-push-down">
+      <!-- empty state -->
       <div class="md-layout-item md-size-80">
         <div v-if='streamsCount == 0'>
           <br>&nbsp
@@ -55,39 +59,49 @@
           <div class="md-subheading">You haven't created any streams, none match your search or they're all archived.</div>
         </div>
       </div>
+      <!-- table -->
       <div class="md-layout-item md-size-80">
+        <!-- table header -->
         <div class="md-layout md-size-80 spk-cell md-alignment-center-left md-gutter" v-if='streamsCount != 0'>
+          <!-- <div class="md-layout-item md-size-5 md-caption">
+            <strong>select</strong>
+          </div> -->
           <div class="md-layout-item md-size-10 md-caption"><strong>streamId</strong></div>
           <div class="md-layout-item md-size-20 md-caption spk-select-pointer-hover" @click='setSort("name")'>
             <strong>name</strong>
-            <md-icon v-if='sortBy === "name"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
+            <md-icon class='spk-small-icon' v-if='sortBy === "name"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
-          <div class="md-layout-item md-size-15 md-text-center md-caption">
+          <div class="md-layout-item md-size-15 md-text-center md-caption spk-select-pointer-hover" @click='setSort("private")'>
             <strong>permissions</strong>
+            <md-icon class='spk-small-icon' v-if='sortBy === "private"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
           <div class="md-layout-item md-size-15 md-text-center md-caption spk-select-pointer-hover" @click='setSort("updatedAt")'>
             <strong>last modified</strong>
-            <md-icon v-if='sortBy === "updatedAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
+            <md-icon class='spk-small-icon' v-if='sortBy === "updatedAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
           <div class="md-layout-item md-size-15 md-text-center md-caption spk-select-pointer-hover" @click='setSort("createdAt")'>
             <strong>created at</strong>
-            <md-icon v-if='sortBy === "createdAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
+            <md-icon class='spk-small-icon' v-if='sortBy === "createdAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
           <div class="md-layout-item md-text-right md-caption"><strong>extras</strong></div>
         </div>
+        <!-- table proper -->
         <div class="md-layout md-alignment-center-left md-gutter spk-cell" :class='{ "spk-disabled": item.deleted }' v-for='item in paginatedStreams'>
+          <!--           <div class="md-layout-item md-size-5">
+            <md-checkbox class='md-primary' v-model='item.selected'></md-checkbox>
+          </div> -->
           <div class="md-layout-item md-size-10 md-caption">
             {{ item.streamId }}
           </div>
           <div class="md-layout-item md-size-20">
-            <editable :value='item.name' :stream-id='item.streamId'></editable>
+            <editable :value='item.name' :stream-id='item.streamId' @setValue='setStreamName'></editable>
           </div>
           <div class="md-text-center md-layout-item md-size-15">
             <div v-if='item.isOwner'>
-              <md-switch v-model="item.private" class="md-primary" @change='setStreamPrivate(item)'></md-switch>
-              <md-button :disabled='!item.private' class='md-dense md-icon-button md-raised' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
-                <md-icon>group_add</md-icon>
-                <md-tooltip md-direction="bottom">Manage permissions</md-tooltip>
+              <!-- <md-switch v-model="item.private" class="md-primary" @change='setStreamPrivate(item)'></md-switch> -->
+              <md-button :disabled='item.deleted' class='md-dense-xxx md-icon-button md-raisedxxx' :class='{"md-primary":!item.private}' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
+                <md-icon>{{item.private ? (item.userPermissions.length == 0 ? "lock_outline": "lock_open" ) : "public" }}</md-icon>
+                <md-tooltip md-direction="bottom">Manage permissions<strong></strong>.</md-tooltip>
               </md-button>
             </div>
             <div v-else>
@@ -95,9 +109,12 @@
             </div>
           </div>
           <div class="md-text-center md-layout-item md-size-15">
-            <timeago :since='item.updatedAt' :auto-update="60"></timeago>
-            <br>
-            <span class="md-caption">{{ item.updatedAt | formatDate }}</span>
+            <span>
+              <timeago :since='item.updatedAt' :auto-update="60"></timeago>
+              <md-tooltip md-direction='bottom'>{{ item.updatedAt | formatDate }}</md-tooltip>
+            </span>
+            <!-- <br>
+            <span class="md-caption">{{ item.updatedAt | formatDate }}</span> -->
           </div>
           <div class="md-text-center md-layout-item md-size-15">
             {{ item.createdAt | formatDate }}
@@ -105,7 +122,11 @@
           <div class="md-layout-item md-text-right">
             <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
               <md-icon>3d_rotation</md-icon>
-              <md-tooltip md-direction="bottom">View 3d</md-tooltip>
+              <md-tooltip md-direction="bottom">View 3D data</md-tooltip>
+            </md-button>
+            <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
+              <md-icon>history</md-icon>
+              <md-tooltip md-direction="bottom">stream history</md-tooltip>
             </md-button>
             <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
               <md-icon>filter_list</md-icon>
@@ -119,11 +140,9 @@
         </div>
       </div>
     </div>
-    <!-- permissions dialog -->
-    <md-dialog :md-active.sync="showPermissions">
-      <md-dialog-title>Stream ownership and rights {{selectedStreamId}}</md-dialog-title>
-      <permissions :stream-id='selectedStreamId'></permissions>
-    </md-dialog>
+    <transition name='fade'>
+      <permissions :stream-id='selectedStreamId' :user-list='selectedStream.userPermissions' @close='showPermissions=false' v-if='showPermissions'></permissions>
+    </transition>
   </div>
 </template>
 <script>
@@ -138,6 +157,7 @@ export default {
     Permissions
   },
   computed: {
+    selectedStream( ) { return this.selectedStreamId ? this.$store.state.streams.find( stream => stream.streamId === this.selectedStreamId ) : [ ] },
     archivedCount( ) { return this.$store.state.streams.filter( stream => stream.deleted ).length },
     streamsCount( ) { return this.filteredStreams.length },
     filteredStreams( ) {
@@ -151,8 +171,8 @@ export default {
     paginatedStreams( ) {
       return this.filteredStreams
         .sort( ( a, b ) => {
-          if( a[this.sortBy] < b[this.sortBy] )  return this.sortAscending ? -1 : 1
-          if ( a[this.sortBy] > b[this.sortBy] ) return this.sortAscending ? 1 : -1
+          if ( a[ this.sortBy ] < b[ this.sortBy ] ) return this.sortAscending ? -1 : 1
+          if ( a[ this.sortBy ] > b[ this.sortBy ] ) return this.sortAscending ? 1 : -1
           return 0
         } )
         .slice( this.startIndex, this.startIndex + this.itemsPerPage )
@@ -180,16 +200,16 @@ export default {
     }
   },
   methods: {
-    setStreamPrivate( item ) {
-      this.$store.dispatch( "setStreamPrivate", { streamId: item.streamId, private: item.private } )
+    setStreamName( name, id ) {
+      this.$store.dispatch( "patchStream", { streamId: id, data: { name: name } } )
     },
     setStreamArchived( item ) {
-      this.$store.dispatch( "setStreamArchived", { streamId: item.streamId, deleted: !item.deleted } )
+      this.$store.dispatch( "patchStream", { streamId: item.streamId, data: { deleted: !item.deleted } } )
     },
     setSort( prop, ascending ) {
       this.startIndex = 0
-      if( this.sortBy === prop ) this.sortAscending = !this.sortAscending
-        else this.sortAscending = true
+      if ( this.sortBy === prop ) this.sortAscending = !this.sortAscending
+      else this.sortAscending = true
       this.sortBy = prop
     }
   },
@@ -200,6 +220,10 @@ export default {
 
 </script>
 <style lang="scss">
+.spk-small-icon {
+  font-size: 14px !important;
+}
+
 .spk-cell {
   min-height: 80px;
   border-bottom: 1px solid #EEEEEE;

@@ -2,11 +2,19 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
 
+import CatFacts from './catfacts.js'
+
 Vue.use( Vuex )
 
 export default new Vuex.Store( {
   state: {
-    user: {},
+    facts: CatFacts.facts,
+    user: {
+      name: "Not initialised...",
+      surname: "Not initialised...",
+      company: "Not initialised...",
+      email: "Not initialised..."
+    },
     server: null,
     auth: false,
     token: null,
@@ -67,55 +75,45 @@ export default new Vuex.Store( {
           } )
       } )
     },
-    setStreamPrivate( context, payload ) {
+    patchStream( context, payload ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.patch( this.state.server + '/streams/' + payload.streamId, { private: payload.private }, { headers: { Authorization: this.state.token } } )
+        Axios.patch( this.state.server + '/streams/' + payload.streamId, payload.data, { headers: { Authorization: this.state.token } } )
           .then( res => {
-            context.commit( 'setStreamPrivate', payload )
-            resolve( )
+            console.log( res )
+            context.commit( 'patchStream', payload )
+            resolve( res.data )
           } )
           .catch( err => {
             console.log( err )
-            reject( )
+            reject( err )
           } )
+
       } )
     },
-    setStreamName( context, payload ) {
+    patchUser( context, payload ) {
+      console.log( payload )
       return new Promise( ( resolve, reject ) => {
-        Axios.patch( this.state.server + '/streams/' + payload.streamId, { name: payload.name }, { headers: { Authorization: this.state.token } } )
+        Axios.put( this.state.server + '/accounts/profile', { ...payload.data }, { headers: { Authorization: this.state.token } } )
           .then( res => {
-            context.commit( 'setStreamName', payload )
-            resolve( )
+            context.commit( 'patchUser', payload )
+            resolve( res.data )
           } )
           .catch( err => {
-            console.log( err )
-            reject( )
-          } )
-      } )
-    },
-    setStreamArchived( context, payload ) {
-      return new Promise( ( resolve, reject ) => {
-        Axios.patch( this.state.server + '/streams/' + payload.streamId, { deleted: payload.deleted }, { headers: { Authorization: this.state.token } } )
-          .then( res => {
-            context.commit( 'setStreamArchived', payload )
-            resolve( )
-          } )
-          .catch( err => {
-            console.log( err )
-            reject( )
+            reject( err )
           } )
       } )
     }
   },
   mutations: {
-    setStreamArchived( state, payload ) {
-      state.streams.find( stream => stream.streamId === payload.streamId ).deleted = payload.deleted
+    patchStream( state, payload ) {
+      let stream = state.streams.find( stream => stream.streamId === payload.streamId )
+      for ( var key in payload.data )
+        if ( stream.hasOwnProperty( key ) ) stream[ key ] = payload.data[ key ]
     },
-    setStreamName( state, payload ) {
-      state.streams.find( stream => stream.streamId === payload.streamId ).name = payload.name
-    },
-    setStreamPrivate( state, payload ) {
-      state.streams.find( stream => stream.streamId === payload.streamId ).private = payload.private
+    patchUser( state, payload ) {
+      for ( var key in payload.data ) {
+        if ( state.user.hasOwnProperty( key ) ) state.user[ key ] = payload.data[ key ]
+      }
     },
     setCredentials( state, payload ) {
       state.auth = payload.auth
@@ -124,10 +122,30 @@ export default new Vuex.Store( {
     setUser( state, user ) {
       state.user = user
     },
+    setPermAgg( state, payload ) {
+      let stream = state.streams.find( str => str.streamId === payload.streamId )
+      stream.userPermissions = payload.permAgg
+    },
     addStreamsBulk( state, streams ) {
       state.streams = streams
+      // prep streams
       state.streams.forEach( stream => {
         stream.isOwner = state.user._id == stream.owner
+        stream.selected = false
+
+        stream.canRead.forEach( usr => {
+          usr.canRead = true;
+          usr.canWrite = false;
+        } )
+        stream.canWrite.forEach( usr => {
+          usr.canWrite = true;
+          usr.canRead = true;
+        } )
+
+        stream.userPermissions = [ ...stream.canWrite, ...stream.canRead.filter( user => { return stream.canWrite.find( u => u.email == user.email ) ? false : true } ) ]
+
+        stream.canRead = stream.canRead.map( usr => usr._id )
+        stream.canWrite = stream.canWrite.map( usr => usr._id )
       } )
     }
   }

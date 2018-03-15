@@ -1,40 +1,47 @@
 <template>
   <div class="page-container">
     <md-app md-waterfall-xxx md-mode="fixed">
+      <md-app-drawer :md-active.sync="showProfile">
+        <profile></profile>
+      </md-app-drawer>
       <md-app-toolbar class="md-primary md-dense" style='z-index: 10' v-if='$store.state.auth'>
         <div class="md-toolbar-row">
           <div class="md-toolbar-section-start">
-            
-            <md-button class='md-dense md-icon-button'>
+            <md-button class='md-dense md-icon-button' @click='showProfile=true'>
               <md-icon>account_circle</md-icon>
             </md-button>
-            <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': false}" @click='changeView( route )'>{{route.name}}</md-button>
+            <p>Hello {{$store.state.user.name}}!</p>
+            <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': false}" @click='changeView( route )'>{{route.name}}</md-button>
+             -->
             <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button> -->
           </div>
           <div class="md-toolbar-section-end">
-            Hello {{$store.state.user.name}}!
             <md-button :md-ripple="false" class='md-dense md-accent' @click='logout'>Logout</md-button>
           </div>
         </div>
       </md-app-toolbar>
       <md-app-content>
-        <login-form v-if='!auth'></login-form>
-        <component v-else :is='currentView'></component>
+        <transition name='fade'>
+          <login-form v-if='!auth'></login-form>
+          <component v-else :is='currentView'></component>
+        </transition>
       </md-app-content>
     </md-app>
   </div>
 </template>
 <script>
+import Axios from 'axios'
+
 import LoginForm from './components/LoginForm.vue'
 import StreamsView from './components/StreamsView.vue'
-import ProfileView from './components/ProfileView.vue'
+import Profile from './components/Profile.vue'
 
 export default {
   name: 'app',
   components: {
     LoginForm,
     StreamsView,
-    ProfileView
+    Profile
   },
   computed: {
     auth( ) {
@@ -44,12 +51,14 @@ export default {
   data( ) {
     return {
       routes: [ {
-          name: "your streams",
-          component: "streams-view",
-          selected: true
-        }
-      ],
-      currentView: 'streams-view'
+        name: "your streams",
+        component: "streams-view",
+        selected: true
+      } ],
+      currentView: 'streams-view',
+      catFact: null,
+      showCatFact: false,
+      showProfile: false
     }
   },
   methods: {
@@ -68,10 +77,13 @@ export default {
     logout( ) {
       this.$store.commit( 'setCredentials', { auth: false, token: null } )
       window.localStorage.clear( )
+    },
+    getCatFact( ) {
+      this.catFact = this.$store.state.facts[ Math.floor( Math.random( ) * this.$store.state.facts.length ) ].fact;
     }
   },
   mounted( ) {
-
+    this.getCatFact( )
   }
 }
 
@@ -82,14 +94,15 @@ export default {
   border: 1px solid rgba(#000, .12);
 }
 
-.md-content{
+.md-content {
   padding: 0;
 }
+
 .md-text-right {
   text-align: right;
 }
 
-.md-text-center{
+.md-text-center {
   text-align: center;
 }
 
@@ -102,12 +115,24 @@ export default {
   border-bottom: 2px solid white;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .3s;
+}
+
+.fade-enter,
+.fade-leave-to
+/* .fade-leave-active below version 2.1.8 */
+
+{
+  opacity: 0;
+}
+
 // @import "~vue-material/dist/theme/engine"; // Import the theme engine
 // @include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
 // accent: md-get-palette-color(red, A400), // The accent or secondary color
 // // theme: dark
 // ));
-
 // @import "~vue-material/dist/theme/all"; // Apply the theme
 
 </style>
