@@ -114,14 +114,14 @@
               <md-icon>3d_rotation</md-icon>
               <md-tooltip md-direction="bottom">View 3D data</md-tooltip>
             </md-button>
-            <!-- <md-button class='md-dense md-icon-button' style='margin-top: 10px;pointer-events:all;'>
+            <md-button class='md-dense md-icon-button md-small-hide' style='margin-top: 10px;pointer-events:all;' @click='showHistory=true'>
               <md-icon>history</md-icon>
               <md-tooltip md-direction="bottom">stream history</md-tooltip>
             </md-button>
-            <md-button class='md-dense md-icon-button' style='margin-top: 10px;'>
+            <md-button class='md-dense md-icon-button md-xsmall-hide' style='margin-top: 10px;' @click='showQuery=true'>
               <md-icon>filter_list</md-icon>
               <md-tooltip md-direction="bottom">Query</md-tooltip>
-            </md-button> -->
+            </md-button>
           </div>
           <div class="md-layout-item md-size-10 md-text-right md-small-hide">
             <md-button :class='{ "md-dense md-icon-button" : true, "md-accent" : !item.deleted, "md-primary" : item.deleted }' style='margin-top: 10px; pointer-events:all;' @click='setStreamArchived(item)' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 )&&!item.isOwner'>
@@ -154,9 +154,11 @@
       </div>
     </div>
     <!-- permissions dialog -->
-    <transition name='fade'>
-      <permissions :stream-id='selectedStreamId' :user-list='selectedStream.userPermissions' @close='showPermissions=false' v-if='showPermissions'></permissions>
-    </transition>
+    <permissions :stream-id='selectedStreamId' :user-list='selectedStream.userPermissions' @close='showPermissions=false' v-if='showPermissions'></permissions>
+    <!-- query dialog -->
+    <query @close='showQuery=false' v-if='showQuery'></query>
+    <!-- history dialog -->
+    <history @close='showHistory=false' v-if='showHistory'></history>
     <!-- shared info dialog -->
     <md-dialog :md-active.sync='showSharedInfo' v-if='showSharedInfo' :md-fullscreen='false'>
       <div>
@@ -189,11 +191,15 @@ import { mapGetters } from 'vuex'
 
 import Editable from './Editable.vue'
 import Permissions from './Permissions.vue'
+import Query from './Query.vue'
+import History from './History.vue'
 
 export default {
   components: {
     Editable,
-    Permissions
+    Permissions,
+    Query,
+    History
   },
   computed: {
     selectedStream( ) { return this.selectedStreamId ? this.$store.state.streams.find( stream => stream.streamId === this.selectedStreamId ) : [ ] },
@@ -211,6 +217,9 @@ export default {
     paginatedStreams( ) {
       return this.filteredStreams
         .sort( ( a, b ) => {
+          if ( this.sortBy == 'private' ) {
+            // TODO: Special case
+          }
           if ( a[ this.sortBy ] < b[ this.sortBy ] ) return this.sortAscending ? -1 : 1
           if ( a[ this.sortBy ] > b[ this.sortBy ] ) return this.sortAscending ? 1 : -1
           return 0
@@ -234,6 +243,8 @@ export default {
       startIndex: 0,
       itemsPerPage: 10,
       showPermissions: false,
+      showQuery: false,
+      showHistory: false,
       showSharedInfo: false,
       selectedStreamId: null,
       sortBy: 'createdAt',
