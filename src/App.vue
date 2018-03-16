@@ -16,7 +16,6 @@
             <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button> -->
           </div>
           <div class="md-toolbar-section-end">
-            <md-button :md-ripple="false" class='md-dense md-accent' @click='logout'>Logout</md-button>
           </div>
         </div>
       </md-app-toolbar>
@@ -42,6 +41,11 @@ export default {
     LoginForm,
     StreamsView,
     Profile
+  },
+  watch: {
+    auth( newValue ) {
+      if ( !newValue ) this.showProfile = false
+    }
   },
   computed: {
     auth( ) {
@@ -71,12 +75,7 @@ export default {
         } else {
           myRoute.selected = false
         }
-
       } )
-    },
-    logout( ) {
-      this.$store.commit( 'setCredentials', { auth: false, token: null } )
-      window.localStorage.clear( )
     },
     getCatFact( ) {
       this.catFact = this.$store.state.facts[ Math.floor( Math.random( ) * this.$store.state.facts.length ) ].fact;

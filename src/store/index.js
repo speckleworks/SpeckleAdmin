@@ -67,7 +67,7 @@ export default new Vuex.Store( {
         Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
           .then( res => {
             console.log( res )
-            context.commit( 'addStreamsBulk', res.data.streams )
+            context.commit( 'addStreamsBulk', [ ...res.data.streams, ...res.data.sharedStreams ] )
             resolve( )
           } )
           .catch( err => {
@@ -120,19 +120,20 @@ export default new Vuex.Store( {
       state.token = payload.token
     },
     setUser( state, user ) {
+      if( !user.company || user.company == ' ') user.company = 'not specified'
       state.user = user
     },
     setPermAgg( state, payload ) {
       let stream = state.streams.find( str => str.streamId === payload.streamId )
       stream.userPermissions = payload.permAgg
     },
-    addStreamsBulk( state, streams ) {
+    addStreamsBulk( state, streams, sharedStreams ) {
       state.streams = streams
       // prep streams
       state.streams.forEach( stream => {
         stream.isOwner = state.user._id == stream.owner
         stream.selected = false
-
+        if( !stream.isOwner ) return
         stream.canRead.forEach( usr => {
           usr.canRead = true;
           usr.canWrite = false;

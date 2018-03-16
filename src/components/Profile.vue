@@ -22,6 +22,9 @@
       <div class="md-layout-item md-caption"><strong>{{user.createdAt | formatDate}}</strong></div>
       <div class="md-layout-item md-size-30 md-caption">member since</div>
     </div>
+    <div class="md-layout md-alignment-center-center spk-cell">
+      <md-button class='md-dense md-accent' @click='logout'>Logout</md-button>
+    </div>
   </div>
 </template>
 <script>
@@ -60,7 +63,11 @@ export default {
     setCompany( val ) {
       this.eCompany = val
       this.$store.dispatch( 'patchUser', { data: { company: this.eCompany } } )
-    }
+    },
+    logout( ) {
+      this.$store.commit( 'setCredentials', { auth: false, token: null } )
+      window.localStorage.clear( )
+    },
   },
   mounted( ) {}
 }

@@ -16,7 +16,7 @@
 </template>
 <script>
 export default {
-  props: [ 'value', 'streamId' ],
+  props: [ 'value', 'streamId', 'disabled' ],
   computed: {},
   data( ) {
     return {
@@ -29,6 +29,7 @@ export default {
   },
   methods: {
     setEdit( ) {
+      if ( this.disabled ) return
       this.edit = true
       this.innerText = this.value
       this.$nextTick( ( ) => {
@@ -78,6 +79,7 @@ export default {
     }
   },
   mounted( ) {
+    this.value = this.value ? this.value : "not specified"
     this.intialValue = this.value
   }
 }
@@ -92,7 +94,8 @@ export default {
   border-bottom: 1px dashed #FFFFFF;
   transition: all .2s ease;
 }
-.spk-stream-name:hover{
+
+.spk-stream-name:hover {
   border-bottom: 1px dashed #BFBFBF;
 }
 
