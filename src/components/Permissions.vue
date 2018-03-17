@@ -31,13 +31,13 @@
               <!-- <p>You can add users below & spread that data!</p> -->
             </div>
           </div>
-          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length!=0 && stream.private'>
+          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length!=0'>
             <div class="md-layout-item md-size-100">
-              <h2 class='md-title'>Users with access:</h2>
+              <h2 class='md-title'>Users that this stream is shared with:</h2>
             </div>
           </div>
           <br>
-          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length!=0 && stream.private'>
+          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length!=0'>
             <div class="md-layout-item md-size-30 md-caption">
               <strong>name</strong>
             </div>
@@ -53,7 +53,7 @@
             <div class="md-layout-item md-text-right" @click='removeUser(index)'>
             </div>
           </div>
-          <div class="md-layout spk-cell-users md-alignment-center-left md-gutter" v-for='(user, index) in users' :key='user.email' v-if='users.length!=0 && stream.private'>
+          <div class="md-layout spk-cell-users md-alignment-center-left md-gutter" v-for='(user, index) in users' :key='user.email' v-if='users.length!=0'>
             <div class="md-layout-item md-size-30">
               {{ user.name }} {{ user.surname }}
             </div>
@@ -81,7 +81,7 @@
           </md-dialog>
           <div class="md-layout">
             <div class="md-layout-item md-size-100 xxxmd-text-right">
-              <md-button class='md-primary md-raised' @click='showSearch=true' v-if='stream.private'>Add users</md-button>
+              <md-button class='md-primary md-raised' @click='showSearch=true'>Add users</md-button>
               <md-button class='md-raised' @click='$emit("close")'>Close</md-button>
             </div>
           </div>

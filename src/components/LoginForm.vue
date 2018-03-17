@@ -4,7 +4,20 @@
       <div class="md-layout-item md-size-30 md-small-size-60 md-xsmall-size-100">
         <md-card class="md-elevation-10">
           <md-progress-bar md-mode="indeterminate" class="md-accent" v-if="sending"></md-progress-bar>
-          <md-tabs md-dynamic-height class="md-primary">
+          <md-toolbar class="md-primary md-dense md-elevation-0">
+            <div class="md-toolbar-section-start">
+              <div class="md-toolbar-row">
+                <p style=''>Hello & welcome.</p>                
+              </div>
+            </div>
+            <div class="md-toolbar-section-end">
+              <a href="https://speckle.works">
+              <img src='https://speckle.works/img/logos/logo-xs.png' width="17"/>
+              <md-tooltip md-direction="left">Speckle.Works!</md-tooltip>
+              </a>
+          </div>
+          </md-toolbar>
+          <md-tabs md-dynamic-height class="xxxmd-primary">
             <md-tab md-label="Login">
               <form v-on:submit.prevent>
                 <md-field :class="{ 'md-invalid' : errors.has('email') }">

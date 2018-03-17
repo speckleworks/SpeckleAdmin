@@ -16,6 +16,10 @@
             <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button> -->
           </div>
           <div class="md-toolbar-section-end">
+              <a href="https://speckle.works">
+              <img src='https://speckle.works/img/logos/logo-xs.png' width="17"/>
+              <md-tooltip md-direction="left">Speckle.Works!</md-tooltip>
+              </a>
           </div>
         </div>
       </md-app-toolbar>
@@ -127,11 +131,11 @@ export default {
   opacity: 0;
 }
 
-// @import "~vue-material/dist/theme/engine"; // Import the theme engine
-// @include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
+@import "~vue-material/dist/theme/engine"; // Import the theme engine
+@include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
 // accent: md-get-palette-color(red, A400), // The accent or secondary color
-// // theme: dark
-// ));
-// @import "~vue-material/dist/theme/all"; // Apply the theme
+// theme: dark
+));
+@import "~vue-material/dist/theme/all"; // Apply the theme
 
 </style>
