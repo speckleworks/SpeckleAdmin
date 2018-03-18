@@ -12,7 +12,7 @@
         </div>
       </md-app-toolbar>
       <div class="md-layout md-alignment-center-center">
-        <div class="md-layout-item md-size-80">
+        <div class="md-layout-item md-size-80 md-small-size-95">
           <br>
           <div class="md-layout md-alignment-center-left md-gutter" xxxv-if='users.length==0'>
             <div class="md-layout-item">
@@ -23,10 +23,10 @@
               <span v-if='users.length > 0 && stream.private'>and shared with {{users.length}} users.</span>
               <span v-if='users.length == 0 && stream.private'>and not currently shared.</span> 
               <span v-if='!stream.private'> so anyone with the link can see it.</span>
-              <span v-if='!stream.private'>Anonymous comments are <span class='spk-color-blue spk-select-pointer-hover' @click='stream.anonymousComments = !stream.anonymousComments'>{{stream.anonymousComments ? "allowed" : "not allowed" }}.</span></span>
             </h2>
-              <!-- <h3 class='md-headline'>
-            </h3> -->
+              <h3 class='md-subheading'>
+              <span v-if='!stream.private'>Anonymous comments are <span class='spk-color-blue spk-select-pointer-hover' @click='stream.anonymousComments = !stream.anonymousComments'>{{stream.anonymousComments ? "allowed" : "not allowed" }}.</span></span>
+            </h3>
               <!-- <md-switch v-model='stream.anonymousComments' class='md-primary'></md-switch> -->
               <!-- <p>You can add users below & spread that data!</p> -->
             </div>
@@ -35,9 +35,14 @@
             <div class="md-layout-item md-size-100">
               <h2 class='md-title'>Users that this stream is shared with:</h2>
             </div>
+          </div>          
+          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length==0'>
+            <div class="md-layout-item md-size-100">
+              <h2 class='md-title'>This stream is not shared with anyone.</h2>
+            </div>
           </div>
           <br>
-          <div class="md-layout md-alignment-center-left md-gutter" v-if='users.length!=0'>
+          <div class="md-layout md-alignment-center-left md-gutter md-small-hide" v-if='users.length!=0'>
             <div class="md-layout-item md-size-30 md-caption">
               <strong>name</strong>
             </div>
@@ -54,7 +59,7 @@
             </div>
           </div>
           <div class="md-layout spk-cell-users md-alignment-center-left md-gutter" v-for='(user, index) in users' :key='user.email' v-if='users.length!=0'>
-            <div class="md-layout-item md-size-30">
+            <div class="md-layout-item md-size-30 md-small-size-40">
               {{ user.name }} {{ user.surname }}
             </div>
             <div class="md-layout-item md-size-20 md-caption md-small-hide">
@@ -76,11 +81,11 @@
             </div>
           </div>
           <br>
-          <md-dialog :md-active.sync="showSearch">
+          <md-dialog :md-active.sync="showSearch" :md-fullscreen='false'>
             <add-users @close='showSearch=false' @addUser='addUser'></add-users>
           </md-dialog>
           <div class="md-layout">
-            <div class="md-layout-item md-size-100 xxxmd-text-right">
+            <div class="md-layout-item md-size-100 md-text-right">
               <md-button class='md-primary md-raised' @click='showSearch=true'>Add users</md-button>
               <md-button class='md-raised' @click='$emit("close")'>Close</md-button>
             </div>

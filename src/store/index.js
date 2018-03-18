@@ -64,6 +64,7 @@ export default new Vuex.Store( {
     },
     getStreams( context ) {
       return new Promise( ( resolve, reject ) => {
+        context.commit( 'addStreamsBulk', [ ] )
         Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
           .then( res => {
             console.log( res )

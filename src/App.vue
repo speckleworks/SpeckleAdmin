@@ -24,10 +24,10 @@
         </div>
       </md-app-toolbar>
       <md-app-content>
-        <transition name='fade'>
+        <!-- <transition name='fade'> -->
           <login-form v-if='!auth'></login-form>
           <component v-else :is='currentView'></component>
-        </transition>
+        <!-- </transition> -->
       </md-app-content>
     </md-app>
   </div>
@@ -92,6 +92,36 @@ export default {
 
 </script>
 <style lang="scss">
+$xsmall-size:600px;
+$small-size:960px;
+$medium-size:1280px;
+$large-size:1920px;
+
+.md-xsmall-show {
+  @media (min-width: $xsmall-size+1) {
+    display: none;
+  }
+}
+
+.md-small-show {
+  @media (min-width: $small-size+1) {
+    display: none;
+  }
+}
+
+.md-medium-show {
+  @media (min-width: $medium-size+1) {
+    display: none;
+  }
+}
+
+.md-large-show {
+  @media (min-width: $large-size+1) {
+    display: none;
+  }
+}
+
+
 .md-app {
   height: 100vh;
   border: 1px solid rgba(#000, .12);
