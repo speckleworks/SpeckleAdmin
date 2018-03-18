@@ -293,6 +293,7 @@ export default {
       searchfilter: null,
       showArchived: false,
       showShared: true,
+      showClones: false,
       startIndex: 0,
       itemsPerPage: 10,
       showPermissions: false,

@@ -148,6 +148,9 @@ export default new Vuex.Store( {
 
         stream.canRead = stream.canRead.map( usr => usr._id )
         stream.canWrite = stream.canWrite.map( usr => usr._id )
+
+        stream.isClone = stream.parent == null ? false : true
+
       } )
     }
   }
