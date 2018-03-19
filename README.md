@@ -1,7 +1,7 @@
-# speckle-admin
+# SpeckleAdmin
 ![image](https://user-images.githubusercontent.com/7696515/37546477-ed733a6a-2964-11e8-9b80-9448a88999bc.png)
 
-> A simple admin ui for speckle users based on vue js and vuematerial.
+> A simple admin app for speckle users based on vue js and vuematerial.
 
 Current functionality allows you to:
 - search & filter your streams
@@ -9,6 +9,8 @@ Current functionality allows you to:
 - edit stream names, etc
 - archive & delete streams
 - edit your profile on that speckle server
+
+## Debugging
 
 To start debugging locally, point your browser to `http://localhost:8080/?dev`. This will set the server to `http://localhost:3000/api`, where a default speckle server would run.
 
