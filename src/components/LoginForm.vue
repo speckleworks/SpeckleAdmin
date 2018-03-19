@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="md-layout md-alignment-center-center">
-      <div class="md-layout-item md-size-30 md-small-size-60 md-xsmall-size-100">
+      <div class="md-layout-item md-size-30 md-medium-size-50 md-small-size-60 md-xsmall-size-95">
         <md-card class="md-elevation-10">
           <md-progress-bar md-mode="indeterminate" class="md-accent" v-if="sending"></md-progress-bar>
           <md-toolbar class="md-primary md-dense md-elevation-0">
@@ -65,10 +65,10 @@
             </md-tab>
           </md-tabs>
         </md-card>
-        <md-snackbar md-position="center" :md-duration="Infinity" :md-active="error!=null" md-persistent>
+        <!-- <md-snackbar md-position="center" :md-duration="1000" :md-active="error!=null" md-persistent>
           <span>{{error}}</span>
           <md-button class="md-accent" @click="error = null">Dismiss</md-button>
-        </md-snackbar>
+        </md-snackbar> -->
       </div>
     </div>
   </div>
@@ -105,12 +105,12 @@ export default {
             this.surname = null
             this.company = null
             this.error = err
+            this.$store.appMessages.push( 'Registration failed.' )
           } )
       } )
     },
     login( ) {
       this.$validator.validateAll( ).then( result => {
-        console.log( this.errors.items )
         // this sux
         if ( !result && this.errors.items[ 0 ].field != "name" ) return
         this.sending = true
@@ -123,6 +123,7 @@ export default {
             this.sending = false
             this.password = null
             this.error = err
+            this.$store.state.appMessages.push( 'Login failed.' )
           } )
       } )
     }

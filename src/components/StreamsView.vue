@@ -48,8 +48,8 @@
                   </md-menu-item>
                   <md-menu-item>
                     <md-button class='md-dense md-primary' xxxstyle='margin-top:10px;' @click='$store.dispatch("getStreams")'>
-                    refresh streams
-                  </md-button>
+                      refresh streams
+                    </md-button>
                   </md-menu-item>
                 </md-menu-content>
               </md-menu>
@@ -72,87 +72,99 @@
       <!-- table -->
       <div class="md-layout-item md-size-80 md-medium-size-95" style="padding-top:100px">
         <!-- table header -->
-        <div class="md-layout md-size-80 spk-cell md-alignment-center-left md-gutter " v-if='streamsCount != 0'>
+        <div class="md-layout md-size-80 spk-cell md-alignment-center-space-around md-gutter " v-if='streamsCount != 0'>
           <!-- <div class="md-layout-item md-size-5 md-caption">
             <strong>select</strong>
           </div> -->
-          <div class="md-layout-item md-size-10 md-caption md-small-hide"><strong>streamId</strong></div>
-          <div class="md-layout-item md-size-20 md-small-size-40 md-caption spk-select-pointer-hover" @click='setSort("name")'>
+          <div class="md-layout-item md-size-10 md-caption md-small-hide">
+            <strong>streamId</strong>
+          </div>
+          <div class="md-layout-item md-size-25 md-small-size-40 md-caption spk-select-pointer-hover" @click='setSort("name")'>
             <strong>name</strong>
             <md-icon class='spk-small-icon' v-if='sortBy === "name"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
-          <div class="md-layout-item md-size-15 md-xsmall-size-15 md-text-center md-caption spk-select-pointer-hover" @click='setSort("private")'>
-            <strong>permissions</strong>
+          <div class="md-text-center md-layout-item md-size-5 md-medium-size-15 md-text-center md-caption spk-select-pointer-hover" @click='setSort("private")'>
+            <strong>perms</strong>
             <md-icon class='spk-small-icon' v-if='sortBy === "private"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
-          <div class="md-layout-item md-size-15 md-text-center md-caption spk-select-pointer-hover md-xsmall-hide" @click='setSort("updatedAt")'>
-            <strong>last modified</strong>
+          <div class="md-text-center md-layout-item md-size-10 md-medium-size-20 md-caption spk-select-pointer-hover md-xsmall-hide" @click='setSort("updatedAt")'>
+            <strong>last mod</strong>
             <md-icon class='spk-small-icon' v-if='sortBy === "updatedAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
-          <div class="md-layout-item md-size-15 md-medium-size-30 md-text-center md-caption spk-select-pointer-hover" @click='setSort("createdAt")'>
-            <strong>created at</strong>
+          <div class="md-text-center md-layout-item md-size-10 md-medium-size-15 md-caption spk-select-pointer-hover" @click='setSort("createdAt")'>
+            <strong>created</strong>
             <md-icon class='spk-small-icon' v-if='sortBy === "createdAt"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
-          <div class="md-layout-item md-text-center md-caption md-medium-hide"><strong>extras</strong></div>
-          <div class="md-layout-item md-size-10 md-text-right md-caption md-medium-hide md-small-hide" @click='setSort("deleted");showArchived=true'>
+          <div class="md-layout-item md-size-20 md-text-center md-medium-hide md-caption"><strong>extras</strong></div>
+          <div class="md-layout-item md-size-15 md-text-right md-medium-hide md-caption" @click='setSort("deleted");showArchived=true'>
             <strong>archived</strong>
             <md-icon class='spk-small-icon' v-if='sortBy === "deleted"'>{{sortAscending ? "arrow_upward" : "arrow_downward"}}</md-icon>
           </div>
+          <div class="md-layout-item md-size-10 md-xsmall-size-25 spk-padding md-medium-show md-text-right" style='pointer-events:all'>
+          </div>
         </div>
         <!-- table proper -->
-        <div class="md-layout md-alignment-center-left md-gutter spk-cell" :class='{ "spk-disabled": item.deleted, "spk-shared-background" : !item.isOwner}' v-for='item in paginatedStreams'>
+        <div class="md-layout md-alignment-center-space-around md-gutter spk-cell" :class='{ "spk-disabled": item.deleted, "spk-shared-background" : !item.isOwner}' v-for='item in paginatedStreams'>
+          <!-- streamid -->
           <div class="md-layout-item md-size-10 md-caption md-small-hide">
             {{ item.streamId }}
           </div>
-          <div class="md-layout-item md-size-20 md-small-size-40">
+          <!-- name -->
+          <div class="md-layout-item md-size-25 md-small-size-40">
             <editable :value='item.name' :stream-id='item.streamId' @setValue='setStreamName' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 ) && !item.isOwner'></editable>
           </div>
-          <div class="md-text-center md-layout-item md-size-15">
+          <!-- permissions -->
+          <div class="md-text-center md-layout-item md-size-5 md-medium-size-15">
             <div v-if='item.isOwner'>
-              <md-button :disabled='item.deleted' class='md-dense-xxx md-icon-button md-raisedxxx' :class='{"md-primary":!item.private}' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
+              <md-button :disabled='item.deleted' class='md-dense-xxx md-icon-button md-raisedxxx' :class='{"md-primary":item.isOwner}' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
                 <md-icon>{{item.private ? (item.userPermissions.length == 0 ? "lock_outline": "lock_open" ) : "public" }}</md-icon>
-                <!-- <md-tooltip md-direction="bottom">Manage permissions<strong></strong>.</md-tooltip> -->
               </md-button>
             </div>
             <div v-else>
               <md-button class='md-icon-button' @click='showSharedInfo=true; selectedStreamId=item.streamId'>
                 <md-icon>{{item.canWrite.indexOf($store.state.user._id) >= 0 ? "mode_edit" : "remove_red_eye" }}</md-icon>
-                <!--                 <md-tooltip md-direction='bottom'>
-                  You {{item.canWrite.indexOf($store.state.user._id) >= 0 ? "have write access." : "can only view." }} Owned by {{item.owner.email}}.
-                </md-tooltip> -->
               </md-button>
             </div>
           </div>
-          <div class="md-text-center md-layout-item md-size-15 md-xsmall-hide">
-            <span>
+          <!-- last modified -->
+          <div class="md-text-center md-layout-item md-size-10 md-medium-size-20 md-xsmall-hide">
+            <span class='md-caption'>
               <timeago :since='item.updatedAt' :auto-update="60"></timeago>
               <!-- <md-tooltip md-direction='bottom'>{{ item.updatedAt | formatDate }}</md-tooltip> -->
             </span>
           </div>
-          <div class="md-text-center md-layout-item">
+          <!-- created at -->
+          <div class="md-text-center md-layout-item md-size-10 md-medium-size-15">
             {{ item.createdAt | formatDate }}
           </div>
-          <div class="md-layout-item md-text-center md-medium-hide">
+          <!-- extras -->
+          <div class="md-layout-item md-size-20 md-text-center md-medium-hide">
             <md-button class='md-dense md-icon-button' style='margin-top: 10px; pointer-events:all;' @click='goToViewer(item.streamId)'>
               <md-icon>3d_rotation</md-icon>
               <!-- <md-tooltip md-direction="bottom">View 3D data</md-tooltip> -->
             </md-button>
-            <md-button class='md-dense md-icon-button md-small-hide' style='margin-top: 10px;pointer-events:all;' @click='showHistory=true'>
+            <md-button class='md-dense md-icon-button md-small-hide' style='margin-top: 10px;pointer-events:all;' @click='showHistory=true; selectedStreamId=item.streamId'>
               <md-icon>history</md-icon>
               <!-- <md-tooltip md-direction="bottom">stream history</md-tooltip> -->
             </md-button>
-            <md-button class='md-dense md-icon-button md-xsmall-hide' style='margin-top: 10px;' @click='showQuery=true'>
+            <md-button class='md-dense md-icon-button md-xsmall-hide' style='margin-top: 10px;' @click='showQuery=true; selectedStreamId=item.streamId'>
               <md-icon>filter_list</md-icon>
               <!-- <md-tooltip md-direction="bottom">Query</md-tooltip> -->
             </md-button>
           </div>
-          <div class="md-layout-item md-size-10 md-text-right md-medium-hide">
+          <!-- archive, delete -->
+          <div class="md-layout-item md-size-15 md-text-right md-medium-hide">
+            <md-button class='md-accent md-icon-button md-dense' style='margin-top: 10px; pointer-events:all;' v-if='item.deleted' @click='deleteStreamConfirm=true;  selectedStreamId = item.streamId'>
+              <md-icon>delete</md-icon>
+              <md-tooltip md-direction='bottom'>Delete this stream permanently</md-tooltip>
+            </md-button>
             <md-button :class='{ "md-dense md-icon-button" : true, "md-accent" : !item.deleted, "md-primary" : item.deleted }' style='margin-top: 10px; pointer-events:all;' @click='setStreamArchived(item)' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 )&&!item.isOwner'>
               <md-icon>{{item.deleted ? "unarchive" : "archive"}}</md-icon>
               <md-tooltip md-direction="bottom">{{item.deleted ? "Unarchive stream" : "Archive stream"}}</md-tooltip>
             </md-button>
           </div>
-          <div class="md-layout-item md-size-10 spk-padding md-medium-show md-text-right" style='pointer-events:all'>
+          <!-- mobile menu -->
+          <div class="md-layout-item md-size-10 md-xsmall-size-25 spk-padding md-medium-show md-text-right" style='pointer-events:all'>
             <md-menu>
               <md-button md-menu-trigger class='md-icon-button'>
                 <md-icon>more_vert</md-icon>
@@ -164,12 +176,12 @@
                   </md-button>
                 </md-menu-item>
                 <md-menu-item>
-                  <md-button class='md-dense' @click='showHistory=true'>
+                  <md-button class='md-dense' @click='showHistory=true; selectedStreamId=item.streamId'>
                     History
                   </md-button>
                 </md-menu-item>
                 <md-menu-item>
-                  <md-button class='md-dense' @click='showQuery=true'>
+                  <md-button class='md-dense' @click='showQuery=true; selectedStreamId=item.streamId'>
                     Query
                   </md-button>
                 </md-menu-item>
@@ -177,6 +189,11 @@
                 <md-menu-item>
                   <md-button :class='{ "md-dense" : true, "md-accent" : !item.deleted, "md-primary" : item.deleted }' @click='setStreamArchived(item)' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 )&&!item.isOwner'>
                     {{item.deleted ? "Unarchive" : "Archive"}}
+                  </md-button>
+                </md-menu-item>
+                <md-menu-item v-if='item.deleted'>
+                  <md-button :class='{ "md-dense" : true, "md-accent" : true, "md-primary" : item.deleted }' @click='deleteStreamConfirm=true;  selectedStreamId = item.streamId'>
+                    Delete
                   </md-button>
                 </md-menu-item>
               </md-menu-content>
@@ -211,7 +228,7 @@
     <!-- query dialog -->
     <query @close='showQuery=false' v-if='showQuery'></query>
     <!-- history dialog -->
-    <history @close='showHistory=false' v-if='showHistory'></history>
+    <history @close='showHistory=false' v-if='showHistory' :stream='selectedStream'></history>
     <!-- shared info dialog -->
     <md-dialog :md-active.sync='showSharedInfo' v-if='showSharedInfo' :md-fullscreen='false'>
       <div>
@@ -236,6 +253,8 @@
           </div>
         </div>
       </div>
+    </md-dialog>
+    <md-dialog-confirm :md-active.sync='deleteStreamConfirm' v-if='selectedStream' :md-fullscreen='false' md-title="Delete stream?" md-content="Are you sure you want to delete this stream? This action cannot be undone." md-confirm-text='Yes' md-cancel-text='Yikes! Take me back.' @md-cancel='' @md-confirm='$store.dispatch( "deleteStream", selectedStream )' style='z-index: 50000' />
     </md-dialog>
   </div>
 </template>
@@ -300,6 +319,7 @@ export default {
       showQuery: false,
       showHistory: false,
       showSharedInfo: false,
+      deleteStreamConfirm: false,
       selectedStreamId: null,
       sortBy: 'createdAt',
       sortAscending: false,
@@ -339,18 +359,21 @@ export default {
 .spk-cell {
   min-height: 80px;
   border-bottom: 1px solid #EEEEEE;
+  transition: all .3s ease;
 }
 
 .spk-disabled {
-  // background-color: #E6E6E6;
   color: #7F7F7F !important;
-  opacity: 0.8;
   background: repeating-linear-gradient( 45deg,
   #F5F5F5,
   #F5F5F5 10px,
   #FFFFFF 10px,
   #FFFFFF 20px);
   pointer-events: none;
+}
+
+.spk-badge {
+  
 }
 
 .spk-shared-background {}

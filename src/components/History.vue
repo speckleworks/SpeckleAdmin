@@ -22,6 +22,9 @@
               <p>
                 Streams already have versioning enabled on them, through two methods in the api, namely cloning and diffing, and two fields, parent and the children array. The children array stores all the clones, or branches, that this stream had. The parent field keeps track of where the stream originated from. There's nothing stopping you from creating a new stream version, saving one and storing it for later, etc. 
               </p>
+              <p>For example, here's the history of this stream:</p>
+              <pre>Parent: {{stream.parent}}</pre>
+              <pre>Children: {{stream.children}}</pre>
               <p><a href='https://github.com/speckleworks/SpeckleAdmin'>PRs welcome!</a></p>
             </div>
           </div>
@@ -32,7 +35,7 @@
 </template>
 <script>
 export default {
-  props: [ ],
+  props: [ 'stream' ],
   computed: {},
   data( ) {
     return {}

@@ -11,12 +11,9 @@
               <md-icon>account_circle</md-icon>
             </md-button>
             <p>Hello {{$store.state.user.name}}!</p>
-            <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': false}" @click='changeView( route )'>{{route.name}}</md-button>
-             -->
-            <!-- <md-button v-for='route in routes' :key='route.name' :class="{'md-dense':true, 'md-raised': route.selected}" @click='changeView( route )'>{{route.name}}</md-button> -->
           </div>
           <div class="md-toolbar-section-end">
-              <a href="https://speckle.works">
+            <a href="https://speckle.works">
               <img src='https://speckle.works/img/logos/logo-xs.png' width="17"/>
               <md-tooltip md-direction="left">Speckle.Works!</md-tooltip>
               </a>
@@ -25,9 +22,13 @@
       </md-app-toolbar>
       <md-app-content>
         <!-- <transition name='fade'> -->
-          <login-form v-if='!auth'></login-form>
-          <component v-else :is='currentView'></component>
+        <login-form v-if='!auth'></login-form>
+        <component v-else :is='currentView'></component>
         <!-- </transition> -->
+        <md-snackbar md-position="left" :md-duration="2000" :md-active.sync="showSnackbar" md-persistent style='z-index:100000'>
+          <span>{{message}}</span>
+          <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
+        </md-snackbar>
       </md-app-content>
     </md-app>
   </div>
@@ -63,6 +64,8 @@ export default {
         component: "streams-view",
         selected: true
       } ],
+      showSnackbar: false,
+      message: null,
       currentView: 'streams-view',
       catFact: null,
       showCatFact: false,
@@ -86,7 +89,10 @@ export default {
     }
   },
   mounted( ) {
-    this.getCatFact( )
+    window.bus.$on( 'message', ( content ) => {
+      this.message = content
+      this.showSnackbar = true
+    } )
   }
 }
 
