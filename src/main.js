@@ -33,25 +33,46 @@ Vue.filter( 'formatDate', function( value ) {
   }
 } )
 
-// this is wrong, but it works
-if ( !window.location.href.includes( 'dev' ) )
-  Store.state.server = 'https://s003.speckle.works/api'
-else
-  Store.state.server = 'http://localhost:3000/api'
 
-let token = window.localStorage.getItem( "token" )
-let email = window.localStorage.getItem( "email" )
+// Url checking
+let locationParams = window.location.href.split( '?' )
 
-if ( token ) {
-  Axios.get( Store.state.server + '/accounts/profile', { headers: { Authorization: token } } )
+// If there is something after the ? and we're not doing dev
+if ( locationParams.length >= 2 && window.location.href.indexOf( 'dev' ) === -1 ) {
+  let myParams = JSON.parse( window.atob( locationParams[ 1 ] ) )
+  console.log( myParams )
+  if ( myParams.hasOwnProperty( 'serverUrl' ) )
+    Store.state.server = myParams[ 'serverUrl' ]
+  if ( myParams.hasOwnProperty( 'token' ) )
+    tryTokenLogin( myParams[ 'serverUrl' ], myParams[ 'token' ] )
+    .then( res => {
+      Store.state.auth = true
+      Store.state.token = myParams[ 'token' ]
+      Store.state.user = res.data.user
+    } )
+    .catch( err => {
+      window.alert( 'invalid parameters!' )
+    } )
+} else {
+  if ( window.location.href.indexOf( 'dev' ) !== -1 ) // we're developing, so default to a default server
+    Store.state.server = 'http://localhost:3000/api'
+  else // assume we're running online
+    Store.state.server = window.location.origin + '/api'
+
+  let token = window.localStorage.getItem( 'token' )
+  tryTokenLogin( Store.state.server, token )
     .then( res => {
       Store.state.auth = true
       Store.state.token = token
       Store.state.user = res.data.user
     } )
-    .catch( err => {
+    .catch( res => {
       window.localStorage.clear( )
     } )
+}
+
+function tryTokenLogin( server, myToken ) {
+  return Axios.get( server + '/accounts/profile', { headers: { Authorization: myToken } } )
 }
 
 new Vue( {
