@@ -1,7 +1,8 @@
 # SpeckleAdmin
+
 ![image](https://user-images.githubusercontent.com/7696515/37546477-ed733a6a-2964-11e8-9b80-9448a88999bc.png)
 
-> A simple admin app for speckle users based on vue js and vuematerial.
+> A simple admin app for [speckle](https://speckle.works).
 
 Current functionality allows you to:
 - search & filter your streams
@@ -9,6 +10,14 @@ Current functionality allows you to:
 - edit stream names, etc
 - archive & delete streams
 - edit your profile on that speckle server
+
+## Roadmap:
+The following api ([1.0.0-beta](https://speckleworks.github.io/SpeckleSpecs/)) need to be exposed:
+- Stream History
+- Stream Comments/Issues
+- Projects
+- User's Comments
+- User's AssignedTo Comments
 
 ## Debugging
 
