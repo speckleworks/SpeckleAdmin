@@ -4,14 +4,14 @@
 
 > A simple admin app for [speckle](https://speckle.works).
 
-Current functionality allows you to:
+## Current features:
 - search & filter your streams
 - manage stream permissions
 - edit stream names, etc
 - archive & delete streams
 - edit your profile on that speckle server
 
-## Roadmap:
+## Roadmap:
 The following api ([1.0.0-beta](https://speckleworks.github.io/SpeckleSpecs/)) need to be exposed:
 - Stream History
 - Stream Comments/Issues
