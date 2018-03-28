@@ -32,6 +32,5 @@ Vue.filter( 'formatDate', function( value ) {
 
 new Vue( {
   el: '#app',
-
   render: h => h( App )
 } )
