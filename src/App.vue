@@ -5,9 +5,11 @@
 </template>
 <script>
 import Admin from './AdminInterface.vue'
+import Store from './store/index'
 
 export default {
   name: 'app',
+  store: Store,
   components: {
     Admin
   },
@@ -24,6 +26,7 @@ export default {
     }
   },
   mounted( ) {
+    console.log( "app  mounted" )
     if ( window.location.href.indexOf( 'dev' ) !== -1 )
       this.server = 'http://localhost:3000/api/v1'
     else

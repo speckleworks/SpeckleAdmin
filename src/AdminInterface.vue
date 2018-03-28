@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <md-app md-waterfall-xxx md-mode="fixed">
+    <md-app md-mode="fixed">
       <md-app-drawer :md-active.sync="showProfile">
         <profile></profile>
       </md-app-drawer>
@@ -32,47 +32,13 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
 import Axios from 'axios'
-import VueMaterial from 'vue-material'
-import VeeValidate from 'vee-validate'
-import moment from 'moment'
-import VueTimeago from 'vue-timeago'
-
-import 'vue-material/dist/vue-material.min.css'
-import 'vue-material/dist/theme/default.css'
-
-import Store from './store/index'
-
 import LoginForm from './components/LoginForm.vue'
 import StreamsView from './components/StreamsView.vue'
 import Profile from './components/Profile.vue'
 
-
-Vue.use( VueMaterial )
-Vue.use( VeeValidate )
-
-Vue.prototype.$http = Axios
-window._adminBus = new Vue( )
-
-Vue.use( VueTimeago, {
-  name: 'timeago', // component name, `timeago` by default
-  locale: 'en-US',
-  locales: {
-    // you will need json-loader in webpack 1
-    'en-US': require( 'vue-timeago/locales/en-US.json' )
-  }
-} )
-
-Vue.filter( 'formatDate', function( value ) {
-  if ( value ) {
-    return moment( String( value ) ).format( 'DD/MM/YYYY' )
-  }
-} )
-
 export default {
   name: 'admin',
-  store: Store,
   props: {
     server: String,
     token: String
@@ -135,17 +101,17 @@ export default {
 
     console.log( this.server, this.token )
     this.$store.state.server = this.server
-    this.tryTokenLogin()
-    .then( res => {
-      console.log( 'Login successful' )
-      this.$store.state.auth = true
-      this.$store.state.token = this.token
-      this.$store.state.user = res.data.resource
-      this.$emit('successLogin', this.token )
-    })
-    .catch( err => {
-      window._adminBus.$emit( 'message', 'Failed to log in.' )
-    })
+    this.tryTokenLogin( )
+      .then( res => {
+        console.log( 'Login successful' )
+        this.$store.state.auth = true
+        this.$store.state.token = this.token
+        this.$store.state.user = res.data.resource
+        this.$emit( 'successLogin', this.token )
+      } )
+      .catch( err => {
+        window._adminBus.$emit( 'message', 'Failed to log in.' )
+      } )
   }
 }
 
@@ -215,6 +181,7 @@ $large-size:1920px;
 .fade-enter,
 .fade-leave-to
 /* .fade-leave-active below version 2.1.8 */
+
 {
   opacity: 0;
 }
