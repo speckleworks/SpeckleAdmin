@@ -4,9 +4,7 @@
   </div>
 </template>
 <script>
-// import Admin from './AdminInterface.vue'
-import Admin from '../comp/SpeckleAdmin.js'
-import '../comp/client.css'
+import Admin from './AdminInterface.vue'
 
 export default {
   name: 'app',
@@ -15,8 +13,8 @@ export default {
   },
   data( ) {
     return {
-      server: 'http://localhost:3000/api/v1',
-      token: '',
+      server: null,
+      token: null,
       readySetGo: false
     }
   },

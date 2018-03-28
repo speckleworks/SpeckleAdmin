@@ -14,14 +14,7 @@ Current functionality allows you to:
 
 To start debugging locally, point your browser to `http://localhost:8080/?dev`. This will set the server to `http://localhost:3000/api`, where a default speckle server would run.
 
-If your setup is different (ie, speckle server running at a different address), use the following steps: 
-
-1. Open your browser's console and type `let settings = { serverUrl: "http://yourspeckleserver.com/api"} `. Hit enter.
-2. Type `btoa(JSON.stringify(settings))` and hit enter.
-3. Copy & paste the resulting string after a question mark in the url, for example: `http://localhost:8080/?eyJzZXJ2ZXJVcmwiOiJodHRwczovL3MwMDMuc3BlY2tsZS53b3Jrcy9hcGkLOL==`
-
-The app will now direct all requests to `http://yourspeckleserver.com/api`. This mechanism is used in the application specific views, but can be re-purposed to more flexible debug uses, although it's quite complicated. 
-
+To set a different server url, edit `App.vue` and set your defaults in `mounted()`.
 
 ## Build Setup
 
@@ -34,4 +27,13 @@ npm run dev
 
 # build for production with minification
 npm run build
+```
+
+## Build Standalone Component
+
+You will need to add [poi](https://poi.js.org) globally, since `vue build` is now deprecated.
+
+```bash
+npm i -g poi
+npm run build-component
 ```

@@ -33,7 +33,6 @@
 </template>
 <script>
 import Vue from 'vue'
-import App from './App.vue'
 import Axios from 'axios'
 import VueMaterial from 'vue-material'
 import VeeValidate from 'vee-validate'
