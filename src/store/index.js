@@ -38,11 +38,11 @@ export default new Vuex.Store( {
           } )
           .then( res => {
             context.commit( 'setUser', res.data.resource )
-            window.bus.$emit( 'message', `Registration ok! Welcome ${res.data.resource.name}!` )
+            window._adminBus.$emit( 'message', `Registration ok! Welcome ${res.data.resource.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to register. Maybe you've used this email before?" )
+            window._adminBus.$emit( 'message', "Failed to register. Maybe you've used this email before?" )
             reject( "Failed to register. Maybe you've used this email before?" )
           } )
       } )
@@ -58,11 +58,11 @@ export default new Vuex.Store( {
           } )
           .then( res => {
             context.commit( 'setUser', res.data.resource )
-            window.bus.$emit( 'message', `Login ok! Welcome ${res.data.user.name}!` )
+            window._adminBus.$emit( 'message', `Login ok! Welcome ${res.data.user.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to authenticate." )
+            window._adminBus.$emit( 'message', "Failed to authenticate." )
             reject( "Failed to authenticate." )
           } )
       } )
@@ -73,11 +73,11 @@ export default new Vuex.Store( {
         Axios.get( this.state.server + '/streams', { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'addStreamsBulk', [ ...res.data.resources ] )
-            window.bus.$emit( 'message', `Here are your streams, ${this.state.user.name}!` )
+            window._adminBus.$emit( 'message', `Here are your streams, ${this.state.user.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to get streams." )
+            window._adminBus.$emit( 'message', "Failed to get streams." )
             reject( err )
           } )
       } )
@@ -87,11 +87,11 @@ export default new Vuex.Store( {
         Axios.put( this.state.server + '/streams/' + payload.streamId, payload.data, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'patchStream', payload )
-            window.bus.$emit( 'message', "Stream edited." )
+            window._adminBus.$emit( 'message', "Stream edited." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to edit stream: " + err.message )
+            window._adminBus.$emit( 'message', "Failed to edit stream: " + err.message )
             reject( err )
           } )
 
@@ -102,11 +102,11 @@ export default new Vuex.Store( {
         Axios.delete( this.state.server + '/streams/' + payload.streamId, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'deleteStream', payload )
-            window.bus.$emit( 'message', "Stream deleted." )
+            window._adminBus.$emit( 'message', "Stream deleted." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to delete stream." )
+            window._adminBus.$emit( 'message', "Failed to delete stream." )
             reject( err )
           } )
       } )
@@ -116,11 +116,11 @@ export default new Vuex.Store( {
         Axios.put( this.state.server + '/accounts', { ...payload.data }, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'patchUser', payload )
-            window.bus.$emit( 'message', "Edit successful." )
+            window._adminBus.$emit( 'message', "Edit successful." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to edit profile." )
+            window._adminBus.$emit( 'message', "Failed to edit profile." )
             reject( err )
           } )
       } )

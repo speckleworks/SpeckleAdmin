@@ -1,7 +1,6 @@
 <template>
   <div><h1>Hello Template</h1></div>
 </template>
-
 <script>
 export default {
   props: [],
