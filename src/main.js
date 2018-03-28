@@ -55,16 +55,16 @@ if ( locationParams.length >= 2 && window.location.href.indexOf( 'dev' ) === -1 
     } )
 } else {
   if ( window.location.href.indexOf( 'dev' ) !== -1 ) // we're developing, so default to a default server
-    Store.state.server = 'http://localhost:3000/api'
+    Store.state.server = 'http://localhost:3000/api/v1'
   else // assume we're running online
-    Store.state.server = window.location.origin + '/api'
+    Store.state.server = window.location.origin + '/api/v1'
 
   let token = window.localStorage.getItem( 'token' )
   tryTokenLogin( Store.state.server, token )
     .then( res => {
       Store.state.auth = true
       Store.state.token = token
-      Store.state.user = res.data.user
+      Store.state.user = res.data.resource
     } )
     .catch( res => {
       window.localStorage.clear( )
@@ -72,7 +72,7 @@ if ( locationParams.length >= 2 && window.location.href.indexOf( 'dev' ) === -1 
 }
 
 function tryTokenLogin( server, myToken ) {
-  return Axios.get( server + '/accounts/profile', { headers: { Authorization: myToken } } )
+  return Axios.get( server + '/accounts', { headers: { Authorization: myToken } } )
 }
 
 new Vue( {
