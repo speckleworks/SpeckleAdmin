@@ -1,7 +1,7 @@
 {
   "name": "speckle-admin",
   "description": "A simple admin ui for speckle users",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Dimitrie Stefanescu <didimitrie@gmail.com>",
   "license": "MIT",
   "main": "standalone/SpeckleAdmin.js",
