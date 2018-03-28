@@ -32,17 +32,17 @@ export default new Vuex.Store( {
         Axios.post( this.state.server + '/accounts/register', { email: credentials.email, password: credentials.password, name: credentials.name, surname: credentials.surname, company: credentials.company } )
           .then( res => {
             if ( !res.data.success ) return reject( res.data.message )
-            context.commit( 'setCredentials', { token: res.data.token, auth: true } )
-            window.localStorage.setItem( 'token', res.data.token )
-            return Axios.get( this.state.server + '/accounts/profile', { headers: { Authorization: res.data.token } } )
+            context.commit( 'setCredentials', { token: res.data.resource.token, auth: true } )
+            window.localStorage.setItem( 'token', res.data.resource.token )
+            return Axios.get( this.state.server + '/accounts', { headers: { Authorization: res.data.token } } )
           } )
           .then( res => {
-            context.commit( 'setUser', res.data.user )
-            window.bus.$emit( 'message', `Registration ok! Welcome ${res.data.user.name}!` )
+            context.commit( 'setUser', res.data.resource )
+            window._adminBus.$emit( 'message', `Registration ok! Welcome ${res.data.resource.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to register. Maybe you've used this email before?" )
+            window._adminBus.$emit( 'message', "Failed to register. Maybe you've used this email before?" )
             reject( "Failed to register. Maybe you've used this email before?" )
           } )
       } )
@@ -52,17 +52,17 @@ export default new Vuex.Store( {
         Axios.post( this.state.server + '/accounts/login', { email: credentials.email, password: credentials.password } )
           .then( res => {
             if ( !res.data.success ) return reject( res.data.message )
-            context.commit( 'setCredentials', { token: res.data.token, auth: true } )
-            window.localStorage.setItem( 'token', res.data.token )
-            return Axios.get( this.state.server + '/accounts/profile', { headers: { Authorization: res.data.token } } )
+            context.commit( 'setCredentials', { token: res.data.resource.token, auth: true } )
+            window.localStorage.setItem( 'token', res.data.resource.token )
+            return Axios.get( this.state.server + '/accounts', { headers: { Authorization: res.data.resource.token } } )
           } )
           .then( res => {
-            context.commit( 'setUser', res.data.user )
-            window.bus.$emit( 'message', `Login ok! Welcome ${res.data.user.name}!` )
+            context.commit( 'setUser', res.data.resource )
+            window._adminBus.$emit( 'message', `Login ok! Welcome ${res.data.user.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to authenticate." )
+            window._adminBus.$emit( 'message', "Failed to authenticate." )
             reject( "Failed to authenticate." )
           } )
       } )
@@ -70,28 +70,28 @@ export default new Vuex.Store( {
     getStreams( context ) {
       return new Promise( ( resolve, reject ) => {
         context.commit( 'addStreamsBulk', [ ] )
-        Axios.get( this.state.server + '/accounts/streams', { headers: { Authorization: this.state.token } } )
+        Axios.get( this.state.server + '/streams', { headers: { Authorization: this.state.token } } )
           .then( res => {
-            context.commit( 'addStreamsBulk', [ ...res.data.streams, ...res.data.sharedStreams ] )
-            window.bus.$emit( 'message', `Here are your streams, ${this.state.user.name}!` )
+            context.commit( 'addStreamsBulk', [ ...res.data.resources ] )
+            window._adminBus.$emit( 'message', `Here are your streams, ${this.state.user.name}!` )
             resolve( )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to get streams." )
+            window._adminBus.$emit( 'message', "Failed to get streams." )
             reject( err )
           } )
       } )
     },
     patchStream( context, payload ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.patch( this.state.server + '/streams/' + payload.streamId, payload.data, { headers: { Authorization: this.state.token } } )
+        Axios.put( this.state.server + '/streams/' + payload.streamId, payload.data, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'patchStream', payload )
-            window.bus.$emit( 'message', "Stream edited." )
+            window._adminBus.$emit( 'message', "Stream edited." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to edit stream: " + err.message )
+            window._adminBus.$emit( 'message', "Failed to edit stream: " + err.message )
             reject( err )
           } )
 
@@ -102,25 +102,25 @@ export default new Vuex.Store( {
         Axios.delete( this.state.server + '/streams/' + payload.streamId, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'deleteStream', payload )
-            window.bus.$emit( 'message', "Stream deleted." )
+            window._adminBus.$emit( 'message', "Stream deleted." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to delete stream." )
+            window._adminBus.$emit( 'message', "Failed to delete stream." )
             reject( err )
           } )
       } )
     },
     patchUser( context, payload ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.put( this.state.server + '/accounts/profile', { ...payload.data }, { headers: { Authorization: this.state.token } } )
+        Axios.put( this.state.server + '/accounts', { ...payload.data }, { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'patchUser', payload )
-            window.bus.$emit( 'message', "Edit successful." )
+            window._adminBus.$emit( 'message', "Edit successful." )
             resolve( res.data )
           } )
           .catch( err => {
-            window.bus.$emit( 'message', "Failed to edit profile." )
+            window._adminBus.$emit( 'message', "Failed to edit profile." )
             reject( err )
           } )
       } )
@@ -149,11 +149,11 @@ export default new Vuex.Store( {
       let stream = state.streams.find( str => str.streamId === payload.streamId )
       stream.userPermissions = payload.permAgg
     },
-    addStreamsBulk( state, streams, sharedStreams ) {
+    addStreamsBulk( state, streams ) {
       state.streams = streams
       // prep streams
       state.streams.forEach( stream => {
-        stream.isOwner = state.user._id == stream.owner
+        stream.isOwner = state.user._id == stream.owner._id
         stream.selected = false
         if ( !stream.isOwner ) return
         stream.canRead.forEach( usr => {

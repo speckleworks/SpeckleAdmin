@@ -1,13 +1,17 @@
 {
   "name": "speckle-admin",
   "description": "A simple admin ui for speckle users",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "author": "Dimitrie Stefanescu <didimitrie@gmail.com>",
   "license": "MIT",
-  "private": true,
+  "main": "standalone/SpeckleAdmin.js",
+  "files": [
+    "standalone"
+  ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "build-component": "poi build ./src/AdminInterface.vue --format cjs --dist standalone --filename.js SpeckleAdmin.js --filename.css SpeckleAdmin.css --no-sourceMap --no-html"
   },
   "dependencies": {
     "axios": "^0.18.0",
