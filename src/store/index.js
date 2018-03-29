@@ -15,6 +15,7 @@ export default new Vuex.Store( {
       company: "Not initialised...",
       email: "Not initialised..."
     },
+    otherUsers: [ ],
     server: null,
     auth: false,
     token: null,
@@ -34,7 +35,7 @@ export default new Vuex.Store( {
             if ( !res.data.success ) return reject( res.data.message )
             context.commit( 'setCredentials', { token: res.data.resource.token, auth: true } )
             window.localStorage.setItem( 'token', res.data.resource.token )
-            return Axios.get( this.state.server + '/accounts', { headers: { Authorization: res.data.token } } )
+            return Axios.get( this.state.server + '/accounts', { headers: { Authorization: res.data.resource.token } } )
           } )
           .then( res => {
             context.commit( 'setUser', res.data.resource )
@@ -70,7 +71,7 @@ export default new Vuex.Store( {
     getStreams( context ) {
       return new Promise( ( resolve, reject ) => {
         context.commit( 'addStreamsBulk', [ ] )
-        Axios.get( this.state.server + '/streams', { headers: { Authorization: this.state.token } } )
+        Axios.get( this.state.server + '/streams?populatePermissions=true', { headers: { Authorization: this.state.token } } )
           .then( res => {
             context.commit( 'addStreamsBulk', [ ...res.data.resources ] )
             window._adminBus.$emit( 'message', `Here are your streams, ${this.state.user.name}!` )
@@ -153,9 +154,10 @@ export default new Vuex.Store( {
       state.streams = streams
       // prep streams
       state.streams.forEach( stream => {
-        stream.isOwner = state.user._id == stream.owner._id
+        stream.isOwner = state.user._id == stream.owner
         stream.selected = false
         if ( !stream.isOwner ) return
+        stream.userPermissions = [ ]
         stream.canRead.forEach( usr => {
           usr.canRead = true;
           usr.canWrite = false;

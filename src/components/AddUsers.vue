@@ -60,7 +60,7 @@ export default {
       if ( searchCriteria.length < 2 ) return vm.setResults( [ ] )
       Axios.post( state.server + '/accounts/search', { email: searchCriteria }, { headers: { Authorization: state.token } } )
         .then( res => {
-          vm.setResults( res.data.users )
+          vm.setResults( res.data.resources )
         } )
 
     }, 300 ),
