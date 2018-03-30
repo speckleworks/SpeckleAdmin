@@ -1,8 +1,9 @@
 # SpeckleAdmin
+[![npm version](https://badge.fury.io/js/speckle-admin.svg)](https://badge.fury.io/js/speckle-admin)
+
+A simple admin app for [speckle](https://speckle.works).
 
 ![image](https://user-images.githubusercontent.com/7696515/37546477-ed733a6a-2964-11e8-9b80-9448a88999bc.png)
-
-> A simple admin app for [speckle](https://speckle.works).
 
 ## Current features:
 - search & filter your streams
