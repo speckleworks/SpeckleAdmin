@@ -139,29 +139,40 @@
           </div>
           <!-- extras -->
           <div class="md-layout-item md-size-20 md-text-center md-medium-hide">
-            <md-button class='md-dense md-icon-button' style='margin-top: 10px; pointer-events:all;' @click='goToViewer(item.streamId)'>
+            <span class="spk-button">
+            <md-button class='md-dense md-icon-button' @click='goToViewer(item.streamId)'>
               <md-icon>3d_rotation</md-icon>
-              <!-- <md-tooltip md-direction="bottom">View 3D data</md-tooltip> -->
             </md-button>
-            <md-button class='md-dense md-icon-button md-small-hide' style='margin-top: 10px;pointer-events:all;' @click='showHistory=true; selectedStreamId=item.streamId'>
+            <md-tooltip md-direction="bottom" class="spk-button-tooltip">Launch the Speckle 3D viewer</md-tooltip>
+          </span>
+          <span class="spk-button">
+            <md-button class='md-dense md-icon-button md-small-hide' @click='showHistory=true; selectedStreamId=item.streamId'>
               <md-icon>history</md-icon>
-              <!-- <md-tooltip md-direction="bottom">stream history</md-tooltip> -->
             </md-button>
-            <md-button class='md-dense md-icon-button md-xsmall-hide' style='margin-top: 10px;' @click='showQuery=true; selectedStreamId=item.streamId'>
+            <md-tooltip md-direction="bottom" class="spk-button-tooltip">View stream history</md-tooltip>
+          </span>
+          <span class="spk-button">
+            <md-button class='md-dense md-icon-button md-xsmall-hide' @click='showQuery=true; selectedStreamId=item.streamId'>
               <md-icon>filter_list</md-icon>
-              <!-- <md-tooltip md-direction="bottom">Query</md-tooltip> -->
             </md-button>
+            <md-tooltip md-direction="bottom" class="spk-button-tooltip">Query the stream</md-tooltip>
+          </span>
           </div>
           <!-- archive, delete -->
           <div class="md-layout-item md-size-15 md-text-right md-medium-hide">
-            <md-button class='md-accent md-icon-button md-dense' style='margin-top: 10px; pointer-events:all;' v-if='item.deleted' @click='deleteStreamConfirm=true;  selectedStreamId = item.streamId'>
+            <span class="spk-button">
+            <md-button class='md-accent md-icon-button md-dense' v-if='item.deleted' @click='deleteStreamConfirm=true;  selectedStreamId = item.streamId'>
               <md-icon>delete</md-icon>
-              <md-tooltip md-direction='bottom'>Delete this stream permanently</md-tooltip>
             </md-button>
-            <md-button :class='{ "md-dense md-icon-button" : true, "md-accent" : !item.deleted, "md-primary" : item.deleted }' style='margin-top: 10px; pointer-events:all;' @click='setStreamArchived(item)' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 )&&!item.isOwner'>
+            <md-tooltip class="spk-button-tooltip" md-direction='bottom'>Delete this stream permanently</md-tooltip>
+          </span>
+            <span class="spk-button">
+            <md-button :class='{ "md-dense md-icon-button" : true, "md-accent" : !item.deleted, "md-primary" : item.deleted }' @click='setStreamArchived(item)' :disabled='!(item.canWrite.indexOf($store.state.user._id) >= 0 )&&!item.isOwner'>
               <md-icon>{{item.deleted ? "unarchive" : "archive"}}</md-icon>
-              <md-tooltip md-direction="bottom">{{item.deleted ? "Unarchive stream" : "Archive stream"}}</md-tooltip>
             </md-button>
+            <md-tooltip class="spk-button-tooltip" md-direction="bottom">{{item.deleted ? "Unarchive stream" : "Archive stream"}}</md-tooltip>
+          </span>
+
           </div>
           <!-- mobile menu -->
           <div class="md-layout-item md-size-10 md-xsmall-size-25 spk-padding md-medium-show md-text-right" style='pointer-events:all'>
@@ -386,6 +397,15 @@ export default {
 
 .spk-push-down {
   margin-top: 90px;
+}
+
+.spk-button-tooltip {
+  margin-top: 20px;
+}
+
+.spk-button {
+  padding-top: 10px;
+  pointer-events:all;
 }
 
 .spk-tools {
