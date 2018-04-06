@@ -4,7 +4,7 @@
       <md-app-drawer :md-active.sync="showProfile">
         <profile></profile>
       </md-app-drawer>
-      <md-app-toolbar class="md-primary md-dense" style='z-index: 10' v-if='$store.state.auth'>
+      <md-app-toolbar class="md-primary md-dense" style='z-index: 10' md-elevation="0" v-if='$store.state.auth'>
         <div class="md-toolbar-row">
           <div class="md-toolbar-section-start">
             <md-button class='md-dense md-icon-button' @click='showProfile=true'>
