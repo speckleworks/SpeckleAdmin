@@ -27,7 +27,7 @@
                 </md-field>
                 <md-field :class="{'md-invalid': errors.has('password')}">
                   <label>Password</label>
-                  <md-input v-model="password" type="password" v-validate name="password" data-vv-rules="min:8|required" data-vv-name="password" autocomplete="password"></md-input>
+                  <md-input v-model="password" type="password" v-validate name="password" data-vv-name="password" autocomplete="password"></md-input>
                   <span v-show="errors.has('password')" class="md-error">{{ errors.first('password') }}</span>
                 </md-field>
                 <md-button type="submit" class="md-raised md-primary" @click='login'>Login</md-button>
