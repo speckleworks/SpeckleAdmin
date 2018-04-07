@@ -116,14 +116,20 @@
           <!-- permissions -->
           <div class="md-text-center md-layout-item md-size-5 md-medium-size-15">
             <div v-if='item.isOwner'>
-              <md-button :disabled='item.deleted' class='md-dense-xxx md-icon-button md-raisedxxx' :class='{"md-primary":item.isOwner}' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
-                <md-icon>{{item.private ? (item.userPermissions.length == 0 ? "lock_outline": "lock_open" ) : "public" }}</md-icon>
-              </md-button>
+              <span class="spk-button">
+                <md-button :disabled='item.deleted' class='md-dense-xxx md-icon-button md-raisedxxx' :class='{"md-primary":item.isOwner}' style='margin-top: 10px;' @click='showPermissions=true; selectedStreamId = item.streamId'>
+                  <md-icon>{{item.private ? (item.userPermissions.length == 0 ? "lock_outline": "lock_open" ) : "public" }}</md-icon>
+                </md-button>
+                <md-tooltip md-direction="bottom" class="spk-button-tooltip">Modify stream permissions</md-tooltip>
+              </span>
             </div>
             <div v-else>
-              <md-button class='md-icon-button' @click='showSharedInfo=true; selectedStreamId=item.streamId'>
-                <md-icon>{{item.canWrite.indexOf($store.state.user._id) >= 0 ? "mode_edit" : "remove_red_eye" }}</md-icon>
-              </md-button>
+              <span class="spk-button">
+                <md-button class='md-icon-button' @click='showSharedInfo=true; selectedStreamId=item.streamId'>
+                  <md-icon>{{item.canWrite.indexOf($store.state.user._id) >= 0 ? "mode_edit" : "remove_red_eye" }}</md-icon>
+                </md-button>
+                <md-tooltip md-direction="bottom" class="spk-button-tooltip">Modify stream permissions</md-tooltip>
+              </span>
             </div>
           </div>
           <!-- last modified -->
