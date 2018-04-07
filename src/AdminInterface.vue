@@ -23,10 +23,15 @@
       <md-app-content>
         <login-form v-if='!auth'></login-form>
         <component v-else :is='currentView'></component>
-        <md-snackbar md-position="left" :md-duration="2000" :md-active.sync="showSnackbar" md-persistent style='z-index:100000'>
+        <md-snackbar md-position="center" :md-duration="2000" :md-active.sync="showSnackbar" md-persistent style='z-index:100000'>
           <span>{{message}}</span>
           <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
         </md-snackbar>
+        <div class='spk-debug'>
+          <span class='md-caption'>
+          Connected to Speckle API server : {{server}}
+          </span>
+        </div>
       </md-app-content>
     </md-app>
   </div>
@@ -93,7 +98,7 @@ export default {
     }
   },
   mounted( ) {
-    console.log( 'Admin ui mounted!' )
+    console.log( 'Admin UI mounted!' )
     window._adminBus.$on( 'message', ( content ) => {
       this.message = content
       this.showSnackbar = true
@@ -110,7 +115,7 @@ export default {
         this.$emit( 'successLogin', this.token )
       } )
       .catch( err => {
-        window._adminBus.$emit( 'message', 'Failed to log in.' )
+        window._adminBus.$emit( 'message', 'Failed to log in.' + err.message )
       } )
   }
 }
@@ -181,11 +186,17 @@ $large-size:1920px;
 .fade-enter,
 .fade-leave-to
 /* .fade-leave-active below version 2.1.8 */
-
 {
   opacity: 0;
 }
 
+.spk-debug {
+  position:fixed;
+  width:100%;
+  background-color:#F9F9F9;
+  bottom:0;
+  padding:10px;
+}
 @import "~vue-material/dist/theme/engine"; // Import the theme engine
 @include md-register-theme("default", ( primary: md-get-palette-color(blue, A400), // The primary color of your application
 // accent: md-get-palette-color(red, A400), // The accent or secondary color
