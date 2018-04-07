@@ -115,7 +115,7 @@ export default {
         this.$emit( 'successLogin', this.token )
       } )
       .catch( err => {
-        window._adminBus.$emit( 'message', 'Failed to log in.' + err.message )
+        window._adminBus.$emit( 'message', 'Failed to log in : ' + err.message )
       } )
   }
 }
