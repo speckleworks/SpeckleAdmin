@@ -27,9 +27,9 @@ export default {
   },
   mounted( ) {
     console.log( "app  mounted" )
-    if ( window.location.href.indexOf( 'dev' ) !== -1 )
-      this.server = 'http://localhost:3000/api/v1'
-    else
+    //if ( window.location.href.indexOf( 'dev' ) !== -1 )
+    //  this.server = 'http://localhost:3000/api/v1'
+    //else
       this.server = window.location.origin + '/api/v1'
     this.token = window.localStorage.getItem( 'token' )
     this.readySetGo = true

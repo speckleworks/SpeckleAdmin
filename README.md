@@ -39,7 +39,7 @@ npm run dev
 npm run build
 ```
 
-## Build Standalone Component
+## Build Standalone Component
 
 You will need to add [poi](https://poi.js.org) globally, since `vue build` is now deprecated.
 
