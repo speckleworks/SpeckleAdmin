@@ -14,7 +14,7 @@
           </div>
           <div class="md-toolbar-section-end">
             <a href="https://speckle.works">
-              <img src='https://speckle.works/img/logos/logo-bw.png' width="25"/>
+              <img src='https://speckle.works/img/logos/2xlogo-white.png' width="30"/>
               <md-tooltip md-direction="left">Speckle.Works!</md-tooltip>
               </a>
           </div>
