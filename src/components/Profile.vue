@@ -23,7 +23,7 @@
       <div class="md-layout-item md-size-30 md-caption">member since</div>
     </div>
     <div class="md-layout md-alignment-center-center spk-cell">
-      <md-button class='md-dense md-accent' @click='logout'>Logout</md-button>
+      <md-button class='md-dense md-accent' style='width:100%; min-height:60px;'@click='logout'>Logout</md-button>
     </div>
   </div>
 </template>
