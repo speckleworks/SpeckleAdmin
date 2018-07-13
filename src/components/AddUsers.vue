@@ -12,21 +12,29 @@
     </md-app-toolbar>
     <div class="md-layout md-alignment-center-center spk-padding spk-useradd-dialog">
       <div class="md-layout-item md-size-100">
-        <div class='md-subheading'>Search for users by typing their email below:</div>
-        <md-field md-clearable :class="{ 'md-invalid' : errors.has('search string') }">
-          <md-input v-model="searchCriteria" v-validate data-vv-name="search string" data-vv-rules="min:3"></md-input>
-          <span v-show="errors.has('search string')" class="md-error">{{ errors.first('search string') }}</span>
+        <div class='md-subheading'>Search for users by typing parts of their name, surname, or company:</div>
+        <md-field md-clearable>
+          <label for="name">Name</label>
+          <md-input name="name" id="name" v-model="searchCriteria.name"></md-input>
+        </md-field>
+        <md-field md-clearable>
+          <label for="surname">Surname</label>
+          <md-input name="surname" id="surname" v-model="searchCriteria.surname"></md-input>
+        </md-field>
+        <md-field md-clearable>
+          <label for="company">Company</label>
+          <md-input name="company" id="company" v-model="searchCriteria.company"></md-input>
         </md-field>
       </div>
     </div>
-    <div class="md-layout md-alignment-center-center spk-padding" v-if='searchResults.length==0 && searchCriteria.length > 2'>
+    <div class="md-layout md-alignment-center-center spk-padding" v-if='searchResults.length==0'>
       <h3>No users found</h3>
     </div>
     <md-content class="md-scrollbar spk-usersearch-results">
       <div class="md-layout md-alignment-center-center spk-padding spk-cell-users md-gutter" v-for='user in searchResults'>
         <div class='md-layout-item md-size-30 truncate'>{{user.name}} {{user.surname}}</div>
-        <div class='md-layout-item md-size-30 md-caption truncate'>{{user.email}}</div>
-        <div class='md-layout-item md-size-20 md-caption md-text-center truncate'>{{user.company ? user.company : 'n/a'}}</div>
+        <div class='md-layout-item md-size-30 md-caption truncate'>{{user.email || ''}}</div>
+        <div class='md-layout-item md-size-20 md-caption md-text-center truncate'>{{user.company || 'n/a'}}</div>
         <div class='md-layout-item md-size-20'>
           <md-button class="md-icon-button md-dense" @click='addUser(user)'>
             <md-icon>add</md-icon>
@@ -45,30 +53,34 @@ export default {
 
   ],
   watch: {
-    searchCriteria( ) { this.debounceSearch( this.searchCriteria, this ) }
+    searchCriteria: {
+      handler: function ( ) { this.debounceSearch( this.searchCriteria, this ) },
+      deep: true,
+      immediate: true
+    }
   },
   computed: {},
   data( ) {
     return {
-      searchCriteria: '',
+      searchCriteria: {
+        name: '',
+        surname: '',
+        company: ''
+      },
       searchResults: [ ]
     }
   },
   methods: {
     debounceSearch: debounce( ( searchCriteria, vm ) => {
       let state = vm.$store.state
-      if ( searchCriteria.length < 2 ) return vm.setResults( [ ] )
-      Axios.post( state.server + '/accounts/search', { email: searchCriteria }, { headers: { Authorization: state.token } } )
+      Axios.post( state.server + '/accounts/search', searchCriteria, { headers: { Authorization: state.token } } )
         .then( res => {
           vm.setResults( res.data.resources )
         } )
 
     }, 300 ),
-    search( ) {
-      console.log( 'search!' )
-    },
     setResults( res ) {
-      this.searchResults = res.filter( usr => usr.email != this.$store.state.user.email )
+      this.searchResults = res.filter( usr => usr._id != this.$store.state.user._id )
     },
     addUser( user ) {
       user.canRead = true
@@ -76,8 +88,7 @@ export default {
       this.searchResults.splice( this.searchResults.indexOf( user ), 1 )
       this.$emit( 'addUser', user )
     }
-  },
-  mounted( ) {}
+  }
 }
 
 </script>
