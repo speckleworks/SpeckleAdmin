@@ -79,9 +79,6 @@ export default {
         } )
 
     }, 300 ),
-    search( ) {
-      console.log( 'search!' )
-    },
     setResults( res ) {
       this.searchResults = res.filter( usr => usr._id != this.$store.state.user._id )
     },
@@ -91,8 +88,7 @@ export default {
       this.searchResults.splice( this.searchResults.indexOf( user ), 1 )
       this.$emit( 'addUser', user )
     }
-  },
-  mounted( ) {}
+  }
 }
 
 </script>
