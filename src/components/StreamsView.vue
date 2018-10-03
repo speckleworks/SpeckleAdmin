@@ -344,7 +344,7 @@ export default {
   },
   methods: {
     goToViewer( streamId ) {
-      let url = this.$store.state.server.replace( 'api', 'view/?' + streamId )
+      let url = this.$store.state.server.replace( 'api', 'view/?streams=' + streamId )
       console.log( url )
       let win = window.open( url, '_blank' );
       win.focus( );
