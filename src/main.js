@@ -1,36 +1,71 @@
 import Vue from 'vue'
 import Axios from 'axios'
-import VueMaterial from 'vue-material'
-import VeeValidate from 'vee-validate'
-import moment from 'moment'
-import VueTimeago from 'vue-timeago'
-
-import 'vue-material/dist/vue-material.min.css'
-import 'vue-material/dist/theme/default.css'
-
 import App from './App.vue'
+import Router from './router'
+import Store from './store'
+import './registerServiceWorker'
 
+Vue.config.productionTip = false
+
+// import comps
+// NOTE: The VueMaterial in this is specially built to incroporate a fix
+// to the router links. See https://github.com/vuematerial/vue-material/pull/1978
+import VueMaterial from 'vue-material'
+import 'vue-material/dist/vue-material.min.css'
 Vue.use( VueMaterial )
-Vue.use( VeeValidate )
 
+// Set up the server route.
+let server = localStorage.getItem( 'server' )
+if ( server )
+  Store.state.server = server
+else
+  Store.state.server = `${window.location.origin}/api`
+
+// Get the token, if any is present.
+let token = localStorage.getItem( 'token' )
+
+// Start the init flow
+Axios.get( Store.state.server )
+  .then( response => {
+    Store.state.serverManifest = response.data
+    return Axios.get( `${Store.state.server}/accounts?omit=logins`, { headers: { Authorization: token } } )
+  } )
+  .then( response => {
+    // means we're logged out
+    if ( response === null ) {
+      // TODO
+      initApp( )
+      return
+    }
+    // needs to log in
+    if ( response.status !== 200 ) {
+      // TODO
+      initApp( )
+      return
+    }
+    // set defaults in axios, if we got this far things should be fine
+    Axios.defaults.baseURL = Store.state.server
+    Axios.defaults.headers.common[ 'Authorization' ] = token
+    // update the store
+    Store.state.isAuth = true
+    Store.state.user = response.data.resource
+    Store.state.token = token
+
+    initApp( )
+  } )
+  .catch( err => {
+    console.warn( err )
+    initApp( )
+  } )
+
+// set axios as default $http request lib
 Vue.prototype.$http = Axios
-window._adminBus = new Vue( )
 
-Vue.use( VueTimeago, {
-  name: 'timeago', // component name, `timeago` by default
-  locale: 'en-US',
-  locales: {
-    'en-US': require( 'vue-timeago/locales/en-US.json' )
-  }
-} )
-
-Vue.filter( 'formatDate', function( value ) {
-  if ( value ) {
-    return moment( String( value ) ).format( 'DD/MM/YYYY' )
-  }
-} )
-
-new Vue( {
-  el: '#app',
-  render: h => h( App )
-} )
+// The init logic (it's called after we do some auth flows)
+let initApp = ( ) => {
+  new Vue( {
+    router: Router,
+    store: Store,
+    render: h => h( App )
+  } ).$mount( '#app' )
+}

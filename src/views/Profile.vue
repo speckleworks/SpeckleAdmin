@@ -1,21 +1,26 @@
 <template>
-  <div><h1>Hello Template</h1></div>
+  <div>
+    <h1 class='md-display-1'>Hello, {{$store.state.user.name}}!</h1>
+  </div>
 </template>
+
 <script>
 export default {
-  props: [],
+  name: '',
   computed: {
   },
-  data( ) {
+  data() {
     return {
+
     }
   },
   methods: {
   },
   mounted() {
+
   }
 }
 </script>
-<style lang="scss">
 
+<style scoped lang='scss'>
 </style>

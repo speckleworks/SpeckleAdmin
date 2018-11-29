@@ -1,43 +1,52 @@
 <template>
-  <div class="page-container">
-    <admin v-if='readySetGo' :server='server' :token='token' @successLogin='setLocalStorage'></admin>
+  <div id="app">
+    <md-app md-waterfall>
+      <md-app-drawer :md-active.sync="showSidebar" class='md-elevation-10 md-primary nav-sidebar' style='' md-persistent="full">
+        <nav-drawer></nav-drawer>
+      </md-app-drawer>
+      <md-app-content>
+        <keep-alive>
+          <router-view></router-view>
+        </keep-alive>
+      </md-app-content>
+    </md-app>
   </div>
 </template>
 <script>
-import Admin from './AdminInterface.vue'
-import Store from './store/index'
+import NavDrawer from './components/NavDrawer.vue'
 
 export default {
-  name: 'app',
-  store: Store,
+  name: 'MainApp',
   components: {
-    Admin
+    NavDrawer
   },
-  data( ) {
-    return {
-      server: null,
-      token: null,
-      readySetGo: false
-    }
-  },
-  methods: {
-    setLocalStorage( token ) {
-      window.localStorage.setItem( 'token', token )
-    }
-  },
-  mounted( ) {
-    console.log( "app  mounted" )
-    //if ( window.location.href.indexOf( 'dev' ) !== -1 )
-    //  this.server = 'http://localhost:3000/api/v1'
-    //else
-      this.server = window.location.origin + '/api/v1'
-    this.token = window.localStorage.getItem( 'token' )
-    this.readySetGo = true
-  }
+  data: _ => ( {
+    showSidebar: true
+  } )
 }
 
 </script>
-<style lang="scss">
+<style lang='scss'>
+#app {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 
+.md-app {
+  height: 100%;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
 
 </style>
