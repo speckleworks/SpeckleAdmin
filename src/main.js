@@ -12,7 +12,11 @@ Vue.config.productionTip = false
 // to the router links. See https://github.com/vuematerial/vue-material/pull/1978
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.min.css'
+import 'vue-material/dist/theme/default.css'
 Vue.use( VueMaterial )
+
+import VueTimeago from 'vue-timeago'
+Vue.use( VueTimeago, { locale: 'en' } )
 
 // Set up the server route.
 let server = localStorage.getItem( 'server' )

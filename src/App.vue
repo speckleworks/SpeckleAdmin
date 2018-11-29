@@ -1,8 +1,11 @@
 <template>
   <div id="app">
     <md-app md-waterfall>
-      <md-app-drawer :md-active.sync="showSidebar" class='md-elevation-10 md-primary nav-sidebar' style='' md-persistent="full">
+      <md-app-drawer :md-active.sync="showSidebar" class='md-primary md-elevation-10 md-primary nav-sidebar' style='' md-persistent="full">
         <nav-drawer></nav-drawer>
+        <md-button class="md-fab md-fab-bottom-left md-fixed" style='z-index: 100000;'>
+          <md-icon>menu</md-icon>
+        </md-button>
       </md-app-drawer>
       <md-app-content>
         <keep-alive>
@@ -47,6 +50,11 @@ export default {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+.btn-no-margin {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 </style>

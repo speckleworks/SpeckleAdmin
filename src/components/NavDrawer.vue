@@ -21,20 +21,24 @@
 <script>
 </script>
 <style lang='scss'>
-  $SpeckleBlue: #448aff;
-  .nav-sidebar {
+$SpeckleBlue: #448aff;
+
+.nav-sidebar {
   width: 200px !important;
-  background-color: $SpeckleBlue;
+  background-color: $SpeckleBlue !important;
   padding-top: 30px;
 }
 
-a {
-  color: white;
-  transition: none !important;
+ul {
+  background-color: transparent !important;
 }
 
-a.is-active {
-  background-color: white;
-  color: $SpeckleBlue;
+.md-list-item-text{
+  color: white !important;
+  transition: none !important;
 }
+.is-active * {
+  color: white !important;
+}
+
 </style>
