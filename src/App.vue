@@ -1,11 +1,11 @@
 <template>
   <div id="app">
+    <md-button class="md-fab md-plain md-fab-bottom-left md-fixed" style='z-index: 10000' @click='showSidebar = !showSidebar'>
+      <md-icon>{{showSidebar ? 'close' : 'menu'}}</md-icon>
+    </md-button>
     <md-app md-waterfall>
-      <md-app-drawer :md-active.sync="showSidebar" class='md-primary md-elevation-10 md-primary nav-sidebar' style='' md-persistent="full">
+      <md-app-drawer :md-active.sync="showSidebar" class='md-primary md-elevation-10 md-primary nav-sidebar' style='' md-permanent="clipped">
         <nav-drawer></nav-drawer>
-        <md-button class="md-fab md-fab-bottom-left md-fixed" style='z-index: 100000;'>
-          <md-icon>menu</md-icon>
-        </md-button>
       </md-app-drawer>
       <md-app-content>
         <keep-alive>
@@ -29,7 +29,7 @@ export default {
 }
 
 </script>
-<style lang='scss'>
+<style>
 #app {
   position: fixed;
   top: 0;
@@ -55,6 +55,9 @@ export default {
 .btn-no-margin {
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+.md-card.md-with-hover {
+  cursor: default !important;
 }
 
 </style>

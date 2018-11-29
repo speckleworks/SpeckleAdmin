@@ -65,6 +65,9 @@ Axios.get( Store.state.server )
 // set axios as default $http request lib
 Vue.prototype.$http = Axios
 
+// event bus used for triggerring events cross-hirearchy
+window.bus = new Vue( )
+
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
   new Vue( {
