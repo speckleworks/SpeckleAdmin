@@ -31,12 +31,12 @@
         <div class="md-layout-item md-caption">
           {{createdAt}}
         </div>
-        <div class="md-layout-item md-caption">
+        <div class="md-layout-item md-caption md-size-20">
           <md-icon>{{stream.private ? 'https' : 'public'}}</md-icon>
-          Stream is {{stream.private?'private':'public'}}.
+          {{stream.private?'private':'public'}}
         </div>
         <div class='md-layout-item md-size-100'>
-          <md-chips v-model="stream.tags" md-placeholder="Tags"></md-chips>
+          <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
         </div>
       </div>
     </md-card-content>
@@ -48,16 +48,15 @@
   </md-card>
 </template>
 <script>
+import debounce from 'lodash.debounce'
+
 export default {
   name: 'StreamCard',
   props: {
     stream: Object
   },
   watch: {
-    selected( ) {
-      console.log( "wtf" )
-      this.$emit( "selected", this.stream )
-    }
+    selected( ) { this.$emit( "selected", this.stream ) }
   },
   computed: {
     createdAt( ) {
@@ -70,6 +69,13 @@ export default {
       selected: false,
     }
   },
+  methods: {
+    updateTags: debounce( function( e ) {
+      console.log( 'should  update tags' )
+      console.log( this.stream.tags )
+      this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, tags: this.stream.tags } )
+    }, 1000 )
+  },
   mounted( ) {
     bus.$on( 'unselect-all', ( ) => {
       this.selected = false
@@ -79,15 +85,38 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.md-card-actions,
 .md-card-header {
-  /*cursor: pointer;*/
+  background: ghostwhite;
+}
+
+.md-card-header {
+  margin-bottom: 10px;
+}
+
+.stream-chips {
+  margin-bottom: 0;
+}
+
+.stream-chips input {
+  font-size: 10px;
+}
+
+.md-field.md-theme-default:after {
+  display: none !important;
+  /*background: none !important;*/
+}
+
+.md-field.md-theme-default:before {
+  display: none !important;
 }
 
 .stream-card {
   margin-bottom: 20px;
 }
 
-.selected {
+.selected,
+.selected * {
   background-color: #CCCCCC !important;
 }
 

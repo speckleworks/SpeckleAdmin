@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Axios from 'axios'
 
 Vue.use( Vuex )
 
@@ -26,10 +27,22 @@ export default new Vuex.Store( {
       } )
     },
     REMOVE_STREAM( state, stream ) {
-
+      //  TOODO
     }
   },
   actions: {
+    getStream( context, payload ) {},
+    updateStream( context, props ) {
+      Axios.put( `/streams/${props.streamId}`, props )
+        .then( res => {
+          console.log( res )
+        } )
+        .catch( err => {
+          console.log( err )
+        } )
+    },
+    deleteStream( context, payload ) {},
+
 
   }
 } )
