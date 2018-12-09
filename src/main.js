@@ -25,6 +25,10 @@ if ( server )
 else
   Store.state.server = `${window.location.origin}/api`
 
+
+// set default server
+Axios.defaults.baseURL = Store.state.server
+
 // Get the token, if any is present.
 let token = localStorage.getItem( 'token' )
 
@@ -48,7 +52,6 @@ Axios.get( Store.state.server )
       return
     }
     // set defaults in axios, if we got this far things should be fine
-    Axios.defaults.baseURL = Store.state.server
     Axios.defaults.headers.common[ 'Authorization' ] = token
     // update the store
     Store.state.isAuth = true
@@ -58,7 +61,6 @@ Axios.get( Store.state.server )
     initApp( )
   } )
   .catch( err => {
-    console.warn( err )
     initApp( )
   } )
 

@@ -2,32 +2,32 @@
   <div class='md-layout'>
     <md-card class="md-primary-xx main-toolbar md-elevation-3">
       <md-card-content class='md-layout md-alignment-center-space-between'>
-        <div class="md-layout-item md-size-30 md-small-size-100">
-          <md-field md-clearable md-theme='dark'>
+        <div class="md-layout-item md-size-95">
+          <md-field md-clearable>
             <md-icon>search</md-icon>
             <label>name:box id:xxx private:true</label>
-            <md-input @input="updateSearch"></md-input>
+            <md-input @input="updateSearch" spellcheck="false"></md-input>
           </md-field>
         </div>
-        <div class="md-layout-item md-size-50 md-small-size-100" v-if='selectedStreams.length > 0' style="text-align: right">
-          <md-button class='md-raised md-dense md-accent'>delete</md-button>
-          <md-button class='md-raised md-dense'>Make Private</md-button>
-          <md-button class='md-raised md-dense' v-if='selectedStreams.length > 1'>Create Project</md-button>
-          <md-button class='md-raised md-dense' @click.native='clearSelection'>clear selection ({{selectedStreams.length}})</md-button>
+        <div class="md-layout-item md-size-5 text-right">
+          <md-button class='md-icon-button md-raised md-primary'>
+            <md-icon>add</md-icon>
+          </md-button>
+        </div>
+        <div class="md-layout-item md-size-100" v-if='selectedStreams.length > 0' style="margin-top: 10px;">
+          <md-button class='md-raised md-dense md-primary' @click.native='clearSelection'>clear selection ({{selectedStreams.length}})</md-button>
+          <md-button class='md-raised-xx md-dense md-accent' @click.native='deleteStreams'>delete</md-button>
+          <md-button class='md-raised md-dense' @click.native='togglePermissions'>Make {{defaultPermission}}</md-button>
+          <md-button class='md-raised md-dense'>Create Project</md-button>
         </div>
       </md-card-content>
     </md-card>
-    <!--     <md-card class="md-layout-item md-size-100 md-elevation-0">
-      <md-card-content>
-        <h1 class='md-display-1'>Your streams:</h1>
-      </md-card-content>
-    </md-card> -->
     <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-33 md-xlarge-size-25' v-for='stream in paginatedStreams' :key='stream._id'>
-      <stream-card :stream='stream' v-on:selected='selectThis'></stream-card>
+      <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
     </div>
     <div class="md-layout-item md-size-100">
       <md-card class='md-elevation-0'>
-        <md-button class='md-raised btn-no-margin' @click.native='endIndex+=12' :disabled='paginatedStreams.length===filteredStreams.length'>
+        <md-button class='md-raised btn-no-margin md-primary' @click.native='endIndex+=12' :disabled='paginatedStreams.length===filteredStreams.length'>
           Show More ({{paginatedStreams.length}} / {{filteredStreams.length}})
         </md-button>
       </md-card>
@@ -39,17 +39,17 @@ import debounce from 'lodash.debounce'
 import StreamCard from '../components/StreamCard.vue'
 
 export default {
-  name: '',
+  name: 'StreamsView',
   components: { StreamCard },
   computed: {
     streams( ) {
-      return this.$store.state.streams.filter( stream => stream.parent == null )
+      return this.$store.state.streams.filter( stream => stream.parent == null && stream.deleted === false )
     },
     filteredStreams( ) {
       let base = this.streams
       if ( this.filters.length === 0 )
         return base
-
+      console.log( this.filters )
       this.filters.forEach( query => {
         query.key = query.key.toLowerCase( )
         switch ( query.key ) {
@@ -60,7 +60,6 @@ export default {
               base = base.filter( stream => stream.private === true )
             break
           case 'public':
-            console.log( query )
             if ( query.value )
               base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
             else
@@ -68,9 +67,18 @@ export default {
             break
           case 'tag':
           case 'tags':
-            let myTags = query.value.split( ',' )
-            // TODO
+            let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
+            base = base.filter( stream => {
+              let streamTags = stream.tags.map( t => t.toLowerCase( ) )
+              return myTags.every( t => streamTags.includes( t ) )
+            } )
             break
+          case 'mine':
+            base = base.filter( stream => stream.owner === this.$store.state.user._id )
+            break;
+          case 'shared':
+            base = base.filter( stream => stream.owner !== this.$store.state.user._id )
+            break;
           case 'name':
             base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
             break
@@ -81,8 +89,6 @@ export default {
         }
       } )
       return base
-
-
     },
     paginatedStreams( ) {
       return this.filteredStreams.slice( this.startIndex, this.endIndex )
@@ -96,16 +102,40 @@ export default {
       selectedStreams: [ ],
       searchfilter: '',
       filters: [ ],
+      defaultPermission: 'private',
+    }
+  },
+  watch: {
+    selectedStreams( ) {
+      let priv = 0,
+        pub = 0
+      this.selectedStreams.forEach( s => {
+        if ( s.private ) priv++
+        else pub++
+      } )
+      this.defaultPermission = priv > pub ? 'public' : 'private'
     }
   },
   methods: {
+    togglePermissions( ) {
+      this.selectedStreams.forEach( stream => {
+        this.$store.dispatch( 'updateStream', { streamId: stream.streamId, private: this.defaultPermission === 'private' ? true : false } )
+      } )
+      this.defaultPermission = this.defaultPermission === 'private' ? 'public' : 'private'
+    },
+    deleteStreams( ) {
+      this.selectedStreams.forEach( stream => {
+        this.$store.dispatch( 'updateStream', { streamId: stream.streamId, deleted: true } )
+      } )
+      this.clearSelection( )
+    },
     updateSearch: debounce( function( e ) {
       this.searchfilter = e
       try {
         let filters = this.searchfilter.split( ' ' ).map( t => {
           if ( t.includes( ':' ) )
             return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
-          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) )
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
             return { key: 'name', value: t }
           else
             return { key: t, value: null }
@@ -123,7 +153,11 @@ export default {
         this.selectedStreams.splice( index, 1 )
     },
     clearSelection( ) {
+      this.defaultPermission = 'private'
       bus.$emit( 'unselect-all' )
+    },
+    checkSelection( ) {
+      this.selectedStreams = this.selectedStreams.filter( s => !s.deleted )
     }
   },
   created( ) {
@@ -157,4 +191,5 @@ export default {
 .md-field {
   margin: 0 !important;
 }
+
 </style>

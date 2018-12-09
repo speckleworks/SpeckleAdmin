@@ -2,31 +2,24 @@
   <md-card md-with-hover :class="{'stream-card':true, 'selected':selected}">
     <md-card-header @click='selected=!selected'>
       <md-card-header-text>
-        <div class="md-title">{{stream.name}}</div>
-        <div class="md-subhead" stlye='user-select:all;'>{{stream.streamId}}</div>
-        <div class="md-caption">{{stream.description}}</div>
+        <router-link :to='"/streams/"+stream.streamId'>
+          <div class="md-title">{{stream.name}}</div>
+          <div class="md-subhead" stlye='user-select:all;'>{{stream.streamId}}</div>
+          <div class="md-caption" v-html='compiledDescription'></div>
+        </router-link>
       </md-card-header-text>
       <md-checkbox v-model="selected" value="1" @click.native='$emit("selected", stream)'></md-checkbox>
     </md-card-header>
     <md-card-content>
       <div class="md-layout md-alignment-center-center">
         <div class="md-layout-item md-size-10">
-          <md-icon>access_time
-            <md-tooltip md-direction="bottom">
-              Last updated
-            </md-tooltip>
-          </md-icon>
+          <md-icon>access_time</md-icon>
         </div>
         <div class="md-layout-item md-caption">
-          <!-- {{stream.updatedAt}} -->
           <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
         </div>
         <div class="md-layout-item md-size-10">
-          <md-icon>create
-            <md-tooltip md-direction="bottom">
-              Created on
-            </md-tooltip>
-          </md-icon>
+          <md-icon>create</md-icon>
         </div>
         <div class="md-layout-item md-caption">
           {{createdAt}}
@@ -41,14 +34,15 @@
       </div>
     </md-card-content>
     <md-card-actions>
-      <md-button class='md-accent'>Delete</md-button>
-      <md-button class='md-raised-xxx'>More...</md-button>
+      <md-button class='md-accent' @click.native='deleteStream' v-show='isOwner'>Delete</md-button>
+      <md-button class='md-raised-xxx' :to='"/streams/"+stream.streamId'>More...</md-button>
     </md-card-actions>
     <!-- {{stream.streamId}} -->
   </md-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'
+import marked from 'marked'
 
 export default {
   name: 'StreamCard',
@@ -62,6 +56,15 @@ export default {
     createdAt( ) {
       let date = new Date( this.stream.createdAt )
       return date.toLocaleString( 'en', { year: 'numeric', month: 'long', day: 'numeric' } )
+    },
+    compiledDescription( ) {
+      return marked( this.stream.description.substring( 0, 120 ) + ' ...', { sanitize: true } )
+    },
+    canEdit( ) {
+      return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
+    },
+    isOwner( ) {
+      return this.stream.owner === this.$store.state.user._id
     }
   },
   data( ) {
@@ -70,9 +73,11 @@ export default {
     }
   },
   methods: {
+    deleteStream( ) {
+      this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, deleted: true } )
+      this.$emit( 'deleted' )
+    },
     updateTags: debounce( function( e ) {
-      console.log( 'should  update tags' )
-      console.log( this.stream.tags )
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, tags: this.stream.tags } )
     }, 1000 )
   },
@@ -85,6 +90,14 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.stream-chips:after {
+  display: none !important;
+}
+
+.stream-chips:before {
+  display: none !important;
+}
+
 .md-card-actions,
 .md-card-header {
   background: ghostwhite;
@@ -102,23 +115,17 @@ export default {
   font-size: 10px;
 }
 
-.md-field.md-theme-default:after {
-  display: none !important;
-  /*background: none !important;*/
-}
-
-.md-field.md-theme-default:before {
-  display: none !important;
-}
-
 .stream-card {
   margin-bottom: 20px;
 }
 
-.selected,
-.selected * {
-  background-color: #CCCCCC !important;
+.selected .md-card-header {
+  /*background-color: #CCCCCC !important;*/
 }
+
+/*.selected .xx-md-card-content, .selected .md-card-header, .selected .xxx-md-card-actions {
+  background-color: #CCCCCC !important;
+}*/
 
 i {
   color: #4C4C4C;
