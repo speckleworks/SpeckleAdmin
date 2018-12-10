@@ -1,34 +1,40 @@
 <template>
-  <div class='md-layout xxx-md-gutter'>
-    <div v-if='error!==""' class='md-layout-item md-size-100'>
-      <md-content class="md-accent md-caption">{{error}}</md-content>
-    </div>
-    <div class="md-layout-item md-size-100">
-      <md-button class='md-dense md-primary' to='/streams'>Back to stream list</md-button>
-    </div>
-    <div class="md-layout-item md-size-100">
-      <div class='md-layout xxx-md-gutter'>
-        <div class="md-layout-item md-size-100">
-          <stream-detail-title :stream='stream'></stream-detail-title>
-        </div>
-        <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-          <stream-detail-description :stream='stream'></stream-detail-description>
-        </div>
-        <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='canEdit'>
-          <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-        </div>
-        <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-          <stream-detail-network :stream='stream'></stream-detail-network>
-        </div>
-        <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-          <stream-detail-comments :stream='stream'></stream-detail-comments>
-        </div>
-        <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-          <stream-detail-history :stream='stream'></stream-detail-history>
+  <div>
+    <div class='md-layout' v-if='stream'>
+      <div v-if='error!==""' class='md-layout-item md-size-100'>
+        <md-content class="md-accent md-caption">{{error}}</md-content>
+      </div>
+      <div class="md-layout-item md-size-100">
+        <md-button class='md-dense md-primary' to='/streams' style='margin-left:25px;'>Back to stream list</md-button>
+      </div>
+      <div class="md-layout-item md-size-100">
+        <div class='md-layout xxx-md-gutter'>
+          <div class="md-layout-item md-size-100">
+            <stream-detail-title :stream='stream'></stream-detail-title>
+          </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+            <stream-detail-description :stream='stream'></stream-detail-description>
+          </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'>
+            <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
+          </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+            <stream-detail-network :stream='stream'></stream-detail-network>
+          </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+            <stream-detail-comments :stream='stream'></stream-detail-comments>
+          </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+            <stream-detail-history :stream='stream'></stream-detail-history>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+    <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
+      <div class='md-layout-item md-size-50'>
+        <md-progress-bar md-mode="indeterminate"></md-progress-bar>
+      </div>
+    </div>
   </div>
 </template>
 <script>

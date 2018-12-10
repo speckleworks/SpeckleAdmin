@@ -4,7 +4,7 @@
       <label>Search for a user</label>
       <md-input v-model='userSearch' @input='startSearchUsers'></md-input>
     </md-field>
-    <md-progress-spinner md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-spinner>
+    <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
     <div class='md-layout'>
       <div class="md-layout-item md-size-100" v-for='user in foundUsers' v-if='userSearch!==null && foundUsers.length > 0'>
         <div class="md-layout user-list md-alignment-center-left" @click='selectUser(user._id)'>
@@ -16,7 +16,7 @@
           </div>
         </div>
       </div>
-      <div v-if='foundUsers.length === 0 && userSearch!==""' class='md-caption'>
+      <div v-if='foundUsers.length === 0 && userSearch!=="" && !searchInProgress' class='md-caption'>
         No users found. Try a different search!
       </div>
     </div>
@@ -36,6 +36,14 @@ export default {
       userSearch: '',
       foundUsers: [ ],
       searchInProgress: false
+    }
+  },
+  watch: {
+    userSearch( newVal, oldVal ) {
+      if ( newVal === '' ) {
+        this.foundUsers = [ ]
+        this.searchInProgress = false
+      }
     }
   },
   methods: {

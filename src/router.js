@@ -40,6 +40,12 @@ let myRouter = new Router( {
       component: ( ) => import( './views/Projects.vue' ),
       meta: { requiresAuth: true },
     }, {
+      path: '/projects/:projectId',
+      name: 'singleproject',
+      component: ( ) => import( './views/ProjectDetail.vue' ),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: ( ) => import( './views/Profile.vue' ),
@@ -51,7 +57,7 @@ let myRouter = new Router( {
 myRouter.beforeEach( ( to, from, next ) => {
   if ( to.meta.requiresAuth ) {
     if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
-      return next( { path: '/login' + (to !== null ? "/" + window.btoa( to.path ) : "") } )
+      return next( { path: '/login' + ( to !== null ? "/" + window.btoa( to.path ) : "" ) } )
   }
   next( )
 } )

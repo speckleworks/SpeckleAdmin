@@ -16,11 +16,13 @@ export default new Vuex.Store( {
     user: {},
     isAuth: false,
     streams: [ ],
+    clients: [ ],
     projects: [ ],
     comments: [ ],
     users: [ ]
   },
   mutations: {
+    // Streams
     ADD_STREAMS( state, streams ) {
       streams.forEach( stream => {
         if ( state.streams.findIndex( x => x.streamId === stream.streamId ) === -1 ) {
@@ -40,6 +42,25 @@ export default new Vuex.Store( {
     REMOVE_STREAM( state, stream ) {
       //  TOODO
     },
+
+    // Projects
+    ADD_PROJECTS( state, projects ) {
+      projects.forEach( project => {
+        if ( state.projects.findIndex( p => p._id === project._id ) === -1 ) {
+          // potentially enforce here extra fields
+          if ( !project.tags ) project.tags = [ ]
+          state.projects.unshift( project )
+        }
+      } )
+    },
+    UPDATE_PROJECT( state, props ) {
+      let found = state.projects.find( p => p._id === props._id )
+      Object.keys( props ).forEach( key => {
+        found[ key ] = props[ key ]
+      } )
+    },
+
+    // Users
     ADD_USER( state, user ) {
       let found = state.users.find( u => u._id === user._id )
       if ( !found )
@@ -61,6 +82,7 @@ export default new Vuex.Store( {
     SET_USER( state, user ) {
       state.user = user
     },
+    // End of life
     FLUSH_ALL( state ) {
       state.token = null
       state.user = {}
@@ -72,11 +94,12 @@ export default new Vuex.Store( {
     }
   },
   actions: {
+    // Streams
     getStream( context, props ) {
       return new Promise( ( resolve, reject ) => {
         let found = context.state.streams.find( s => s.streamId === props.streamId )
         if ( found ) return resolve( found )
-        Axios.get( `/streams/${props.streamId}?omit=objects` )
+        Axios.get( `streams/${props.streamId}?omit=objects` )
           .then( res => {
             context.commit( 'ADD_STREAMS', [ res.data.resource ] )
             return resolve( res )
@@ -87,7 +110,7 @@ export default new Vuex.Store( {
       } )
     },
     updateStream( context, props ) {
-      Axios.put( `/streams/${props.streamId}`, props )
+      Axios.put( `streams/${props.streamId}`, props )
         .then( res => {
           context.commit( 'UPDATE_STREAM', props )
         } )
@@ -95,15 +118,76 @@ export default new Vuex.Store( {
           console.warn( err )
         } )
     },
+    getStreamClients( context, props ) {
+      Axios.get( `streams/${props.streamId}/clients` )
+        .then( res => {
+          console.log( res )
+          console.log( 'TODO' )
+        } )
+        .catch( err => {
+          console.log( err )
+        } )
+    },
     deleteStream( context, payload ) {},
 
+    // projects
+    getProject( context, props ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `projects/${props._id}` )
+          .then( res => {
+            context.commit( 'ADD_PROJECTS', [ res.data.resource ] )
+            return resolve( res )
+          } )
+          .catch( err => {
+            console.err( err )
+            return reject( err )
+          } )
+      } )
+    },
+    getProjects( context ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `projects` )
+          .then( res => {
+            context.commit( 'ADD_PROJECTS', res.data.resources )
+            return resolve( res.data.resources )
+          } )
+          .catch( err => {
+            console.log( err )
+            return reject( err )
+          } )
+      } )
+    },
+    createProject( context ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `projects`, { name: 'A Speckle Project' } )
+          .then( res => {
+            context.commit( 'ADD_PROJECTS', [ res.data.resource ] )
+            return resolve( res.data.resource )
+          } )
+          .catch( err => {
+            console.log( err )
+            return reject( err )
+          } )
+      } )
+    },
+    updateProject( context, props ) {
+      Axios.put( `projects/${props._id}`, props )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', props )
+        } )
+        .catch( err => {
+          console.warn( err )
+        } )
+    },
+
+    // users
     getUser( context, payload ) {
       return new Promise( ( resolve, reject ) => {
         let found = context.state.users.find( u => u._id === payload._id )
         if ( found ) return resolve( found )
         Axios.get( `accounts/${payload._id}` )
           .then( res => {
-            if(context.state.user._id === payload._id ) res.data.resource.surname += ' (that is you!)'
+            if ( context.state.user._id === payload._id ) res.data.resource.surname += ' (that is you!)'
             context.commit( 'ADD_USER', res.data.resource )
             return resolve( res.data.resource )
           } )

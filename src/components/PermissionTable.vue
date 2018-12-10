@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class=''>
+      <div v-if='allUsersPop.length === 0'>
+        No sharing buddies so far!
+      </div>
       <div class="md-layout md-alignment-center-left user" v-for='user in allUsersPop' v-if='user'>
         <div class="md-layout-item md-size-10">
           <md-avatar class="md-avatar-icon md-small">{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
@@ -8,7 +11,7 @@
         <div class="md-layout-item md-size-40">
           {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>
         </div>
-        <div class="md-layout-item text-right" xxxv-if='!user.surname.includes(`(that is you!)`)'>
+        <div class="md-layout-item text-right">
           <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`)'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
           <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`)'>
             <md-icon>delete</md-icon>
