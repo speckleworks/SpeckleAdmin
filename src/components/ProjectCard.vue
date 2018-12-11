@@ -40,10 +40,6 @@
             </div>
           </div>
         </div>
-        <!--         <div class="md-layout-item md-caption md-size-20">
-          <md-icon>{{project.private ? 'https' : 'public'}}</md-icon>
-          {{project.private?'private':'public'}}
-        </div> -->
         <div class='md-layout-item md-size-100'>
           <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
         </div>
@@ -59,6 +55,7 @@
 <script>
 import debounce from 'lodash.debounce'
 import uniq from 'lodash.uniq'
+import union from 'lodash.union'
 import marked from 'marked'
 
 export default {
@@ -74,7 +71,7 @@ export default {
       return this.resource
     },
     projectTeamMembers() {
-      return uniq( this.project.canRead, this.project.canWrite )
+      return union( this.project.canRead, this.project.canWrite )
     },
     createdAt( ) {
       let date = new Date( this.project.createdAt )

@@ -6,16 +6,9 @@
     </md-field>
     <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
     <div class='md-layout'>
-      <div class="md-layout-item md-size-100" v-for='user in foundUsers' v-if='userSearch!==null && foundUsers.length > 0'>
-        <div class="md-layout user-list md-alignment-center-left" @click='selectUser(user._id)'>
-          <div class="md-layout-item md-size-10 ">
-            <md-avatar class="md-avatar-icon md-small">{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
-          </div>
-          <div class="md-layout-item md-size-60">
-            {{user.name}} {{user.surname}} <span v-if='user.company' class='md-caption'>({{user.company}})</span>
-          </div>
-        </div>
-      </div>
+      <md-chip md-clickable class='md-primary' style='margin: 3px;' v-for='user in foundUsers' v-if='userSearch!==null && foundUsers.length > 0' @click='selectUser(user._id)'>
+        {{user.name}} {{user.surname}} <span v-if='user.company' class='md-caption'>({{user.company}})</span>
+      </md-chip>
       <div v-if='foundUsers.length === 0 && userSearch!=="" && !searchInProgress' class='md-caption'>
         No users found. Try a different search!
       </div>

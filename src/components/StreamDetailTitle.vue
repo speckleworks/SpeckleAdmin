@@ -2,8 +2,9 @@
   <md-card class='md-elevation-0'>
     <md-card-content>
       <h1 class='md-display-1'>
-        <md-icon>import_export</md-icon> {{stream.name}}
+        <router-link to='/streams'>Streams</router-link> / {{stream.name}}
       </h1>
+      <md-divider></md-divider>
       <p>StreamId: <span style="user-select:all"><strong>{{stream.streamId}}</strong></span></p>
       <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
     </md-card-content>

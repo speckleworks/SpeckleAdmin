@@ -51,11 +51,13 @@ export default {
   },
   created( ) {
     this.$store.dispatch( 'getProjects' )
+    this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
   }
 }
 
 </script>
 <style scoped lang='scss'>
+
 .md-field label {
   opacity: 0.5;
 }

@@ -5,9 +5,6 @@
         <md-content class="md-accent md-caption">{{error}}</md-content>
       </div>
       <div class="md-layout-item md-size-100">
-        <md-button class='md-dense md-primary' to='/streams' style='margin-left:25px;'>Back to stream list</md-button>
-      </div>
-      <div class="md-layout-item md-size-100">
         <div class='md-layout xxx-md-gutter'>
           <div class="md-layout-item md-size-100">
             <stream-detail-title :stream='stream'></stream-detail-title>

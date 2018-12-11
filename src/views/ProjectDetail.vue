@@ -2,50 +2,25 @@
   <div>
     <div class='md-layout' v-if='project'>
       <div class="md-layout-item md-size-100">
-        <md-card class='md-elevation-0'>
-          <h1 class='md-display-1'>
-            <md-icon>location_city</md-icon> {{project.name}}
-          </h1>
-          <md-chips v-model="project.tags" @input='' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
-          {{project.description}}
-        </md-card>
+        <project-detail-title :project='project'></project-detail-title>
       </div>
       <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-        <md-card>
-          <md-card-header>
+        <md-card md-with-hover>
+          <md-card-header class='bg-ghost-white'>
             <md-card-header-text>
               <h2 class='md-title'><md-icon>group</md-icon> Team Members</h2>
+              <p class='md-caption'>The following people will have access to the streams in this project, and will be able to view this project.</p>
             </md-card-header-text>
           </md-card-header>
           <md-card-content>
-            <permission-table :resource='project' v-on:update-table='updatePerms'></permission-table>
-            <user-search v-on:selected-user='addUserToWrite'></user-search>
+            <user-search v-on:selected-user='addUserToTeam'></user-search>
+            <permission-table :resource='project' v-on:update-table='updateTeamPerms'></permission-table>
           </md-card-content>
         </md-card>
+        <br>
+        <project-detail-streams :streams='project.streams' v-on:selected-stream='addStream'></project-detail-streams>
       </div>
       <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-        <md-card>
-          <md-card-header>
-            <md-card-header-text>
-              <h2 class='md-title'>Streams</h2>
-            </md-card-header-text>
-          </md-card-header>
-          <md-card-content>
-            {{project.streams}}
-          </md-card-content>
-        </md-card>
-      </div>
-      <div class="md-layout-item md-size-100 md-medium-size-100 detail-card">
-        <md-card>
-          <md-card-header>
-            <md-card-header-text>
-              <h2 class='md-title'>Discussion</h2>
-            </md-card-header-text>
-          </md-card-header>
-          <md-card-content>
-            {{project.streams}}
-          </md-card-content>
-        </md-card>
       </div>
     </div>
     <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
@@ -61,12 +36,16 @@ import uniq from 'lodash.uniq'
 
 import UserSearch from '../components/UserSearch.vue'
 import PermissionTable from '../components/PermissionTable.vue'
+import ProjectDetailStreams from '../components/ProjectDetailStreams.vue'
+import ProjectDetailTitle from '../components/ProjectDetailTitle.vue'
 
 export default {
   name: 'ProjectDetailView',
   components: {
     UserSearch,
-    PermissionTable
+    PermissionTable,
+    ProjectDetailStreams,
+    ProjectDetailTitle
   },
   props: {
 
@@ -76,19 +55,24 @@ export default {
       return this.$store.state.projects.find( p => p._id === this.$route.params.projectId )
     }
   },
-  data( ) { return {} },
+  data( ) {
+    return {
+
+    }
+  },
   methods: {
-    addUserToWrite( userId ) {
+    addUserToTeam( userId ) {
       let canWrite = uniq( [ ...this.project.canWrite, userId ] )
       this.$store.dispatch( 'updateProject', { _id: this.project._id, canWrite: canWrite } )
       //  TODO: propagate this to all streams
     },
-    updatePerms( { canRead, canWrite } ) {
+    updateTeamPerms( { canRead, canWrite } ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, canWrite: canWrite, canRead: canRead } )
       //  TODO: propagate this to all streams
     },
-    addStream( ) {
-      // add current users to stream canRead and canWrite
+    addStream( streamId ) {
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: uniq( [...this.project.streams, streamId ] ) } )
+      // TODO propagate permissions users & streams
     },
     removeStream( ) {
       //
@@ -117,4 +101,5 @@ export default {
 .detail-card {
   margin-bottom: 20px;
 }
+
 </style>

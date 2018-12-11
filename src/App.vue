@@ -25,7 +25,11 @@ export default {
   },
   data: _ => ( {
     showSidebar: true
-  } )
+  } ),
+  created( ) {
+    this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
+    this.$store.dispatch( 'getProjects' )
+  }
 }
 
 </script>
@@ -52,11 +56,11 @@ export default {
   opacity: 0;
 }
 
-.btn-no-margin, .no-margin {
+.btn-no-margin,
+.no-margin {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
-
 
 .md-card.md-with-hover {
   cursor: default !important;
@@ -70,8 +74,15 @@ export default {
   display: none !important;
 }
 
-.text-right{
+.text-right {
   text-align: right;
+}
+.text-center {
+  text-align: justify;
+}
+
+.bg-ghost-white {
+  background-color: ghostwhite;
 }
 
 </style>

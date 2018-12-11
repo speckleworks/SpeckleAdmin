@@ -25,7 +25,7 @@
         </div>
       </md-card-content>
     </md-card>
-    <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-33 md-xlarge-size-25' v-for='stream in paginatedStreams' :key='stream._id'>
+    <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-33 md-xlarge-size-33' v-for='stream in paginatedStreams' :key='stream._id'>
       <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
     </div>
     <div class="md-layout-item md-size-100">
