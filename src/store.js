@@ -21,6 +21,51 @@ export default new Vuex.Store( {
     comments: [ ],
     users: [ ]
   },
+  getters: {
+    filteredStreams: ( state ) => ( filters ) => {
+      let base = state.streams.filter( stream => stream.parent == null && stream.deleted === false )
+      if ( !filters || filters.length === 0 ) return base
+      filters.forEach( query => {
+        query.key = query.key.toLowerCase( )
+        switch ( query.key ) {
+          case 'private':
+            if ( query.value )
+              base = base.filter( stream => stream.private.toString( ) === query.value )
+            else
+              base = base.filter( stream => stream.private === true )
+            break
+          case 'public':
+            if ( query.value )
+              base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
+            else
+              base = base.filter( stream => stream.private === false )
+            break
+          case 'tag':
+          case 'tags':
+            let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
+            base = base.filter( stream => {
+              let streamTags = stream.tags.map( t => t.toLowerCase( ) )
+              return myTags.every( t => streamTags.includes( t ) )
+            } )
+            break
+          case 'mine':
+            base = base.filter( stream => stream.owner === state.user._id )
+            break;
+          case 'shared':
+            base = base.filter( stream => stream.owner !== state.user._id )
+            break;
+          case 'name':
+            base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
+            break
+          case 'streamid':
+          case 'id':
+            base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
+            break
+        }
+      } )
+      return base
+    }
+  },
   mutations: {
     // Streams
     ADD_STREAMS( state, streams ) {
@@ -109,6 +154,19 @@ export default new Vuex.Store( {
           } )
       } )
     },
+    getStreams( context, query ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `streams?${query}` )
+          .then( res => {
+            context.commit( 'ADD_STREAMS', res.data.resources )
+            return resolve( res.data.resources )
+          } )
+          .catch( err => {
+            console.log( err )
+            return reject( err )
+          } )
+      } )
+    },
     updateStream( context, props ) {
       Axios.put( `streams/${props.streamId}`, props )
         .then( res => {
@@ -144,9 +202,9 @@ export default new Vuex.Store( {
           } )
       } )
     },
-    getProjects( context ) {
+    getProjects( context, query ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.get( `projects` )
+        Axios.get( `projects?${query}` )
           .then( res => {
             context.commit( 'ADD_PROJECTS', res.data.resources )
             return resolve( res.data.resources )

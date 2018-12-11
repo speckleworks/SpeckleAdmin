@@ -1,5 +1,8 @@
 <template>
-  <div class='md-layout'>
+  <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
+    <!--     <md-button class="md-primary md-raised" @click.native='createProject'>Create your first project!</md-button> -->
+  </md-empty-state>
+  <div class='md-layout' v-else>
     <md-card class="md-primary-xx main-toolbar md-elevation-3">
       <md-card-content class='md-layout md-alignment-center-space-between'>
         <div class="md-layout-item md-size-95">
@@ -46,49 +49,7 @@ export default {
       return this.$store.state.streams.filter( stream => stream.parent == null && stream.deleted === false )
     },
     filteredStreams( ) {
-      let base = this.streams
-      if ( this.filters.length === 0 )
-        return base
-      console.log( this.filters )
-      this.filters.forEach( query => {
-        query.key = query.key.toLowerCase( )
-        switch ( query.key ) {
-          case 'private':
-            if ( query.value )
-              base = base.filter( stream => stream.private.toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === true )
-            break
-          case 'public':
-            if ( query.value )
-              base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === false )
-            break
-          case 'tag':
-          case 'tags':
-            let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
-            base = base.filter( stream => {
-              let streamTags = stream.tags.map( t => t.toLowerCase( ) )
-              return myTags.every( t => streamTags.includes( t ) )
-            } )
-            break
-          case 'mine':
-            base = base.filter( stream => stream.owner === this.$store.state.user._id )
-            break;
-          case 'shared':
-            base = base.filter( stream => stream.owner !== this.$store.state.user._id )
-            break;
-          case 'name':
-            base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-          case 'streamid':
-          case 'id':
-            base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-        }
-      } )
-      return base
+      return this.$store.getters.filteredStreams( this.filters )
     },
     paginatedStreams( ) {
       return this.filteredStreams.slice( this.startIndex, this.endIndex )
@@ -161,13 +122,7 @@ export default {
     }
   },
   created( ) {
-    this.$http.get( 'streams?omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
-      .then( res => {
-        this.$store.commit( 'ADD_STREAMS', res.data.resources )
-      } )
-      .catch( err => {
-        // TODO: throw error re could not get stream
-      } )
+    this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
   }
 }
 

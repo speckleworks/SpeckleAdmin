@@ -3,15 +3,18 @@
     <div class='md-layout' v-if='project'>
       <div class="md-layout-item md-size-100">
         <md-card class='md-elevation-0'>
-          <h1 class='md-display-1'>{{project.name}}</h1>
+          <h1 class='md-display-1'>
+            <md-icon>location_city</md-icon> {{project.name}}
+          </h1>
+          <md-chips v-model="project.tags" @input='' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
           {{project.description}}
         </md-card>
       </div>
-      <div class="md-layout-item md-size-50 md-medium-size-100">
+      <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
         <md-card>
           <md-card-header>
             <md-card-header-text>
-              <h2 class='md-title'>Team Members</h2>
+              <h2 class='md-title'><md-icon>group</md-icon> Team Members</h2>
             </md-card-header-text>
           </md-card-header>
           <md-card-content>
@@ -20,7 +23,7 @@
           </md-card-content>
         </md-card>
       </div>
-      <div class="md-layout-item md-size-50 md-medium-size-100">
+      <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
         <md-card>
           <md-card-header>
             <md-card-header-text>
@@ -32,7 +35,7 @@
           </md-card-content>
         </md-card>
       </div>
-      <div class="md-layout-item md-size-100 md-medium-size-100">
+      <div class="md-layout-item md-size-100 md-medium-size-100 detail-card">
         <md-card>
           <md-card-header>
             <md-card-header-text>
@@ -111,4 +114,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.detail-card {
+  margin-bottom: 20px;
+}
 </style>
