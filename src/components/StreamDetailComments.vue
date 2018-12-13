@@ -11,7 +11,7 @@
 import debounce from 'lodash.debounce'
 
 export default {
-  name: 'StreamDetailUserPerms',
+  name: 'StreamDetailUserComments',
   props: {
     stream: Object, // can be alert or info
   },

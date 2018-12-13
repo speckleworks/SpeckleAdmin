@@ -4,16 +4,16 @@
       <div class="md-layout-item md-size-30">
         <router-link :to='"/streams/"+stream.streamId'>{{stream.name}}</router-link>
       </div>
-      <div class="md-layout-item md-size-30 md-caption">
+      <div class="md-layout-item md-size-30-xxx md-caption">
         {{stream.streamId}} | last update <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
       </div>
       <div class="md-layout-item md-size-20 md-caption xx-text-center">
-        <span v-for='tag in stream.tags'>{{tag}}</span>
+        <span v-for='tag in stream.tags'>{{tag}},  </span>
       </div>
-      <div class="md-layout-item text-right">
+      <div class="md-layout-item text-right" v-if='removable'>
         <md-button class='md-dense-xxx md-icon-button md-accent'>
-            <md-icon>delete</md-icon>
-          </md-button>
+          <md-icon>delete</md-icon>
+        </md-button>
       </div>
     </md-card-content>
   </md-card>
@@ -22,11 +22,17 @@
 export default {
   name: 'StreamCardSmall',
   props: {
-    streamId: String
+    streamId: String,
+    removable: {
+      type: Boolean,
+      default: true
+    }
   },
   computed: {
     stream( ) {
-      return this.$store.state.streams.find( s => s.streamId === this.streamId )
+      let stream = this.$store.state.streams.find( s => s.streamId === this.streamId )
+      if ( !stream ) this.$store.dispatch( 'getStream', { streamId: this.streamId } )
+      return stream
     }
   },
   data( ) { return {} },

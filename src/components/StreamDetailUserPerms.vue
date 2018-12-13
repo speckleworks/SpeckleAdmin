@@ -1,32 +1,39 @@
 <template>
   <md-card class='md-elevation-3'>
-    <md-card-content>
-      <div class="md-layout">
+    <md-card-content class='bg-ghost-white'>
+      <div class="md-layout md-alignment-center-center">
         <div class="md-layout-item md-title md-size-70">Link Sharing</div>
         <div class="md-layout-item md-title md-size-30 text-right">
           <md-button :class='{ "md-raised": true, "md-primary" : !stream.private }' @click.native='changeLinkSharing' :disabled='!canEdit'>
             {{stream.private ? "OFF" : "ON"}}
           </md-button>
         </div>
-        <div class='md-layout-item md-size-100'>
+        <div class='md-layout-item md-size-100 md-caption'>
           {{ stream.private ? "Private resource. Only people with read or write persmissions can access it." : "Public resource. Anyone with the id can access it."}}
-        </div>
-        <div class='md-layout-item md-size-100' v-if='isOwner'>
+          <span class='md-layout-item md-size-100 md-caption' v-if='isOwner'>
           You own this stream.
-          <md-divider></md-divider>
-        </div>
-        <div class='md-layout-item md-size-100' v-else>
+        </span>
+          <span class='md-layout-item md-size-100 md-caption' v-else>
           This stream was shared with you by <strong>{{streamOwner}}.</strong>
-        </div>
+        </span></div>
+      </div>
+    </md-card-content>
+    <md-card-content class='bg-ghost-white'>
+      <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:20px;">
           <div class="md-title">Permissions</div>
           <p class='md-caption' v-if='canEdit'>Changing permission here will override any project-based settings this stream might have.</p>
           <p class='md-caption' v-else>You can't change permissions.</p>
-          <permission-table :resource='stream' v-on:update-table='updatePerms'></permission-table>
         </div>
-        <div class='md-layout-item md-size-100' style="margin-top:20px;" v-if='canEdit'>
-          <p class='md-title'>Share with:</p>
-          <user-search v-on:selected-user='addUserToWrite'></user-search>
+      </div>
+    </md-card-content>
+    <md-card-content>
+      <div class="md-layout">
+        <div class='md-layout-item md-size-100' style="margin-top:20px;">
+          <permission-table :resource='stream' v-on:update-table='updatePerms'></permission-table>
+          <div class='md-layout-item md-size-100' style="margin-top:20px;" v-if='canEdit'>
+            <user-search v-on:selected-user='addUserToWrite'></user-search>
+          </div>
         </div>
       </div>
     </md-card-content>

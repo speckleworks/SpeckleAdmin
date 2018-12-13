@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <md-button class="md-fab md-plain md-fab-bottom-left md-fixed" style='z-index: 10000' @click='showSidebar = !showSidebar' v-show='$store.state.isAuth'>
+    <md-button class="md-fab md-plain md-primary md-fab-bottom-left md-fixed" style='z-index: 10000' @click='showSidebar = !showSidebar' v-show='$store.state.isAuth'>
       <md-icon>{{showSidebar ? 'close' : 'menu'}}</md-icon>
     </md-button>
     <md-app md-waterfall>

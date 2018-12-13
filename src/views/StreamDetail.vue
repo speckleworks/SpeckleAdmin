@@ -58,23 +58,6 @@ export default {
   computed: {
     stream( ) {
       let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
-      if ( !stream ) {
-        return {
-          name: 'Loading',
-          streamId: 'Loading',
-          tags: [ ],
-          description: '...',
-          history: [ ],
-          children: [ ],
-          comments: [ ],
-          canRead: [ ],
-          canWrite: [ ],
-          owner: '-1',
-          layers: [ ],
-          objects: [ ],
-          _id: '-1',
-        }
-      }
       return stream
     },
 

@@ -1,25 +1,30 @@
 <template>
-  <md-card class='md-elevation-3'>
+  <md-card class='md-elevation-3' md-with-hover>
+    <md-card-header class='bg-ghost-white'>
+      <md-card-header-text>
+        <div class="md-title">Network</div>
+        <div class="md-caption">Where this stream is received and sent from.</div>
+      </md-card-header-text>
+    </md-card-header>
     <md-card-content>
-      <div class="md-title">Network</div>
-      <md-divider md-inset></md-divider>
-      <p>TODO</p>
+      <br>
+      <client-card v-for='client in clients' :key='client._id' :client='client'></client-card>
     </md-card-content>
   </md-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'
-// TODO:
-// watch is useful for setting up on direct page entering
-// created is useful when loading this comp up from the stream list
+import ClientCard from './ClientCard.vue'
 export default {
-  name: 'StreamDetailUserPerms',
+  name: 'StreamDetailNetwork',
+  components: { ClientCard },
   props: {
     stream: Object,
   },
   watch: {
     stream( newStream, oldStream ) {
       console.log( "wathc", newStream )
+      this.fetchData( )
     }
   },
   computed: {
@@ -28,11 +33,19 @@ export default {
     },
     isOwner( ) {
       return this.stream.owner === this.$store.state.user._id
+    },
+    clients( ) {
+      return this.$store.getters.streamClients( this.stream.streamId )
     }
   },
-  methods: {},
+  methods: {
+    fetchData( ) {
+      this.$store.dispatch( 'getStreamClients', { streamId: this.stream.streamId } )
+    }
+  },
   created( ) {
-    console.log( "created:", this.stream )
+    this.fetchData( )
+    // console.log( "created network:", this.stream )
   }
 }
 

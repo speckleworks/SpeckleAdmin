@@ -11,7 +11,7 @@
         <p>This project has no streams. Add some using the form below!</p>
       </div>
       <div class='md-layout-item md-size-100' v-else>
-        <stream-card-small v-for='stream in streams' :streamId='stream'></stream-card-small>
+        <stream-card-small v-for='stream in streams' :key='stream' :streamId='stream'></stream-card-small>
       </div>
       <div class='md-layout-item md-size-100'>
         <md-field md-clearable>
@@ -20,7 +20,7 @@
           <label>name:box id:xxx private:true</label>
         </md-field>
       </div>
-      <div class='md-layout-item md-size-100 searched-stream' v-for='stream in paginatedStreams' v-if='filters.length > 0 && showSearchResults' @click='selectStream(stream.streamId)'>
+      <div class='md-layout-item md-size-100 searched-stream' v-for='stream in paginatedStreams' v-if='filters.length > 0 && showSearchResults' :key='stream.streamId' @click='selectStream(stream.streamId)'>
         <div class="md-layout">
           <div class='md-layout-item md-size-40'>
             <strong>{{stream.name}}</strong>

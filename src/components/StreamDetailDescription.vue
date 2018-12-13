@@ -1,11 +1,12 @@
 <template>
-  <md-card>
-    <md-card-header>
+  <md-card v-if='stream'>
+    <md-card-header class='bg-ghost-white'>
       <md-card-header-text>
         <div class="md-title">Description</div>
       </md-card-header-text>
     </md-card-header>
     <md-card-content>
+      <br>
       <div v-show='!editDescription'>
         <div v-html='compiledDescription' style="background-color: #F4F4F4; padding:1px 15px;border-radius: 2px;"></div>
       </div>
@@ -21,6 +22,10 @@
       <md-button class='md-primary' v-if='editDescription===false && canEdit' @click.native='editDescription=true'>Edit</md-button>
       <md-button class='md-primary' v-if='editDescription===true' @click.native='updateDescription'>Done</md-button>
     </md-card-actions>
+    <md-card-content class='md-caption' v-if='stream.baseProperties'>
+      <span><strong>Units:</strong> {{stream.baseProperties.units}}</span>;
+      <span><strong>Tolerance:</strong> {{stream.baseProperties.tolerance}}</span>.
+    </md-card-content>
   </md-card>
 </template>
 <script>

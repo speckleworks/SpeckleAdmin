@@ -1,9 +1,9 @@
 <template>
   <md-list>
-    <md-list-item to='/'>
+    <!--     <md-list-item to='/'>
       <md-icon>home</md-icon>
       <span class="md-list-item-text">Home</span>
-    </md-list-item>
+    </md-list-item> -->
     <md-list-item to='/streams'>
       <md-icon>import_export</md-icon>
       <span class="md-list-item-text">Streams</span>
@@ -25,7 +25,8 @@ $SpeckleBlue: #448aff;
 
 .nav-sidebar {
   width: 200px !important;
-  background-color: $SpeckleBlue !important;
+  /*background-color: $SpeckleBlue !important;*/
+  background-color: ghostwhite !important;
   padding-top: 30px;
 }
 
@@ -33,12 +34,12 @@ ul {
   background-color: transparent !important;
 }
 
-.md-list-item-text{
+/*.md-list-item-text{
   color: white !important;
   transition: none !important;
 }
 .is-active * {
   color: white !important;
-}
+}*/
 
 </style>

@@ -1,12 +1,12 @@
 <template>
   <div>
     <md-field md-clearable>
-      <label>Search for a user</label>
+      <label>Search for a user to add</label>
       <md-input v-model='userSearch' @input='startSearchUsers'></md-input>
     </md-field>
     <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
     <div class='md-layout'>
-      <md-chip md-clickable class='md-primary' style='margin: 3px;' v-for='user in foundUsers' v-if='userSearch!==null && foundUsers.length > 0' @click='selectUser(user._id)'>
+      <md-chip md-clickable class='md-primary' style='margin: 3px;' v-for='user in foundUsers' :key='user._id' v-if='userSearch!==null && foundUsers.length > 0' @click='selectUser(user._id)'>
         {{user.name}} {{user.surname}} <span v-if='user.company' class='md-caption'>({{user.company}})</span>
       </md-chip>
       <div v-if='foundUsers.length === 0 && userSearch!=="" && !searchInProgress' class='md-caption'>

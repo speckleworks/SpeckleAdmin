@@ -14,7 +14,7 @@
           </md-card-header>
           <md-card-content>
             <user-search v-on:selected-user='addUserToTeam'></user-search>
-            <permission-table :resource='project' v-on:update-table='updateTeamPerms'></permission-table>
+            <permission-table :resource='project.permissions' v-on:update-table='updateTeamPerms'></permission-table>
           </md-card-content>
         </md-card>
         <br>
@@ -51,6 +51,9 @@ export default {
 
   },
   computed: {
+    canEdit( ) {
+      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
+    },
     project( ) {
       return this.$store.state.projects.find( p => p._id === this.$route.params.projectId )
     }
@@ -62,16 +65,21 @@ export default {
   },
   methods: {
     addUserToTeam( userId ) {
-      let canWrite = uniq( [ ...this.project.canWrite, userId ] )
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, canWrite: canWrite } )
+      let permissions = {
+        canWrite: uniq( [ ...this.project.permissions.canWrite, userId ] ),
+        canRead: this.project.permissions.canRead
+      }
+      let canRead = uniq( [ ...this.project.canRead, userId ] )
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: permissions, canRead: canRead } )
       //  TODO: propagate this to all streams
     },
     updateTeamPerms( { canRead, canWrite } ) {
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, canWrite: canWrite, canRead: canRead } )
+      let projectCanRead =
+        this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canWrite: canWrite, canRead: canRead } } )
       //  TODO: propagate this to all streams
     },
     addStream( streamId ) {
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: uniq( [...this.project.streams, streamId ] ) } )
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: uniq( [ ...this.project.streams, streamId ] ) } )
       // TODO propagate permissions users & streams
     },
     removeStream( ) {

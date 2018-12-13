@@ -22,6 +22,9 @@ export default new Vuex.Store( {
     users: [ ]
   },
   getters: {
+    streamClients: ( state ) => ( streamId ) => {
+      return state.clients.filter( c => c.streamId === streamId )
+    },
     filteredStreams: ( state ) => ( filters ) => {
       let base = state.streams.filter( stream => stream.parent == null && stream.deleted === false )
       if ( !filters || filters.length === 0 ) return base
@@ -88,6 +91,15 @@ export default new Vuex.Store( {
       //  TOODO
     },
 
+    // Clients
+    ADD_CLIENTS( state, clients ) {
+      clients.forEach( client => {
+        if ( state.clients.findIndex( x => x._id === client._id ) === -1 ) {
+          state.clients.push( client )
+        }
+      } )
+    },
+
     // Projects
     ADD_PROJECTS( state, projects ) {
       projects.forEach( project => {
@@ -133,6 +145,7 @@ export default new Vuex.Store( {
       state.user = {}
       state.streams = [ ]
       state.projects = [ ]
+      state.clients = [ ]
       state.users = [ ]
       state.comments = [ ]
       state.isAuth = false
@@ -179,6 +192,7 @@ export default new Vuex.Store( {
     getStreamClients( context, props ) {
       Axios.get( `streams/${props.streamId}/clients` )
         .then( res => {
+          context.commit( 'ADD_CLIENTS', res.data.resources )
           console.log( res )
           console.log( 'TODO' )
         } )

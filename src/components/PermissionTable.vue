@@ -38,7 +38,11 @@ export default {
     },
     allUsersPop( ) {
       if ( this.allUsers.length === 0 ) return [ ]
-      return this.allUsers.map( userId => this.$store.state.users.find( user => user._id === userId ) )
+      return this.allUsers.map( userId => {
+        let u = this.$store.state.users.find( user => user._id === userId )
+        if ( !u ) this.$store.dispatch( 'getUser', { _id: userId } )
+        return u
+      } )
     }
   },
   data( ) {
