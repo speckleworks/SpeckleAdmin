@@ -53,21 +53,31 @@ export default {
       return this.canWrite.indexOf( _id ) > -1
     },
     changePermission( _id ) {
-      let index = this.canWrite.indexOf( _id )
       let localCanWrite = [ ],
         localCanRead = [ ]
+
+      // check in which perm cat the user is right now
+      let index = this.canWrite.indexOf( _id )
+
+      // canWrite -> canRead
       if ( index > -1 ) {
         localCanWrite = this.canWrite.filter( uId => uId !== _id )
         localCanRead = uniq( [ ...this.canRead, _id ] )
-        this.$emit( 'update-table', { canRead: localCanRead, canWrite: localCanWrite } )
+        // this.$emit('move-user')
+        // TODO: this.$emit('move-user', { userId:x, from:'W->R' }) // for projects
+      // canRead -> canWrite
       } else {
         localCanWrite = uniq( [ ...this.canWrite, _id ] )
-        this.$emit( 'update-table', { canRead: this.canRead, canWrite: localCanWrite } )
+        // TODO: this.$emit('move-user', { userId:x, from:'R->W' }) // for projects
       }
+
+      // emit one global event
+      this.$emit( 'update-table', { canRead: this.canRead, canWrite: localCanWrite } )
     },
     removeUser( _id ) {
       let localCanWrite = this.canWrite.filter( uId => uId !== _id )
       let localCanRead = this.canRead.filter( uId => uId !== _id )
+      this.$emit( 'remove-user', { userId: _id } )
       this.$emit( 'update-table', { canRead: localCanRead, canWrite: localCanWrite } )
     }
   },

@@ -9,7 +9,7 @@
           <div class="md-layout-item md-size-95">
             <md-field md-clearable>
               <md-icon>search</md-icon>
-              <label>name:box id:xxx private:true</label>
+              <label>search for projects by their name</label>
               <md-input @input="" spellcheck="false"></md-input>
             </md-field>
           </div>

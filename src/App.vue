@@ -63,7 +63,7 @@ export default {
 }
 
 .md-card.md-with-hover {
-  /*cursor: default;*/
+  cursor: default !important;
 }
 button {
   /*cursor: pointer !important;*/
@@ -88,4 +88,14 @@ button {
   background-color: ghostwhite;
 }
 
+.sticky-top {
+  position: -webkit-sticky;
+  /* Safari */
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 100;
+  margin-bottom: 30px;
+}
 </style>

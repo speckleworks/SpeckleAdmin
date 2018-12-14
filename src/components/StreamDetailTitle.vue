@@ -4,9 +4,8 @@
       <h1 class='md-display-1'>
         <router-link to='/streams'>Streams</router-link> / {{stream.name}}
       </h1>
-      <!-- <md-divider></md-divider> -->
       <p>
-        streamId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{stream.streamId}}</strong></md-chip></span>&nbsp<span v-if='streamProjects.length>0'>projects:
+        streamId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{stream.streamId}}</strong></md-chip></span>&nbsp<br>&nbsp<br><span v-if='streamProjects.length>0'>projects:
         <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
           <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
         </md-chip></span>

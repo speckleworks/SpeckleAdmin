@@ -2,7 +2,7 @@
   "name": "Speckle Admin",
   "version":"0.2.7",
   "desc": "This plugin allows you to manage your streams.",
-  "serveFrom": "/",
+  "serveFrom": "/beta-admin",
   "author": "Speckle Project Contributors",
   "contact":"hello@speckle.works",
   "homepage":"https://speckle.works",

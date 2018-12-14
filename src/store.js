@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
 
+import uniq from 'lodash.uniq'
+
 Vue.use( Vuex )
 
 export default new Vuex.Store( {
@@ -132,6 +134,12 @@ export default new Vuex.Store( {
         else found = user // update the user
       } )
     },
+    SET_SERVER( state, server ) {
+      state.server = server
+    },
+    SET_SERVER_DETAILS( state, serverManifest ) {
+      state.serverManifest = serverManifest
+    },
     SET_TOKEN( state, token ) {
       state.token = token
       state.isAuth = true
@@ -189,12 +197,18 @@ export default new Vuex.Store( {
           console.warn( err )
         } )
     },
+    // streamAddWriteUser( context, props ) {
+    //   return new Promise( ( resolve, reject ) => {
+    //     let stream = context.state.streams.find( s => s.streamId === props.streamId )
+    //     if ( !found ) return reject( new Error( 'Failed to find stream in store.' ) )
+    //     stream.canWrite = uniq( [ ...stream.canWrite, props.userId ] )
+    //     dispatch( 'updateStream', { streamId: props.streamId, canWrite: stream.canWrite } )
+    //   } )
+    // },
     getStreamClients( context, props ) {
       Axios.get( `streams/${props.streamId}/clients` )
         .then( res => {
           context.commit( 'ADD_CLIENTS', res.data.resources )
-          console.log( res )
-          console.log( 'TODO' )
         } )
         .catch( err => {
           console.log( err )

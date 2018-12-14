@@ -1,27 +1,32 @@
 <template>
   <div>
-    <div class='md-layout' v-if='stream'>
+    <div class='md-layout md-alignment-center-center' v-if='stream'>
       <div v-if='error!==""' class='md-layout-item md-size-100'>
         <md-content class="md-accent md-caption">{{error}}</md-content>
       </div>
       <div class="md-layout-item md-size-100">
-        <div class='md-layout xxx-md-gutter'>
-          <div class="md-layout-item md-size-100">
+        <div class='md-layout xxx-md-gutter md-alignment-center-center'>
+          <div class="md-layout-item md-size-50">
             <stream-detail-title :stream='stream'></stream-detail-title>
-          </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
-            <stream-detail-description :stream='stream'></stream-detail-description>
-          </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'>
+          <!-- </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
+            <br>
+            <detail-description :resource='stream'></detail-description>
+          <!-- </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'> -->
+            <br>
             <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-          </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+          <!-- </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
+            <br>
             <stream-detail-network :stream='stream'></stream-detail-network>
-          </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+          <!-- </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
+            <br>
             <stream-detail-comments :stream='stream'></stream-detail-comments>
-          </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+          <!-- </div>
+          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
+            <br>
             <stream-detail-history :stream='stream'></stream-detail-history>
           </div>
         </div>
@@ -39,7 +44,7 @@ import debounce from 'lodash.debounce'
 import union from 'lodash.union'
 
 import StreamDetailTitle from '../components/StreamDetailTitle.vue'
-import StreamDetailDescription from '../components/StreamDetailDescription.vue'
+import DetailDescription from '../components/DetailDescription.vue'
 import StreamDetailUserPerms from '../components/StreamDetailUserPerms.vue'
 import StreamDetailNetwork from '../components/StreamDetailNetwork.vue'
 import StreamDetailHistory from '../components/StreamDetailHistory.vue'
@@ -49,7 +54,7 @@ export default {
   name: 'StreamDetailView',
   components: {
     StreamDetailTitle,
-    StreamDetailDescription,
+    DetailDescription,
     StreamDetailUserPerms,
     StreamDetailNetwork,
     StreamDetailHistory,

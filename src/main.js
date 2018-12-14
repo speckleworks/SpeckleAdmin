@@ -22,8 +22,8 @@ Vue.use( VueTimeago, { locale: 'en' } )
 let server = localStorage.getItem( 'server' )
 if ( server )
   Store.state.server = server
-else
-  Store.state.server = `${window.location.origin}/api`
+// else
+//   Store.state.server = `${window.location.origin}/api`
 
 
 // set default server

@@ -58,7 +58,7 @@ export default {
       return date.toLocaleString( 'en', { year: 'numeric', month: 'long', day: 'numeric' } )
     },
     compiledDescription( ) {
-      return marked( this.stream.description.substring( 0, 120 ) + ' ...', { sanitize: true } )
+      return marked( this.stream.description.substring( 0, 220 ) + ' ...', { sanitize: true } )
     },
     canEdit( ) {
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
