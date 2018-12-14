@@ -8,7 +8,7 @@
     </md-card-header>
     <md-card-content class='md-layout'>
       <div class='md-layout-item md-size-100'>
-        <stream-search :streams-to-omit='streams' v-on:selected-stream='selectStream'></stream-search>
+        <stream-search :streams-to-omit='streams' write-only v-on:selected-stream='selectStream'></stream-search>
       </div>
       <div class='md-layout-item md-size-100' v-if='streams.length === 0'>
         <p>This project has no streams. Add some using the form below!</p>
@@ -40,9 +40,11 @@ export default {
   },
   methods: {
     selectStream( streamId ) {
+      // just bubble it up
       this.$emit( 'selected-stream', streamId )
     },
     removeStream( streamId ) {
+      // just bubble it up
       this.$emit( 'remove-stream', streamId )
     }
   }

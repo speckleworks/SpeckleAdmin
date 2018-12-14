@@ -62,9 +62,7 @@ export default {
     ProjectDetailStreams,
     ProjectDetailTitle
   },
-  props: {
-
-  },
+  props: { },
   computed: {
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
@@ -105,7 +103,11 @@ export default {
       // Remove user from project team
       let pCanRead = this.project.permissions.canRead.filter( _id => _id !== userId )
       let pCanWrite = this.project.permissions.canWrite.filter( _id => _id !== userId )
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: pCanRead, canWrite: pCanWrite } } )
+
+      let rCanRead = this.project.canRead.filter( _id => _id !== userId )
+      let rCanWrite = this.project.canWrite.filter( _id => _id !== userId )
+
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: pCanRead, canWrite: pCanWrite }, canRead: rCanRead, rCanWrite: rCanWrite } )
 
       // Remove user from all streams
       this.project.streams.forEach( streamId => {
@@ -183,5 +185,4 @@ export default {
 .detail-card {
   margin-bottom: 20px;
 }
-
 </style>

@@ -27,14 +27,18 @@ export default {
     streamsToOmit: {
       type: Array,
       default ( ) { return [ ] }
-    }
+    },
+    writeOnly: Boolean
   },
   computed: {
     filteredStreams( ) {
       return this.$store.getters.filteredStreams( this.filters ).filter( s => this.streamsToOmit.indexOf( s.streamId ) === -1 )
     },
     paginatedStreams( ) {
-      return this.filteredStreams.slice( this.startIndex, this.endIndex )
+      let toReturn = this.filteredStreams.slice( this.startIndex, this.endIndex )
+      if( this.writeOnly )
+        toReturn = toReturn.filter( s => s.owner === this.$store.state.user._id || s.canWrite.indexOf( this.$store.state.user._id ) > -1 )
+      return toReturn
     }
   },
   watch: {
@@ -60,6 +64,7 @@ export default {
     },
     updateSearch: debounce( function( e ) {
       this.searchfilter = e
+
       if ( e === '' ) {
         this.showSearchResults = false
         return
