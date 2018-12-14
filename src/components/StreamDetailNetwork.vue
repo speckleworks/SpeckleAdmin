@@ -2,7 +2,7 @@
   <md-card class='md-elevation-3' md-with-hover>
     <md-card-header class='bg-ghost-white'>
       <md-card-header-text>
-        <div class="md-title">Network</div>
+        <div class="md-title"><md-icon>share</md-icon> Connectivity</div>
         <div class="md-caption">Where this stream is received and sent from.</div>
       </md-card-header-text>
     </md-card-header>

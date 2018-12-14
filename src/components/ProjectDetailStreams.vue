@@ -7,31 +7,14 @@
       </md-card-header-text>
     </md-card-header>
     <md-card-content class='md-layout'>
+      <div class='md-layout-item md-size-100'>
+        <stream-search :streams-to-omit='streams' v-on:selected-stream='selectStream'></stream-search>
+      </div>
       <div class='md-layout-item md-size-100' v-if='streams.length === 0'>
         <p>This project has no streams. Add some using the form below!</p>
       </div>
       <div class='md-layout-item md-size-100' v-else>
-        <stream-card-small v-for='stream in streams' :key='stream' :streamId='stream'></stream-card-small>
-      </div>
-      <div class='md-layout-item md-size-100'>
-        <md-field md-clearable>
-          <md-icon>search</md-icon>
-          <md-input @input="updateSearch" v-model='searchfilter' spellcheck="false"></md-input>
-          <label>name:box id:xxx private:true</label>
-        </md-field>
-      </div>
-      <div class='md-layout-item md-size-100 searched-stream' v-for='stream in paginatedStreams' v-if='filters.length > 0 && showSearchResults' :key='stream.streamId' @click='selectStream(stream.streamId)'>
-        <div class="md-layout">
-          <div class='md-layout-item md-size-40'>
-            <strong>{{stream.name}}</strong>
-          </div>
-          <div class='md-layout-item md-size-20'>
-            <span class='md-caption'>{{stream.streamId}}</span>
-          </div>
-          <div class='md-layout-item xxx-md-size-20 md-caption'>
-            last update <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
-          </div>
-        </div>
+        <stream-card-small v-for='stream in streams' :key='stream' :streamId='stream' v-on:remove-stream='removeStream'></stream-card-small>
       </div>
     </md-card-content>
   </md-card>
@@ -39,76 +22,32 @@
 <script>
 import debounce from 'lodash.debounce'
 import StreamCardSmall from './StreamCardSmall.vue'
+import StreamSearch from './StreamSearch.vue'
 
 export default {
   name: 'ProjectStreams',
   components: {
-    StreamCardSmall
+    StreamCardSmall,
+    StreamSearch
   },
   props: {
     streams: Array,
   },
-  computed: {
-    filteredStreams( ) {
-      return this.$store.getters.filteredStreams( this.filters ).filter( s => this.streams.indexOf( s.streamId ) === -1 )
-    },
-    paginatedStreams( ) {
-      return this.filteredStreams.slice( this.startIndex, this.endIndex )
-    }
-  },
-  watch: {
-    searchfilter( val ) {
-      if ( val === '' )
-        this.showSearchResults = false
-    }
-  },
+  computed: {},
+  watch: {},
   data( ) {
-    return {
-      startIndex: 0,
-      itemsPerPage: 12,
-      endIndex: 12,
-      filters: [ ],
-      searchfilter: '',
-      showSearchResults: false
-    }
+    return {}
   },
   methods: {
     selectStream( streamId ) {
       this.$emit( 'selected-stream', streamId )
     },
-    updateSearch: debounce( function( e ) {
-      this.searchfilter = e
-      if( e === '' ) {
-        this.showSearchResults = false
-        return
-      }
-      this.showSearchResults = true
-      try {
-        let filters = this.searchfilter.split( ' ' ).map( t => {
-          if ( t.includes( ':' ) )
-            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
-          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
-            return { key: 'name', value: t }
-          else
-            return { key: t, value: null }
-        } )
-        this.filters = filters
-      } catch {
-        this.filters = [ { key: 'name', value: e } ]
-      }
-    }, 1000 ),
+    removeStream( streamId ) {
+      this.$emit( 'remove-stream', streamId )
+    }
   }
 }
 
 </script>
 <style scoped lang='scss'>
-.searched-stream {
-  padding: 10px;
-}
-
-.searched-stream:hover {
-  background-color: ghostwhite;
-  cursor: pointer;
-}
-
 </style>

@@ -63,7 +63,10 @@ export default {
 }
 
 .md-card.md-with-hover {
-  cursor: default !important;
+  /*cursor: default;*/
+}
+button {
+  /*cursor: pointer !important;*/
 }
 
 .stream-chips:after {
@@ -78,7 +81,7 @@ export default {
   text-align: right;
 }
 .text-center {
-  text-align: justify;
+  text-align: center !important;
 }
 
 .bg-ghost-white {

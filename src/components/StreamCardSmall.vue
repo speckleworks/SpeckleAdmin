@@ -11,7 +11,7 @@
         <span v-for='tag in stream.tags'>{{tag}},  </span>
       </div>
       <div class="md-layout-item text-right" v-if='removable'>
-        <md-button class='md-dense-xxx md-icon-button md-accent'>
+        <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='$emit("remove-stream", streamId)'>
           <md-icon>delete</md-icon>
         </md-button>
       </div>

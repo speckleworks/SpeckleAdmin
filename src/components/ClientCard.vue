@@ -6,8 +6,8 @@
     <div class='md-layout-item md-caption'>
       {{client.documentType}} <span v-if='client.documentName'>doc: {{client.documentName}}</span>
     </div>
-    <div class='md-layout-item'>
-      {{client.online ? "online" : "offline"}}
+    <div class='md-layout-item md-caption'>
+      <!-- {{client.online ? "online" : "offline"}}, --> last seen: <strong><timeago :datetime='client.updatedAt'></timeago></strong>
     </div>
     <div class='md-layout-item md-caption'>
       <span v-if='owner'>{{ owner.name }} {{owner.surname}}</span>

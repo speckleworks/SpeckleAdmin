@@ -5,8 +5,16 @@
         <router-link to='/streams'>Streams</router-link> / {{stream.name}}
       </h1>
       <!-- <md-divider></md-divider> -->
-      <p>StreamId: <span style="user-select:all"><strong>{{stream.streamId}}</strong></span></p>
+      <p>
+        streamId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{stream.streamId}}</strong></md-chip></span>&nbsp<span v-if='streamProjects.length>0'>projects:
+        <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
+          <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
+        </md-chip></span>
+      </p>
+      <md-divider></md-divider>
       <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
+      <p>
+      </p>
     </md-card-content>
   </md-card>
 </template>
@@ -19,23 +27,25 @@ export default {
     stream: Object, // can be alert or info
   },
   computed: {
-  canEdit( ) {
-    return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
-  },
-  isOwner( ) {
-    return this.stream.owner === this.$store.state.user._id
-  }
-},
-data( ) {
-    return {
+    canEdit( ) {
+      return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
+    },
+    isOwner( ) {
+      return this.stream.owner === this.$store.state.user._id
+    },
+    streamProjects( ) {
+      return this.$store.state.projects.filter( p => p.streams.indexOf( this.stream.streamId ) !== -1 )
     }
+  },
+  data( ) {
+    return {}
   },
   methods: {
     updateTags: debounce( function( e ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, tags: this.stream.tags } )
     }, 1000 ),
   },
-  mounted( ) {  }
+  mounted( ) {}
 }
 
 </script>

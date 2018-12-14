@@ -1,5 +1,5 @@
 <template>
-  <md-card class='md-elevation-3'>
+  <md-card class='md-elevation-3' md-with-hover>
     <md-card-content class='bg-ghost-white'>
       <div class="md-layout md-alignment-center-center">
         <div class="md-layout-item md-title md-size-70">Link Sharing</div>
@@ -29,11 +29,9 @@
     </md-card-content>
     <md-card-content>
       <div class="md-layout">
-        <div class='md-layout-item md-size-100' style="margin-top:20px;">
+        <div class='md-layout-item md-size-100' style="margin-top:0px;">
+          <user-search v-on:selected-user='addUserToWrite'></user-search>
           <permission-table :resource='stream' v-on:update-table='updatePerms'></permission-table>
-          <div class='md-layout-item md-size-100' style="margin-top:20px;" v-if='canEdit'>
-            <user-search v-on:selected-user='addUserToWrite'></user-search>
-          </div>
         </div>
       </div>
     </md-card-content>
