@@ -6,11 +6,10 @@
       </div>
       <div class="md-layout-item md-size-100">
         <div class='md-layout xxx-md-gutter md-alignment-center-center'>
-          <div class="md-layout-item md-size-50">
+          <div class="md-layout-item md-size-50 md-medium-size-80 md-small-size-100">
             <stream-detail-title :stream='stream'></stream-detail-title>
           <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
-            <br>
             <detail-description :resource='stream'></detail-description>
           <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'> -->
