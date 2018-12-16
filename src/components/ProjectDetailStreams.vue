@@ -3,7 +3,7 @@
     <md-card-header class='bg-ghost-white'>
       <md-card-header-text>
         <h2 class='md-title'><md-icon>import_export</md-icon> Streams</h2>
-        <p class='md-caption'>These are this project's streams. Adding a stream here will automatically grant write permission to the project's team members.</p>
+        <p class='md-caption'>These are this project's streams. Adding a stream here will automatically grant write permission to the project's team members.<br>&nbsp<md-divider></md-divider><br>You can only add streams that you have write permissions to.</p>
       </md-card-header-text>
     </md-card-header>
     <md-card-content class='md-layout'>

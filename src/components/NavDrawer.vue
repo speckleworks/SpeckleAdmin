@@ -26,7 +26,7 @@ $SpeckleBlue: #448aff;
 .nav-sidebar {
   width: 200px !important;
   /*background-color: $SpeckleBlue !important;*/
-  background-color: ghostwhite !important;
+  /*background-color: ghostwhite !important;*/
   padding-top: 30px;
 }
 

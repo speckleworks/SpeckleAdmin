@@ -14,7 +14,7 @@
             </md-field>
           </div>
           <div class="md-layout-item md-size-5 text-right">
-            <md-button class='md-icon-button md-raised md-primary'>
+            <md-button class='md-icon-button md-raised md-primary' @click.native='createProject'>
               <md-icon>add</md-icon>
             </md-button>
           </div>

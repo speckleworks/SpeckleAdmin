@@ -22,18 +22,18 @@
         <br>
         <project-detail-streams :streams='project.streams' v-on:selected-stream='addStream' v-on:remove-stream='removeStream'></project-detail-streams>
         <br>
-        <md-card md-with-hover>
+        <!--  <md-card md-with-hover>
           <md-card-header class='bg-ghost-white'>
             <md-card-header-text>
               <h2 class='md-title'><md-icon>group</md-icon> Project Management</h2>
-              <p class='md-caption'>The following people have access to this project. Adding someone here will <strong>NOT</strong> grant them permissions to the streams, but will allow them to view or edit this project.<br>&nbsp<md-divider></md-divider> <br>Essentially, people with WRITE permissions become "project managers" and they can add and remove streams and users to this project, but without having any claim on the streams themselves.</p>
+              <p class='md-caption'>The following people have access to this project. Adding someone here will <strong>NOT</strong> grant them permissions to the streams, but will allow them to view or edit this project.<br>&nbsp<md-divider></md-divider><br>Team members are automatically added with read permissions.</p>
             </md-card-header-text>
           </md-card-header>
-          <md-card-content>
+          <md-card-content v-if='canEdit'>
             <user-search v-on:selected-user='addUserToProject'></user-search>
             <permission-table :resource='project' v-on:update-table='updateProjectPerms'></permission-table>
           </md-card-content>
-        </md-card>
+        </md-card> -->
       </div>
     </div>
     <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
@@ -62,7 +62,7 @@ export default {
     ProjectDetailStreams,
     ProjectDetailTitle
   },
-  props: { },
+  props: {},
   computed: {
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
@@ -99,7 +99,7 @@ export default {
       } )
     },
     removeUserFromTeam( { userId } ) {
-      console.log(`removing user from team; _id: ${userId}`)
+      console.log( `removing user from team; _id: ${userId}` )
       // Remove user from project team
       let pCanRead = this.project.permissions.canRead.filter( _id => _id !== userId )
       let pCanWrite = this.project.permissions.canWrite.filter( _id => _id !== userId )
@@ -113,29 +113,32 @@ export default {
       this.project.streams.forEach( streamId => {
         let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
         if ( myStream ) {
-          let canRead = myStream.canRead.filter( _id => _id !== userId )
-          let canWrite = myStream.canWrite.filter( _id => _id !== userId )
-          this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
+          // Checks if this stream is in another project that contains this userId
+          let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
+          let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
+          let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
+
+          let canWrite = myStream.canWrite,
+            canRead = myStream.canRead,
+            anyChange = false
+
+          // only remove him from the stream's permissions if no conflicts with other projects.
+          if ( otherCanRead.indexOf( userId ) === -1 ) {
+            canRead = myStream.canRead.filter( _id => _id !== userId )
+            anyChange = true
+          }
+          if ( otherCanWrite.indexOf( userId ) === -1 ) {
+            canWrite = myStream.canWrite.filter( _id => _id !== userId )
+            anyChange = true
+          }
+
+          if ( anyChange )
+            this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
         }
       } )
     },
     moveUserInTeam( { userId } ) {
 
-    },
-    updateTeamPerms( { canRead, canWrite } ) {
-      let projectCanRead = canRead
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canWrite: canWrite, canRead: canRead } } )
-      //  TODO: propagate this to all streams
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          let localCanWrite = uniq( [ ...myStream.canWrite, ...canWrite ] )
-          let localCanRead = uniq( [ ...myStream.canRead, ...canRead ] )
-          // this.$store.dispatch( 'updateStream', { streamId: streamId, canWrite: localCanWrite, canRead: localCanRead } )
-        } else {
-          console.error( `Failed to find ${streamId} while updating permissions from project.` )
-        }
-      } )
     },
     addUserToProject( userId ) {
 
@@ -152,8 +155,6 @@ export default {
       let canWrite = uniq( [ ...myStream.canWrite, ...this.project.permissions.canWrite ] )
 
       this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
-
-
     },
     removeStream( streamId ) {
       console.log( `remove ${streamId}` )
@@ -185,4 +186,5 @@ export default {
 .detail-card {
   margin-bottom: 20px;
 }
+
 </style>

@@ -1,6 +1,6 @@
 <template>
-  <md-content class='md-layout md-alignment-center-center md-primary' style="min-height: 100%">
-    <form class="md-layout-item md-size-25 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
+  <md-content class='md-layout md-alignment-center-center super-bg  ' style="min-height: 100%">
+    <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
       <md-card class="md-elevation-3">
         <md-card-header>
           <md-card-header-text>

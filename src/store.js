@@ -177,7 +177,7 @@ export default new Vuex.Store( {
     },
     getStreams( context, query ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.get( `streams?${query}` )
+        Axios.get( `streams?${query ? query : '' }` )
           .then( res => {
             context.commit( 'ADD_STREAMS', res.data.resources )
             return resolve( res.data.resources )
@@ -232,7 +232,7 @@ export default new Vuex.Store( {
     },
     getProjects( context, query ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.get( `projects?${query}` )
+        Axios.get( `projects?${query ? query : '' }` )
           .then( res => {
             context.commit( 'ADD_PROJECTS', res.data.resources )
             return resolve( res.data.resources )

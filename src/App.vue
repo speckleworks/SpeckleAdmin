@@ -4,7 +4,7 @@
       <md-icon>{{showSidebar ? 'close' : 'menu'}}</md-icon>
     </md-button>
     <md-app md-waterfall>
-      <md-app-drawer :md-active="showSidebar" class='md-primary md-elevation-10 md-primary nav-sidebar' style='' md-permanent="clipped" v-show='$store.state.isAuth && showSidebar'>
+      <md-app-drawer :md-active="showSidebar" class='md-primary xxx-md-elevation-10 nav-sidebar' style='' md-permanent="clipped" v-show='$store.state.isAuth && showSidebar'>
         <nav-drawer></nav-drawer>
       </md-app-drawer>
       <md-app-content>
@@ -27,13 +27,28 @@ export default {
     showSidebar: true
   } ),
   created( ) {
-    this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
-    this.$store.dispatch( 'getProjects' )
+    if ( this.$store.state.isAuth ) {
+      this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
+      this.$store.dispatch( 'getProjects' )
+    }
   }
 }
 
 </script>
-<style>
+<style lang='scss'>
+$SpeckleBlue: #448aff;
+
+.super-bg {
+  background: #448aff;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #448aff, #396afc);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #448aff, #396afc);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+
 #app {
   position: fixed;
   top: 0;
@@ -65,6 +80,7 @@ export default {
 .md-card.md-with-hover {
   cursor: default !important;
 }
+
 button {
   /*cursor: pointer !important;*/
 }
@@ -80,6 +96,7 @@ button {
 .text-right {
   text-align: right;
 }
+
 .text-center {
   text-align: center !important;
 }
@@ -98,4 +115,5 @@ button {
   z-index: 100;
   margin-bottom: 30px;
 }
+
 </style>
