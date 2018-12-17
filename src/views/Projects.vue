@@ -36,7 +36,7 @@ export default {
   },
   computed: {
     projects( ) {
-      return this.$store.state.projects
+      return this.$store.state.projects.filter( p => p.deleted === false)
     }
   },
   data( ) {
@@ -47,17 +47,17 @@ export default {
   methods: {
     createProject( ) {
       this.$store.dispatch( 'createProject' )
+        .then( res => {
+          this.$router.push( `/projects/${res._id}` )
+        } )
     }
   },
   created( ) {
-    // this.$store.dispatch( 'getProjects' )
-    // this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
   }
 }
 
 </script>
 <style scoped lang='scss'>
-
 .md-field label {
   opacity: 0.5;
 }

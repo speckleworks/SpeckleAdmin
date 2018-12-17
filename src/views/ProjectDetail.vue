@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class='md-layout md-alignment-center-center' v-if='project'>
-      <div class="md-layout-item md-size-100">
+      <div class="md-layout-item md-size-100 text-center sticky-top" v-if='project.deleted'>
+        <md-content class='md-accent md-caption md-layout md-alignment-center-center' style='width:100%;padding:10px; border-radius: 2px;'>
+          <div class='md-layout-item'>This project is in your trashbin.</div>
+          <div class='md-layout-item'><md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button></div>
+        </md-content>
       </div>
       <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100 detail-card">
         <project-detail-title :project='project'></project-detail-title>
@@ -69,6 +73,9 @@ export default {
     return {}
   },
   methods: {
+    restore( ) {
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, deleted: false } )
+    },
     addUserToTeam( userId ) {
       // adds user to project's map of permissions, straight into canWrite
       let permissions = {

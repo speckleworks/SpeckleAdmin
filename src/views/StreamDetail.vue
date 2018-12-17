@@ -1,29 +1,34 @@
 <template>
   <div>
     <div class='md-layout md-alignment-center-center' v-if='stream'>
-      <div v-if='error!==""' class='md-layout-item md-size-100'>
-        <md-content class="md-accent md-caption">{{error}}</md-content>
+      <div class="md-layout-item md-size-100 text-center sticky-top" v-if='stream.deleted'>
+        <md-content class='md-accent md-caption  md-layout md-alignment-center-center' style='width:100%;padding:10px; border-radius: 2px;'>
+          <div class='md-layout-item'>This stream is in your trashbin.</div>
+          <div class='md-layout-item'>
+            <md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button>
+          </div>
+        </md-content>
       </div>
       <div class="md-layout-item md-size-100">
-        <div class='md-layout xxx-md-gutter md-alignment-center-center'>
-          <div class="md-layout-item md-size-50 md-medium-size-80 md-small-size-100">
+        <div class='md-layout md-alignment-center-center'>
+          <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100">
             <stream-detail-title :stream='stream'></stream-detail-title>
-          <!-- </div>
+            <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
             <detail-description :resource='stream'></detail-description>
-          <!-- </div>
+            <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'> -->
             <br>
             <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-          <!-- </div>
+            <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
             <br>
             <stream-detail-network :stream='stream'></stream-detail-network>
-          <!-- </div>
+            <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
             <br>
             <stream-detail-comments :stream='stream'></stream-detail-comments>
-          <!-- </div>
+            <!-- </div>
           <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
             <br>
             <stream-detail-history :stream='stream'></stream-detail-history>
@@ -78,7 +83,11 @@ export default {
       editDescription: false
     }
   },
-  methods: {},
+  methods: {
+    restore( ) {
+      this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, deleted: false } )
+    },
+  },
   mounted( ) {
     let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
     if ( !stream ) {

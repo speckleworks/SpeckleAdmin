@@ -1,10 +1,11 @@
 <template>
-  <md-card v-if='resource' class='md-elevation-0'>
-    <!-- <md-card-header class='bg-ghost-white'>
+  <md-card v-if='resource' class='md-elevation-3'>
+    <md-card-header class='bg-ghost-white'>
       <md-card-header-text>
         <div class="md-title">Description</div>
+        <div class="md-caption">What this {{isStream ? "stream" : "project"}} is about.</div>
       </md-card-header-text>
-    </md-card-header> -->
+    </md-card-header>
     <md-card-content>
       <div v-show='!editDescription'>
         <div v-html='compiledDescription'></div>

@@ -46,6 +46,12 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
+      path: '/trash',
+      name: 'trash',
+      component: ( ) => import( './views/Trash.vue' ),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: ( ) => import( './views/Profile.vue' ),

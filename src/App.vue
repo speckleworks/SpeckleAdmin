@@ -28,7 +28,7 @@ export default {
   } ),
   created( ) {
     if ( this.$store.state.isAuth ) {
-      this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
+      this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
       this.$store.dispatch( 'getProjects' )
     }
   }
@@ -113,7 +113,7 @@ button {
   width: 100%;
   background-color: white;
   z-index: 100;
-  margin-bottom: 30px;
+  /*margin-bottom: 30px;*/
 }
 
 </style>

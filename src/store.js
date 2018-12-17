@@ -89,8 +89,12 @@ export default new Vuex.Store( {
         found[ key ] = props[ key ]
       } )
     },
-    REMOVE_STREAM( state, stream ) {
-      //  TOODO
+    DELETE_STREAM( state, stream ) {
+      let index = state.streams.findIndex( s => s.streamId === stream.streamId )
+      if ( index > -1 ) {
+        state.streams.splice( index, 1 )
+      } else
+        console.log( `Failed to remove stream ${stream.streamId} from store.` )
     },
 
     // Clients
@@ -108,6 +112,7 @@ export default new Vuex.Store( {
         if ( state.projects.findIndex( p => p._id === project._id ) === -1 ) {
           // potentially enforce here extra fields
           if ( !project.tags ) project.tags = [ ]
+          if ( !project.deleted ) project.deleted = false
           state.projects.unshift( project )
         }
       } )
@@ -117,6 +122,13 @@ export default new Vuex.Store( {
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
+    },
+    DELETE_PROJECT( state, props ) {
+      let index = state.projects.findIndex( p => p._id === props._id )
+      if ( index > -1 ) {
+        state.projects.splice( index, 1 )
+      } else
+        console.log( `Failed to remove project ${props._id} from store.` )
     },
 
     // Users
@@ -214,7 +226,15 @@ export default new Vuex.Store( {
           console.log( err )
         } )
     },
-    deleteStream( context, payload ) {},
+    deleteStream( context, payload ) {
+      Axios.delete( `streams/${payload.streamId}` )
+        .then( res => {
+          context.commit( 'DELETE_STREAM', { streamId: payload.streamId } )
+        } )
+        .catch( err => {
+          console.log( err )
+        } )
+    },
 
     // projects
     getProject( context, props ) {
@@ -260,6 +280,15 @@ export default new Vuex.Store( {
       Axios.put( `projects/${props._id}`, props )
         .then( res => {
           context.commit( 'UPDATE_PROJECT', props )
+        } )
+        .catch( err => {
+          console.warn( err )
+        } )
+    },
+    deleteProject( context, props ) {
+      Axios.delete( `projects/${props._id}` )
+        .then( res => {
+          context.commit( 'DELETE_PROJECT', { _id: props._id } )
         } )
         .catch( err => {
           console.warn( err )

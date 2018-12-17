@@ -22,15 +22,14 @@
       <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:20px;">
           <div class="md-title">Permissions</div>
-          <p class='md-caption' v-if='canEdit'>Changing permission here will override any project-based settings this stream might have.</p>
-          <p class='md-caption' v-else>You can't change permissions.</p>
+          <p class='md-caption'>Some users might be disabled as their permissions are set through projects.</p>
         </div>
       </div>
     </md-card-content>
     <md-card-content>
       <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:0px;">
-          <user-search v-on:selected-user='addUserToWrite'></user-search>
+          <user-search v-on:selected-user='addUserToWrite' v-if='canEdit'></user-search>
           <permission-table :resource='stream' v-on:update-table='updatePerms'></permission-table>
         </div>
       </div>

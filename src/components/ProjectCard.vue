@@ -46,7 +46,7 @@
       </div>
     </md-card-content>
     <md-card-actions>
-      <md-button class='md-accent' @click.native='deleteStream' v-show='isOwner'>Delete</md-button>
+      <md-button class='md-accent' @click.native='deleteProject' v-show='isOwner'>Delete</md-button>
       <md-button class='md-raised-xxx' :to='"/projects/"+project._id'>More...</md-button>
     </md-card-actions>
     <!-- {{stream.streamId}} -->
@@ -70,7 +70,7 @@ export default {
     project( ) {
       return this.resource
     },
-    projectTeamMembers() {
+    projectTeamMembers( ) {
       return union( this.project.canRead, this.project.canWrite )
     },
     createdAt( ) {
@@ -93,9 +93,10 @@ export default {
     }
   },
   methods: {
-    deleteStream( ) {
+    deleteProject( ) {
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, deleted: true } )
       // this.$store.dispatch( 'updateStream', { _id: this.project._id, deleted: true } )
-      this.$emit( 'deleted' )
+      // this.$emit( 'deleted' )
     },
     updateTags: debounce( function( e ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, tags: this.project.tags } )

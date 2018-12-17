@@ -12,6 +12,11 @@
       <md-icon>business</md-icon>
       <span class="md-list-item-text">Projects</span>
     </md-list-item>
+    <md-list-item to='/trash'>
+      <md-icon>delete_outline</md-icon>
+      <span class="md-list-item-text">Trash</span>
+    </md-list-item>
+    <md-divider md-inset></md-divider>
     <md-list-item to='/profile'>
       <md-icon>account_circle</md-icon>
       <span class="md-list-item-text">Profile</span>
