@@ -3,7 +3,7 @@
     <div class='md-layout md-alignment-center-center' v-if='project'>
       <div class="md-layout-item md-size-100">
       </div>
-      <div class="md-layout-item md-size-50 md-medium-size-100 detail-card">
+      <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100 detail-card">
         <project-detail-title :project='project'></project-detail-title>
         <detail-description :resource='project'></detail-description>
         <br>
@@ -11,29 +11,16 @@
           <md-card-header class='bg-ghost-white'>
             <md-card-header-text>
               <h2 class='md-title'><md-icon>group</md-icon> Team Members</h2>
-              <p class='md-caption'>The following people will have access to the streams in this project, and will be able to view this project. Updating permissions here will override any previously set permissions for this stream.</p>
+              <p class='md-caption'>The following people will have access to the streams in this project, and will be able to view this project. Please note, users with higher privileges from other projects will not be downgraded or removed.</p>
             </md-card-header-text>
           </md-card-header>
           <md-card-content>
-            <user-search v-on:selected-user='addUserToTeam'></user-search>
-            <permission-table :resource='project.permissions' @remove-user='removeUserFromTeam' @move-user='moveUserInTeam'></permission-table>
+            <user-search v-on:selected-user='addUserToTeam' v-if='canEdit'></user-search>
+            <permission-table :project='project' :global-disabled='!canEdit' @remove-user='' @move-user=''></permission-table>
           </md-card-content>
         </md-card>
         <br>
-        <project-detail-streams :streams='project.streams' v-on:selected-stream='addStream' v-on:remove-stream='removeStream'></project-detail-streams>
-        <br>
-        <!--  <md-card md-with-hover>
-          <md-card-header class='bg-ghost-white'>
-            <md-card-header-text>
-              <h2 class='md-title'><md-icon>group</md-icon> Project Management</h2>
-              <p class='md-caption'>The following people have access to this project. Adding someone here will <strong>NOT</strong> grant them permissions to the streams, but will allow them to view or edit this project.<br>&nbsp<md-divider></md-divider><br>Team members are automatically added with read permissions.</p>
-            </md-card-header-text>
-          </md-card-header>
-          <md-card-content v-if='canEdit'>
-            <user-search v-on:selected-user='addUserToProject'></user-search>
-            <permission-table :resource='project' v-on:update-table='updateProjectPerms'></permission-table>
-          </md-card-content>
-        </md-card> -->
+        <project-detail-streams :project='project' v-on:selected-stream='addStream' v-on:remove-stream='removeStream'></project-detail-streams>
       </div>
     </div>
     <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
@@ -48,7 +35,7 @@ import union from 'lodash.union'
 import uniq from 'lodash.uniq'
 
 import UserSearch from '../components/UserSearch.vue'
-import PermissionTable from '../components/PermissionTable.vue'
+import PermissionTable from '../components/PermissionTableProject.vue'
 import DetailDescription from '../components/DetailDescription.vue'
 import ProjectDetailStreams from '../components/ProjectDetailStreams.vue'
 import ProjectDetailTitle from '../components/ProjectDetailTitle.vue'
@@ -98,54 +85,6 @@ export default {
         }
       } )
     },
-    removeUserFromTeam( { userId } ) {
-      console.log( `removing user from team; _id: ${userId}` )
-      // Remove user from project team
-      let pCanRead = this.project.permissions.canRead.filter( _id => _id !== userId )
-      let pCanWrite = this.project.permissions.canWrite.filter( _id => _id !== userId )
-
-      let rCanRead = this.project.canRead.filter( _id => _id !== userId )
-      let rCanWrite = this.project.canWrite.filter( _id => _id !== userId )
-
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: pCanRead, canWrite: pCanWrite }, canRead: rCanRead, rCanWrite: rCanWrite } )
-
-      // Remove user from all streams
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          // Checks if this stream is in another project that contains this userId
-          let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
-          let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
-          let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
-
-          let canWrite = myStream.canWrite,
-            canRead = myStream.canRead,
-            anyChange = false
-
-          // only remove him from the stream's permissions if no conflicts with other projects.
-          if ( otherCanRead.indexOf( userId ) === -1 ) {
-            canRead = myStream.canRead.filter( _id => _id !== userId )
-            anyChange = true
-          }
-          if ( otherCanWrite.indexOf( userId ) === -1 ) {
-            canWrite = myStream.canWrite.filter( _id => _id !== userId )
-            anyChange = true
-          }
-
-          if ( anyChange )
-            this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
-        }
-      } )
-    },
-    moveUserInTeam( { userId } ) {
-
-    },
-    addUserToProject( userId ) {
-
-    },
-    updateProjectPerms( { canRead, canWrite } ) {
-
-    },
     addStream( streamId ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: uniq( [ ...this.project.streams, streamId ] ) } )
 
@@ -172,6 +111,13 @@ export default {
           union( res.data.resource.canRead, res.data.resource.canWrite ).forEach( _id => this.$store.dispatch( 'getUser', { _id: _id } ) )
         } )
         .catch( err => {
+          if ( this.$store.state.isAuth ) {
+            this.$router.push( '/projects' )
+            console.log( "you don't have permission." )
+          } else {
+            console.log( "should redirect to login" )
+            this.$router.push( '/login' )
+          }
           console.log( err )
         } )
     } else {

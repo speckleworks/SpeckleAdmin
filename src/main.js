@@ -70,6 +70,14 @@ Vue.prototype.$http = Axios
 // event bus used for triggerring events cross-hirearchy
 window.bus = new Vue( )
 
+import CH from 'color-hash'
+let ColorHasher = new CH( )
+Vue.mixin( {
+  methods: {
+    getHexFromString: str => ColorHasher.hex( str )
+  }
+} )
+
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
   new Vue( {

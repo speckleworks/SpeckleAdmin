@@ -225,7 +225,7 @@ export default new Vuex.Store( {
             return resolve( res )
           } )
           .catch( err => {
-            console.err( err )
+            console.error( err )
             return reject( err )
           } )
       } )

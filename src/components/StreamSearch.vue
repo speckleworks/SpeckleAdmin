@@ -3,7 +3,7 @@
     <md-card-content>
       <md-field md-clearable>
         <md-icon>search</md-icon>
-        <md-input @input="updateSearch" v-model='searchfilter' spellcheck="false"></md-input>
+        <md-input @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled'></md-input>
         <label>Search for a stream to add</label>
       </md-field>
       <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
@@ -27,6 +27,10 @@ export default {
     streamsToOmit: {
       type: Array,
       default ( ) { return [ ] }
+    },
+    globalDisabled: {
+      type:Boolean,
+      default: false
     },
     writeOnly: Boolean
   },

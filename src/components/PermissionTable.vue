@@ -12,8 +12,8 @@
           {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>
         </div>
         <div class="md-layout-item text-right">
-          <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`)'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
-          <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`)'>
+          <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
+          <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled'>
             <md-icon>delete</md-icon>
           </md-button>
         </div>
@@ -28,7 +28,11 @@ import uniq from 'lodash.uniq'
 export default {
   name: 'PermissionTable',
   props: {
-    resource: Object
+    resource: Object,
+    globalDisabled: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     canRead( ) { return this.resource.canRead },
