@@ -56,12 +56,17 @@ export default {
     },
     project( ) {
       return this.$store.state.projects.find( p => p._id === this.$route.params.projectId )
+    },
+    canReadProject( ) { return this.project.canRead },
+    canWriteProject( ) { return this.project.canWrite },
+    canReadStreams( ) { return this.project.permissions.canRead },
+    canWriteStreams( ) { return this.project.permissions.canWrite },
+    allUsers( ) {
+      return uniq( [ ...this.canReadProject, ...this.canWriteProject, ...this.canReadStreams, ...this.canWriteProject, this.project.owner ] )
     }
   },
   data( ) {
-    return {
-
-    }
+    return {}
   },
   methods: {
     addUserToTeam( userId ) {
@@ -99,7 +104,28 @@ export default {
       console.log( `remove ${streamId}` )
       let streams = this.project.streams.filter( s => s !== streamId )
       this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: streams } )
-      // TODO: Remove users from stream
+
+      // Remove users from stream, only if they're not there due to another project
+      let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
+
+      let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
+      let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
+      let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
+      let streamNewCanRead = myStream.canRead,
+        streamNewCanWrite = myStream.canWrite,
+        anyChange = false
+      this.allUsers.forEach( uId => {
+        if ( otherCanWrite.indexOf( uId ) === -1 ) {
+          streamNewCanWrite = streamNewCanWrite.filter( _id => _id !== uId )
+          anyChange = true
+        }
+        if ( otherCanRead.indexOf( uId ) === -1 ) {
+          streamNewCanRead = streamNewCanRead.filter( _id => _id !== uId )
+          anyChange = true
+        }
+      } )
+      if ( anyChange )
+        this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: streamNewCanRead, canWrite: streamNewCanWrite } )
     },
   },
   mounted( ) {

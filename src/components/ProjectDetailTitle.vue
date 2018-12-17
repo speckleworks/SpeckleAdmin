@@ -30,7 +30,9 @@ export default {
       return this.project.name
     },
     updateName( e ) {
-      this.project.name = e.target.innerText.replace( /(\r\n|\n|\r)/gm, " " )
+      let newName = e.target.innerText.replace( /(\r\n|\n|\r)/gm, " " )
+      if ( newName === this.project.name ) return
+      this.project.name = newName
       this.$store.dispatch( 'updateProject', { _id: this.project._id, name: this.project.name } )
     },
     updateTags: debounce( function( e ) {
