@@ -263,9 +263,9 @@ export default new Vuex.Store( {
           } )
       } )
     },
-    createProject( context ) {
+    createProject( context, project ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.post( `projects`, { name: 'A Speckle Project' } )
+        Axios.post( `projects`, project ? project : { name: 'A new speckle project' } )
           .then( res => {
             context.commit( 'ADD_PROJECTS', [ res.data.resource ] )
             return resolve( res.data.resource )

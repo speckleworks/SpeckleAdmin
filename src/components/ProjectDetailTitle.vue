@@ -2,7 +2,7 @@
   <md-card class='md-elevation-0'>
     <h1 class='md-display-1'>
       <router-link to='/projects'>Projects</router-link> /
-      <span title='Click to edit.' class='project-name' :contenteditable="canEdit" @blur='updateName' v-html='getName()'></span>
+      <span title='Click to edit.' class='project-name' :contenteditable="canEdit" @blur='updateName' v-html='getName()' @keyup.enter='updateNameEnter'></span>
     </h1>
     <p>
       projectId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{project._id}}</strong></md-chip></span>
@@ -26,6 +26,13 @@ export default {
   },
   data( ) { return {} },
   methods: {
+    updateNameEnter( e ) {
+      let newName = e.target.innerText.replace( /(\r\n|\n|\r)/gm, " " )
+      if ( newName === this.project.name ) return
+      this.project.name = newName
+      e.target.blur()
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, name: this.project.name } )
+    },
     getName( ) {
       return this.project.name
     },

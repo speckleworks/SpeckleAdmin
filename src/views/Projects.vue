@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     createProject( ) {
-      this.$store.dispatch( 'createProject' )
+      this.$store.dispatch( 'createProject', { name: 'A brand new speckle project' } )
         .then( res => {
           this.$router.push( `/projects/${res._id}` )
         } )
