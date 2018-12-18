@@ -87,7 +87,6 @@ export default {
         } )
     },
     checkServer( ) {
-      console.log( 'blur' )
       if ( !this.server.includes( 'api' ) )
         this.server += '/api'
       Axios.get( this.server )
@@ -100,6 +99,7 @@ export default {
           this.$store.commit( 'SET_SERVER', this.server )
           this.$store.commit( 'SET_SERVER_DETAILS', res.data )
           localStorage.setItem( 'server', this.server )
+          Axios.defaults.baseURL = this.server
         } )
         .catch( err => {
           this.serverOk = false

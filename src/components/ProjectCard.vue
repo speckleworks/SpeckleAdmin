@@ -46,7 +46,7 @@
       </div>
     </md-card-content>
     <md-card-actions>
-      <md-button class='md-accent' @click.native='deleteProject' v-show='isOwner'>Delete</md-button>
+      <md-button class='md-accent' @click.native='archiveProject' v-show='isOwner'>Archive</md-button>
       <md-button class='md-raised-xxx' :to='"/projects/"+project._id'>More...</md-button>
     </md-card-actions>
     <!-- {{stream.streamId}} -->
@@ -93,7 +93,7 @@ export default {
     }
   },
   methods: {
-    deleteProject( ) {
+    archiveProject( ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, deleted: true } )
       // this.$store.dispatch( 'updateStream', { _id: this.project._id, deleted: true } )
       // this.$emit( 'deleted' )

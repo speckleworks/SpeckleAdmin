@@ -21,7 +21,7 @@
           <md-button class='md-raised md-dense md-primary' @click.native='clearSelection'>clear selection ({{selectedStreams.length}})</md-button>
           <md-button class='md-raised-xx md-dense md-accent' @click.native='deleteStreams'>delete</md-button>
           <md-button class='md-raised md-dense' @click.native='togglePermissions'>Make {{defaultPermission}}</md-button>
-          <md-button class='md-raised md-dense'>Create Project</md-button>
+          <md-button class='md-raised md-dense' @click.native='createProjectFromSelection'>Create Project</md-button>
         </div>
       </md-card-content>
     </md-card>
@@ -78,6 +78,13 @@ export default {
     }
   },
   methods: {
+    createProjectFromSelection( ) {
+      this.$store.dispatch( 'createProject', { name: 'Speckle Project', streams: this.selectedStreams.map( s => s.streamId ) } )
+        .then( res => {
+          this.clearSelection( )
+          this.$router.push( `/projects/${res._id}` )
+        } )
+    },
     togglePermissions( ) {
       this.selectedStreams.forEach( stream => {
         this.$store.dispatch( 'updateStream', { streamId: stream.streamId, private: this.defaultPermission === 'private' ? true : false } )
