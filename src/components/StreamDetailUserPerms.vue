@@ -30,7 +30,10 @@
       <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:0px;">
           <user-search v-on:selected-user='addUserToWrite' v-if='canEdit'></user-search>
-          <permission-table :resource='stream' v-on:update-table='updatePerms'></permission-table>
+          <permission-table
+            :resource='stream'
+            :disabled-users='usersFromProjects'
+            v-on:update-table='updatePerms'></permission-table>
         </div>
       </div>
     </md-card-content>
@@ -65,6 +68,12 @@ export default {
     },
     isOwner( ) {
       return this.stream.owner === this.$store.state.user._id
+    },
+    usersFromProjects( ) {
+      let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( this.stream.streamId ) !== -1 )
+      let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
+      let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
+      return [ ...new Set( [ ...otherCanWrite, ...otherCanRead ] ) ]
     }
   },
   data( ) {

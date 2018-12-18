@@ -6,14 +6,14 @@
       </div>
       <div class="md-layout md-alignment-center-left user" v-for='user in allUsersPop' v-if='user'>
         <div class="md-layout-item md-size-10">
-          <md-avatar class="md-avatar-icon md-small">{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
+          <md-avatar class="md-avatar-icon md-small" :style='{ "background" : getHexFromString( user.name ) }'>{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
         </div>
         <div class="md-layout-item md-size-40">
           {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>
         </div>
         <div class="md-layout-item text-right">
-          <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
-          <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled'>
+          <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
+          <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>
             <md-icon>delete</md-icon>
           </md-button>
         </div>
@@ -32,6 +32,10 @@ export default {
     globalDisabled: {
       type: Boolean,
       default: false
+    },
+    disabledUsers: {
+      type: Array,
+      default: () => []
     }
   },
   computed: {
@@ -46,13 +50,16 @@ export default {
         let u = this.$store.state.users.find( user => user._id === userId )
         if ( !u ) this.$store.dispatch( 'getUser', { _id: userId } )
         return u
-      } )
+      } ).sort( ( a, b ) => a.name > b.name ? 1 : -1 )
     }
   },
   data( ) {
     return {}
   },
   methods: {
+    isDisabled( _id ) {
+      return this.disabledUsers.indexOf(_id) > -1
+    },
     hasWritePermission( _id ) {
       return this.canWrite.indexOf( _id ) > -1
     },
@@ -71,12 +78,13 @@ export default {
         // TODO: this.$emit('move-user', { userId:x, from:'W->R' }) // for projects
       // canRead -> canWrite
       } else {
+        localCanRead = this.canRead.filter( uId => uId !== _id )
         localCanWrite = uniq( [ ...this.canWrite, _id ] )
         // TODO: this.$emit('move-user', { userId:x, from:'R->W' }) // for projects
       }
 
       // emit one global event
-      this.$emit( 'update-table', { canRead: this.canRead, canWrite: localCanWrite } )
+      this.$emit( 'update-table', { canRead: localCanRead, canWrite: localCanWrite } )
     },
     removeUser( _id ) {
       let localCanWrite = this.canWrite.filter( uId => uId !== _id )
