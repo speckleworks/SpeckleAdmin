@@ -3,6 +3,7 @@
   "version":"0.4.7",
   "desc": "This plugin allows you to manage your streams.",
   "serveFrom": "/newadmin",
+  "serveRoot": "/dist",
   "author": "Speckle Project Contributors",
   "contact":"hello@speckle.works",
   "homepage":"https://speckle.works",

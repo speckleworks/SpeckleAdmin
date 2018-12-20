@@ -5,15 +5,13 @@
         <router-link to='/streams'>Streams</router-link> / {{stream.name}}
       </h1>
       <p>
-        streamId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{stream.streamId}}</strong></md-chip></span>&nbsp<br>&nbsp<br><span v-if='streamProjects.length>0'>projects:
+        <span ><md-chip class=''>streamId: <strong style="user-select:all; cursor: pointer;">{{stream.streamId}}</strong></md-chip></span>&nbsp<br>&nbsp<br><span v-if='streamProjects.length>0'>projects:
         <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
           <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
         </md-chip></span>
       </p>
       <md-divider></md-divider>
       <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
-      <p>
-      </p>
     </md-card-content>
   </md-card>
 </template>
@@ -49,4 +47,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.md-card-content:last-of-type{
+  padding-bottom: 0px  !important;
+}
 </style>

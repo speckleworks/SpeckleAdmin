@@ -115,4 +115,9 @@ button {
   z-index: 100;
   /*margin-bottom: 30px;*/
 }
+
+.md-select-menu {
+  /*z-index: 10000 !important;*/
+  background-color: white !important;
+}
 </style>

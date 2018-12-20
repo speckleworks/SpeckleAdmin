@@ -13,7 +13,7 @@
           </md-field>
         </div>
         <div class="md-layout-item md-size-5 text-right">
-          <md-button class='md-icon-button md-raised md-primary'>
+          <md-button class='md-icon-button md-raised md-primary' @click.native='createStream'>
             <md-icon>add</md-icon>
           </md-button>
         </div>
@@ -78,6 +78,15 @@ export default {
     }
   },
   methods: {
+    createStream() {
+      this.$store.dispatch( 'createStream', { name: 'A New Speckle Stream', onlineEditable: true } )
+      .then( res => {
+        this.$router.push(`/streams/${res.streamId}/edit`)
+      })
+      .catch( err => {
+        console.error( err )
+      })
+    },
     createProjectFromSelection( ) {
       this.$store.dispatch( 'createProject', { name: 'Speckle Project', streams: this.selectedStreams.map( s => s.streamId ) } )
         .then( res => {

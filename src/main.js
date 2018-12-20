@@ -70,6 +70,7 @@ Vue.prototype.$http = Axios
 // event bus used for triggerring events cross-hirearchy
 window.bus = new Vue( )
 
+// get hex color from string global mixin
 import CH from 'color-hash'
 let ColorHasher = new CH( )
 Vue.mixin( {
@@ -77,6 +78,39 @@ Vue.mixin( {
     getHexFromString: str => ColorHasher.hex( str )
   }
 } )
+
+import EditableSpan from './components/EditableSpan.vue'
+Vue.component( 'editable-span', EditableSpan )
+// Vue.component( 'editable-span', {
+//   props: {
+//     text: { type: String, default: 'loading...' },
+//     disabled: { type: Boolean, default: false },
+//     hint: { type: String, default: 'click to edit' },
+//   },
+//   template: `
+//     <span
+//       :title='hint'
+//       :contenteditable='!disabled'
+//       @blur='update'
+//       @keydown.enter='update'
+//       v-html='getContent()'
+//       ></span>
+//   `,
+//   methods: {
+//     getContent( ) {
+//       return this.text
+//     },
+//     update( e ) {
+//       let newContent = e.target.innerText.replace( /(\r\n|\n|\r)/gm, " " )
+//       if ( this.getContent( ) === newContent ) {
+//         e.target.blur( )
+//         return
+//       }
+//       this.text = newContent
+//       this.$emit( 'update', newContent )
+//     }
+//   }
+// } )
 
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
