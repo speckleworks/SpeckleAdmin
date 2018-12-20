@@ -28,7 +28,7 @@
               </div>
               <div class='md-layout-item'>
                 <md-button xxx-to='{name:"streamdata"}' class='link-button'>
-                  Issues
+                  Discussion
                 </md-button>
               </div>
             <!-- </div> -->
@@ -130,6 +130,7 @@ export default {
 .link-button.is-active {
   border-bottom: 2px solid #448aff;
   color: #448aff !important;
+  background-color: ghostwhite;
 }
 
 .detail-card {

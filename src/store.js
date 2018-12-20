@@ -310,10 +310,14 @@ export default new Vuex.Store( {
     updateStreamObjectsAndLayers: ( context, { streamId, commitMessage } ) => new Promise( ( resolve, reject ) => {
       let found = context.state.deStreams.find( s => s.streamId === streamId )
       found.commitMessage = commitMessage
-      console.log( found )
       if ( !found ) return reject( new Error( 'Stream not found in store.' ) )
+
+      context.commit( 'UPDATE_STREAM', { streamId: streamId, commitMessage: commitMessage } )
+
       Axios.post( `streams/${streamId}/clone` )
         .then( res => {
+          let originalStream = context.state.streams.find(  s => s.streamId === streamId )
+          context.commit( 'UPDATE_STREAM', { streamId: streamId, children: [ ...originalStream.children, res.data.clone.streamId ] } )
           return Axios.put( `streams/${streamId}`, found )
         } )
         .then( res => {

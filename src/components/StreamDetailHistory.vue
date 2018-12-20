@@ -1,27 +1,24 @@
 <template>
   <md-card class='md-elevation-3' md-with-hover>
-    <md-card-header class='bg-ghost-white'>
+    <!-- <md-card-header class='bg-ghost-white'>
       <md-card-header-text>
         <div class="md-title">History</div>
         <div class="md-caption">This stream's children and parents, if any.</div>
       </md-card-header-text>
-    </md-card-header>
+    </md-card-header> -->
     <!-- <md-card-content> -->
-    <md-card class='md-elevation-0'>
+    <md-card class='md-elevation-0' v-if='stream.parent'>
       <md-card-content>
         <div class="md-title">Parent</div>
       </md-card-content>
     </md-card>
     <stream-card-small :stream-id='stream.parent' v-if='stream.parent' :removable='false'></stream-card-small>
-    <md-card class='md-elevation-0' v-else>
-      <md-card-content>
-        <div class="md-caption">This stream is a parent stream.</div>
-      </md-card-content>
-    </md-card>
     <md-card class='md-elevation-0'>
-      <md-card-content>
+      <md-card-header class='bg-ghost-white'>
+        <md-card-header-text>
         <div class="md-title">Children <span class='md-caption'>({{stream.children.length}})</span></div>
-      </md-card-content>
+        </md-card-header-text>
+      </md-card-header>
     </md-card>
     <md-card class='md-elevation-0' v-if='stream.children.length === 0'>
       <md-card-content>
@@ -43,14 +40,14 @@ import debounce from 'lodash.debounce'
 import StreamCardSmall from './StreamCardSmall.vue'
 
 export default {
-  name: 'StreamDetailUserHistory',
+  name: 'StreamDetailHistory',
   components: { StreamCardSmall },
   props: {
     stream: Object, // can be alert or info
   },
   computed: {
     paginatedKids( ) {
-      return this.stream.children.slice( this.startIndex, this.endIndex )
+      return this.stream.children.reverse().slice( this.startIndex, this.endIndex )
     },
     canEdit( ) {
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1

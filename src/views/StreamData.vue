@@ -5,6 +5,12 @@
         <md-card-header-text>
           <div class="md-title">Data</div>
           <div class="md-caption">Add/remove data below. Strings, numbers and booleans are supported.</div>
+          <div v-if='stream.commitMessage'>
+            <br>
+            <md-divider></md-divider>
+            <br>
+            <div class="md-caption"><i>Current commit message:</i> {{stream.commitMessage}}</div>
+          </div>
         </md-card-header-text>
         <md-button class='md-primary md-raised' @click.native='preSaveData()' :disabled='!changed'> SAVE </md-button>
       </md-card-header>
@@ -28,11 +34,14 @@
             </md-button>
           </div>
           <div class="md-layout-item text-right">
-          <md-button class='md-primary md-raised' @click.native='preSaveData()' :disabled='!changed'> SAVE </md-button>
-        </div>
+            <md-button class='md-primary md-raised' @click.native='preSaveData()' :disabled='!changed'> SAVE </md-button>
+          </div>
         </div>
       </md-card-content>
     </md-card>
+    <br>
+    <stream-detail-history :stream='stream'></stream-detail-history>
+    <br>
     <md-dialog :md-active.sync="showSaveDialog">
       <md-dialog-title>Commit message</md-dialog-title>
       <div class="md-layout md-gutter" style="padding:24px 24px 0; box-sizing: border-box;">
@@ -59,11 +68,12 @@ import Axios from 'axios'
 import uuid from 'uuid/v4'
 
 import StreamLayer from '../components/StreamLayer.vue'
-
+import StreamDetailHistory from '../components/StreamDetailHistory.vue'
 export default {
   name: 'StreamEditView',
   components: {
-    StreamLayer
+    StreamLayer,
+    StreamDetailHistory
   },
   computed: {
     // fed to the stream layers component

@@ -4,11 +4,11 @@
       <div class="md-layout-item md-size-30">
         <router-link :to='"/streams/"+stream.streamId'>{{stream.name}}</router-link>
       </div>
-      <div class="md-layout-item md-size-30-xxx md-caption">
-        {{stream.streamId}} | last update <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
+      <div class="md-layout-item md-caption">
+        <span v-if='stream.commitMessage'> {{stream.commitMessage}}</span>
       </div>
-      <div class="md-layout-item md-size-20 md-caption xx-text-center">
-        <span v-for='tag in stream.tags'>{{tag}},  </span>
+      <div class="md-layout-item md-caption text-right">
+        {{stream.streamId}} | last update <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
       </div>
       <div class="md-layout-item text-right" v-if='removable'>
         <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='$emit("remove-stream", streamId)'>
