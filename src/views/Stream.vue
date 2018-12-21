@@ -11,27 +11,33 @@
       </div>
       <div class="md-layout-item md-size-100">
         <div class='md-layout md-alignment-center-center'>
-          <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100">
+          <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
             <stream-detail-title :stream='stream'></stream-detail-title>
-            <!-- </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
-            <detail-description :resource='stream'></detail-description>
-            <!-- </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card" v-show='true'> -->
+          </div>
+          <div class="md-layout-item md-layout md-size-55 md-large-size-65 md-medium-size-100" style="padding-left:16px; padding-right:16px; box-sizing: border-box">
+            <!-- <div class='md-layout md-alignment-center-center' style='width:90%;'> -->
+              <div class='md-layout-item'>
+                <md-button :to='{name:"streamoverview"}' class='link-button'>
+                  Overview
+                </md-button>
+              </div>
+              <div class='md-layout-item' v-if='stream.onlineEditable'>
+                <md-button :to='{name:"streamdata"}' class='link-button'>
+                  Data
+                </md-button>
+              </div>
+              <div class='md-layout-item'>
+                <md-button xxx-to='{name:"streamdata"}' class='link-button'>
+                  Discussion
+                </md-button>
+              </div>
+            <!-- </div> -->
+          </div>
+          <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
             <br>
-            <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-            <!-- </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
-            <br>
-            <stream-detail-network :stream='stream'></stream-detail-network>
-            <!-- </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
-            <br>
-            <stream-detail-comments :stream='stream'></stream-detail-comments>
-            <!-- </div>
-          <div class="md-layout-item md-size-50 md-medium-size-100 detail-card"> -->
-            <br>
-            <stream-detail-history :stream='stream'></stream-detail-history>
+            <keep-alive>
+            <router-view></router-view>
+            </keep-alive>
           </div>
         </div>
       </div>
@@ -69,7 +75,6 @@ export default {
       let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
       return stream
     },
-
     canEdit( ) {
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
     },
@@ -84,6 +89,11 @@ export default {
     }
   },
   methods: {
+    getEndRoute( ) {
+      let ending = this.$route.path.split( '/' ).reverse( )[ 0 ]
+      if ( ending === this.$route.params.streamId || ending === '' ) return 'overview'
+      else return ending
+    },
     restore( ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, deleted: false } )
     },
@@ -109,6 +119,20 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.link-button {
+  width: 100%;
+  height: 60px;
+  border-bottom: 2px solid white;
+  transition: all .3s ease;
+  margin: 0;
+}
+
+.link-button.is-active {
+  border-bottom: 2px solid #448aff;
+  color: #448aff !important;
+  background-color: ghostwhite;
+}
+
 .detail-card {
   margin-bottom: 20px;
 }

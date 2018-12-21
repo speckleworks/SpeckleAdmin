@@ -3,12 +3,15 @@ import Vuex from 'vuex'
 import Axios from 'axios'
 
 import uniq from 'lodash.uniq'
+import uuid from 'uuid/v4'
 
 Vue.use( Vuex )
 
 export default new Vuex.Store( {
   state: {
+    // The canonical and correct server url, i.e. `https://speckle.server.com/api`
     server: null,
+    // The server description
     serverManifest: {
       serverName: null,
       api: null,
@@ -17,10 +20,18 @@ export default new Vuex.Store( {
     token: null,
     user: {},
     isAuth: false,
+    // where all the streams and their properties are stored.
     streams: [ ],
+    // data editable streams; we store objects and layers in here. rest of metadata
+    // is in streams proper array (see above).
+    deStreams: [ ],
+    // global store for stream clients.
     clients: [ ],
+    // global store for projects
     projects: [ ],
     comments: [ ],
+    // global store for users. it's dynamically assembled as the end-user moves through
+    // the admin ui, and new user profiles need to be requested.
     users: [ ]
   },
   getters: {
@@ -89,6 +100,13 @@ export default new Vuex.Store( {
         found[ key ] = props[ key ]
       } )
     },
+    UPDATE_STREAM_DATA( state, props ) {
+      let found = state.streams.find( s => s.streamId === props.streamId )
+      if ( props.layers )
+        found.layers = props.layers
+
+      // console.log('TODO')
+    },
     DELETE_STREAM( state, stream ) {
       let index = state.streams.findIndex( s => s.streamId === stream.streamId )
       if ( index > -1 ) {
@@ -106,6 +124,92 @@ export default new Vuex.Store( {
       } )
     },
 
+    ADD_DE_STREAM( state, stream ) {
+      let found = state.deStreams.find( s => s.streamId === stream )
+      if ( !found )
+        state.deStreams.push( stream )
+      else {
+        found.layers = stream.layers
+        found.objects = stream.objects
+      }
+    },
+    ADD_DE_STREAM_LAYER( state, stream ) {
+      console.log( stream )
+      let found = state.deStreams.find( s => s.streamId === stream.streamId )
+      let newLayer = {
+        name: `Param group ${found.layers.length + 1}`,
+        orderIndex: found.layers.length,
+        startIndex: found.objects.length,
+        objectCount: 0,
+        topology: "0-0",
+        guid: uuid( ),
+      }
+      found.layers.push( newLayer )
+    },
+    UPDATE_DE_STREAM_LAYER( state, { streamId, layer, objects } ) {
+      let found = state.deStreams.find( s => s.streamId === streamId )
+      let surpassed = false,
+        objectCountDifference = 0
+
+      found.layers.forEach( iterLayer => {
+        if ( surpassed ) {
+          iterLayer.startIndex += objectCountDifference
+        } else if ( iterLayer.guid === layer.guid ) {
+          iterLayer.name = layer.name
+          iterLayer.topology = `0-${objects.length}`
+          objectCountDifference = objects.length - iterLayer.objectCount
+          found.objects.splice( iterLayer.startIndex, iterLayer.objectCount, ...objects )
+          iterLayer.objectCount = objects.length
+          surpassed = true
+        }
+      } )
+    },
+    REMOVE_DE_STREAM_LAYER( state, { streamId, layer } ) {
+      let found = state.deStreams.find( s => s.streamId === streamId )
+      // dump objects
+      found.objects.splice( layer.startIndex, layer.objectCount )
+      // adjust start indexes
+      let surpassed = false
+      found.layers.forEach( iterLayer => {
+        if ( surpassed ) {
+          iterLayer.startIndex -= layer.objectCount
+          iterLayer.orderIndex -= 1
+        } else if ( iterLayer.guid === layer.guid ) surpassed = true
+      } )
+      // dump layer
+      found.layers = found.layers.filter( l => l.guid !== layer.guid )
+    },
+    APPEND_DE_STREAM_LAYERS_FROM_CSV( state, { streamId, transposed } ) {
+      let found = state.deStreams.find( s => s.streamId === streamId )
+      let index = 0
+      for ( let arr of transposed ) {
+        let newLayer = {
+          name: arr[ 0 ] !== '' ? arr[ 0 ] : "Unnamed",
+          orderIndex: -1, // to be set properly afterwards
+          startIndex: index === 0 ? found.objects.length : found.objects.length,
+          objectCount: arr.length - 1,
+          topology: `0-${arr.length-1}`,
+          guid: uuid( ),
+        }
+        found.layers.push( newLayer )
+        let noHeader = arr.slice( 1, arr.length )
+        console.log( noHeader )
+        found.objects.push( ...noHeader.map( val => {
+          if ( !val ) return { type: "Null", value: "" }
+          if ( typeof val === 'boolean' )
+            return { type: "Boolean", value: val }
+          if ( typeof val === 'number' )
+            return { type: "Number", value: val } // TODO: Hash it please
+          if ( typeof val === 'string' )
+            return { type: "String", value: val } // TODO: Hash it please
+        } ) )
+        index++
+      }
+      found.layers.forEach( ( layer, k ) => {
+        console.log( k )
+        layer.orderIndex = k
+      } )
+    },
     // Projects
     ADD_PROJECTS( state, projects ) {
       projects.forEach( project => {
@@ -200,6 +304,28 @@ export default new Vuex.Store( {
           } )
       } )
     },
+    createStream( context, stream ) {
+      let streamId = null
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `streams` )
+          .then( res => {
+            console.log( res )
+            stream.streamId = res.data.resource.streamId
+            res.data.resource.onlineEditable = true
+            context.commit( 'ADD_STREAMS', [ res.data.resource ] )
+            return Axios.put( `streams/${res.data.resource.streamId}`, stream )
+          } )
+          .then( res => {
+            console.log( res )
+            context.commit( 'UPDATE_STREAM', stream )
+            return resolve( stream )
+          } )
+          .catch( err => {
+            console.error( err )
+            return reject( err )
+          } )
+      } )
+    },
     updateStream( context, props ) {
       Axios.put( `streams/${props.streamId}`, props )
         .then( res => {
@@ -209,14 +335,28 @@ export default new Vuex.Store( {
           console.warn( err )
         } )
     },
-    // streamAddWriteUser( context, props ) {
-    //   return new Promise( ( resolve, reject ) => {
-    //     let stream = context.state.streams.find( s => s.streamId === props.streamId )
-    //     if ( !found ) return reject( new Error( 'Failed to find stream in store.' ) )
-    //     stream.canWrite = uniq( [ ...stream.canWrite, props.userId ] )
-    //     dispatch( 'updateStream', { streamId: props.streamId, canWrite: stream.canWrite } )
-    //   } )
-    // },
+    // For data-editable streams only
+    updateStreamObjectsAndLayers: ( context, { streamId, commitMessage } ) => new Promise( ( resolve, reject ) => {
+      let found = context.state.deStreams.find( s => s.streamId === streamId )
+      found.commitMessage = commitMessage
+      if ( !found ) return reject( new Error( 'Stream not found in store.' ) )
+
+      context.commit( 'UPDATE_STREAM', { streamId: streamId, commitMessage: commitMessage } )
+
+      Axios.post( `streams/${streamId}/clone` )
+        .then( res => {
+          let originalStream = context.state.streams.find( s => s.streamId === streamId )
+          context.commit( 'UPDATE_STREAM', { streamId: streamId, children: [ ...originalStream.children, res.data.clone.streamId ] } )
+          return Axios.put( `streams/${streamId}`, found )
+        } )
+        .then( res => {
+          resolve( res )
+        } )
+        .catch( err => {
+          reject( err )
+        } )
+
+    } ),
     getStreamClients( context, props ) {
       Axios.get( `streams/${props.streamId}/clients` )
         .then( res => {
@@ -227,6 +367,7 @@ export default new Vuex.Store( {
         } )
     },
     deleteStream( context, payload ) {
+      // TODO: https://github.com/speckleworks/SpeckleAdmin/issues/19
       Axios.delete( `streams/${payload.streamId}` )
         .then( res => {
           context.commit( 'DELETE_STREAM', { streamId: payload.streamId } )

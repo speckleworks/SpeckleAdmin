@@ -30,9 +30,17 @@ let myRouter = new Router( {
     },
     {
       path: '/streams/:streamId',
-      name: 'singlestream',
-      component: ( ) => import( './views/StreamDetail.vue' ),
+      component: ( ) => import( './views/Stream.vue' ),
       meta: { requiresAuth: true },
+      children: [ {
+        name: 'streamoverview',
+        path: '',
+        component: ( ) => import( './views/StreamOverview.vue' )
+      }, {
+        name: 'streamdata',
+        path: 'data',
+        component: ( ) => import( './views/StreamData.vue' )
+      } ]
     },
     {
       path: '/projects',
@@ -57,8 +65,16 @@ let myRouter = new Router( {
       component: ( ) => import( './views/Profile.vue' ),
       meta: { requiresAuth: true },
     }
-  ]
+  ],
+  // scrollBehavior( to, from, savedPosition ) {
+  //   console.log( 'scrollBehavior' )
+  //   return { x: 0, y: 0 }
+  // }
 } )
+
+// myRouter.afterEach( ( to, from ) => {
+//   document.getElementById( 'app' ).scrollIntoView( )
+// } )
 
 myRouter.beforeEach( ( to, from, next ) => {
   if ( to.meta.requiresAuth ) {
