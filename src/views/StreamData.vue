@@ -4,7 +4,7 @@
       <md-card-header class='bg-ghost-white'>
         <md-card-header-text>
           <div class="md-title">Data</div>
-          <div class="md-caption">Add/remove data below. Strings, numbers and booleans are supported.</div>
+          <div class="md-caption">Add/remove data below. Strings, numbers and booleans are supported. Changes will not be saved automatically until you click "save".</div>
           <div v-if='stream.commitMessage'>
             <br>
             <md-divider></md-divider>

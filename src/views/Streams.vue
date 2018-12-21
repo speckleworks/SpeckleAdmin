@@ -81,7 +81,7 @@ export default {
     createStream() {
       this.$store.dispatch( 'createStream', { name: 'A New Speckle Stream', onlineEditable: true } )
       .then( res => {
-        this.$router.push(`/streams/${res.streamId}/edit`)
+        this.$router.push(`/streams/${res.streamId}`)
       })
       .catch( err => {
         console.error( err )

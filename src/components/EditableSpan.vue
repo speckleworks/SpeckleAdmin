@@ -54,10 +54,14 @@ export default {
 </script>
 <style scoped lang='scss'>
 $SpeckleBlue: #448aff;
-
+span {
+  border-bottom: 2px solid transparent;
+  transition: all .3s ease;
+}
 span:hover {
   cursor: text;
   color: $SpeckleBlue;
+  border-bottom: 2px solid $SpeckleBlue;
+  cursor: pointer;
 }
-
 </style>
