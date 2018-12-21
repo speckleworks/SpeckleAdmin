@@ -29,8 +29,9 @@
             <md-button class='md-icon-button md-raised md-primary' @click.native='addLayer'>
               <md-icon>add</md-icon>
             </md-button>
-            <md-button class='md-icon-button md-raised' @click.native=''>
+            <md-button class='md-icon-button md-raised' @click.native='showImportCSVDialog = true'>
               <md-icon>cloud_upload</md-icon>
+              <md-tooltip md-direction="top">Paste a CSV file</md-tooltip>
             </md-button>
           </div>
           <div class="md-layout-item text-right">
@@ -40,8 +41,26 @@
       </md-card-content>
     </md-card>
     <br>
-    <stream-detail-history :stream='stream'></stream-detail-history>
+    <!-- <stream-detail-history :stream='stream'></stream-detail-history> -->
     <br>
+    <md-dialog :md-active.sync='showImportCSVDialog'>
+      <md-dialog-title>Import CSV</md-dialog-title>
+      <div class="md-layout md-gutter" style="width:50vw;padding:24px 24px 0; box-sizing: border-box;">
+        <div class="md-layout-item md-size-100">
+          <p>Paste your csv below.</p>
+          <p class='md-caption'>We assume the first row will contain the column names. Each column will become a separate "output port" or layer.</p>
+        </div>
+        <div class="md-layout-item md-size-100">
+          <textarea style="height: 150px;width:100%" v-model='csvInput'></textarea>
+        </div>
+        <div>
+        </div>
+      </div>
+      <md-dialog-actions>
+        <md-button class="md-primary" @click='closeCsvDialog()'>Cancel</md-button>
+        <md-button class="md-primary md-raised" @click='importCSV()'>Import CSV</md-button>
+      </md-dialog-actions>
+    </md-dialog>
     <md-dialog :md-active.sync="showSaveDialog">
       <md-dialog-title>Commit message</md-dialog-title>
       <div class="md-layout md-gutter" style="padding:24px 24px 0; box-sizing: border-box;">
@@ -66,6 +85,7 @@ import debounce from 'lodash.debounce'
 import union from 'lodash.union'
 import Axios from 'axios'
 import uuid from 'uuid/v4'
+import papa from 'papaparse'
 
 import StreamLayer from '../components/StreamLayer.vue'
 import StreamDetailHistory from '../components/StreamDetailHistory.vue'
@@ -111,6 +131,8 @@ export default {
       changed: false,
       showSaveDialog: false,
       commitMessage: 'no message',
+      showImportCSVDialog: false,
+      csvInput: ''
     }
   },
   methods: {
@@ -144,10 +166,6 @@ export default {
         .catch( err => {
           console.error( err )
         } )
-      // If stream has children (ie, history is present), clone it.
-      //
-      // Save stream with current object list, etc.
-      //
     },
     fetchData( streamId ) {
       console.log( `fetching data for ${streamId}` )
@@ -163,6 +181,20 @@ export default {
         .catch( err => {
           console.error( err )
         } )
+    },
+    importCSV( ) {
+      let results = papa.parse( this.csvInput, { dynamicTyping: false } )
+      // console.log( results )
+      let transposed = results.data[ 0 ].map( ( x, i ) => results.data.map( x => x[ i ] ) )
+      // console.log( transposed )
+      this.$store.commit( 'APPEND_DE_STREAM_LAYERS_FROM_CSV', { streamId: this.stream.streamId, transposed } )
+      this.showImportCSVDialog = false
+      this.csvInput = ''
+      this.changed = true
+    },
+    closeCsvDialog( ) {
+      this.showImportCSVDialog = false
+      this.csvInput = ''
     }
   },
   mounted( ) {

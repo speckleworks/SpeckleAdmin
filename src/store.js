@@ -165,7 +165,6 @@ export default new Vuex.Store( {
       } )
     },
     REMOVE_DE_STREAM_LAYER( state, { streamId, layer } ) {
-      console.log( `TODO: Remove layer ${layer.guid} from ${streamId}` )
       let found = state.deStreams.find( s => s.streamId === streamId )
       // dump objects
       found.objects.splice( layer.startIndex, layer.objectCount )
@@ -180,7 +179,37 @@ export default new Vuex.Store( {
       // dump layer
       found.layers = found.layers.filter( l => l.guid !== layer.guid )
     },
-
+    APPEND_DE_STREAM_LAYERS_FROM_CSV( state, { streamId, transposed } ) {
+      let found = state.deStreams.find( s => s.streamId === streamId )
+      let index = 0
+      for ( let arr of transposed ) {
+        let newLayer = {
+          name: arr[ 0 ] !== '' ? arr[ 0 ] : "Unnamed",
+          orderIndex: -1, // to be set properly afterwards
+          startIndex: index === 0 ? found.objects.length : found.objects.length,
+          objectCount: arr.length - 1,
+          topology: `0-${arr.length-1}`,
+          guid: uuid( ),
+        }
+        found.layers.push( newLayer )
+        let noHeader = arr.slice( 1, arr.length )
+        console.log( noHeader )
+        found.objects.push( ...noHeader.map( val => {
+          if ( !val ) return { type: "Null", value: "" }
+          if ( typeof val === 'boolean' )
+            return { type: "Boolean", value: val }
+          if ( typeof val === 'number' )
+            return { type: "Number", value: val } // TODO: Hash it please
+          if ( typeof val === 'string' )
+            return { type: "String", value: val } // TODO: Hash it please
+        } ) )
+        index++
+      }
+      found.layers.forEach( ( layer, k ) => {
+        console.log( k )
+        layer.orderIndex = k
+      } )
+    },
     // Projects
     ADD_PROJECTS( state, projects ) {
       projects.forEach( project => {
@@ -316,7 +345,7 @@ export default new Vuex.Store( {
 
       Axios.post( `streams/${streamId}/clone` )
         .then( res => {
-          let originalStream = context.state.streams.find(  s => s.streamId === streamId )
+          let originalStream = context.state.streams.find( s => s.streamId === streamId )
           context.commit( 'UPDATE_STREAM', { streamId: streamId, children: [ ...originalStream.children, res.data.clone.streamId ] } )
           return Axios.put( `streams/${streamId}`, found )
         } )
