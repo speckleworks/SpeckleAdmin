@@ -11,8 +11,8 @@
         <strong>{{project._id}}</strong></span>
         </md-chip>
         <md-chip class=''>
-          <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit.</span>
-          <span v-else><md-icon>lock</md-icon> you cannot edit.</span>
+          <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit</span>
+          <span v-else><md-icon>lock</md-icon> you cannot edit</span>
         </md-chip>
       </p>
       <md-divider></md-divider>

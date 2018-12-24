@@ -44,6 +44,10 @@
   </div>
 </template>
 <script>
+export default {
+  name: 'SiteNavigation'
+}
+
 </script>
 <style lang='scss'>
 $SpeckleBlue: #448aff;

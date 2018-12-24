@@ -8,7 +8,7 @@
             <span class="md-list-item-text"></span>
           </md-list-item>
         </md-list>
-          <nav-drawer></nav-drawer>
+        <nav-drawer></nav-drawer>
       </md-app-drawer>
       <md-app-content>
         <keep-alive exclude='StreamDetailView'>
@@ -34,12 +34,26 @@ export default {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
       this.$store.dispatch( 'getProjects' )
     }
+  },
+  updated( ) {
+    let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
+    if ( !overlay ) return
+    overlay.onclick = ( function( ) {
+      this.showSidebar = false
+    } ).bind( this )
   }
+
 }
 
 </script>
 <style lang='scss'>
 $SpeckleBlue: #448aff;
+
+.md-app-content {
+  @media only screen and (max-width: 600px) {
+    padding: 0 !important;
+  }
+}
 
 .md-drawer.md-persistent-mini {
   transform: translate3D(0, 0px, 0) !important;

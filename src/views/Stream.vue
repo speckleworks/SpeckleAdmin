@@ -36,11 +36,11 @@
                   History
                 </md-button>
               </div>
-              <div class='md-layout-item'>
+        <!--       <div class='md-layout-item'>
                 <md-button xxx-to='{name:"streamdata"}' class='link-button'>
                   Discussion
                 </md-button>
-              </div>
+              </div> -->
             <!-- </div> -->
           </div>
           <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
@@ -67,7 +67,6 @@ import StreamDetailTitle from '../components/StreamDetailTitle.vue'
 import DetailDescription from '../components/DetailDescription.vue'
 import StreamDetailUserPerms from '../components/StreamDetailUserPerms.vue'
 import StreamDetailNetwork from '../components/StreamDetailNetwork.vue'
-import StreamDetailHistory from '../components/StreamDetailHistory.vue'
 import StreamDetailComments from '../components/StreamDetailComments.vue'
 
 export default {
@@ -77,12 +76,14 @@ export default {
     DetailDescription,
     StreamDetailUserPerms,
     StreamDetailNetwork,
-    StreamDetailHistory,
     StreamDetailComments
   },
   computed: {
     stream( ) {
       let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
+      if( stream === null ) {
+        console.log('null fukcing stream')
+      }
       return stream
     },
     canEdit( ) {

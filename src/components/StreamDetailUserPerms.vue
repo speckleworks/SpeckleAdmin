@@ -23,7 +23,7 @@
         <div class='md-layout-item md-size-100' style="margin-top:20px;">
           <div class="md-title">Permissions</div>
           <p class='md-caption' v-if='canEdit'>
-            <span v-if='streamProjects.length>0'>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' xxxstyle='color:white !important;'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
+            <span v-if='streamProjects.length>0'>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' :key='proj._id'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
             <span v-else>Add or remove users below.</span>
           </p>
           <p class='md-caption' v-else>You cannot edit the permissions of this stream.</p>

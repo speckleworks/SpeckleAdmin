@@ -58,7 +58,7 @@ let myRouter = new Router( {
     }, {
       path: '/projects/:projectId',
       name: 'singleproject',
-      component: ( ) => import( './views/ProjectDetail.vue' ),
+      component: ( ) => import( './views/Project.vue' ),
       meta: { requiresAuth: true },
     },
     {

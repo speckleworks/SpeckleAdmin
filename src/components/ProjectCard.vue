@@ -4,8 +4,8 @@
       <md-card-header-text>
         <router-link :to='"/projects/"+project._id'>
           <div class="md-title">{{project.name}}</div>
-          <div class="md-subhead" stlye='user-select:all;'>{{project._id}}</div>
-          <div class="md-caption" v-html='compiledDescription'></div>
+          <div class="md-subhead md-small-hide" stlye='user-select:all;'>{{project._id}}</div>
+          <div class="md-caption md-small-hide" v-html='compiledDescription'></div>
         </router-link>
       </md-card-header-text>
       <!-- <md-checkbox v-model="selected" value="1" @click.native='$emit("selected", stream)'></md-checkbox> -->
@@ -40,7 +40,7 @@
             </div>
           </div>
         </div>
-        <div class='md-layout-item md-size-100'>
+        <div class='md-layout-item md-size-100 md-small-hide'>
           <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
         </div>
       </div>

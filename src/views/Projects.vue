@@ -12,14 +12,14 @@
       </md-card>
       <md-card class="md-primary-xx main-toolbar md-elevation-3">
         <md-card-content class='md-layout md-alignment-center-space-between'>
-          <div class="md-layout-item md-size-95">
+          <div class="md-layout-item md-size-95 md-small-size-70">
             <md-field md-clearable>
               <md-icon>search</md-icon>
               <label>search for projects by their name</label>
               <md-input @input="" spellcheck="false"></md-input>
             </md-field>
           </div>
-          <div class="md-layout-item md-size-5 text-right">
+          <div class="md-layout-item md-size-5 md-small-size-30 text-right">
             <md-button class='md-icon-button md-raised md-primary' @click.native='createProject'>
               <md-icon>add</md-icon>
             </md-button>

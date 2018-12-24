@@ -88,12 +88,11 @@ import uuid from 'uuid/v4'
 import papa from 'papaparse'
 
 import StreamLayer from '../components/StreamLayer.vue'
-import StreamDetailHistory from '../components/StreamDetailHistory.vue'
+
 export default {
   name: 'StreamEditView',
   components: {
-    StreamLayer,
-    StreamDetailHistory
+    StreamLayer
   },
   computed: {
     // fed to the stream layers component

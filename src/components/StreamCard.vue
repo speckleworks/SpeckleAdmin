@@ -5,7 +5,7 @@
         <router-link :to='"/streams/"+stream.streamId'>
           <div class="md-title">{{stream.name}}</div>
           <div class="md-subhead" stlye='user-select:all;'>{{stream.streamId}}</div>
-          <div class="md-caption" v-html='compiledDescription'></div>
+          <div class="md-caption md-small-hide" v-html='compiledDescription'></div>
         </router-link>
       </md-card-header-text>
       <md-checkbox v-model="selected" value="1" @click.native='$emit("selected", stream)'></md-checkbox>
@@ -24,11 +24,7 @@
         <div class="md-layout-item md-caption">
           {{createdAt}}
         </div>
-        <div class="md-layout-item md-caption md-size-20">
-          <md-icon>{{stream.private ? 'https' : 'public'}}</md-icon>
-          {{stream.private?'private':'public'}}
-        </div>
-        <div class='md-layout-item md-size-100'>
+        <div class='md-layout-item md-size-100 md-small-hide'>
           <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
         </div>
       </div>
