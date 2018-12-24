@@ -11,7 +11,8 @@
         <div v-html='compiledDescription'></div>
       </div>
       <div v-show='editDescription'>
-        Supports <a class='' target="_blank" href='https://en.wikipedia.org/wiki/Markdown#Example'>markdown.</a>
+        <div class="md-caption">
+        Supports <a class='' target="_blank" href='https://en.wikipedia.org/wiki/Markdown#Example'>markdown:</a><strong> ** bold **</strong>, <i>* italic *</i>, <code># Heading 1</code>, <code>## Heading 2</code>, <code>[links](http://example.com)</code>, etc.</div>
         <md-field>
           <md-textarea v-model="resource.description"></md-textarea>
         </md-field>

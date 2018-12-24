@@ -1,39 +1,10 @@
 <template>
-  <md-card class='md-elevation-3' md-with-hover>
-    <!-- <md-card-header class='bg-ghost-white'>
-      <md-card-header-text>
-        <div class="md-title">History</div>
-        <div class="md-caption">This stream's children and parents, if any.</div>
-      </md-card-header-text>
-    </md-card-header> -->
-    <!-- <md-card-content> -->
-    <md-card class='md-elevation-0' v-if='stream.parent'>
-      <md-card-content>
-        <div class="md-title">Parent</div>
-      </md-card-content>
-    </md-card>
-    <stream-card-small :stream-id='stream.parent' v-if='stream.parent' :removable='false'></stream-card-small>
-    <md-card class='md-elevation-0'>
-      <md-card-header class='bg-ghost-white'>
-        <md-card-header-text>
-        <div class="md-title">Children <span class='md-caption'>({{stream.children.length}})</span></div>
-        </md-card-header-text>
-      </md-card-header>
-    </md-card>
-    <md-card class='md-elevation-0' v-if='stream.children.length === 0'>
-      <md-card-content>
-        <div class="md-caption">This stream has no children.</div>
-      </md-card-content>
-    </md-card>
-    <stream-card-small v-for='childId in paginatedKids' :key='childId' :stream-id='childId' :removable='false'></stream-card-small>
-    <br>
-    <div class="text-center" style="padding-bottom: 5px">
-      <md-button class='md-raised md-primary' @click.native='endIndex+=5' :disabled='paginatedKids.length===stream.children.length'>
-        Show More ({{paginatedKids.length}} / {{stream.children.length}})
-      </md-button>
+  <div>
+    <div v-if='false'></div>
+    <div v-else>
+      Stream has no history.
     </div>
-    <!-- </md-card-content> -->
-  </md-card>
+  </div>
 </template>
 <script>
 import debounce from 'lodash.debounce'

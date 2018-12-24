@@ -12,11 +12,7 @@ export default new Vuex.Store( {
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`
     server: null,
     // The server description
-    serverManifest: {
-      serverName: null,
-      api: null,
-      version: null
-    },
+    serverManifest: null,
     token: null,
     user: {},
     isAuth: false,

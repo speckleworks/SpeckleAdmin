@@ -4,6 +4,12 @@
       You do not have any deleted items.
     </md-empty-state>
     <div class='md-layout' v-else>
+      <md-card class="md-elevation-0 md-layout-item md-size-100">
+        <md-card-content>
+          <h1 class='md-display-1'>Trash bin</h1>
+          <p>These are your deleted resources. You can restore them or delete them permanently. Take care, there's no undo button!</p>
+        </md-card-content>
+      </md-card>
       <md-card class="main-toolbar md-elevation-3">
         <md-card-content class='md-layout md-alignment-center-space-between'>
           <div class="md-layout-item md-size-100">
@@ -16,7 +22,7 @@
         </md-card-content>
       </md-card>
       <div class="md-layout md-alignment-center-center">
-        <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100">
+        <div class="md-layout-item md-size-100 md-medium-size-100">
           <md-card class="md-elevation-0">
             <md-card-content class='md-layout md-alignment-center-center' v-for='resource in allResourcesFiltered'>
               <div class="md-layout-item md-size-5">
@@ -58,7 +64,9 @@ export default {
       return this.$store.state.streams.filter( s => s.deleted === true )
     },
     allResources( ) {
-      return [ ...this.streams, ...this.projects ]
+      return [ ...this.streams, ...this.projects ].sort( ( a, b ) => {
+        return new Date( b.updatedAt ) - new Date( a.updatedAt );
+      } )
     },
     allResourcesFiltered( ) {
       if ( this.filterText === '' ) return this.allResources

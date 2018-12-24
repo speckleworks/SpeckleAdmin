@@ -21,9 +21,19 @@
                   Overview
                 </md-button>
               </div>
+              <div class='md-layout-item'>
+                <md-button :to='{name:"streamsharing"}' class='link-button'>
+                  Sharing
+                </md-button>
+              </div>
               <div class='md-layout-item' v-if='stream.onlineEditable'>
                 <md-button :to='{name:"streamdata"}' class='link-button'>
-                  Data
+                  Edit Data
+                </md-button>
+              </div>
+              <div class='md-layout-item'>
+                <md-button :to='{name:"streamhistory"}' class='link-button'>
+                  History
                 </md-button>
               </div>
               <div class='md-layout-item'>

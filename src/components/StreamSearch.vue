@@ -1,5 +1,5 @@
 <template>
-  <md-card md-with-hover class='md-elevation-0'>
+  <md-card md-with-hover class='md-elevation-0 stream-search'>
     <md-card-content>
       <md-field md-clearable>
         <md-icon>search</md-icon>
@@ -94,4 +94,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.stream-search {
+  border-radius: 10px;
+}
 </style>

@@ -40,6 +40,14 @@ let myRouter = new Router( {
         name: 'streamdata',
         path: 'data',
         component: ( ) => import( './views/StreamData.vue' )
+      },{
+        name: 'streamsharing',
+        path: 'sharing',
+        component: ( ) => import( './views/StreamSharing.vue' )
+      } ,{
+        name: 'streamhistory',
+        path: 'history',
+        component: ( ) => import( './views/StreamHistory.vue' )
       } ]
     },
     {
@@ -63,6 +71,17 @@ let myRouter = new Router( {
       path: '/profile',
       name: 'profile',
       component: ( ) => import( './views/Profile.vue' ),
+    },
+    {
+      path: '/plugins',
+      name: 'plugins',
+      component: ( ) => import( './views/Plugins.vue' ),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/feedback',
+      name: 'feedback',
+      component: ( ) => import( './views/Feedback.vue' ),
       meta: { requiresAuth: true },
     }
   ],

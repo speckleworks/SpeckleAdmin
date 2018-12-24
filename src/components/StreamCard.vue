@@ -34,7 +34,7 @@
       </div>
     </md-card-content>
     <md-card-actions>
-      <md-button class='md-accent' @click.native='deleteStream' v-show='isOwner'>Delete</md-button>
+      <md-button class='md-accent' @click.native='deleteStream' v-show='isOwner'>Archive</md-button>
       <md-button class='md-raised-xxx' :to='"/streams/"+stream.streamId'>Details</md-button>
     </md-card-actions>
     <!-- {{stream.streamId}} -->

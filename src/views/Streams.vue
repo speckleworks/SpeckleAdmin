@@ -3,16 +3,22 @@
     <!--     <md-button class="md-primary md-raised" @click.native='createProject'>Create your first project!</md-button> -->
   </md-empty-state>
   <div class='md-layout' v-else>
+    <md-card class="md-elevation-0 md-layout-item md-size-100">
+      <md-card-content>
+        <h1 class='md-display-1'>Streams</h1>
+        <p>Streams are the place where your project data (objects and other information) is kept.</p>
+      </md-card-content>
+    </md-card>
     <md-card class="md-primary-xx main-toolbar md-elevation-3">
       <md-card-content class='md-layout md-alignment-center-space-between'>
-        <div class="md-layout-item md-size-95">
+        <div class="md-layout-item md-size-95 md-small-size-80">
           <md-field md-clearable>
             <md-icon>search</md-icon>
-            <label>name:box id:xxx private:true</label>
+            <label>filter query</label>
             <md-input @input="updateSearch" spellcheck="false"></md-input>
           </md-field>
         </div>
-        <div class="md-layout-item md-size-5 text-right">
+        <div class="md-layout-item md-size-5 md-small-size-20 text-right">
           <md-button class='md-icon-button md-raised md-primary' @click.native='createStream'>
             <md-icon>add</md-icon>
           </md-button>
@@ -25,7 +31,7 @@
         </div>
       </md-card-content>
     </md-card>
-    <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-33 md-xlarge-size-33' v-for='stream in paginatedStreams' :key='stream._id'>
+    <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-50 md-xlarge-size-33' v-for='stream in paginatedStreams' :key='stream._id'>
       <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
     </div>
     <div class="md-layout-item md-size-100">

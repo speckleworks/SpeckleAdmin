@@ -1,5 +1,5 @@
 <template>
-  <md-card md-with-hover class='md-elevation-0'>
+  <md-card md-with-hover class='md-elevation-0 user-search'>
     <md-card-content>
     <md-field md-clearable>
       <md-icon>search</md-icon>
@@ -80,7 +80,9 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-
+.user-search {
+  border-radius: 10px;
+}
 .search-results {
   position: absolute;
   background-color: white;

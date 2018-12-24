@@ -1,11 +1,11 @@
 <template>
-  <div>
-    <h1 class='md-display-1'>Hello, {{$store.state.user.name}}!</h1>
-    <md-button class='no-margin md-raised' @click.native='logout'>Logout</md-button>
-<!--     <p>You look like this:</p>
-    <pre>
-      {{$store.state.user}}
-    </pre> -->
+  <div class='md-layout'>
+    <md-card class="md-elevation-0 md-layout-item md-size-100">
+      <md-card-content>
+        <h1 class='md-display-1'>Hello, {{$store.state.user.name}}!</h1>
+        <md-button class='no-margin md-raised md-primary' @click.native='logout'>Logout</md-button>
+      </md-card-content>
+    </md-card>
   </div>
 </template>
 <script>

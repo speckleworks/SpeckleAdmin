@@ -1,12 +1,13 @@
 <template>
-  <md-content class='md-layout md-alignment-center-center super-bg  ' style="min-height: 100%">
+  <md-content class='md-layout md-alignment-center-center' style="min-height: 100%">
     <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
       <md-card class="md-elevation-3">
         <md-card-header>
           <md-card-header-text>
             <div class="md-title">Login</div>
             <div class="md-caption">
-              <!-- at <strong><a :href='$store.state.server' target="_blank">{{$store.state.serverManifest.serverName}}</a></strong>. --> Do you want to <router-link to='/register'>register</router-link>?</div>
+            <span v-if='$store.state.serverManifest'>at <strong><a :href='$store.state.server' target="_blank">{{$store.state.serverManifest.serverName}}</a></strong>.</span>
+            Do you want to <router-link to='/register'>register</router-link>?</div>
           </md-card-header-text>
         </md-card-header>
         <md-card-content>
@@ -51,10 +52,6 @@ export default {
   },
   computed: {},
   watch: {
-    // '$route'() {
-    //   if( this.$store.state.isAuth )
-    //     this.$router.push( '/' )
-    // }
   },
   data( ) {
     return {
@@ -111,8 +108,10 @@ export default {
   mounted( ) {
     if ( this.$store.state.server ) {
       this.server = this.$store.state.server
+      this.checkServer( )
     } else {
       this.server = `${window.location.origin}/api`
+      this.checkServer( )
     }
     if ( this.$store.state.isAuth === true ) {
       this.$router.push( '/' )

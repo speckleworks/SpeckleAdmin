@@ -2,13 +2,23 @@
   <div>
     <detail-description :resource='stream'></detail-description>
     <br>
-    <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-    <br>
     <stream-detail-network :stream='stream'></stream-detail-network>
     <br>
-    <stream-detail-comments :stream='stream'></stream-detail-comments>
+    <md-card>
+      <md-card-header class='bg-ghost-white'>
+        <md-card-header-text>
+          <h2 class='md-title'>Projects</h2>
+          <p class="md-caption">Projects this stream is part of.</p>
+        </md-card-header-text>
+      </md-card-header>
+      <md-card-content>
+        <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
+          <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
+        </md-chip></span>
+        <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
+      </md-card-content>
+    </md-card>
     <br>
-    <stream-detail-history :stream='stream'></stream-detail-history>
   </div>
 </template>
 <script>
@@ -17,9 +27,7 @@ import union from 'lodash.union'
 
 import StreamDetailTitle from '../components/StreamDetailTitle.vue'
 import DetailDescription from '../components/DetailDescription.vue'
-import StreamDetailUserPerms from '../components/StreamDetailUserPerms.vue'
 import StreamDetailNetwork from '../components/StreamDetailNetwork.vue'
-import StreamDetailHistory from '../components/StreamDetailHistory.vue'
 import StreamDetailComments from '../components/StreamDetailComments.vue'
 
 export default {
@@ -27,9 +35,7 @@ export default {
   components: {
     StreamDetailTitle,
     DetailDescription,
-    StreamDetailUserPerms,
     StreamDetailNetwork,
-    StreamDetailHistory,
     StreamDetailComments
   },
   computed: {
@@ -42,6 +48,9 @@ export default {
     },
     isOwner( ) {
       return this.stream.owner === this.$store.state.user._id
+    },
+    streamProjects( ) {
+      return this.$store.state.projects.filter( p => p.streams.indexOf( this.stream.streamId ) !== -1 )
     }
   },
   data( ) {

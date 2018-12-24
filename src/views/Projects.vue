@@ -4,6 +4,12 @@
       <md-button class="md-primary md-raised" @click.native='createProject'>Create your first project!</md-button>
     </md-empty-state>
     <div class='md-layout' v-else>
+      <md-card class="md-elevation-0 md-layout-item md-size-100">
+        <md-card-content>
+          <h1 class='md-display-1'>Projects</h1>
+          <p>Projects allow you to group streams together with a team of users.</p>
+        </md-card-content>
+      </md-card>
       <md-card class="md-primary-xx main-toolbar md-elevation-3">
         <md-card-content class='md-layout md-alignment-center-space-between'>
           <div class="md-layout-item md-size-95">
@@ -36,7 +42,7 @@ export default {
   },
   computed: {
     projects( ) {
-      return this.$store.state.projects.filter( p => p.deleted === false)
+      return this.$store.state.projects.filter( p => p.deleted === false )
     }
   },
   data( ) {
@@ -52,8 +58,7 @@ export default {
         } )
     }
   },
-  created( ) {
-  }
+  created( ) {}
 }
 
 </script>

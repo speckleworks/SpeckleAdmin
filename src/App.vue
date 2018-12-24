@@ -1,11 +1,14 @@
 <template>
   <div id="app">
-    <md-button class="md-fab md-plain md-primary md-fab-bottom-left md-fixed" style='z-index: 10000' @click='showSidebar = !showSidebar' v-show='$store.state.isAuth'>
-      <md-icon>{{showSidebar ? 'close' : 'menu'}}</md-icon>
-    </md-button>
     <md-app md-waterfall>
-      <md-app-drawer :md-active="showSidebar" class='md-primary xxx-md-elevation-10 nav-sidebar' style='' md-permanent="clipped" v-show='$store.state.isAuth && showSidebar'>
-        <nav-drawer></nav-drawer>
+      <md-app-drawer :md-active="showSidebar" class='super-bg md-primary nav-sidebar' md-persistent="mini">
+        <md-list>
+          <md-list-item @click='showSidebar=!showSidebar'>
+            <md-icon>{{ showSidebar ? "chevron_left" : "chevron_right"}}</md-icon>
+            <span class="md-list-item-text"></span>
+          </md-list-item>
+        </md-list>
+          <nav-drawer></nav-drawer>
       </md-app-drawer>
       <md-app-content>
         <keep-alive exclude='StreamDetailView'>
@@ -38,6 +41,10 @@ export default {
 <style lang='scss'>
 $SpeckleBlue: #448aff;
 
+.md-drawer.md-persistent-mini {
+  transform: translate3D(0, 0px, 0) !important;
+}
+
 .super-bg {
   background: #448aff;
   /* fallback for old browsers */
@@ -45,7 +52,6 @@ $SpeckleBlue: #448aff;
   /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #448aff, #396afc);
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
 }
 
 
@@ -120,4 +126,5 @@ button {
   /*z-index: 10000 !important;*/
   background-color: white !important;
 }
+
 </style>

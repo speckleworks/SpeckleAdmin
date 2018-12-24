@@ -1,14 +1,23 @@
 <template>
-  <md-card class='md-elevation-0'>
-    <h1 class='md-display-1'>
+  <md-card class='md-elevation-0 title-card'>
+    <md-card-content>
+      <h1 class='md-display-1'>
       <router-link to='/projects'>Projects</router-link> /
       <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span>
+      <span v-else>{{project.name}}</span>
     </h1>
-    <p>
-      projectId: <span style="user-select:all"><md-chip class='md-accent'><strong>{{project._id}}</strong></md-chip></span>
-    </p>
-    <md-divider></md-divider>
-    <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
+      <p>
+        <md-chip class='md-primary'>projectId: <span style="user-select:all">
+        <strong>{{project._id}}</strong></span>
+        </md-chip>
+        <md-chip class=''>
+          <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit.</span>
+          <span v-else><md-icon>lock</md-icon> you cannot edit.</span>
+        </md-chip>
+      </p>
+      <md-divider></md-divider>
+      <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
+    </md-card-content>
   </md-card>
 </template>
 <script>
@@ -37,6 +46,11 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.title-card {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .project-name {
   transition: all 0.2s ease;
 }

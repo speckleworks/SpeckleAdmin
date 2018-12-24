@@ -7,7 +7,7 @@
           <div class='md-layout-item'><md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button></div>
         </md-content>
       </div>
-      <div class="md-layout-item md-size-50 md-large-size-65 md-medium-size-100 detail-card">
+      <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100 detail-card">
         <project-detail-title :project='project'></project-detail-title>
         <detail-description :resource='project'></detail-description>
         <br>
@@ -28,7 +28,7 @@
       </div>
     </div>
     <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
-      <div class='md-layout-item md-size-50'>
+      <div class='md-layout-item md-size-55'>
         <md-progress-bar md-mode="indeterminate"></md-progress-bar>
       </div>
     </div>

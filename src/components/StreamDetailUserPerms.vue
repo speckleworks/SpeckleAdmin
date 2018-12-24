@@ -1,5 +1,5 @@
 <template>
-  <md-card class='md-elevation-3' md-with-hover>
+  <md-card class='md-elevation-3'>
     <md-card-content class='bg-ghost-white'>
       <div class="md-layout md-alignment-center-center">
         <div class="md-layout-item md-title md-size-70">Link Sharing</div>
@@ -11,7 +11,7 @@
         <div class='md-layout-item md-size-100 md-caption'>
           {{ stream.private ? "Private resource. Only people with read or write persmissions can access it." : "Public resource. Anyone with the id can access it."}}
           <span class='md-layout-item md-size-100 md-caption' v-if='isOwner'>
-          You own this stream.
+          You are the <strong>owner</strong> of this stream.
         </span>
           <span class='md-layout-item md-size-100 md-caption' v-else>
           This stream was shared with you by <strong>{{streamOwner}}.</strong>
@@ -22,7 +22,11 @@
       <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:20px;">
           <div class="md-title">Permissions</div>
-          <p class='md-caption'>Some users might be disabled as their permissions are set through projects.</p>
+          <p class='md-caption' v-if='canEdit'>
+            <span v-if='streamProjects.length>0'>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' xxxstyle='color:white !important;'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
+            <span v-else>Add or remove users below.</span>
+          </p>
+          <p class='md-caption' v-else>You cannot edit the permissions of this stream.</p>
         </div>
       </div>
     </md-card-content>
@@ -30,10 +34,7 @@
       <div class="md-layout">
         <div class='md-layout-item md-size-100' style="margin-top:0px;">
           <user-search v-on:selected-user='addUserToWrite' v-if='canEdit'></user-search>
-          <permission-table
-            :resource='stream'
-            :disabled-users='usersFromProjects'
-            v-on:update-table='updatePerms'></permission-table>
+          <permission-table :resource='stream' :disabled-users='usersFromProjects' :global-disabled='!canEdit' v-on:update-table='updatePerms'></permission-table>
         </div>
       </div>
     </md-card-content>
@@ -74,7 +75,11 @@ export default {
       let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
       let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
       return [ ...new Set( [ ...otherCanWrite, ...otherCanRead ] ) ]
+    },
+    streamProjects( ) {
+      return this.$store.state.projects.filter( p => p.streams.indexOf( this.stream.streamId ) !== -1 )
     }
+
   },
   data( ) {
     return {
