@@ -10,6 +10,7 @@
         <md-chip class='md-primary'>projectId: <span style="user-select:all">
         <strong>{{project._id}}</strong></span>
         </md-chip>
+        <div class='md-xlarge-hide md-large-hide md-medium-hide md-small-hide'><br>&nbsp</div>
         <md-chip class=''>
           <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit</span>
           <span v-else><md-icon>lock</md-icon> you cannot edit</span>

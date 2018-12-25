@@ -94,6 +94,11 @@ export default {
   components: {
     StreamLayer
   },
+  watch: {
+    stream( newStream, oldStream ) {
+      this.fetchData( newStream.streamId )
+    }
+  },
   computed: {
     // fed to the stream layers component
     mergedLayers( ) {
@@ -154,7 +159,6 @@ export default {
       this.showSaveDialog = true
     },
     saveData( ) {
-      this.commitMessage += ` (changed by ${this.$store.state.user.name} ${this.$store.state.user.surname})`
       this.$store.dispatch( 'updateStreamObjectsAndLayers', { streamId: this.stream.streamId, commitMessage: this.commitMessage } )
         .then( res => {
           this.showSaveDialog = false

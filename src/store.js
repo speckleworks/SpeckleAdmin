@@ -246,6 +246,19 @@ export default new Vuex.Store( {
         else found = user // update the user
       } )
     },
+    UPDATE_LUSER( state, user ) {
+      let found = null
+      if ( user._id === state.user._id ) found = state.user
+      else
+        found = state.users.find( u => u._id === user._id )
+      if ( !found )
+        return console.error( 'User not found; aborting update.' )
+      Object.keys( user ).forEach( key => {
+        found[ key ] = user[ key ]
+      } )
+    },
+
+    // Generics
     SET_SERVER( state, server ) {
       state.server = server
     },
@@ -334,8 +347,10 @@ export default new Vuex.Store( {
     // For data-editable streams only
     updateStreamObjectsAndLayers: ( context, { streamId, commitMessage } ) => new Promise( ( resolve, reject ) => {
       let found = context.state.deStreams.find( s => s.streamId === streamId )
-      found.commitMessage = commitMessage
       if ( !found ) return reject( new Error( 'Stream not found in store.' ) )
+
+      found.commitMessage = commitMessage + ` (changed by ${context.state.user.name} ${context.state.user.surname})`
+      found.lastChangedBy = context.state.user._id
 
       context.commit( 'UPDATE_STREAM', { streamId: streamId, commitMessage: commitMessage } )
 
@@ -345,13 +360,8 @@ export default new Vuex.Store( {
           context.commit( 'UPDATE_STREAM', { streamId: streamId, children: [ ...originalStream.children, res.data.clone.streamId ] } )
           return Axios.put( `streams/${streamId}`, found )
         } )
-        .then( res => {
-          resolve( res )
-        } )
-        .catch( err => {
-          reject( err )
-        } )
-
+        .then( res => resolve( res ) )
+        .catch( err => reject( err ) )
     } ),
     getStreamClients( context, props ) {
       Axios.get( `streams/${props.streamId}/clients` )
@@ -448,6 +458,15 @@ export default new Vuex.Store( {
           } )
       } )
     },
+
+    updateLoggedInUser: ( context, payload ) => new Promise( ( resolve, reject ) => {
+      Axios.put( `accounts`, payload )
+        .then( res => {
+          context.commit( 'UPDATE_LUSER', payload )
+          return resolve( res )
+        } )
+        .catch( err => reject( err ) )
+    } ),
 
     // Auth
     login( context, payload ) {

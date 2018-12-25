@@ -57,6 +57,11 @@ export default {
   components: {
     VueSlider
   },
+  watch: {
+    'stream.children'() {
+      this.fetchData()
+    }
+  },
   computed: {
     sizeBound( ) {
       return this.timeFiltered.slice( 0, this.currentMax ).reverse()
@@ -100,6 +105,7 @@ export default {
           return promiseChain.then( chainResults => currentTask.then( currentResult => [ ...chainResults, currentResult.data.resource ] ) )
         }, Promise.resolve( [ ] ) ).then( arr => {
           this.streamChildren = arr
+          this.streamChildren.push( this.stream )
           this.dates = this.streamChildren
             .map( c => c.updatedAt )
             .sort( ( a, b ) => new Date( b.updatedAt ) - new Date( a.updatedAt ) )

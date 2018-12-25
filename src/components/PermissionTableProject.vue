@@ -8,24 +8,25 @@
         <div class="md-layout-item md-size-10 md-small-hide">
           <md-avatar class="md-avatar-icon md-small" :style='{ "background" : getHexFromString( user.name ) }'>{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
         </div>
-        <div class="md-layout-item xxx-md-size-40 md-small-size-100">
+        <div class="md-layout-item xxx-md-size-40 md-xsmall-size-100 text-center">
           {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>&nbsp<span v-if='user.isOwner'><strong>owner</strong> </span>
         </div>
-        <div class="md-layout-item text-center ">
+        <div class="md-layout-item text-center md-xsmall-size-100">
           <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionStreams(user._id)}' @click.native='changePermissionStreams(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
             {{hasWritePermissionStreams(user._id) ? "write streams" : "read streams"}}
           </md-button>
         </div>
-        <div class="md-layout-item text-center">
+        <div class="md-layout-item text-center md-xsmall-size-100">
           <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionProject(user._id)}' @click.native='changePermissionProject(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
             {{hasWritePermissionProject(user._id) ? "write project" : "read project"}}
           </md-button>
         </div>
-        <div class="md-layout-item text-center md-size-5">
+        <div class="md-layout-item text-center md-size-5 md-xsmall-size-100">
           <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
             <md-icon>delete</md-icon>
           </md-button>
         </div>
+        <div class="md-layout-item md-size-100"><md-divider></md-divider></div>
         <div class="md-layout-item md-size-100">
           <!-- <md-divider></md-divider> -->
         </div>

@@ -8,6 +8,7 @@
       </h1>
       <p>
         <span ><md-chip class='md-primary'>streamId: <strong style="user-select:all; cursor: pointer;">{{stream.streamId}}</strong></md-chip></span>&nbsp
+        <div class='md-xlarge-hide md-large-hide md-medium-hide md-small-hide'><br>&nbsp</div>
         <md-chip class=''>
           <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit.</span>
           <span v-else><md-icon>lock</md-icon> you cannot edit.</span>

@@ -82,6 +82,9 @@ export default {
 <style scoped lang='scss'>
 .user-search {
   border-radius: 10px;
+  @media only screen and (max-width: 600px) {
+    margin: 0 !important;
+  }
 }
 .search-results {
   position: absolute;

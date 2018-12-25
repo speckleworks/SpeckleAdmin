@@ -15,7 +15,7 @@
           <div class="md-layout-item md-size-95 md-small-size-70">
             <md-field md-clearable>
               <md-icon>search</md-icon>
-              <label>search for projects by their name</label>
+              <label>search by name</label>
               <md-input @input="" spellcheck="false"></md-input>
             </md-field>
           </div>

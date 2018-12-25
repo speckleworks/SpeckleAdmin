@@ -16,27 +16,27 @@
           </div>
           <div class="md-layout-item md-layout md-size-55 md-large-size-65 md-medium-size-100" style="padding-left:16px; padding-right:16px; box-sizing: border-box">
             <!-- <div class='md-layout md-alignment-center-center' style='width:90%;'> -->
-              <div class='md-layout-item'>
-                <md-button :to='{name:"streamoverview"}' class='link-button'>
-                  Overview
-                </md-button>
-              </div>
-              <div class='md-layout-item'>
-                <md-button :to='{name:"streamsharing"}' class='link-button'>
-                  Sharing
-                </md-button>
-              </div>
-              <div class='md-layout-item' v-if='stream.onlineEditable'>
-                <md-button :to='{name:"streamdata"}' class='link-button'>
-                  Edit Data
-                </md-button>
-              </div>
-              <div class='md-layout-item'>
-                <md-button :to='{name:"streamhistory"}' class='link-button'>
-                  History
-                </md-button>
-              </div>
-        <!--       <div class='md-layout-item'>
+            <div class='md-layout-item'>
+              <md-button :to='{name:"streamoverview"}' class='link-button'>
+                Overview
+              </md-button>
+            </div>
+            <div class='md-layout-item'>
+              <md-button :to='{name:"streamsharing"}' class='link-button'>
+                Sharing
+              </md-button>
+            </div>
+            <div class='md-layout-item' v-if='stream.onlineEditable'>
+              <md-button :to='{name:"streamdata"}' class='link-button'>
+                Edit Data
+              </md-button>
+            </div>
+            <div class='md-layout-item'>
+              <md-button :to='{name:"streamhistory"}' class='link-button'>
+                History
+              </md-button>
+            </div>
+            <!--       <div class='md-layout-item'>
                 <md-button xxx-to='{name:"streamdata"}' class='link-button'>
                   Discussion
                 </md-button>
@@ -46,7 +46,7 @@
           <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
             <br>
             <keep-alive>
-            <router-view></router-view>
+              <router-view></router-view>
             </keep-alive>
           </div>
         </div>
@@ -78,11 +78,16 @@ export default {
     StreamDetailNetwork,
     StreamDetailComments
   },
+  watch: {
+    stream( ) {
+      this.fetchData()
+    }
+  },
   computed: {
     stream( ) {
       let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
-      if( stream === null ) {
-        console.log('null fukcing stream')
+      if ( stream === null ) {
+        console.log( 'null fukcing stream' )
       }
       return stream
     },
@@ -108,23 +113,26 @@ export default {
     restore( ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, deleted: false } )
     },
+    fetchData( ) {
+      let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
+      if ( !stream ) {
+        this.$store.dispatch( 'getStream', { streamId: this.$route.params.streamId } )
+          .then( res => {
+            this.$store.dispatch( 'getUser', { _id: res.data.resource.owner } )
+            union( res.data.resource.canRead, res.data.resource.canWrite ).forEach( _id => this.$store.dispatch( 'getUser', { _id: _id } ) )
+          } )
+          .catch( err => {
+            if ( err.message.includes( '404' ) ) this.error = `Stream ${this.$route.params.streamId} was not found.`
+            if ( err.message.includes( '401' ) ) this.error = `Stream ${this.$route.params.streamId} is not accessible to you due to its protection level.`
+          } )
+      } else {
+        this.$store.dispatch( 'getUser', { _id: stream.owner } )
+        union( stream.canRead, stream.canWrite ).forEach( _id => this.$store.dispatch( 'getUser', { _id: _id } ) )
+      }
+    }
   },
   mounted( ) {
-    let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
-    if ( !stream ) {
-      this.$store.dispatch( 'getStream', { streamId: this.$route.params.streamId } )
-        .then( res => {
-          this.$store.dispatch( 'getUser', { _id: res.data.resource.owner } )
-          union( res.data.resource.canRead, res.data.resource.canWrite ).forEach( _id => this.$store.dispatch( 'getUser', { _id: _id } ) )
-        } )
-        .catch( err => {
-          if ( err.message.includes( '404' ) ) this.error = `Stream ${this.$route.params.streamId} was not found.`
-          if ( err.message.includes( '401' ) ) this.error = `Stream ${this.$route.params.streamId} is not accessible to you due to its protection level.`
-        } )
-    } else {
-      this.$store.dispatch( 'getUser', { _id: stream.owner } )
-      union( stream.canRead, stream.canWrite ).forEach( _id => this.$store.dispatch( 'getUser', { _id: _id } ) )
-    }
+    this.fetchData()
   }
 }
 

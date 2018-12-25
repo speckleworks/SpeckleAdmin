@@ -5,18 +5,19 @@
         No sharing buddies so far!
       </div>
       <div class="md-layout md-alignment-center-left user" v-for='user in allUsersPop' v-if='user'>
-        <div class="md-layout-item md-size-10">
+        <div class="md-layout-item md-size-10 md-small-hide">
           <md-avatar class="md-avatar-icon md-small" :style='{ "background" : getHexFromString( user.name ) }'>{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
         </div>
-        <div class="md-layout-item md-size-40">
+        <div class="md-layout-item md-size-40 md-xsmall-size-100">
           {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>
         </div>
-        <div class="md-layout-item text-right">
+        <div class="md-layout-item text-right text-center-small">
           <md-button :class='{ "md-dense md-raised": true, "md-primary" : hasWritePermission(user._id)}' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>{{hasWritePermission(user._id) ? "write" : "read"}}</md-button>
           <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>
             <md-icon>delete</md-icon>
           </md-button>
         </div>
+        <div class="md-layout-item md-size-100"><md-divider></md-divider></div>
       </div>
     </div>
   </div>

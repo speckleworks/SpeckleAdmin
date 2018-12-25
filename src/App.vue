@@ -54,6 +54,11 @@ $SpeckleBlue: #448aff;
     padding: 0 !important;
   }
 }
+.text-center-small {
+  @media only screen and (max-width: 600px) {
+    text-align: center;
+  }
+}
 
 .md-drawer.md-persistent-mini {
   transform: translate3D(0, 0px, 0) !important;
