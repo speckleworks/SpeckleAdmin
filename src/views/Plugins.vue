@@ -1,21 +1,18 @@
 <template>
-  <md-card class='md-layout md-layout-item md-size-100 md-alignment-top-center md-elevation-0' style='height:90vh'>
+  <md-card class='md-layout md-layout-item md-size-100 md-alignment-top-left md-elevation-0' style='height:90vh'>
     <md-card-content class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
-      <div class="md-layout-item md-size-100 md-display-1">
-        <br>
-        Speckle Plugins!
-        <br>&nbsp
-      </div>
+      <h1 class="md-layout-item md-size-100 md-display-2">
+        Plugins & Integrations
+      </h1>
       <div class="md-layout-item md-size-100">
-        <p>
+        <!-- <p>
           Speckle currently has a bunch of application integration plugins for getting data in and out:
-        </p>
+        </p> -->
         <p class='md-title'>
           <a target="_blank" href='https://github.com/speckleworks/speckleinstaller/releases/latest'>Dynamo, Grasshopper and Rhino</a>
         </p>
         <p>
           The above come bundled with an installer which you can <a target="_blank" href='https://github.com/speckleworks/speckleinstaller/releases/latest'>download from here</a>.
-          <br>&nbsp
           <br>&nbsp
         </p>
         <p class='md-title'>

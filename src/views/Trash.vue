@@ -6,7 +6,7 @@
     <div class='md-layout' v-else>
       <md-card class="md-elevation-0 md-layout-item md-size-100">
         <md-card-content>
-          <h1 class='md-display-1'>Trash bin</h1>
+          <h1 class='md-display-2'>Trash bin</h1>
           <p>These are your deleted resources. You can restore them or delete them permanently. Take care, there's no undo button!</p>
         </md-card-content>
       </md-card>

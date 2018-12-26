@@ -9,6 +9,7 @@
           </md-list-item>
         </md-list>
         <nav-drawer></nav-drawer>
+        <div class='md-caption credits'><a href='https://speckle.works' target="_blank"><img src='https://speckle.works/img/logos/logo-xs.png' width="19px"></a></div>
       </md-app-drawer>
       <md-app-content>
         <keep-alive exclude='StreamDetailView'>
@@ -49,6 +50,15 @@ export default {
 <style lang='scss'>
 $SpeckleBlue: #448aff;
 
+.credits {
+  position: absolute;
+  bottom:20px;
+  width: 100%;
+  text-align: center;
+}
+.credits a {
+  color: white !important;
+}
 .md-app-content {
   @media only screen and (max-width: 600px) {
     padding: 0 !important;

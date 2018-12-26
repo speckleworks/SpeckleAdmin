@@ -6,7 +6,7 @@
     <div class='md-layout' v-else>
       <md-card class="md-elevation-0 md-layout-item md-size-100">
         <md-card-content>
-          <h1 class='md-display-1'>Projects</h1>
+          <h1 class='md-display-2'>Projects</h1>
           <p>Projects allow you to group streams together with a team of users.</p>
         </md-card-content>
       </md-card>

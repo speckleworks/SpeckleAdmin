@@ -1,9 +1,10 @@
 <template>
-  <md-card class='md-layout md-layout-item md-size-100 md-alignment-top-center md-elevation-0' style='height:90vh' v-if='user'>
+  <md-card class='md-layout md-layout-item md-size-100 md-alignment-top-left md-elevation-0' v-if='user'>
     <md-card-content class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
+      <h1 class="md-layout-item md-size-100 md-display-2">Hello!</h1>
       <div class="md-layout-item md-size-100 md-display-1">
-        <br>
-        Hello! Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>.<br>&nbsp
+
+        Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>.<br>&nbsp
       </div>
       <div class="md-layout-item md-size-100">
         Your email address is {{user.email}}.<br>&nbsp

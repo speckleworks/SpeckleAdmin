@@ -1,11 +1,10 @@
 <template>
   <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
-    <!--     <md-button class="md-primary md-raised" @click.native='createProject'>Create your first project!</md-button> -->
   </md-empty-state>
   <div class='md-layout' v-else>
     <md-card class="md-elevation-0 md-layout-item md-size-100">
       <md-card-content>
-        <h1 class='md-display-1'>Streams</h1>
+        <h1 class='md-display-2'>Streams</h1>
         <p>Streams are the place where your project data (objects and other information) is kept.</p>
       </md-card-content>
     </md-card>
