@@ -3,7 +3,7 @@
     <md-card-content class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
       <h1 class="md-layout-item md-size-100 md-display-2">Feedback</h1>
       <div class="md-layout-item md-size-100 md-title">Something wrong?</div>
-      <p>The best way to tell us is to raise <a target="_blank" href="https://github.com/speckleworks/SpeckleAdmin/issues">an issue on github</a>! Alternatively, reach out:</p>
+      <p>The best way to tell us is to raise <a target="_blank" href="https://github.com/speckleworks/SpeckleAdmin/issues">an issue on github</a>!</p>
     </md-card-content>
     <md-card-content class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
       <div class="md-layout-item md-size-100 md-title">Get in touch!</div>

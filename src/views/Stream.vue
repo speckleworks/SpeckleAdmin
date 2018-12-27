@@ -33,7 +33,7 @@
             </div>
             <div class='md-layout-item'>
               <md-button :to='{name:"streamhistory"}' class='link-button'>
-                History
+                History <span class='md-caption'>({{stream.children.length}})</span>
               </md-button>
             </div>
             <!--       <div class='md-layout-item'>
