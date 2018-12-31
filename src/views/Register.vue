@@ -71,7 +71,19 @@ export default {
   },
   methods: {
     register( ) {
-      window.alert( 'todo' )
+      //window.alert( 'todo' )
+      // TODO: validation...
+      Axios.post( '/accounts/register', {
+        email: this.email,
+        name: this.name,
+        surname: this.surname,
+        company: this.company,
+        password: this.password
+      } ).then( res => {
+        console.log( res )
+      } ).catch( err => {
+        console.log( err )
+      } )
     },
     checkServer( ) {
       if ( !this.server.includes( 'api' ) )

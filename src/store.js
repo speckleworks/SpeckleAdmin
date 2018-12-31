@@ -432,15 +432,133 @@ export default new Vuex.Store( {
           console.warn( err )
         } )
     },
-    deleteProject( context, props ) {
-      Axios.delete( `projects/${props._id}` )
+    addUserToProject: ( context, { projectId, userId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+
+      Axios.put( `projects/${projectId}/adduser/${userId}` )
         .then( res => {
-          context.commit( 'DELETE_PROJECT', { _id: props._id } )
+          let permissions = { canWrite: [ ...new Set( [ ...project.permissions.canWrite, userId ] ) ], canRead: project.permissions.canRead }
+          let canRead = [ ...new Set( [ ...project.canRead, userId ] ) ]
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, permissions: permissions, canRead: canRead } )
+          project.streams.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: uniq( [ ...myStream.canWrite, userId ] ) } )
+          } )
+          return resolve( )
         } )
         .catch( err => {
           console.warn( err )
+          return reject( err )
         } )
-    },
+    } ),
+    upgradeUserInProject: ( context, { projectId, userId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+      Axios.put( `projects/${projectId}/upgradeuser/${userId}` )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, permissions: { canRead: uniq( [ ...project.canRead, userId ] ), canWrite: uniq( [ ...project.canWrite, userId ] ) } } )
+          project.streams.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: uniq( [ ...myStream.canWrite, userId ] ), canRead: uniq( [ ...myStream.canRead, userId ] ) } )
+          } )
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
+    downgradeUserInProject: ( context, { projectId, userId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+      Axios.put( `projects/${projectId}/downgradeuser/${userId}` )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, permissions: res.data.project.permissions } )
+          res.data.streamsToAddReadAndPullWrite.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: myStream.canWrite.filter( id => id !== userId ), canRead: uniq( [ ...myStream.canRead, userId ] ) } )
+          } )
+          res.data.streamsToAddToRead.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canRead: uniq( [ ...myStream.canRead, userId ] ) } )
+          } )
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
+    removeUserInProject: ( context, { projectId, userId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+      Axios.delete( `projects/${projectId}/removeuser/${userId}` )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, canRead: res.data.project.canRead, canWrite: res.data.project.canWrite, permissions: res.data.project.permissions } )
+          res.data.streamsToPullBothFrom.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canRead: myStream.canRead.filter( id => id !== userId ), canWrite: myStream.canWrite.filter( id => id !== userId ) } )
+          } )
+          res.data.streamsToPullWriteFrom.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: myStream.canWrite.filter( id => id !== userId ) } )
+          } )
+          res.data.streamsToPullReadFrom.forEach( streamId => {
+            let myStream = context.state.streams.find( s => s.streamId === streamId )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, canRead: myStream.canRead.filter( id => id !== userId ) } )
+          } )
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
+    addStreamToProject: ( context, { projectId, streamId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+
+      Axios.put( `projects/${projectId}/addstream/${streamId}` )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, streams: res.data.project.streams } )
+          context.commit( 'UPDATE_STREAM', { streamId: streamId, canRead: res.data.stream.canRead, canWrite: res.data.stream.canWrite } )
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
+    removeStreamFromProject: ( context, { projectId, streamId } ) => new Promise( ( resolve, reject ) => {
+      let project = context.state.projects.find( p => p._id === projectId )
+      if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
+
+      Axios.delete( `projects/${projectId}/removestream/${streamId}` )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', { _id: projectId, streams: res.data.project.streams } )
+          context.commit( 'UPDATE_STREAM', { streamId: streamId, canRead: res.data.stream.canRead, canWrite: res.data.stream.canWrite } )
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
+    deleteProject: ( context, props ) => new Promise( ( resolve, reject ) => {
+      Axios.delete( `projects/${props._id}` )
+        .then( res => {
+          context.commit( 'DELETE_PROJECT', { _id: props._id } )
+          for ( let stream of res.data.modifiedStreams ) {
+            context.commit( 'UPDATE_STREAM', { streamId: stream.streamId, canRead: stream.canRead, canWrite: stream.canWrite } )
+          }
+          return resolve( )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+    } ),
 
     // users
     getUser( context, payload ) {

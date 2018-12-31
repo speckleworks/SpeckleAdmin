@@ -158,6 +158,9 @@ export default {
         },
         {
           "fact": "Speckle is a recursive acronym for <strong>S</strong>peckle <strong>P</strong>lanted <strong>E</strong>ggs <strong>C</strong>onvert <strong>K</strong>ey <strong>L</strong>anguage <strong>E</strong>rrors."
+        },
+        {
+          "fact": "Speckle is a recursive acronym for <strong>S</strong>peckled, <strong>P</strong>urring, and <strong>E</strong>ffervescent <strong>C</strong>ats <strong>K</strong>indly <strong>L</strong>ick <strong>E</strong>ars."
         }
       ]
     }

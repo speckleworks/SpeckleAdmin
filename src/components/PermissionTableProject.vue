@@ -26,7 +26,9 @@
             <md-icon>delete</md-icon>
           </md-button>
         </div>
-        <div class="md-layout-item md-size-100"><md-divider></md-divider></div>
+        <div class="md-layout-item md-size-100">
+          <!-- <md-divider></md-divider> -->
+        </div>
         <div class="md-layout-item md-size-100">
           <!-- <md-divider></md-divider> -->
         </div>
@@ -76,117 +78,38 @@ export default {
     hasWritePermissionProject( _id ) {
       return this.canWriteProject.indexOf( _id ) > -1
     },
-    changePermissionProject( _id ) {
-      let canWrite = this.project.canWrite.indexOf( _id ) > -1 ? true : false
+    changePermissionProject( userId ) {
+      let canWrite = this.project.canWrite.indexOf( userId ) > -1 ? true : false
       let localCanWrite = [ ],
         localCanRead = [ ],
         streamCanWrite = this.project.permissions.canWrite,
         streamCanRead = this.project.permissions.canRead
 
       if ( canWrite ) {
-        localCanWrite = this.project.canWrite.filter( uId => uId !== _id )
-        localCanRead = uniq( [ ...this.project.canRead, _id ] )
+        localCanWrite = this.project.canWrite.filter( uId => uId !== userId )
+        localCanRead = uniq( [ ...this.project.canRead, userId ] )
       } else {
         localCanRead = this.project.canRead
-        localCanWrite = uniq( [ ...this.project.canWrite, _id ] )
+        localCanWrite = uniq( [ ...this.project.canWrite, userId ] )
         // TODO: UPGRADE STREAMS CANWRITE TOO (otherwise user x can edit the project but not do much)
-        streamCanWrite = uniq( [ ...streamCanWrite, _id ] )
-        this.upgradeUser( _id )
+        streamCanWrite = uniq( [ ...streamCanWrite, userId ] )
+        this.upgradeUser( userId )
       }
-
       this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: streamCanRead, canWrite: streamCanWrite }, canRead: localCanRead, canWrite: localCanWrite } )
     },
-    changePermissionStreams( _id ) {
-      let hasWritePermission = this.project.permissions.canWrite.indexOf( _id ) > -1 ? true : false
-      // Project permissions first
-      let localCanRead = [ ],
-        localCanWrite = [ ]
-      if ( hasWritePermission ) {
-        localCanWrite = this.project.permissions.canWrite.filter( uId => uId !== _id )
-        localCanRead = uniq( [ ...this.project.permissions.canRead, _id ] )
-      } else {
-        localCanRead = this.project.permissions.canRead
-        localCanWrite = uniq( [ ...this.project.permissions.canWrite, _id ] )
-      }
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: localCanRead, canWrite: localCanWrite } } )
-
-      // Propagate to streams
-      if ( !hasWritePermission ) this.upgradeUser( _id )
-      else this.downgradeUser( _id )
+    changePermissionStreams( userId ) {
+      let hasWritePermission = this.project.permissions.canWrite.indexOf( userId ) > -1 ? true : false
+      if ( !hasWritePermission ) this.upgradeUser( userId )
+      else this.downgradeUser( userId )
     },
-    upgradeUser( _id ) {
-      // upgading a user should be straigtforward; just add him to all the stream's can read.
-      // since we're giving MORE permissions, this shouldn't be a problem.
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          let localCanWrite = uniq( [ ...myStream.canWrite, _id ] )
-          this.$store.dispatch( 'updateStream', { streamId: streamId, canWrite: localCanWrite } )
-        }
-      } )
+    upgradeUser( userId ) {
+      this.$store.dispatch( 'upgradeUserInProject', { projectId: this.project._id, userId: userId } )
     },
-    downgradeUser( _id ) {
-      // downgrading a user is trickier: if he has write permissions from a previous project,
-      // we cannot downgrade his permission level (as it results in conflicts down the line)
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
-          let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
-          let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
-          console.log( otherCanRead )
-          let canWrite = myStream.canWrite,
-            canRead = myStream.canRead,
-            anyChange = false
-          // if this user DOES NOT HAVE write permissions from another project, we can downgrade him on this stream.
-          if ( otherCanWrite.indexOf( _id ) === -1 ) {
-            canWrite = canWrite.filter( uId => uId !== _id )
-            canRead = uniq( [ ...canRead, _id ] )
-            this.$store.dispatch( 'updateStream', { streamId: streamId, canWrite: canWrite, canRead: canRead } )
-          } else {
-            console.warn( `User ${_id} has write permissions from another project on stream ${streamId}. Will not change.` )
-          }
-        }
-      } )
+    downgradeUser( userId ) {
+      this.$store.dispatch( 'downgradeUserInProject', { projectId: this.project._id, userId: userId } )
     },
     removeUser( userId ) {
-      // console.log( `removing user from team; _id: ${userId}` )
-      // Remove user from project team
-      let pCanRead = this.project.permissions.canRead.filter( _id => _id !== userId )
-      let pCanWrite = this.project.permissions.canWrite.filter( _id => _id !== userId )
-
-      let rCanRead = this.project.canRead.filter( _id => _id !== userId )
-      let rCanWrite = this.project.canWrite.filter( _id => _id !== userId )
-
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: pCanRead, canWrite: pCanWrite }, canRead: rCanRead, canWrite: rCanWrite } )
-
-      // Remove user from all streams
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          // Checks if this stream is in another project that contains this userId
-          let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
-          let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
-          let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
-
-          let canWrite = myStream.canWrite,
-            canRead = myStream.canRead,
-            anyChange = false
-
-          // only remove him from the stream's permissions if no conflicts with other projects.
-          if ( otherCanRead.indexOf( userId ) === -1 ) {
-            canRead = myStream.canRead.filter( _id => _id !== userId )
-            anyChange = true
-          }
-          if ( otherCanWrite.indexOf( userId ) === -1 ) {
-            canWrite = myStream.canWrite.filter( _id => _id !== userId )
-            anyChange = true
-          }
-
-          if ( anyChange )
-            this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
-        }
-      } )
+      this.$store.dispatch( 'removeUserInProject', { projectId: this.project._id, userId: userId } )
     }
   },
   mounted( ) {}

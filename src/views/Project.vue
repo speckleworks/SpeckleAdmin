@@ -4,7 +4,9 @@
       <div class="md-layout-item md-size-100 text-center sticky-top" v-if='project.deleted'>
         <md-content class='md-accent md-caption md-layout md-alignment-center-center' style='width:100%;padding:10px; border-radius: 2px;'>
           <div class='md-layout-item'>This project is in your trashbin.</div>
-          <div class='md-layout-item'><md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button></div>
+          <div class='md-layout-item'>
+            <md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button>
+          </div>
         </md-content>
       </div>
       <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100 detail-card">
@@ -77,62 +79,15 @@ export default {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, deleted: false } )
     },
     addUserToTeam( userId ) {
-      // adds user to project's map of permissions, straight into canWrite
-      let permissions = {
-        canWrite: uniq( [ ...this.project.permissions.canWrite, userId ] ),
-        canRead: this.project.permissions.canRead
-      }
-      // adds user to project canRead so it shows up in his project tab
-      let canRead = uniq( [ ...this.project.canRead, userId ] )
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: permissions, canRead: canRead } )
-
-      //  TODO: propagate this to all streams
-      this.project.streams.forEach( streamId => {
-        let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-        if ( myStream ) {
-          let canWrite = uniq( [ ...myStream.canWrite, userId ] )
-          this.$store.dispatch( 'updateStream', { streamId: streamId, canWrite: canWrite } )
-        } else {
-          console.error( `Failed to find ${streamId} while updating permissions from project.` )
-        }
-      } )
+      this.$store.dispatch( 'addUserToProject', { projectId: this.project._id, userId: userId } )
+      return
     },
     addStream( streamId ) {
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: uniq( [ ...this.project.streams, streamId ] ) } )
-
-      // TODO propagate permissions users & streams
-      let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-      let canRead = uniq( [ ...myStream.canRead, ...this.project.permissions.canRead ] )
-      let canWrite = uniq( [ ...myStream.canWrite, ...this.project.permissions.canWrite ] )
-
-      this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: canRead, canWrite: canWrite } )
+      this.$store.dispatch( 'addStreamToProject', { projectId: this.project._id, streamId: streamId } )
+      return
     },
     removeStream( streamId ) {
-      console.log( `remove ${streamId}` )
-      let streams = this.project.streams.filter( s => s !== streamId )
-      this.$store.dispatch( 'updateProject', { _id: this.project._id, streams: streams } )
-
-      // Remove users from stream, only if they're not there due to another project
-      let otherProjects = this.$store.state.projects.filter( p => p.streams.indexOf( streamId ) !== -1 && p._id !== this.project._id )
-
-      let otherCanRead = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canRead ) )
-      let otherCanWrite = Array.prototype.concat( ...otherProjects.map( op => op.permissions.canWrite ) )
-      let myStream = this.$store.state.streams.find( s => s.streamId === streamId )
-      let streamNewCanRead = myStream.canRead,
-        streamNewCanWrite = myStream.canWrite,
-        anyChange = false
-      this.allUsers.forEach( uId => {
-        if ( otherCanWrite.indexOf( uId ) === -1 ) {
-          streamNewCanWrite = streamNewCanWrite.filter( _id => _id !== uId )
-          anyChange = true
-        }
-        if ( otherCanRead.indexOf( uId ) === -1 ) {
-          streamNewCanRead = streamNewCanRead.filter( _id => _id !== uId )
-          anyChange = true
-        }
-      } )
-      if ( anyChange )
-        this.$store.dispatch( 'updateStream', { streamId: streamId, canRead: streamNewCanRead, canWrite: streamNewCanWrite } )
+      this.$store.dispatch( 'removeStreamFromProject', { projectId: this.project._id, streamId: streamId } )
     },
   },
   mounted( ) {
