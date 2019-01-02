@@ -1,5 +1,7 @@
 <template>
   <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
+    <p> You can create a new one here or through <router-link to='/plugins'>existing CAD integrations.</router-link></p>
+    <md-button class="md-primary md-raised" @click.native='createStream'>Create your first stream!</md-button>
   </md-empty-state>
   <div class='md-layout' v-else>
     <md-card class="md-elevation-0 md-layout-item md-size-100">

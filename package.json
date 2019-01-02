@@ -30,6 +30,7 @@
     "vue-material": "^1.0.0-beta-10.2",
     "vue-slider-component": "^2.8.3",
     "vue-template-compiler": "^2.5.17",
-    "vue-timeago": "^5.0.0"
+    "vue-timeago": "^5.0.0",
+    "vuelidate": "^0.7.4"
   }
 }
