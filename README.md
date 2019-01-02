@@ -1,38 +1,24 @@
 # SpeckleAdmin
 A simple admin app for [speckle](https://speckle.works).
 
-![image](https://user-images.githubusercontent.com/7696515/37546477-ed733a6a-2964-11e8-9b80-9448a88999bc.png)
 
-## Current features:
-
-### Streams:
-- search & filter your streams
-- manage stream permissions
-- edit stream names, etc
-- archive & delete streams
-- edit your profile on that speckle server
-
-### Projects:
-// TODO
+![image](https://user-images.githubusercontent.com/7696515/50599851-e678ef00-0eb7-11e9-8b38-dc7f7dc65d78.png)
 
 
-## Roadmap:
-The following api ([1.0.0-beta](https://speckleworks.github.io/SpeckleSpecs/)) need to be exposed:
-- Stream History
-- Stream Comments/Issues
-- Projects
-- User's Comments
-- User's AssignedTo Comments
+## Fresh installation for a speckle server deployment
+Depending on your version, you should have in your server install location a `plugins` dir. If you don't, do update your server first and come back!
 
-## Build Setup
+1. `cd ~/${your speckle server install location}/plugins`
+2. `git clone https://github.com/speckleworks/SpeckleAdmin.git`
+3. Restart your server, and navigate to its root address - TADA!
+4. Profit!
 
-``` bash
-# install dependencies
-npm install
+If you have previously installed the SpeckleAdmin frontend plugin, you should be able to just
+1. `git fetch`
+2. `git pull`
 
-# serve with hot reload at localhost:8080
-npm run dev
+## License
+MIT
 
-# build for production with minification
-npm run build
-```
+
+
