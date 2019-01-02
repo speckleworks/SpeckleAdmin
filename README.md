@@ -6,7 +6,7 @@ A simple admin app for [speckle](https://speckle.works).
 
 If you have an account on the speckle test server (hestia), check it out live [here](https://hestia.speckle.works).
 
-## Fresh installation for a speckle server deployment
+## Fresh installation for a speckle server deployment
 Depending on your version, you should have in your server install location a `plugins` dir. If you don't, do update your server first and come back!
 
 1. `cd ~/${your speckle server install location}/plugins`
@@ -18,7 +18,14 @@ If you have previously installed the SpeckleAdmin frontend plugin, you should be
 1. `git fetch`
 2. `git pull`
 
-## License
+## Development notes
+
+To start a development server: `npm run dev`
+To build for production: `npm run build`
+
+Please note: we use a custom build of the vuematerial library that fixes [this issue](https://github.com/vuematerial/vue-material/issues/1977). As soon as this lands on npm, we'll upgrade and you won't need to custom build it yourself. 
+
+## License
 MIT
 
 
