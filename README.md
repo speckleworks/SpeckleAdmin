@@ -1,49 +1,25 @@
 # SpeckleAdmin
-[![npm version](https://badge.fury.io/js/speckle-admin.svg)](https://badge.fury.io/js/speckle-admin)
-
 A simple admin app for [speckle](https://speckle.works).
 
-![image](https://user-images.githubusercontent.com/7696515/37546477-ed733a6a-2964-11e8-9b80-9448a88999bc.png)
 
-## Current features:
-- search & filter your streams
-- manage stream permissions
-- edit stream names, etc
-- archive & delete streams
-- edit your profile on that speckle server
+![image](https://user-images.githubusercontent.com/7696515/50599992-5be4bf80-0eb8-11e9-8b01-7698b407c7ac.png)
 
-## Roadmap:
-The following api ([1.0.0-beta](https://speckleworks.github.io/SpeckleSpecs/)) need to be exposed:
-- Stream History
-- Stream Comments/Issues
-- Projects
-- User's Comments
-- User's AssignedTo Comments
+If you have an account on the speckle test server (hestia), check it out live [here](https://hestia.speckle.works).
 
-## Debugging
+## Fresh installation for a speckle server deployment
+Depending on your version, you should have in your server install location a `plugins` dir. If you don't, do update your server first and come back!
 
-To start debugging locally, point your browser to `http://localhost:8080/?dev`. This will set the server to `http://localhost:3000/api`, where a default speckle server would run.
+1. `cd ~/${your speckle server install location}/plugins`
+2. `git clone https://github.com/speckleworks/SpeckleAdmin.git`
+3. Restart your server, and navigate to its root address - TADA!
+4. Profit!
 
-To set a different server url, edit `App.vue` and set your defaults in `mounted()`.
+If you have previously installed the SpeckleAdmin frontend plugin, you should be able to just
+1. `git fetch`
+2. `git pull`
 
-## Build Setup
+## License
+MIT
 
-``` bash
-# install dependencies
-npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
 
-# build for production with minification
-npm run build
-```
-
-## Build Standalone Component
-
-You will need to add [poi](https://poi.js.org) globally, since `vue build` is now deprecated.
-
-```bash
-npm i -g poi
-npm run build-component
-```
