@@ -7,12 +7,16 @@
         <span v-else>{{stream.name}}</span>
       </h1>
       <p>
-        <span ><md-chip class='md-primary'>streamId: <strong style="user-select:all; cursor: pointer;">{{stream.streamId}}</strong></md-chip></span>&nbsp
+        <md-button class='md-icon-button md-dense md-raised md-primary' :href='viewLink' taget="_blank">
+          <md-icon>3d_rotation</md-icon>
+        </md-button>
+        <span><md-chip class='md-primary'>streamId: <strong style="user-select:all; cursor: pointer;">{{stream.streamId}}</strong></md-chip></span>&nbsp
         <div class='md-xlarge-hide md-large-hide md-medium-hide md-small-hide'><br>&nbsp</div>
         <md-chip class=''>
           <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit.</span>
           <span v-else><md-icon>lock</md-icon> you cannot edit.</span>
         </md-chip>
+        <!-- &nbsp&nbsp&nbsp<a href='#'></a> -->
       </p>
       <md-divider></md-divider>
       <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
@@ -36,6 +40,10 @@ export default {
     },
     streamProjects( ) {
       return this.$store.state.projects.filter( p => p.streams.indexOf( this.stream.streamId ) !== -1 )
+    },
+    viewLink( ) {
+      let url = new URL( this.$store.state.server )
+      return url.origin + `/view?streams=${this.stream.streamId}`
     }
   },
   data( ) {

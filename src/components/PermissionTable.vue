@@ -42,8 +42,8 @@ export default {
     }
   },
   computed: {
-    canRead( ) { return this.resource.canRead },
-    canWrite( ) { return this.resource.canWrite },
+    canRead( ) { return [ ...this.resource.canRead, this.resource.owner ] },
+    canWrite( ) { return [...this.resource.canWrite, , this.resource.owner ] },
     allUsers( ) {
       return union( this.canRead, this.canWrite, [ this.resource.owner ] )
     },

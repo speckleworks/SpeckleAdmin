@@ -13,12 +13,12 @@
         </div>
         <div class="md-layout-item text-center md-xsmall-size-100">
           <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionStreams(user._id)}' @click.native='changePermissionStreams(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-            {{hasWritePermissionStreams(user._id) ? "write streams" : "read streams"}}
+            {{ user.isOwner ? "write streams" : hasWritePermissionStreams(user._id) ? "write streams" : "read streams"}}
           </md-button>
         </div>
         <div class="md-layout-item text-center md-xsmall-size-100">
           <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionProject(user._id)}' @click.native='changePermissionProject(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-            {{hasWritePermissionProject(user._id) ? "write project" : "read project"}}
+            {{ user.isOwner ? "write project" : hasWritePermissionProject(user._id) ? "write project" : "read project"}}
           </md-button>
         </div>
         <div class="md-layout-item text-center md-size-5 md-xsmall-size-100">

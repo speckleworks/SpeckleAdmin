@@ -71,6 +71,7 @@ let myRouter = new Router( {
       path: '/profile',
       name: 'profile',
       component: ( ) => import( './views/Profile.vue' ),
+      meta: { requiresAuth: true },
     },
     {
       path: '/plugins',
