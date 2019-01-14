@@ -18,6 +18,11 @@
         <span class="md-list-item-text">Trash</span>
       </md-list-item>
       <md-divider md-inset></md-divider>
+      <md-list-item to='/view'>
+        <md-icon>3d_rotation</md-icon>
+        <span class="md-list-item-text">Viewer</span>
+      </md-list-item>
+      <md-divider md-inset></md-divider>
       <md-list-item to='/profile'>
         <md-icon>face</md-icon>
         <span class="md-list-item-text">Profile</span>

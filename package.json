@@ -13,6 +13,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@tweenjs/tween.js": "^17.2.0",
     "@vue/cli-plugin-babel": "^3.2.0",
     "@vue/cli-plugin-pwa": "^3.2.0",
     "@vue/cli-service": "^3.2.0",
@@ -26,6 +27,8 @@
     "node-sass": "^4.10.0",
     "papaparse": "^4.6.2",
     "sass-loader": "^7.1.0",
+    "three": "^0.100.0",
+    "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",
     "vue-material": "^1.0.0-beta-10.2",
     "vue-slider-component": "^2.8.3",

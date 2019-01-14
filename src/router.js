@@ -68,6 +68,12 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
+      path: '/view/:streamIds?/:objectId?',
+      name: 'viewer',
+      component: ( ) => import( './views/Viewer.vue' ),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: ( ) => import( './views/Profile.vue' ),
