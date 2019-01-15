@@ -7,7 +7,8 @@
         <span v-else>{{stream.name}}</span>
       </h1>
       <p>
-        <md-button class='md-icon-button md-dense md-raised md-primary' :href='viewLink' taget="_blank">
+        <!-- <md-button class='md-icon-button md-dense md-raised md-primary' :href='viewLink' taget="_blank"> -->
+        <md-button class='md-icon-button md-dense md-raised md-primary' :to='`/view/${stream.streamId}`'>
           <md-icon>3d_rotation</md-icon>
         </md-button>
         <span><md-chip class='md-primary'>streamId: <strong style="user-select:all; cursor: pointer;">{{stream.streamId}}</strong></md-chip></span>&nbsp

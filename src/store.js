@@ -21,6 +21,8 @@ export default new Vuex.Store( {
     // data editable streams; we store objects and layers in here. rest of metadata
     // is in streams proper array (see above).
     deStreams: [ ],
+    // speckle objects store
+    objects: [ ],
     // global store for stream clients.
     clients: [ ],
     // global store for projects
@@ -93,7 +95,9 @@ export default new Vuex.Store( {
     UPDATE_STREAM( state, props ) {
       let found = state.streams.find( s => s.streamId === props.streamId )
       Object.keys( props ).forEach( key => {
+        // if ( found.hasOwnProperty( key ) )
         found[ key ] = props[ key ]
+
       } )
     },
     UPDATE_STREAM_DATA( state, props ) {
@@ -205,6 +209,10 @@ export default new Vuex.Store( {
         console.log( k )
         layer.orderIndex = k
       } )
+    },
+    // OBJECTS
+    ADD_OBJECTS( state, objects ) {
+      state.objects.push( ...objects )
     },
     // Projects
     ADD_PROJECTS( state, projects ) {
@@ -381,6 +389,33 @@ export default new Vuex.Store( {
         .catch( err => {
           console.log( err )
         } )
+    },
+
+    // objects
+    getStreamObjects( context, streamId ) {
+      let found = context.state.streams.find( s => s.streamId === streamId )
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `streams/${streamId}?fields=objects,layers` )
+          .then( res => {
+            let ids = res.data.resource.objects.map( o => o._id )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, objects: ids, layers: res.data.resource.layers } )
+            resolve( ids )
+          } )
+          .catch( err => {
+            reject( err )
+          } )
+      } )
+    },
+    getObjects( context, objectIds ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `objects/getbulk?omit=base64,rawData,canRead,canWrite,children,anonymousComments,name`, objectIds )
+          .then( res => {
+            // context.state.objects.push( ...res.data.resources )
+            // context.commit( 'ADD_OBJECTS', res.data.resources )
+            resolve( res.data.resources )
+          } )
+          .catch( err => reject( err ) )
+      } )
     },
 
     // projects

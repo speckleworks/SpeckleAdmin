@@ -1,10 +1,16 @@
 import * as THREE from 'three'
 import OrbitControls from 'threejs-orbit-controls'
+
+import Axios from 'axios'
+import EE from 'event-emitter-es6'
+
+import Converter from './SpeckleConverter.js'
 // import TWEEN from 'tween.js'
 
-export default class SpeckleRenderer {
+export default class SpeckleRenderer extends EE {
 
   constructor( { domObject } ) {
+    super( ) // event emitter init
     this.domObject = domObject
     this.renderer = null
     this.scene = null
@@ -15,6 +21,7 @@ export default class SpeckleRenderer {
     this.flashLight = null
     this.raycaster = null
     this.isInitialised = false
+    this.objectIds = new Set( )
 
     this.initialise( )
   }
@@ -29,11 +36,13 @@ export default class SpeckleRenderer {
     let axesHelper = new THREE.AxesHelper( 50 )
     this.scene.add( axesHelper )
 
+    let gridHelper = new THREE.GridHelper( 200, 20 );
+    this.scene.add( gridHelper )
+
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
     this.camera.up.set( 0, 0, 1 )
     this.camera.position.z = 1000
     this.camera.isCurrent = true
-    this.camera.name = 'my super camera'
 
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
@@ -59,13 +68,22 @@ export default class SpeckleRenderer {
   }
 
   // add and remove objects
-  loadObjects( { objIds, zoomExtents, } ) {}
+  loadObjects( { objs, zoomExtents } ) {
+    objs.forEach( obj => {
+      console.log( obj.type )
+    } )
+  }
+
   unloadObjects( { objIds, streamId } ) {}
 
   ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
+
   showObjects( objIds ) {}
   hideObjects( objIds ) {}
+
+  highlightObjects( objIds ) {}
+  unHighlightObjects( objIds ) {}
 
   zoomToObject( ) {}
   zoomExtents( ) {}
@@ -76,7 +94,31 @@ export default class SpeckleRenderer {
 
 
   // material helpers
-  getMeshMaterial( color ) {}
-  getLineMaterial( color ) {}
-  getPointsMaterial( color ) {}
+  getMeshMaterial( color ) {
+    return new THREE.MeshPhongMaterial( {
+      color: new THREE.Color( color.hex ),
+      specular: new THREE.Color( '#FFECB3' ),
+      shininess: 30,
+      side: THREE.DoubleSide,
+      transparent: true,
+      wireframe: false,
+      opacity: color.a
+    } )
+  }
+  getLineMaterial( color ) {
+    return new THREE.LineBasicMaterial( {
+      color: new THREE.Color( color.hex ),
+      linewidth: 1,
+      opacity: color.a
+    } )
+  }
+  getPointsMaterial( color ) {
+    return new THREE.PointsMaterial( {
+      color: new THREE.Color( color.hex ),
+      sizeAttenuation: false,
+      transparent: true,
+      size: 3,
+      opacity: color.a
+    } )
+  }
 }

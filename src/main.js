@@ -76,7 +76,8 @@ import CH from 'color-hash'
 let ColorHasher = new CH( )
 Vue.mixin( {
   methods: {
-    getHexFromString: str => ColorHasher.hex( str )
+    getHexFromString: str => ColorHasher.hex( str ),
+    sleep: milis => new Promise( resolve => setTimeout( resolve, milis ) )
   }
 } )
 

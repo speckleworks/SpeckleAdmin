@@ -97,4 +97,10 @@ export default {
 .stream-search {
   border-radius: 10px;
 }
+.search-results {
+/*  position: absolute;
+  background: white;
+  width: 100%;
+  padding:32px;*/
+}
 </style>

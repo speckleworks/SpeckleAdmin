@@ -1,6 +1,6 @@
 <template>
   <div>
-    <md-list v-if='$store.state.isAuth'>
+    <md-list v-if='$store.state.isAuth' style='padding-top: 0 !impotant'>
       <md-list-item to='/'>
         <md-icon>home</md-icon>
         <span class="md-list-item-text">Home</span>
@@ -61,7 +61,7 @@ $SpeckleBlue: #448aff;
   width: 200px !important;
   /*background-color: $SpeckleBlue !important;*/
   /*background-color: ghostwhite !important;*/
-  padding-top: 30px;
+  /*padding-top: 30px;*/
 }
 
 ul {
@@ -72,7 +72,10 @@ ul {
   color: white !important;
   /*transition: none !important;*/
 }
-
+/*.router-link-active *{
+  color: white !important;
+  background-color: #3190FD;
+}*/
 .is-active * {
   color: white !important;
   background-color: #3190FD;

@@ -3,7 +3,7 @@
     <md-app md-waterfall>
       <md-app-drawer :md-active="showSidebar" class='super-bg md-primary nav-sidebar' md-persistent="mini">
         <md-list>
-          <md-list-item @click='showSidebar=!showSidebar'>
+          <md-list-item @click='showSidebar=!showSidebar' style='padding-bottom: 0 !important;'>
             <md-icon>{{ showSidebar ? "chevron_left" : "chevron_right"}}</md-icon>
             <span class="md-list-item-text"></span>
           </md-list-item>
@@ -75,11 +75,11 @@ $SpeckleBlue: #448aff;
 }
 
 .super-bg {
-  background: #448aff;
+  background: #448aff !important;
   /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #448aff, #396afc);
+  background: -webkit-linear-gradient(to right, #448aff, #396afc) !important;
   /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #448aff, #396afc);
+  background: linear-gradient(to right, #448aff, #396afc) !important;
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 

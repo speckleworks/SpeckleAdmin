@@ -1,30 +1,120 @@
 <template>
-  <div class='md-layout' style="height:100%">
-    <div class="view-part-data md-layout-item md-size-20">
-      <p>Streams</p>
-
+  <div class='md-layout viewer-main'>
+    <div class="view-part-render md-layout-item" ref='render'></div>
+    <div class="md-layout-item md-size-40 view-part-data">
+      <md-tabs md-alignment="fixed" class='md-primary'>
+        <md-tab id="tab-x" md-label="Streams" md-icon="import_export">
+          <br>
+          <div class='md-caption text-center'>isRequesting: {{isRequesting}}; buckets: {{requestBuckets.length}}</div>
+          <br>
+          <stream-search @selected-stream='addStream' :streams-to-omit='streamIds'></stream-search>
+          <br>
+          <stream-card-renderer v-for='stream in streams' :stream='stream' @remove-stream='removeStream'></stream-card-renderer>
+        </md-tab>
+        <md-tab id="tab-data" md-label="Data" md-icon="storage">
+          <md-content style='padding:16px;'>
+            <h3>Data View</h3>
+            #objects: {{$store.state.objects.length}}
+          </md-content>
+        </md-tab>
+        <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
+          <h3>Test</h3>
+        </md-tab>
+      </md-tabs>
     </div>
-    <div class="view-part-render md-layout-item md-size-80" ref='render'></div>
-    <!-- <h1>Hello Viewer.</h1> -->
   </div>
 </template>
 <script>
 import HelloWorld from '@/components/HelloWorld.vue'
+import StreamSearch from '@/components/StreamSearch.vue'
+import StreamCardRenderer from '@/components/StreamCardRenderer.vue'
+
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
 export default {
   name: 'ViewerView',
-  components: {},
-  computed: {},
-  methods: {},
-  data( ) {
-    return {
-      renderer: null
+  components: {
+    StreamSearch,
+    StreamCardRenderer
+  },
+  computed: {
+    streams( ) {
+      return this.streamIds.map( id => this.$store.state.streams.find( s => s.streamId === id ) )
     }
   },
+  watch: {},
+  data( ) {
+    return {
+      renderer: null,
+      streamIds: [ ],
+      toRequest: [ ],
+      requestBuckets: [ ],
+      isRequesting: false
+    }
+  },
+  methods: {
+    async addStream( streamId ) {
+      this.streamIds.unshift( streamId )
+      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
+
+      // loaded already?
+      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+      console.log( `toRequest length: ${toRequest.length}` )
+
+      let bucket = [ ],
+        maxReq = 50
+      for ( let i = 0; i < toRequest.length; i++ ) {
+        bucket.push( toRequest[ i ] )
+        if ( i % maxReq == 0 && i != 0 ) {
+          this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+          bucket = [ ]
+          if ( !this.isRequesting ) this.bucketProcessor( )
+        }
+      }
+    },
+    // Goes through all the request buckets and requests them from the server,
+    // then plops them in the renderer as they go
+    async bucketProcessor( ) {
+      if ( this.requestBuckets.length === 0 ) {
+        this.isRequesting = false
+        // as we don't want to flood the vue store with a lotta add objects call,
+        // we store all objects in an accumulator and commit that once we're done
+        this.$store.commit( 'ADD_OBJECTS', this.objectAccumulator )
+        this.objectAccumulator = [ ]
+        console.log( `done processing buckets!` )
+        return
+      }
+
+      this.isRequesting = true
+
+      // await this.sleep( 500 ) // simulate api
+      let objs = await this.$store.dispatch( 'getObjects', this.requestBuckets[ 0 ].objectIds )
+      objs.forEach( o => o.streams = [ this.requestBuckets[ 0 ].streamId ] )
+      this.objectAccumulator.push( ...objs.map( obj => { return { type: obj.type, properties: obj.properties, streams: obj.streams } } ) )
+
+      this.renderer.loadObjects( { objs: objs, zoomExtents: this.requestBuckets.length === 1 } )
+
+      this.requestBuckets.splice( 0, 1 )
+      this.bucketProcessor( )
+    },
+    removeStream( streamId ) {
+      this.streamIds.splice( this.streamIds.indexOf( streamId ), 1 )
+    }
+  },
+  activated( ) {
+    if ( this.$route.params.streamIds ) {
+      let streamIds = this.$route.params.streamIds.split( ',' )
+      this.streamIds = streamIds
+    }
+    console.log( 'activated!' )
+  },
+  deactivated( ) {
+    console.log( 'de-activated!' )
+  },
   mounted( ) {
-    console.log( 'viewer created' )
-    console.log( this.$refs.render )
+    // non reactive
+    this.objectAccumulator = [ ]
+
     this.renderer = new SpeckleRenderer( { domObject: this.$refs.render } )
     this.renderer.animate( )
   }
@@ -32,15 +122,24 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.viewer-main {
+  margin: -16px;
+  height: 100vh;
+}
+
+.md-tab {
+  padding: 0 !important;
+}
+
 .view-part-render {
   background: #E0EAFC;
-  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to top, #CFDEF3, #E0EAFC);
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to top, #CFDEF3, #E0EAFC);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  /*max-height: 97vh;*/
+}
 
-
+.view-part-data {
+  /*max-height: 97vh;*/
+  overflow: auto;
+  /*padding-left: 16px;*/
 }
 
 </style>
