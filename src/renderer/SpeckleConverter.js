@@ -1,10 +1,62 @@
 import * as THREE from 'three'
 
-export default {
+class MaterialManager {
+  constructor( ) {
+    this.meshMaterialTable = [ ]
+    this.lineMaterialTable = [ ]
+    this.pointMaterialTable = [ ]
+  }
+
+  getMeshMaterial( color ) {
+    let mat = this.meshMaterialTable.find( m => m.hex === color.hex )
+    if ( mat ) return mat.threeMaterial
+    let c = colourNameToHex( color.hex )
+    if ( c !== false ) color.hex = c
+    mat = new THREE.MeshPhongMaterial( {
+      color: new THREE.Color( color.hex ),
+      specular: new THREE.Color( '#FFECB3' ),
+      shininess: 30,
+      side: THREE.DoubleSide,
+      transparent: true,
+      wireframe: false,
+      opacity: color.a ? color.a : 1
+    } )
+
+    this.meshMaterialTable.push( { hex: color.hex, threeMaterial: mat } )
+    return mat
+  }
+
+  getLineMaterial( color ) {
+    let c = colourNameToHex( color.hex )
+    if ( c !== false ) color.hex = c
+    return new THREE.LineBasicMaterial( {
+      color: new THREE.Color( color.hex ),
+      linewidth: 1,
+      opacity: color.a
+    } )
+  }
+
+  getPointsMaterial( color ) {
+    let c = colourNameToHex( color.hex )
+    if ( c !== false ) color.hex = c
+    return new THREE.PointsMaterial( {
+      color: new THREE.Color( color.hex ),
+      sizeAttenuation: false,
+      transparent: true,
+      size: 3,
+      opacity: color.a
+    } )
+  }
+}
+
+// the conversion logic; needs cleanup
+let Converter = {
+  materialManager: new MaterialManager( ),
+
   Point( args, cb ) {
     let geometry = new THREE.Geometry( )
     geometry.vertices.push( new THREE.Vector3( ...args.obj.value ) )
-    let point = new THREE.Points( geometry, getPointsMaterial( args.obj.color ) )
+    let point = new THREE.Points( geometry, this.materialManager.getPointsMaterial( args.obj.color ) )
     cb( null, point )
   },
 
@@ -17,7 +69,7 @@ export default {
         let geometry = new THREE.Geometry( )
         geometry.vertices.push( v )
         geometry.vertices.push( origin )
-        let line = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+        let line = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
         line.hash = args.obj.hash
         cb( null, line )
       }
@@ -34,7 +86,7 @@ export default {
     let q = new THREE.Quaternion( )
     q.setFromUnitVectors( v1, v2 )
     let geometry = new THREE.PlaneGeometry( planeSize, planeSize )
-    let plane = new THREE.Mesh( geometry, getMeshMaterial( args.obj.color ) )
+    let plane = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     plane.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     plane.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.Origin.value ) );
     plane.hash = args.obj.hash
@@ -45,7 +97,7 @@ export default {
     let geometry = new THREE.Geometry( )
     geometry.vertices.push( new THREE.Vector3( args.obj.value[ 0 ], args.obj.value[ 1 ], args.obj.value[ 2 ] ) )
     geometry.vertices.push( new THREE.Vector3( args.obj.value[ 3 ], args.obj.value[ 4 ], args.obj.value[ 5 ] ) )
-    let line = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+    let line = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     line.hash = args.obj.hash
     cb( null, line )
   },
@@ -64,7 +116,7 @@ export default {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, 0, 2 * Math.PI, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
-    let circle = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+    let circle = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     circle.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     circle.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...origin ) );
     circle.hash = args.obj.hash
@@ -82,7 +134,7 @@ export default {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, startAngle, endAngle, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
-    let arc = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+    let arc = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.plane.origin.value ) );
     arc.hash = args.obj.hash
@@ -101,7 +153,7 @@ export default {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, startAngle, endAngle, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
-    let arc = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+    let arc = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.plane.Origin.value ) );
     arc.hash = args.obj.hash
@@ -154,7 +206,7 @@ export default {
     }
     let geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings )
     geometry.applyMatrix( m )
-    let extrusion = new THREE.Mesh( geometry, getMeshMaterial( args.obj.color ) )
+    let extrusion = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     extrusion.hash = args.obj.hash
     cb( null, extrusion )
   },
@@ -170,7 +222,7 @@ export default {
     let q = new THREE.Quaternion( )
     q.setFromUnitVectors( v1, v2 )
     let geometry = new THREE.BoxGeometry( width, height, depth )
-    let box = new THREE.Mesh( geometry, getMeshMaterial( args.obj.color ) )
+    let box = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     box.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) )
     box.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...origin ) )
     box.geometry.verticesNeedUpdate = true
@@ -187,7 +239,7 @@ export default {
     }
     for ( let i = 2; i < args.obj.value.length; i += 3 )
       geometry.vertices.push( new THREE.Vector3( args.obj.value[ i - 2 ], args.obj.value[ i - 1 ], args.obj.value[ i ] ) )
-    let polyline = new THREE.Line( geometry, getLineMaterial( args.obj.color ) )
+    let polyline = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     polyline.hash = args.obj.hash
     cb( null, polyline )
   },
@@ -250,7 +302,7 @@ export default {
     geometry.computeFaceNormals( )
     geometry.computeVertexNormals( )
 
-    let mesh = new THREE.Mesh( geometry, getMeshMaterial( args.obj.color ) )
+    let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     mesh.hasVertexColors = false
 
     if ( args.obj.colors.length > 0 ) {
@@ -268,79 +320,14 @@ export default {
       if ( err ) return cb( err, null )
       return cb( null, obj )
     } )
-  },
-
-  Abstract( args, cb ) {
-    // console.log( 'Soon™', args.obj.type )
-    // console.log( args.obj )
-    let loader = new THREE.FontLoader( )
-    if ( args.obj._type.includes( 'Dimension' ) ) {
-      let dimProps = args.obj.properties
-      let extLineOffset = dimProps.ExtensionLineOffset
-      let extLineExtension = dimProps.ExtensionLineExtension
-
-      if ( dimProps.DimensionLinePoint.properties.Y < 0 ) {
-        extLineOffset = -extLineOffset
-        extLineExtension = -extLineExtension
-      }
-      //Draw the text
-      loader.load( '/src/assets/helvetiker_regular.typeface.json', function( font ) {
-        let geometry = new THREE.TextGeometry( dimProps.Text, {
-          font: font,
-          size: dimProps.TextHeight,
-          height: 0
-        } )
-        geometry.computeBoundingBox( )
-        let centerOffset = -0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x )
-        geometry.translate( dimProps.TextPosition.properties.X + centerOffset, dimProps.TextPosition.properties.Y - extLineExtension, 0 )
-        planeToPlane( geometry, worldXY, dimProps.Plane )
-        let dimText = new THREE.Mesh( geometry, getLineMaterial( args.obj.color ) )
-        dimText.hash = args.obj.hash
-        cb( null, dimText )
-
-      } )
-      //Draw the extension lines
-      //1st extension line
-      let ext1Geo = new THREE.Geometry( )
-      ext1Geo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine1End.properties.X, dimProps.ExtensionLine1End.properties.Y + extLineOffset, 0 ) )
-      ext1Geo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine1End.properties.X, dimProps.DimensionLinePoint.properties.Y + extLineExtension, 0 ) )
-      planeToPlane( ext1Geo, worldXY, dimProps.Plane )
-      let ext1line = new THREE.Line( ext1Geo, getLineMaterial( args.obj.color ) )
-      cb( null, ext1line )
-
-      //extension line 1 dot
-      let ext1dotGeo = new THREE.CircleGeometry( dimProps.ArrowSize / 3, 32 )
-      ext1dotGeo.translate( dimProps.ExtensionLine1End.properties.X, dimProps.DimensionLinePoint.properties.Y, 0 )
-      planeToPlane( ext1dotGeo, worldXY, dimProps.Plane )
-      let ext1dot = new THREE.Mesh( ext1dotGeo, getLineMaterial( args.obj.color ) )
-      cb( null, ext1dot )
-
-      //2nd extension line
-      let ext2Geo = new THREE.Geometry( )
-      ext2Geo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine2End.properties.X, dimProps.ExtensionLine2End.properties.Y + extLineOffset, 0 ) )
-      ext2Geo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine2End.properties.X, dimProps.DimensionLinePoint.properties.Y + extLineExtension, 0 ) )
-      planeToPlane( ext2Geo, worldXY, dimProps.Plane )
-      let ext2line = new THREE.Line( ext2Geo, getLineMaterial( args.obj.color ) )
-      cb( null, ext2line )
-
-      //extension line 2 dot
-      let ext2dotGeo = new THREE.CircleGeometry( dimProps.ArrowSize / 3, 32 )
-      ext2dotGeo.translate( dimProps.ExtensionLine2End.properties.X, dimProps.DimensionLinePoint.properties.Y, 0 )
-      planeToPlane( ext2dotGeo, worldXY, dimProps.Plane )
-      let ext2dot = new THREE.Mesh( ext2dotGeo, getLineMaterial( args.obj.color ) )
-      cb( null, ext2dot )
-
-      let dimLineGeo = new THREE.Geometry( )
-      dimLineGeo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine1End.properties.X, dimProps.DimensionLinePoint.properties.Y, 0 ) )
-      dimLineGeo.vertices.push( new THREE.Vector3( dimProps.ExtensionLine2End.properties.X, dimProps.DimensionLinePoint.properties.Y, 0 ) )
-      planeToPlane( dimLineGeo, worldXY, dimProps.Plane )
-      let dimLine = new THREE.Line( dimLineGeo, getLineMaterial( args.obj.color ) )
-      cb( null, dimLine )
-
-    }
   }
 }
 
+// export
+export { Converter, MaterialManager }
+
+
+// Helper functions below
 let worldXY = {
   origin: { value: [ 0, 0, 0 ] },
   xdir: { value: [ 1, 0, 0 ] },
@@ -362,42 +349,6 @@ function planeToPlane( geometry, plane1, plane2 ) {
   // geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( qY ) )
   // geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( qZ ) )
   geometry.translate( ...translateVector )
-}
-
-function getMeshMaterial( color ) {
-  let c = colourNameToHex( color.hex )
-  if ( c !== false ) color.hex = c
-  return new THREE.MeshPhongMaterial( {
-    color: new THREE.Color( color.hex ),
-    specular: new THREE.Color( '#FFECB3' ),
-    shininess: 30,
-    side: THREE.DoubleSide,
-    transparent: true,
-    wireframe: false,
-    opacity: color.a ? color.a : 1
-  } )
-}
-
-function getLineMaterial( color ) {
-  let c = colourNameToHex( color.hex )
-  if ( c !== false ) color.hex = c
-  return new THREE.LineBasicMaterial( {
-    color: new THREE.Color( color.hex ),
-    linewidth: 1,
-    opacity: color.a
-  } )
-}
-
-function getPointsMaterial( color ) {
-  let c = colourNameToHex( color.hex )
-  if ( c !== false ) color.hex = c
-  return new THREE.PointsMaterial( {
-    color: new THREE.Color( color.hex ),
-    sizeAttenuation: false,
-    transparent: true,
-    size: 3,
-    opacity: color.a
-  } )
 }
 
 // (c) https://stackoverflow.com/a/1573141/3446736

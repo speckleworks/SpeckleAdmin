@@ -4,7 +4,7 @@ import OrbitControls from 'threejs-orbit-controls'
 import Axios from 'axios'
 import EE from 'event-emitter-es6'
 
-import Converter from './SpeckleConverter.js'
+import { Converter, SceneManager } from './SpeckleConverter.js'
 // import TWEEN from 'tween.js'
 
 export default class SpeckleRenderer extends EE {
@@ -53,9 +53,18 @@ export default class SpeckleRenderer extends EE {
     this.camera.position.z = 1000
     this.camera.isCurrent = true
 
+    let flashlight = new THREE.PointLight( new THREE.Color( '#FFFFFF' ), 0.32, 0, 1 )
+    flashlight.name = 'camera light'
+    this.camera.add( flashlight )
+
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
 
+    if ( webpackHotUpdate ) {
+      console.log( 'In Dev Mode' );
+    }
+
+    window.scene = this.scene
     window.addEventListener( 'resize', this.resizeCanvas.bind( this ), false )
     this.render( )
   }
@@ -79,15 +88,35 @@ export default class SpeckleRenderer extends EE {
   // add and remove objects
   loadObjects( { objs, zoomExtents } ) {
     objs.forEach( obj => {
-      console.log( obj.type, obj.color )
-      Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
-        threeObj._id = obj._id
-        this.scene.add( threeObj )
-      } )
+      try {
+        if ( Converter.hasOwnProperty( obj.type ) )
+          Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
+            threeObj._id = obj._id
+            this.scene.add( threeObj )
+          } )
+      } catch ( e ) {}
     } )
+
   }
 
-  unloadObjects( { objIds, streamId } ) {}
+  unloadObjects( { objIds } ) {
+    // this.scene.children = this.scene.children.filter( object => {
+    //   // if ( !object.hasOwnProperty( '_id' ) ) return true
+    //   console.log( object._id, objIds.indexOf( object._id ) )
+    //   if ( objIds.indexOf( object._id ) !== -1 ) return false
+    // } )
+    //
+    let toRemove = [ ]
+    this.scene.traverse( obj => {
+      if ( obj._id )
+        if ( objIds.indexOf( obj._id ) !== -1 ) toRemove.push( obj )
+    } )
+    // let toRemove = this.scene.children.filter( obj => objIds.indexOf( obj._id ) !== -1 )
+    // console.log( toRemove.map( o => o._id ) )
+    toRemove.forEach( object => {
+      this.scene.remove( object )
+    })
+  }
 
   ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
@@ -104,34 +133,4 @@ export default class SpeckleRenderer extends EE {
   computeSceneBoundingSphere( ) {}
   setFar( ) {}
   setCamera( ) {}
-
-
-  // material helpers
-  getMeshMaterial( color ) {
-    return new THREE.MeshPhongMaterial( {
-      color: new THREE.Color( color.hex ),
-      specular: new THREE.Color( '#FFECB3' ),
-      shininess: 30,
-      side: THREE.DoubleSide,
-      transparent: true,
-      wireframe: false,
-      opacity: color.a
-    } )
-  }
-  getLineMaterial( color ) {
-    return new THREE.LineBasicMaterial( {
-      color: new THREE.Color( color.hex ),
-      linewidth: 1,
-      opacity: color.a
-    } )
-  }
-  getPointsMaterial( color ) {
-    return new THREE.PointsMaterial( {
-      color: new THREE.Color( color.hex ),
-      sizeAttenuation: false,
-      transparent: true,
-      size: 3,
-      opacity: color.a
-    } )
-  }
 }

@@ -2,7 +2,7 @@
   <md-card md-with-hover :class="{'stream-card':true, 'selected':selected}">
     <md-card-header @click='selected=!selected'>
       <md-card-header-text>
-        <div class="md-title">{{stream.name}}</div>
+        <div class="md-title"><router-link :to='`/streams/${stream.streamId}`'>{{stream.name}}</router-link></div>
         <div class="md-subhead" stlye='user-select:all;'>{{stream.streamId}}</div>
       </md-card-header-text>
       <md-button class='md-icon-button' @click.native='removeStream()'>
