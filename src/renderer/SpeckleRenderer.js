@@ -33,11 +33,20 @@ export default class SpeckleRenderer extends EE {
     this.domObject.appendChild( this.renderer.domElement )
 
     this.scene = new THREE.Scene( )
+
     let axesHelper = new THREE.AxesHelper( 50 )
     this.scene.add( axesHelper )
 
-    let gridHelper = new THREE.GridHelper( 200, 20 );
-    this.scene.add( gridHelper )
+    let hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 )
+    hemiLight.color = new THREE.Color( '#FFFFFF' )
+    hemiLight.groundColor = new THREE.Color( '#959595' )
+    hemiLight.position.set( 0, 500, 0 )
+    hemiLight.isCurrent = true
+    hemiLight.name = 'world lighting'
+    this.scene.add( hemiLight )
+
+    // let gridHelper = new THREE.GridHelper( 200, 20 );
+    // this.scene.add( gridHelper )
 
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
     this.camera.up.set( 0, 0, 1 )
@@ -70,7 +79,11 @@ export default class SpeckleRenderer extends EE {
   // add and remove objects
   loadObjects( { objs, zoomExtents } ) {
     objs.forEach( obj => {
-      console.log( obj.type )
+      console.log( obj.type, obj.color )
+      Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
+        threeObj._id = obj._id
+        this.scene.add( threeObj )
+      } )
     } )
   }
 

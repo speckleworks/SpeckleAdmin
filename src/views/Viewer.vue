@@ -58,7 +58,7 @@ export default {
       let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
       // loaded already?
-      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 ) // todo: if found, add streamId to the object's streams []
       console.log( `toRequest length: ${toRequest.length}` )
 
       let bucket = [ ],
@@ -71,10 +71,16 @@ export default {
           if ( !this.isRequesting ) this.bucketProcessor( )
         }
       }
+      // last one
+      if ( bucket.length !== 0 ) {
+        this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+        if ( !this.isRequesting ) this.bucketProcessor( )
+      }
     },
     // Goes through all the request buckets and requests them from the server,
     // then plops them in the renderer as they go
     async bucketProcessor( ) {
+      console.log( 'hai' )
       if ( this.requestBuckets.length === 0 ) {
         this.isRequesting = false
         // as we don't want to flood the vue store with a lotta add objects call,
@@ -89,7 +95,17 @@ export default {
 
       // await this.sleep( 500 ) // simulate api
       let objs = await this.$store.dispatch( 'getObjects', this.requestBuckets[ 0 ].objectIds )
-      objs.forEach( o => o.streams = [ this.requestBuckets[ 0 ].streamId ] )
+      let stream = this.$store.state.streams.find( s => s.streamId === this.requestBuckets[ 0 ].streamId )
+
+      objs.forEach( ( o, index ) => {
+        let layer = stream.layers.find( l => l.startIndex >= index && index < l.startIndex + l.objectCount )
+        o.streams = [ this.requestBuckets[ 0 ].streamId ]
+        if ( layer.properties )
+          o.color = layer.properties.color ? layer.properties.color : { hex: '#E6E6E6', a: 1 }
+        else
+          o.color = { hex: '#E6E6E6', a: 1 }
+      } )
+
       this.objectAccumulator.push( ...objs.map( obj => { return { type: obj.type, properties: obj.properties, streams: obj.streams } } ) )
 
       this.renderer.loadObjects( { objs: objs, zoomExtents: this.requestBuckets.length === 1 } )
