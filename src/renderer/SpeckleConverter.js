@@ -5,7 +5,63 @@ class MaterialManager {
     this.meshMaterialTable = [ ]
     this.lineMaterialTable = [ ]
     this.pointMaterialTable = [ ]
+    this.meshVertexMat = null
+    this.lineVertexMat = null
+    this.pointVertexMat = null
+    this.meshGhostMat = null
+    this.lineGhostMat = null
+    this.pointGhostMat = null
   }
+
+  getMeshVertexMat( ) {
+    if ( this.meshVertexMat ) return this.meshVertexMat
+    this.meshVertexMat = new THREE.MeshPhongMaterial( {
+      color: new THREE.Color( '#E6E6E6' ),
+      specular: new THREE.Color( '#FFECB3' ),
+      shininess: 30,
+      side: THREE.DoubleSide,
+      transparent: true,
+      wireframe: false,
+      opacity: 0.6,
+      vertexColors: THREE.VertexColors
+    } )
+    return this.meshVertexMat
+  }
+
+  getLineVertexMat() {
+    return null // TODO
+  }
+
+  getPointVertexMat() {
+    return null // TODO
+  }
+
+  getMeshGhostMat( ) {
+    if ( this.meshGhostMat ) return this.meshGhostMat
+    this.meshGhostMat = new THREE.MeshPhongMaterial( {
+      color: new THREE.Color( '#E6E6E6' ),
+      specular: new THREE.Color( '#FFECB3' ),
+      shininess: 30,
+      side: THREE.DoubleSide,
+      transparent: true,
+      wireframe: false,
+      opacity: 0.6,
+      vertexColors: THREE.VertexColors
+    } )
+    return this.meshGhostMat
+  }
+
+  getLineGhostMat() {
+    if( this.lineGhostMat ) return this.lineGhostMat
+    return null // TODO
+  }
+
+  getPointGhostMat() {
+    if( this.pointGhostMat ) return this.pointGhostMat
+    return null // TODO
+  }
+
+
 
   getMeshMaterial( color ) {
     let mat = this.meshMaterialTable.find( m => m.hex === color.hex )
@@ -19,7 +75,7 @@ class MaterialManager {
       side: THREE.DoubleSide,
       transparent: true,
       wireframe: false,
-      opacity: color.a ? color.a : 1
+      opacity: color.a ? color.a : 0.9
     } )
 
     this.meshMaterialTable.push( { hex: color.hex, threeMaterial: mat } )
@@ -297,13 +353,19 @@ let Converter = {
         let colorC = new THREE.Color( argbToRGB( args.obj.colors[ face.c ] ) )
         face.vertexColors.push( colorC )
       } )
+    } else {
+      // Set mesh vert colors anyway in potential preparation for "color by property" functionality
+      let colorA = new THREE.Color( '#CCCCCC' )
+      face.vertexColors.push( colorA )
+      face.vertexColors.push( colorA )
+      face.vertexColors.push( colorA )
     }
 
     geometry.computeFaceNormals( )
     geometry.computeVertexNormals( )
 
     let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
-    mesh.hasVertexColors = false
+    // mesh.hasVertexColors = false
 
     if ( args.obj.colors.length > 0 ) {
       mesh.hasVertexColors = true
@@ -324,8 +386,7 @@ let Converter = {
 }
 
 // export
-export { Converter, MaterialManager }
-
+export { Converter }
 
 // Helper functions below
 let worldXY = {

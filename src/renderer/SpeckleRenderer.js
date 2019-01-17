@@ -1,10 +1,12 @@
 import * as THREE from 'three'
 import OrbitControls from 'threejs-orbit-controls'
+import Rainbow from 'rainbowvis.js'
+import CH from 'color-hash'
 
 import Axios from 'axios'
 import EE from 'event-emitter-es6'
 
-import { Converter, SceneManager } from './SpeckleConverter.js'
+import { Converter } from './SpeckleConverter.js'
 // import TWEEN from 'tween.js'
 
 export default class SpeckleRenderer extends EE {
@@ -20,8 +22,7 @@ export default class SpeckleRenderer extends EE {
     this.hemiLight = null
     this.flashLight = null
     this.raycaster = null
-    this.isInitialised = false
-    this.objectIds = new Set( )
+    this.colorHasher = new CH()
 
     this.initialise( )
   }
@@ -61,10 +62,9 @@ export default class SpeckleRenderer extends EE {
     this.controls.enabled = true
 
     if ( webpackHotUpdate ) {
-      console.log( 'In Dev Mode' );
+      window.scene = this.scene
+      window.THREE = THREE
     }
-
-    window.scene = this.scene
     window.addEventListener( 'resize', this.resizeCanvas.bind( this ), false )
     this.render( )
   }
@@ -91,31 +91,79 @@ export default class SpeckleRenderer extends EE {
       try {
         if ( Converter.hasOwnProperty( obj.type ) )
           Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
-            threeObj._id = obj._id
+            threeObj.userData._id = obj._id
+            threeObj.userData.properties = obj.properties ? obj.properties : null
             this.scene.add( threeObj )
           } )
       } catch ( e ) {}
     } )
-
   }
 
   unloadObjects( { objIds } ) {
-    // this.scene.children = this.scene.children.filter( object => {
-    //   // if ( !object.hasOwnProperty( '_id' ) ) return true
-    //   console.log( object._id, objIds.indexOf( object._id ) )
-    //   if ( objIds.indexOf( object._id ) !== -1 ) return false
-    // } )
-    //
     let toRemove = [ ]
     this.scene.traverse( obj => {
-      if ( obj._id )
-        if ( objIds.indexOf( obj._id ) !== -1 ) toRemove.push( obj )
+      if ( obj.userData._id )
+        if ( objIds.indexOf( obj.userData._id ) !== -1 ) toRemove.push( obj )
     } )
-    // let toRemove = this.scene.children.filter( obj => objIds.indexOf( obj._id ) !== -1 )
-    // console.log( toRemove.map( o => o._id ) )
     toRemove.forEach( object => {
       this.scene.remove( object )
-    })
+    } )
+  }
+
+  colorByProperty( { propertyName } ) {
+    let first = this.scene.children.find( o => o.userData && o.userData.properties && o.userData.properties[ propertyName ] )
+    if ( !first ) {
+      console.error( 'no prop found' )
+      return
+    }
+
+    let isNumeric = !isNaN( first.userData.properties[ propertyName ] )
+    console.log( `coloring by ${propertyName}, which is (numeric: ${isNumeric})` )
+
+    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName } )
+    else this.colorByStringProperty( { propertyName: propertyName } )
+  }
+
+
+  colorByNumericProperty( { propertyName } ) {
+    // compute bounds
+    let min = 10e6,
+      max = -10e6,
+      foundObjs = [ ],
+      toGhost = [ ]
+    for ( let obj of this.scene.children ) {
+      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ propertyName ] ) ) continue
+      let value = obj.userData.properties[ propertyName ]
+      if ( value > max ) max = value
+      if ( value < min ) min = value
+      foundObjs.push( obj )
+    }
+
+    // gen rainbow 🌈
+    let rainbow = new Rainbow( )
+    rainbow.setNumberRange( min, max )
+    rainbow.setSpectrum( '#0A66FF', '#FC0280' )
+
+    foundObjs.forEach( obj => {
+      let value = obj.userData.properties[ propertyName ]
+      let color = new THREE.Color( `#${rainbow.colourAt( value )}` )
+      obj._oldMaterial = obj.material
+      obj.material = Converter.materialManager.getMeshVertexMat( )
+
+      obj.geometry.faces.forEach( face => {
+        face.vertexColors[ 0 ].copy( color )
+        face.vertexColors[ 1 ].copy( color )
+        face.vertexColors[ 2 ].copy( color )
+      } )
+      obj.hasVertexColors = true
+      obj.geometry.colorsNeedUpdate = true
+
+    } )
+  }
+
+  // TODO
+  colorByStringProperty( { propertyName } ) {
+
   }
 
   ghostObjects( objIds ) {}

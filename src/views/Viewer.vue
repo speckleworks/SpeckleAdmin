@@ -14,7 +14,13 @@
         <md-tab id="tab-data" md-label="Data" md-icon="storage">
           <md-content style='padding:16px;'>
             <h3>Data View</h3>
+            <md-button @click.native='colorByTemp()'>Color by something</md-button>
             #objects: {{$store.state.objects.length}}
+            <br>
+            <div v-for='obj in $store.state.objects' class='md-layout md-caption'>
+              <div class="md-layout-item md-size-10">{{obj.type}}</div>
+              <div class="md-layout-item md-size-90">{{obj.properties}}</div>
+            </div>
           </md-content>
         </md-tab>
         <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
@@ -160,7 +166,12 @@ export default {
       this.streamsToRemove = [ ]
       // restart the bucket processor
       this.bucketProcessor( )
+    },
+
+    colorByTemp( ) {
+      this.renderer.colorByProperty( { propertyName: 'volume' } )
     }
+
   },
   activated( ) {},
   deactivated( ) {},
