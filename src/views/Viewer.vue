@@ -1,7 +1,7 @@
 <template>
   <div class='md-layout viewer-main'>
     <div class="view-part-render md-layout-item" ref='render'></div>
-    <div class="md-layout-item md-size-40 view-part-data md-elevation-20">
+    <div class="md-layout-item md-size-60 view-part-data md-elevation-20">
       <md-tabs md-alignment="fixed" class='md-primary'>
         <md-tab id="tab-x" md-label="Streams" md-icon="import_export">
           <br>
@@ -13,14 +13,7 @@
         </md-tab>
         <md-tab id="tab-data" md-label="Data" md-icon="storage">
           <md-content style='padding:16px;'>
-            <h3>Data View</h3>
-            <md-button @click.native='colorByTemp()'>Color by something</md-button>
-            #objects: {{$store.state.objects.length}}
-            <br>
-            <div v-for='obj in $store.state.objects' class='md-layout md-caption'>
-              <div class="md-layout-item md-size-10">{{obj.type}}</div>
-              <div class="md-layout-item md-size-90">{{obj.properties}}</div>
-            </div>
+            <object-data-view></object-data-view>
           </md-content>
         </md-tab>
         <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
@@ -31,9 +24,12 @@
   </div>
 </template>
 <script>
+import flatten from 'flat'
+
 import HelloWorld from '@/components/HelloWorld.vue'
 import StreamSearch from '@/components/StreamSearch.vue'
 import StreamCardRenderer from '@/components/StreamCardRenderer.vue'
+import ObjectDataView from '@/components/ObjectDataView.vue'
 
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
@@ -41,7 +37,8 @@ export default {
   name: 'ViewerView',
   components: {
     StreamSearch,
-    StreamCardRenderer
+    StreamCardRenderer,
+    ObjectDataView
   },
   computed: {
     streams( ) {
@@ -112,12 +109,16 @@ export default {
       let stream = this.$store.state.streams.find( s => s.streamId === this.requestBuckets[ 0 ].streamId )
 
       objs.forEach( ( o, index ) => {
+        if ( !o.properties ) o.properties = {}
+        o.properties.id = o._id ? o._id : 'no id'
+
         let layer = stream.layers.find( l => l.startIndex >= index && index < l.startIndex + l.objectCount )
         o.streams = [ this.requestBuckets[ 0 ].streamId ]
         if ( layer && layer.properties )
-          o.color = layer.properties.color ? layer.properties.color : { hex: '#E6E6E6', a: 1 }
+          o.color = layer.properties.color ? layer.properties.color : { hex: '#4E8EFE', a: 0.7 }
         else
-          o.color = { hex: '#E6E6E6', a: 1 }
+          o.color = { hex: '#4E8EFE', a: 0.7 }
+        o.properties.layerGuid = layer.guid
       } )
 
       this.objectAccumulator.push( ...objs.map( obj => { return Object.freeze( { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } ) } ) )
@@ -169,7 +170,11 @@ export default {
     },
 
     colorByTemp( ) {
-      this.renderer.colorByProperty( { propertyName: 'volume' } )
+      this.renderer.colorByProperty( { propertyName: 'stringProp' } )
+    },
+
+    resetColors( ) {
+      this.renderer.resetColors( )
     }
 
   },
@@ -180,6 +185,8 @@ export default {
     this.objectAccumulator = [ ]
     this.renderer = new SpeckleRenderer( { domObject: this.$refs.render } )
     this.renderer.animate( )
+
+    window.renderer = this.renderer // let's pollute the global scope yea!
   }
 }
 
@@ -196,7 +203,7 @@ export default {
 
 .view-part-render {
   /*background: #333333;*/
-  background: #E0EAFC;
+  background: #E4EBF6;
 }
 
 .view-part-data {

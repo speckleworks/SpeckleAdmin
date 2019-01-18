@@ -28,14 +28,27 @@ class MaterialManager {
     return this.meshVertexMat
   }
 
-  getLineVertexMat() {
-    return null // TODO
+  getLineVertexMat( ) {
+    if ( this.lineVertexMat ) return this.lineVertexMat
+    this.lineVertexMat = new THREE.LineBasicMaterial( {
+      color: new THREE.Color( '#666666' ),
+      vertexColors: THREE.VertexColors
+    } )
+    return this.lineVertexMat
   }
 
-  getPointVertexMat() {
-    return null // TODO
+  getPointVertexMat( ) {
+    if ( this.pointVertexMat ) return this.pointVertexMat
+    this.pointVertexMat = new THREE.PointsMaterial( {
+      color: new THREE.Color( '#666666' ),
+      sizeAttenuation: false,
+      size: 5,
+      vertexColors: THREE.VertexColors
+    } )
+    return this.pointVertexMat
   }
 
+  // TODO: ghost materials
   getMeshGhostMat( ) {
     if ( this.meshGhostMat ) return this.meshGhostMat
     this.meshGhostMat = new THREE.MeshPhongMaterial( {
@@ -45,23 +58,21 @@ class MaterialManager {
       side: THREE.DoubleSide,
       transparent: true,
       wireframe: false,
-      opacity: 0.6,
+      opacity: 0.1,
       vertexColors: THREE.VertexColors
     } )
     return this.meshGhostMat
   }
 
-  getLineGhostMat() {
-    if( this.lineGhostMat ) return this.lineGhostMat
+  getLineGhostMat( ) {
+    if ( this.lineGhostMat ) return this.lineGhostMat
     return null // TODO
   }
 
-  getPointGhostMat() {
-    if( this.pointGhostMat ) return this.pointGhostMat
+  getPointGhostMat( ) {
+    if ( this.pointGhostMat ) return this.pointGhostMat
     return null // TODO
   }
-
-
 
   getMeshMaterial( color ) {
     let mat = this.meshMaterialTable.find( m => m.hex === color.hex )
@@ -99,7 +110,7 @@ class MaterialManager {
       color: new THREE.Color( color.hex ),
       sizeAttenuation: false,
       transparent: true,
-      size: 3,
+      size: 5,
       opacity: color.a
     } )
   }
@@ -108,10 +119,14 @@ class MaterialManager {
 // the conversion logic; needs cleanup
 let Converter = {
   materialManager: new MaterialManager( ),
+  defaultColor: new THREE.Color( '#FC02FF' ),
 
   Point( args, cb ) {
     let geometry = new THREE.Geometry( )
     geometry.vertices.push( new THREE.Vector3( ...args.obj.value ) )
+
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let point = new THREE.Points( geometry, this.materialManager.getPointsMaterial( args.obj.color ) )
     cb( null, point )
   },
@@ -125,6 +140,7 @@ let Converter = {
         let geometry = new THREE.Geometry( )
         geometry.vertices.push( v )
         geometry.vertices.push( origin )
+        geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
         let line = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
         line.hash = args.obj.hash
         cb( null, line )
@@ -142,6 +158,9 @@ let Converter = {
     let q = new THREE.Quaternion( )
     q.setFromUnitVectors( v1, v2 )
     let geometry = new THREE.PlaneGeometry( planeSize, planeSize )
+
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let plane = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     plane.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     plane.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.Origin.value ) );
@@ -153,6 +172,10 @@ let Converter = {
     let geometry = new THREE.Geometry( )
     geometry.vertices.push( new THREE.Vector3( args.obj.value[ 0 ], args.obj.value[ 1 ], args.obj.value[ 2 ] ) )
     geometry.vertices.push( new THREE.Vector3( args.obj.value[ 3 ], args.obj.value[ 4 ], args.obj.value[ 5 ] ) )
+
+    // prepare for potential coloring!
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let line = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     line.hash = args.obj.hash
     cb( null, line )
@@ -172,6 +195,10 @@ let Converter = {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, 0, 2 * Math.PI, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
+
+    // prepare for potential coloring!
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let circle = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     circle.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     circle.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...origin ) );
@@ -190,6 +217,10 @@ let Converter = {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, startAngle, endAngle, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
+
+    // prepare for potential coloring!
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let arc = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.plane.origin.value ) );
@@ -209,6 +240,10 @@ let Converter = {
     let curve = new THREE.EllipseCurve( 0, 0, radius, radius, startAngle, endAngle, false, 0 )
     let points = curve.getPoints( 50 )
     let geometry = new THREE.Geometry( ).setFromPoints( points )
+
+    // prepare for potential coloring!
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let arc = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) );
     arc.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...args.obj.plane.Origin.value ) );
@@ -282,6 +317,15 @@ let Converter = {
     box.geometry.applyMatrix( new THREE.Matrix4( ).makeRotationFromQuaternion( q ) )
     box.geometry.applyMatrix( new THREE.Matrix4( ).makeTranslation( ...origin ) )
     box.geometry.verticesNeedUpdate = true
+
+    box.geometry.faces.forEach( face => {
+      // Set mesh vert colors anyway in potential preparation for "color by property" functionality
+      let colorA = this.defaultColor
+      face.vertexColors.push( colorA )
+      face.vertexColors.push( colorA )
+      face.vertexColors.push( colorA )
+    } )
+
     box.hash = args.obj.hash
     cb( null, box )
   },
@@ -295,6 +339,10 @@ let Converter = {
     }
     for ( let i = 2; i < args.obj.value.length; i += 3 )
       geometry.vertices.push( new THREE.Vector3( args.obj.value[ i - 2 ], args.obj.value[ i - 1 ], args.obj.value[ i ] ) )
+
+    // prepare for potential coloring!
+    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+
     let polyline = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     polyline.hash = args.obj.hash
     cb( null, polyline )
@@ -354,11 +402,13 @@ let Converter = {
         face.vertexColors.push( colorC )
       } )
     } else {
-      // Set mesh vert colors anyway in potential preparation for "color by property" functionality
-      let colorA = new THREE.Color( '#CCCCCC' )
-      face.vertexColors.push( colorA )
-      face.vertexColors.push( colorA )
-      face.vertexColors.push( colorA )
+      geometry.faces.forEach( face => {
+        // Set mesh vert colors anyway in potential preparation for "color by property" functionality
+        let colorA = this.defaultColor
+        face.vertexColors.push( colorA )
+        face.vertexColors.push( colorA )
+        face.vertexColors.push( colorA )
+      } )
     }
 
     geometry.computeFaceNormals( )

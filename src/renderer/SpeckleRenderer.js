@@ -5,6 +5,7 @@ import CH from 'color-hash'
 
 import Axios from 'axios'
 import EE from 'event-emitter-es6'
+import flatten from 'flat'
 
 import { Converter } from './SpeckleConverter.js'
 // import TWEEN from 'tween.js'
@@ -22,7 +23,7 @@ export default class SpeckleRenderer extends EE {
     this.hemiLight = null
     this.flashLight = null
     this.raycaster = null
-    this.colorHasher = new CH()
+    this.colorHasher = new CH( )
 
     this.initialise( )
   }
@@ -92,7 +93,7 @@ export default class SpeckleRenderer extends EE {
         if ( Converter.hasOwnProperty( obj.type ) )
           Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
             threeObj.userData._id = obj._id
-            threeObj.userData.properties = obj.properties ? obj.properties : null
+            threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
             this.scene.add( threeObj )
           } )
       } catch ( e ) {}
@@ -124,49 +125,111 @@ export default class SpeckleRenderer extends EE {
     else this.colorByStringProperty( { propertyName: propertyName } )
   }
 
-
   colorByNumericProperty( { propertyName } ) {
     // compute bounds
     let min = 10e6,
       max = -10e6,
       foundObjs = [ ],
-      toGhost = [ ]
+      toReset = [ ]
     for ( let obj of this.scene.children ) {
-      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ propertyName ] ) ) continue
+      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ propertyName ] ) ) {
+        toReset.push( obj )
+        continue
+      }
+
       let value = obj.userData.properties[ propertyName ]
       if ( value > max ) max = value
       if ( value < min ) min = value
       foundObjs.push( obj )
     }
 
+    if ( min === max ) {
+      min -= 1
+    }
+    console.log( `bounds: ${min}, ${max}.` )
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
     rainbow.setSpectrum( '#0A66FF', '#FC0280' )
 
     foundObjs.forEach( obj => {
+      let value = obj.userData.properties[ propertyName ],
+        color = null
+
+      if ( !isNaN( value ) )
+        color = new THREE.Color( `#${rainbow.colourAt( value )}` )
+      else
+        color = new THREE.Color( '#000000' )
+
+      obj._oldMaterial = obj.material
+
+      this.setObjVertexColors( { obj: obj, color: color } )
+    } )
+  }
+
+  colorByStringProperty( { propertyName } ) {
+    let toReset = [ ]
+    for ( let obj of this.scene.children ) {
+      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ propertyName ] ) ) {
+        toReset.push( obj )
+        continue
+      }
       let value = obj.userData.properties[ propertyName ]
-      let color = new THREE.Color( `#${rainbow.colourAt( value )}` )
+      let color = new THREE.Color( this.colorHasher.hex( value.toString() ) )
       obj._oldMaterial = obj.material
       obj.material = Converter.materialManager.getMeshVertexMat( )
 
+      this.setObjVertexColors( { obj: obj, color: color } )
+    }
+  }
+
+  // sets vertex colors on objects by their type (mesh, line, points)
+  setObjVertexColors( { obj, color } ) {
+
+    if ( obj.type === 'Mesh' ) {
+      obj.material = Converter.materialManager.getMeshVertexMat( )
       obj.geometry.faces.forEach( face => {
         face.vertexColors[ 0 ].copy( color )
         face.vertexColors[ 1 ].copy( color )
         face.vertexColors[ 2 ].copy( color )
       } )
-      obj.hasVertexColors = true
-      obj.geometry.colorsNeedUpdate = true
+    }
 
+    if ( obj.type === 'Line' ) {
+      obj.material = Converter.materialManager.getLineVertexMat( )
+      obj.geometry.vertices.forEach( ( v, i ) => { obj.geometry.colors[ i ].copy( color ) } )
+    }
+
+    if ( obj.type === 'Points' ) {
+      obj.material = Converter.materialManager.getPointVertexMat( )
+      obj.geometry.vertices.forEach( ( v, i ) => { obj.geometry.colors[ i ].copy( color ) } )
+    }
+
+    obj.hasVertexColors = true
+    obj.geometry.colorsNeedUpdate = true
+  }
+
+  resetColors( ) {
+    for ( let obj of this.scene.children ) {
+      if ( !( obj._oldMaterial ) ) continue
+      obj.material = obj._oldMaterial
+    }
+  }
+
+  ghostObjects( objIds ) {
+    this.scene.traverse( obj => {
+      if ( !( obj.userData && obj.userData._id ) ) return
+      if ( obj.userData.ghostMaterial ) return // means it's already ghosted
+      if ( objIds.indexOf( obj.userData._id ) === -1 ) return
+
+      obj.userData.ghostMaterial = obj.material // keep old ref
+      obj.material = obj.material.clone( ) // break ref
+      obj.material.opacity = 0.1 // change opacity
+      obj.premultipliedAlpha = true
+      obj.renderOrder = 1
+      // obj.material.wireframe = true
     } )
   }
-
-  // TODO
-  colorByStringProperty( { propertyName } ) {
-
-  }
-
-  ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
 
   showObjects( objIds ) {}
