@@ -11,16 +11,22 @@
         </md-select>
       </md-field>
       <md-button v-show='selectedColorByKey!==null' class='md-raised-xxx md-primary' @click.native='clearColorBy()'>clear</md-button>
-      <!-- <div class='md-layout-item md-size-30'>
-    </div> -->
-      <!-- {{propertyKeys}} -->
+    </div>
+    <div class="md-layout-item md-size-100">
+      <h3>Filters</h3>
+      <p>TODO</p>
     </div>
     <div class="md-layout-item md-size-100">
       <h3>Data</h3>
-      <p class='md-caption'>Total items: {{$store.state.objects.length}}</p>
+      <p class='md-caption'>Total items: {{$store.state.objects.length}}. Now showing {{currentIndex}}.</p>
     </div>
     <div class="md-layout-item md-size-100" v-for='object in objects'>
       <object-detail-row :object='object'></object-detail-row>
+    </div>
+    <div class="md-layout-item md-size-100">
+      <md-button class='md-raised btn-no-margin md-primary' style='width: 100%' @click.native='currentIndex+=paginationIncrement'>
+        Show More
+      </md-button>
     </div>
     <!-- {{objects}} -->
   </div>
@@ -59,8 +65,8 @@ export default {
   },
   data( ) {
     return {
-      paginationIncrement: 20,
-      currentIndex: 100,
+      paginationIncrement: 25,
+      currentIndex: 25,
       selectedColorByKey: null
     }
   },

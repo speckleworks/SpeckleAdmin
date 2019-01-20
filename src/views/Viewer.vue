@@ -1,7 +1,7 @@
 <template>
   <div class='md-layout viewer-main'>
     <div class="view-part-render md-layout-item" ref='render'></div>
-    <div class="md-layout-item md-size-60 view-part-data md-elevation-20">
+    <div class="md-layout-item md-size-50 view-part-data md-elevation-20">
       <md-tabs md-alignment="fixed" class='md-primary'>
         <md-tab id="tab-x" md-label="Streams" md-icon="import_export">
           <br>
@@ -111,14 +111,17 @@ export default {
       objs.forEach( ( o, index ) => {
         if ( !o.properties ) o.properties = {}
         o.properties.id = o._id ? o._id : 'no id'
+        o.properties.hash = o.hash ? o.hash : 'no hash'
 
         let layer = stream.layers.find( l => l.startIndex >= index && index < l.startIndex + l.objectCount )
         o.streams = [ this.requestBuckets[ 0 ].streamId ]
-        if ( layer && layer.properties )
-          o.color = layer.properties.color ? layer.properties.color : { hex: '#4E8EFE', a: 0.7 }
+        if ( layer && layer.properties ) {
+          o.color = layer.properties.color ? layer.properties.color : { hex: '#4E8EFE', a: 0.75 }
+          o.properties.layerGuid = layer.guid ? layer.guid : 'no layer guid'
+        }
         else
-          o.color = { hex: '#4E8EFE', a: 0.7 }
-        o.properties.layerGuid = layer.guid
+          o.color = { hex: '#4E8EFE', a: 0.75 }
+
       } )
 
       this.objectAccumulator.push( ...objs.map( obj => { return Object.freeze( { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } ) } ) )

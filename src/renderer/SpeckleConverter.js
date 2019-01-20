@@ -11,8 +11,12 @@ class MaterialManager {
     this.meshGhostMat = null
     this.lineGhostMat = null
     this.pointGhostMat = null
+    this.meshHighlightMat = null
+    this.lineHighlightMat = null
+    this.pointHighlightMat = null
   }
 
+  // Vertex materials: used for analysis colouring
   getMeshVertexMat( ) {
     if ( this.meshVertexMat ) return this.meshVertexMat
     this.meshVertexMat = new THREE.MeshPhongMaterial( {
@@ -22,7 +26,7 @@ class MaterialManager {
       side: THREE.DoubleSide,
       transparent: true,
       wireframe: false,
-      opacity: 0.6,
+      opacity: 0.9,
       vertexColors: THREE.VertexColors
     } )
     return this.meshVertexMat
@@ -46,6 +50,39 @@ class MaterialManager {
       vertexColors: THREE.VertexColors
     } )
     return this.pointVertexMat
+  }
+
+  // Highlight materials: used for selected objects
+  getMeshHighlightMat( ) {
+    if ( this.meshHighlightMat ) return this.meshHighlightMat
+    this.meshHighlightMat = new THREE.MeshPhongMaterial( {
+      color: new THREE.Color( '#FF5558' ),
+      emissive: new THREE.Color( '#F170FF' ),
+      shininess: 30,
+      side: THREE.DoubleSide,
+      transparent: true,
+      wireframe: false,
+      opacity: 1
+    } )
+    return this.meshHighlightMat
+  }
+
+  getLineHighlightMat( ) {
+    if ( this.lineHighlightMat ) return this.lineHighlightMat
+    this.lineHighlightMat = new THREE.LineBasicMaterial( {
+      color: new THREE.Color( '#FB0206' )
+    } )
+    return this.lineHighlightMat
+  }
+
+  getPointHighlightMat( ) {
+    if ( this.pointHighlightMat ) return this.pointHighlightMat
+    this.pointHighlightMat = new THREE.PointsMaterial( {
+      color: new THREE.Color( '#FF0206' ),
+      sizeAttenuation: false,
+      size: 5,
+    } )
+    return this.pointHighlightMat
   }
 
   // TODO: ghost materials

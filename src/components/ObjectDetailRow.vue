@@ -1,18 +1,14 @@
 <template>
-  <md-card class='md-layout-xx object-row md-elevation-0 md-gutter' md-with-hover ref='rowdiv'>
-    <div class="md-layout-item md-size-10 row-cell">
-      <strong>Type:</strong> {{object.type}}
-    </div>
-    <div class="md-layout-item row-cell" v-for='kvp in limitKvps'>
-      <strong><span class='md-caption'>{{kvp.key}}:</span></strong> {{ kvp.value }}
-    </div>
-    <div class="md-layout-item row-cell row-slide xxx-md-elevation-1">
-      <a href="javascript:void(0)" @click='scrollLeft()'><md-icon>chevron_left</md-icon></a>
-      <a href="javascript:void(0)" @click='scrollReset()'><md-icon style='color:#EFEFEF'>fiber_manual_record</md-icon></a>
-      <a href="javascript:void(0)" @click='scrollRight()'><md-icon>chevron_right</md-icon></a>
-      <!-- <a href="javascript:void(0)" ><md-icon>chevron_right</md-icon></a> -->
-    </div>
-  </md-card>
+  <div class='row-container' @mouseover='hover()' @mouseleave='unhover()'>
+    <md-card class='md-layout-xx object-row md-elevation-0 md-gutter' md-with-hover ref='rowdiv'>
+      <div class="md-layout-item md-size-10 row-cell">
+        <strong>Type:</strong> {{object.type}}
+      </div>
+      <div class="md-layout-item row-cell" v-for='kvp in limitKvps'>
+        <strong><span class='md-caption'>{{kvp.key}}:</span></strong> {{ kvp.value }}
+      </div>
+    </md-card>
+  </div>
 </template>
 <script>
 import flatten from 'flat'
@@ -36,62 +32,45 @@ export default {
   data( ) {
     return {
       sliceStart: 0,
-      sliceEnd: 5
+      sliceEnd: 50,
+      isHovering: false
     }
   },
   methods: {
-    scrollReset( ) {
-      this.sliceStart = 0
-      this.sliceEnd = 5
+    hover( ) {
+      if ( this.isHovering ) return
+      this.isHovering = true
+      console.log( 'hover', this.object._id )
     },
-    scrollLeft( ) {
-      if ( this.sliceStart > 0 ) {
-        this.sliceStart -= 1
-        this.sliceEnd -= 1
-      } else {
-        this.sliceStart = this.kvps.length - 5
-        this.sliceEnd = this.kvps.length
-      }
-    },
-    scrollRight( ) {
-      if ( this.sliceEnd < this.kvps.length ) {
-        this.sliceStart += 1
-        this.sliceEnd += 1
-      } else {
-        this.sliceStart = 0
-        this.sliceEnd = 5
-      }
+    unhover( ) {
+      if ( !this.isHovering ) return
+      this.isHovering = false
+      console.log( 'unhover', this.object._id )
     }
   }
 }
 
 </script>
 <style scoped lang='scss'>
-.row-slide {
-  position: absolute;
-  background-color: white;
-  /*background-color: black;*/
-  right: 0;
-}
-
 .object-row {
   margin-left: 0;
   margin-right: 0;
   padding-left: 10px;
   border-bottom: 1px solid #F1F1F1;
   height: 50px;
-  width: auto;
   line-height: 50px;
   white-space: nowrap;
   overflow: hidden;
 }
 
-/*.object-row:hover{
-  overflow: auto;
-}*/
+.object-row:hover {
+  overflow-x: auto;
+}
+
 .row-cell:first-of-type {
   padding-left: 0;
 }
+
 .row-cell {
   min-width: 0;
   max-width: 150px;
@@ -101,7 +80,6 @@ export default {
   padding-left: 8px;
   padding-right: 8px;
   display: inline-block;
-  /*float: left;*/
   border-right: 1px solid #F1F1F1;
 }
 

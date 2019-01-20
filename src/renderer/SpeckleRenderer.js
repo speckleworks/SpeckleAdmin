@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import OrbitControls from 'threejs-orbit-controls'
+
 import Rainbow from 'rainbowvis.js'
 import CH from 'color-hash'
 
@@ -22,7 +23,13 @@ export default class SpeckleRenderer extends EE {
     this.orbitControls = null
     this.hemiLight = null
     this.flashLight = null
+
     this.raycaster = null
+    this.mouse = null
+
+    this.hoveredObject = null
+    this.objectsToHighlight = [ ]
+
     this.colorHasher = new CH( )
 
     this.initialise( )
@@ -31,7 +38,8 @@ export default class SpeckleRenderer extends EE {
   initialise( ) {
     this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } )
     this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight )
-    this.renderer.setClearColor( new THREE.Color( '#FFFFFF' ), 0 )
+    // this.renderer.setClearColor( new THREE.Color(  ), 0.0 )
+    this.renderer.shadowMap.enabled = true
     this.domObject.appendChild( this.renderer.domElement )
 
     this.scene = new THREE.Scene( )
@@ -61,19 +69,28 @@ export default class SpeckleRenderer extends EE {
 
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
+    this.controls.enableDamping = true
+    this.controls.dampingFactor = 0.45
 
     if ( webpackHotUpdate ) {
       window.scene = this.scene
       window.THREE = THREE
     }
+
+    this.raycaster = new THREE.Raycaster( )
+    this.mouse = new THREE.Vector2( )
+
     window.addEventListener( 'resize', this.resizeCanvas.bind( this ), false )
+    window.addEventListener( 'mousemove', this.onTouchMove.bind( this ) )
+    window.addEventListener( 'touchmove', this.onTouchMove.bind( this ) )
+
     this.render( )
   }
 
   animate( ) {
     requestAnimationFrame( this.animate.bind( this ) );
-    this.render( )
     this.controls.update( )
+    this.render( )
   }
 
   render( ) {
@@ -83,7 +100,48 @@ export default class SpeckleRenderer extends EE {
   resizeCanvas( ) {
     this.camera.aspect = this.domObject.offsetWidth / this.domObject.offsetHeight
     this.camera.updateProjectionMatrix( )
-    this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight );
+    this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight )
+  }
+
+  onTouchMove( event ) {
+    let x, y
+    if ( event.changedTouches ) {
+      x = event.changedTouches[ 0 ].pageX
+      y = event.changedTouches[ 0 ].pageY
+    } else {
+      x = event.clientX
+      y = event.clientY
+    }
+    let rect = this.domObject.getBoundingClientRect( )
+    x -= rect.left
+    y -= rect.top
+    this.mouse.x = ( x / this.domObject.offsetWidth ) * 2 - 1
+    this.mouse.y = -( y / this.domObject.offsetHeight ) * 2 + 1
+
+    this.checkIntersection( )
+  }
+
+  checkIntersection( ) {
+    this.raycaster.setFromCamera( this.mouse, this.camera )
+    let intersects = this.raycaster.intersectObjects( [ this.scene ], true )
+    if ( intersects.length > 0 ) {
+      this.domObject.style.cursor = 'pointer'
+
+      if ( intersects[ 0 ].object !== this.hoveredObject ) {
+        if ( this.hoveredObject ) {
+          this.hoveredObject.material = this.hoveredObject.__oldMaterialPreHover
+        }
+        this.hoveredObject = intersects[ 0 ].object
+        this.hoveredObject.__oldMaterialPreHover = this.hoveredObject.material
+        this.hoveredObject.material = Converter.materialManager.getMeshHighlightMat( )
+      }
+    } else {
+      this.domObject.style.cursor = 'default'
+      if ( this.hoveredObject ) {
+        this.hoveredObject.material = this.hoveredObject.__oldMaterialPreHover
+        this.hoveredObject = null
+      }
+    }
   }
 
   // add and remove objects
@@ -150,7 +208,7 @@ export default class SpeckleRenderer extends EE {
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
-    rainbow.setSpectrum( '#0A66FF', '#FC0280' )
+    rainbow.setSpectrum( '#0A66FF', '#FC4CA5' )
 
     foundObjs.forEach( obj => {
       let value = obj.userData.properties[ propertyName ],
@@ -175,7 +233,7 @@ export default class SpeckleRenderer extends EE {
         continue
       }
       let value = obj.userData.properties[ propertyName ]
-      let color = new THREE.Color( this.colorHasher.hex( value.toString() ) )
+      let color = new THREE.Color( this.colorHasher.hex( value.toString( ) ) )
       obj._oldMaterial = obj.material
       obj.material = Converter.materialManager.getMeshVertexMat( )
 
@@ -185,7 +243,6 @@ export default class SpeckleRenderer extends EE {
 
   // sets vertex colors on objects by their type (mesh, line, points)
   setObjVertexColors( { obj, color } ) {
-
     if ( obj.type === 'Mesh' ) {
       obj.material = Converter.materialManager.getMeshVertexMat( )
       obj.geometry.faces.forEach( face => {
