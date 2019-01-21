@@ -62,7 +62,7 @@ class MaterialManager {
       side: THREE.DoubleSide,
       transparent: true,
       wireframe: false,
-      opacity: 1
+      opacity: 0.5
     } )
     return this.meshHighlightMat
   }

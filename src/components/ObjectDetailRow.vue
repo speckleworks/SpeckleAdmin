@@ -1,11 +1,16 @@
 <template>
   <div class='row-container' @mouseover='hover()' @mouseleave='unhover()' @click='zoomTo()'>
     <md-card class='md-layout-xx object-row md-elevation-0 md-gutter' md-with-hover ref='rowdiv'>
-      <div class="md-layout-item md-size-10 row-cell">
-        <strong>Type:</strong> {{object.type}}
+      <div class="md-layout-item md-size-15 row-cell">
+        <strong>Id:</strong> {{object._id}}
       </div>
-      <div class="md-layout-item row-cell" v-for='kvp in limitKvps'>
+      <div class='md-layout-item md-size-75 row-cell'>
+        <span class="" v-for='kvp in limitKvps'>
         <strong><span class='md-caption'>{{kvp.key}}:</span></strong> {{ kvp.value }}
+        </span>
+      </div>
+      <div class='md-layout-item md-size-10 row-cell'>
+        +
       </div>
     </md-card>
   </div>
@@ -49,7 +54,7 @@ export default {
       renderer.unHighlightObjects( [ this.object._id ] )
       console.log( 'unhover', this.object._id )
     },
-    zoomTo() {
+    zoomTo( ) {
       renderer.zoomToObject( this.object._id )
     }
   }
@@ -68,9 +73,9 @@ export default {
   overflow: hidden;
 }
 
-.object-row:hover {
+/*.object-row:hover {
   overflow-x: auto;
-}
+}*/
 
 .row-cell:first-of-type {
   padding-left: 0;
@@ -78,7 +83,8 @@ export default {
 
 .row-cell {
   min-width: 0;
-  max-width: 150px;
+  /*
+  max-width: 150px;*/
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

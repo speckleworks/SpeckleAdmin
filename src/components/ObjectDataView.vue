@@ -75,7 +75,9 @@ export default {
       this.selectedColorByKey = null
     }
   },
-  mounted( ) {}
+  mounted( ) {
+
+  }
 }
 
 </script>

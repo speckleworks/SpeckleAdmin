@@ -118,8 +118,7 @@ export default {
         if ( layer && layer.properties ) {
           o.color = layer.properties.color ? layer.properties.color : { hex: '#4E8EFE', a: 0.75 }
           o.properties.layerGuid = layer.guid ? layer.guid : 'no layer guid'
-        }
-        else
+        } else
           o.color = { hex: '#4E8EFE', a: 0.75 }
 
       } )
@@ -190,6 +189,10 @@ export default {
     this.renderer.animate( )
 
     window.renderer = this.renderer // let's pollute the global scope yea!
+
+    this.renderer.on( 'clicked-on-object', id => {
+      console.log( `sel ${id}` )
+    } )
   }
 }
 

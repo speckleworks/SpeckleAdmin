@@ -10,7 +10,8 @@ import EE from 'event-emitter-es6'
 import flatten from 'flat'
 
 import { Converter } from './SpeckleConverter.js'
-// import TWEEN from 'tween.js'
+import SelectionBox from './SelectionBox.js'
+import SelectionHelper from './SelectionHelper.js'
 
 export default class SpeckleRenderer extends EE {
 
@@ -29,6 +30,9 @@ export default class SpeckleRenderer extends EE {
     this.mouse = null
     this.mouseDownTime = null
     this.enableKeyobardEvents = false
+
+    this.selectionBox = null
+    this.selectionHelper = null
 
     this.hoveredObject = null
     this.objectsToHighlight = [ ]
@@ -60,9 +64,6 @@ export default class SpeckleRenderer extends EE {
     hemiLight.name = 'world lighting'
     this.scene.add( hemiLight )
 
-    // let gridHelper = new THREE.GridHelper( 200, 20 );
-    // this.scene.add( gridHelper )
-
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
     this.camera.up.set( 0, 0, 1 )
     this.camera.position.z = 1000
@@ -85,6 +86,10 @@ export default class SpeckleRenderer extends EE {
     this.raycaster = new THREE.Raycaster( )
     this.mouse = new THREE.Vector2( )
 
+    this.selectionBox = new SelectionBox( this.camera, this.scene )
+    this.selectionHelper = new SelectionHelper( this.selectionBox, this.renderer, "selectBox", this.controls, this.mouse )
+
+
     window.addEventListener( 'resize', this.resizeCanvas.bind( this ), false )
     this.renderer.domElement.addEventListener( 'mousemove', this.onTouchMove.bind( this ) )
     this.renderer.domElement.addEventListener( 'touchmove', this.onTouchMove.bind( this ) )
@@ -96,6 +101,7 @@ export default class SpeckleRenderer extends EE {
     this.domObject.addEventListener( 'mouseout', this.disableEvents.bind( this ) )
 
     window.addEventListener( 'keydown', this.keydown.bind( this ) )
+    window.addEventListener( 'keyup', this.keyup.bind( this ) )
 
     this.computeSceneBoundingSphere( )
     this.render( )
@@ -118,20 +124,48 @@ export default class SpeckleRenderer extends EE {
     this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight )
   }
 
+  // called on mouseover the render div - tells us we can actually enable interactions
+  // in the threejs window
   enableEvents( ) {
     this.enableKeyobardEvents = true
   }
 
+  // called on mouseout of the render div - will stop interactions, such as spacebar
+  // for zoom extents, etc. in the threejs window
   disableEvents( ) {
     this.enableKeyobardEvents = false
   }
+
+  // HIC SUNT DRACONES:
+  // Selection events and mouse interactions below.
+  // Main thing to note:
+  // - Holding down shift will disable the orbit controls and enable draggin a selection box
+  // - Double clicking on an object will zoom to it
+  // - (TODO) Clicking on an object selects it
+  // - (TODO) Clicking outside any objects/selection box will kill current selection
+
   keydown( event ) {
     if ( !this.enableKeyobardEvents ) return
     console.log( `key: ${event.code}` )
     switch ( event.code ) {
       case 'Space':
-        this.computeSceneBoundingSphere()
+        this.computeSceneBoundingSphere( )
         this.zoomExtents( )
+        break
+      case 'ShiftLeft':
+        this.controls.enabled = false
+        break
+      default:
+        break
+    }
+  }
+
+  keyup( event ) {
+    if ( !this.enableKeyobardEvents ) return
+    console.log( `key: ${event.code}` )
+    switch ( event.code ) {
+      case 'ShiftLeft':
+        this.controls.enabled = true
         break
       default:
         break
@@ -139,10 +173,13 @@ export default class SpeckleRenderer extends EE {
   }
 
   mouseDown( event ) {
-    if ( Date.now( ) - this.mouseDownTime < 200 ) {
+    if ( Date.now( ) - this.mouseDownTime < 300 ) {
       if ( this.hoveredObject !== null )
         this.zoomToObject( this.hoveredObject )
     }
+
+    if ( this.controls.enabled === false )
+      this.selectionBox.startPoint.set( this.mouse.x, this.mouse.y, 0.5 )
 
     this.mouseDownTime = Date.now( )
   }
@@ -151,6 +188,13 @@ export default class SpeckleRenderer extends EE {
     if ( Date.now( ) - this.mouseDownTime < 250 ) {
       console.log( this.hoveredObject )
       console.log( `select! multi? ${event.shiftKey} unselect? ${event.ctrlKey}` )
+
+      for ( var i = 0; i < this.selectionBox.collection.length; i++ ) {
+        this.selectionBox.collection[ i ].material = this.selectionBox.collection[ i ].__oldMaterialPreMassHighlight
+      }
+
+      if ( this.hoveredObject )
+        this.emit( 'clicked-on-object', this.hoveredObject.userData._id )
     }
   }
 
@@ -169,7 +213,22 @@ export default class SpeckleRenderer extends EE {
     this.mouse.x = ( x / this.domObject.offsetWidth ) * 2 - 1
     this.mouse.y = -( y / this.domObject.offsetHeight ) * 2 + 1
 
-    this.checkIntersection( )
+    // check if we're dragging a box selection
+    if ( this.selectionHelper.isDown && !this.controls.enabled ) {
+      for ( var i = 0; i < this.selectionBox.collection.length; i++ ) {
+        this.selectionBox.collection[ i ].material = this.selectionBox.collection[ i ].__oldMaterialPreMassHighlight
+      }
+      this.selectionBox.endPoint.set( this.mouse.x, this.mouse.y, 0.5 );
+      var allSelected = this.selectionBox.select( )
+      for ( var i = 0; i < allSelected.length; i++ ) {
+        allSelected[ i ].__oldMaterialPreMassHighlight = allSelected[ i ].material
+        allSelected[ i ].material = Converter.materialManager.getMeshHighlightMat( )
+      }
+    }
+    // if not, highlight a selected object
+    else {
+      this.checkIntersection( )
+    }
   }
 
   checkIntersection( ) {
@@ -195,7 +254,9 @@ export default class SpeckleRenderer extends EE {
     }
   }
 
-  // add and remove objects
+  // adds a bunch of speckle objects to the scene. handles conversion and
+  // computes each objects's bounding sphere for faster zoom extents calculation
+  // of the scene bounding sphere.
   loadObjects( { objs, zoomExtents } ) {
     objs.forEach( ( obj, index ) => {
       try {
@@ -218,6 +279,7 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  // removes an array of objects from the scene and recalculates the scene bounding sphere
   unloadObjects( { objIds } ) {
     let toRemove = [ ]
     this.scene.traverse( obj => {
@@ -233,6 +295,9 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  // entry point for any attempt to color things by their properties in the viewer
+  // depending on the property, it will either call "colorByNumericProperty" or
+  // "colorByStringProperty" (see below)
   colorByProperty( { propertyName } ) {
     let first = this.scene.children.find( o => o.userData && o.userData.properties && o.userData.properties[ propertyName ] )
     if ( !first ) {
@@ -247,6 +312,8 @@ export default class SpeckleRenderer extends EE {
     else this.colorByStringProperty( { propertyName: propertyName } )
   }
 
+  // attempts to color all objects  in the scene by a numeric property, computing its bounds
+  // and generating a gradient from min (blue) to max (pinkish)
   colorByNumericProperty( { propertyName } ) {
     // compute bounds
     let min = 10e6,
@@ -289,6 +356,8 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  // attempts to color all objects in the scene by a string property
+  // uses colorHasher to get a hex color out of a string
   colorByStringProperty( { propertyName } ) {
     let toReset = [ ]
     for ( let obj of this.scene.children ) {
@@ -337,22 +406,11 @@ export default class SpeckleRenderer extends EE {
     }
   }
 
-  ghostObjects( objIds ) {
-    this.scene.traverse( obj => {
-      if ( !( obj.userData && obj.userData._id ) ) return
-      if ( obj.userData.ghostMaterial ) return // means it's already ghosted
-      if ( objIds.indexOf( obj.userData._id ) === -1 ) return
-
-      obj.userData.ghostMaterial = obj.material // keep old ref
-      obj.material = obj.material.clone( ) // break ref
-      obj.material.opacity = 0.1 // change opacity
-      obj.premultipliedAlpha = true
-      obj.renderOrder = 1
-      // obj.material.wireframe = true
-    } )
-  }
+  // TODO
+  ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
 
+  // TODO
   showObjects( objIds ) {}
   hideObjects( objIds ) {}
 
@@ -383,7 +441,7 @@ export default class SpeckleRenderer extends EE {
     let vector = new THREE.Vector3( 0, 0, 1 )
     let dir = vector.applyQuaternion( this.controls.object.quaternion );
     let newPos = new THREE.Vector3( )
-    dir.multiplyScalar( offset * 1.25 )
+    dir.multiplyScalar( offset * 1.5 )
     newPos.addVectors( bsphere.center, dir )
     this.setCamera( {
       position: [ newPos.x, newPos.y, newPos.z ],
@@ -430,8 +488,6 @@ export default class SpeckleRenderer extends EE {
     }
     center ? center.divideScalar( 2 ) : null
     this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.5 : 100 }
-    console.log( this.sceneBoundingSphere )
-    console.log( `done in ${Date.now()-time} ms` )
   }
 
   setFar( ) {}
