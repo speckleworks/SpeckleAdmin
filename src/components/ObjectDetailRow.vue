@@ -1,5 +1,5 @@
 <template>
-  <div class='row-container' @mouseover='hover()' @mouseleave='unhover()'>
+  <div class='row-container' @mouseover='hover()' @mouseleave='unhover()' @click='zoomTo()'>
     <md-card class='md-layout-xx object-row md-elevation-0 md-gutter' md-with-hover ref='rowdiv'>
       <div class="md-layout-item md-size-10 row-cell">
         <strong>Type:</strong> {{object.type}}
@@ -40,12 +40,17 @@ export default {
     hover( ) {
       if ( this.isHovering ) return
       this.isHovering = true
+      renderer.highlightObjects( [ this.object._id ] )
       console.log( 'hover', this.object._id )
     },
     unhover( ) {
       if ( !this.isHovering ) return
       this.isHovering = false
+      renderer.unHighlightObjects( [ this.object._id ] )
       console.log( 'unhover', this.object._id )
+    },
+    zoomTo() {
+      renderer.zoomToObject( this.object._id )
     }
   }
 }

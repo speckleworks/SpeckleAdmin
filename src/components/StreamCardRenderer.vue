@@ -13,7 +13,8 @@
       <p>Created on: <strong>{{createdAt}}</strong></p>
       <p>Modified on: <strong>{{createdAt}}</strong></p>
       <p>Units: <strong>{{stream.baseProperties.units}}</strong></p>
-      {{stream.description}}
+      <div v-html='compiledDescription'></div>
+      <!-- {{stream.description}} -->
     </md-card-content>
   </md-card>
 </template>
