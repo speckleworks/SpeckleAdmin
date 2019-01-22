@@ -23,8 +23,8 @@
       <md-button class='md-primary' v-if='editDescription===true' @click.native='updateDescription'>Done</md-button>
     </md-card-actions>
     <md-card-content class='md-caption' v-if='resource.baseProperties'>
-      <span><strong>Units:</strong> {{resource.baseProperties.units}}</span>;
-      <span><strong>Tolerance:</strong> {{resource.baseProperties.tolerance}}</span>.
+      <span><strong>Units:</strong> {{resource.baseProperties.units ? resource.baseProperties.units : 'no units specified'}}</span>;
+      <span><strong>Tolerance:</strong> {{resource.baseProperties.tolerance ? resource.baseProperties.tolerance : 'no tolerance specified'}}</span>.
     </md-card-content>
   </md-card>
 </template>

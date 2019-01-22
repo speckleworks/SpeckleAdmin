@@ -35,7 +35,7 @@ export default class SpeckleRenderer extends EE {
     this.selectionHelper = null
 
     this.hoveredObject = null
-    this.objectsToHighlight = [ ]
+    this.objectSelection = [ ]
 
     this.sceneBoundingSphere = null
 
@@ -62,6 +62,7 @@ export default class SpeckleRenderer extends EE {
     hemiLight.position.set( 0, 500, 0 )
     hemiLight.isCurrent = true
     hemiLight.name = 'world lighting'
+    hemiLight.up.set( 0, 0, 1 )
     this.scene.add( hemiLight )
 
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
@@ -185,16 +186,38 @@ export default class SpeckleRenderer extends EE {
   }
 
   mouseUp( event ) {
-    if ( Date.now( ) - this.mouseDownTime < 250 ) {
-      console.log( this.hoveredObject )
-      console.log( `select! multi? ${event.shiftKey} unselect? ${event.ctrlKey}` )
+    // check for single tap/click
+    if ( Date.now( ) - this.mouseDownTime < 300 ) {
+      // console.log( this.hoveredObject )
+      // console.log( `select! multi? ${event.shiftKey} unselect? ${event.ctrlKey}` )
 
-      for ( var i = 0; i < this.selectionBox.collection.length; i++ ) {
-        this.selectionBox.collection[ i ].material = this.selectionBox.collection[ i ].__oldMaterialPreMassHighlight
+      if ( this.hoveredObject && this.selectionBox.collection.findIndex( x => x.userData._id === this.hoveredObject.userData._id ) !== -1 ) {
+        // Inside the selection
+        if ( event.ctrlKey ) {
+          // TODO: remove from selection
+        }
+      } else {
+        for ( var i = 0; i < this.selectionBox.collection.length; i++ ) {
+          this.selectionBox.collection[ i ].material = this.selectionBox.collection[ i ].__oldMaterialPreMassHighlight
+        }
+        this.selectionBox.collection = [ ]
       }
 
-      if ( this.hoveredObject )
-        this.emit( 'clicked-on-object', this.hoveredObject.userData._id )
+      if ( this.hoveredObject ) {
+        if ( event.shiftKey ) {
+          console.log( 'emit add to selection' )
+        } else if ( event.ctrlKey ) {
+          console.log( 'remove from selection' )
+        } else {
+          console.log( 'emit single selection' )
+          this.emit( 'clicked-on-object', this.hoveredObject.userData._id )
+        }
+      }
+    } else {
+      if ( !this.controls.enabled ) {
+        console.log( 'emit mass selection' )
+        console.log( this.selectionBox.collection )
+      }
     }
   }
 
@@ -227,11 +250,11 @@ export default class SpeckleRenderer extends EE {
     }
     // if not, highlight a selected object
     else {
-      this.checkIntersection( )
+      this.highlightMouseOverObject( )
     }
   }
 
-  checkIntersection( ) {
+  highlightMouseOverObject( ) {
     this.raycaster.setFromCamera( this.mouse, this.camera )
     let intersects = this.raycaster.intersectObjects( [ this.scene ], true )
     if ( intersects.length > 0 ) {
@@ -335,7 +358,7 @@ export default class SpeckleRenderer extends EE {
     if ( min === max ) {
       min -= 1
     }
-    console.log( `bounds: ${min}, ${max}.` )
+    console.log( `bounds: ${min}, ${max} 🌈` )
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )

@@ -1,19 +1,39 @@
 <template>
-  <div class='row-container' @mouseover='hover()' @mouseleave='unhover()' @click='zoomTo()'>
-    <md-card class='md-layout-xx object-row md-elevation-0 md-gutter' md-with-hover ref='rowdiv'>
-      <div class="md-layout-item md-size-15 row-cell">
+  <md-card class='row-container md-elevation-0' @mouseover.native='hover()' @mouseleave.native='unhover()' md-with-hover style='margin:0'>
+    <div class='md-layout object-row md-elevation-0' ref='rowdiv'>
+      <div class="md-layout-item md-size-10 row-cell">
+        <md-icon @click.native='zoomTo()' class='pointer-hover'>zoom_out_map</md-icon>
+      </div>
+      <div class="md-layout-item md-size-10 row-cell">
         <strong>Id:</strong> {{object._id}}
       </div>
-      <div class='md-layout-item md-size-75 row-cell'>
+      <div class='md-layout-item md-size-70 row-cell'>
         <span class="" v-for='kvp in limitKvps'>
         <strong><span class='md-caption'>{{kvp.key}}:</span></strong> {{ kvp.value }}
         </span>
       </div>
-      <div class='md-layout-item md-size-10 row-cell'>
-        +
+      <div class='md-layout-item md-size-10 text-center row-cell'>
+        <md-icon @click.native='expanded=!expanded' class='pointer-hover'>{{expanded ? 'expand_less':'expand_more'}}</md-icon>
       </div>
-    </md-card>
-  </div>
+    </div>
+    <div v-if='expanded'>
+      <br>
+      <div v-for='kvp in kvps' class='md-layout md-gutter expanded-props'>
+        <div class='md-layout-item md-size-15'></div>
+        <div class='md-layout-item md-size-25'>
+          <span class='md-caption'>{{kvp.key}}:</span>
+        </div>
+        <div class='md-layout-item md-size-60 row-cell'>
+          <code>{{kvp.value}}</code>
+        </div>
+        <!-- <md-divider></md-divider> -->
+      </div>
+      <br>
+      <!-- <pre>
+        {{object}}
+      </pre> -->
+    </div>
+  </md-card>
 </template>
 <script>
 import flatten from 'flat'
@@ -38,7 +58,8 @@ export default {
     return {
       sliceStart: 0,
       sliceEnd: 50,
-      isHovering: false
+      isHovering: false,
+      expanded: false
     }
   },
   methods: {
@@ -62,6 +83,10 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.pointer-hover:hover {
+  cursor: pointer;
+}
+
 .object-row {
   margin-left: 0;
   margin-right: 0;
@@ -77,9 +102,9 @@ export default {
   overflow-x: auto;
 }*/
 
-.row-cell:first-of-type {
+/*.row-cell:first-of-type {
   padding-left: 0;
-}
+}*/
 
 .row-cell {
   min-width: 0;

@@ -40,7 +40,12 @@ export default {
   components: {
     ObjectDetailRow
   },
-  props: {},
+  props: {
+    selectedObjetcs: {
+      type: Array,
+      default: () => []
+    }
+  },
   watch: {
     selectedColorByKey( newVal ) {
       renderer.resetColors( )

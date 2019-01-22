@@ -16,9 +16,9 @@
             <object-data-view></object-data-view>
           </md-content>
         </md-tab>
-        <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
+       <!--  <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
           <h3>Test</h3>
-        </md-tab>
+        </md-tab> -->
       </md-tabs>
     </div>
   </div>
@@ -69,11 +69,11 @@ export default {
       this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
 
       let bucket = [ ],
-        maxReq = 50
+        maxReq = 50 // magic number; maximum objects to request in a bucket
 
       for ( let i = 0; i < toRequest.length; i++ ) {
         bucket.push( toRequest[ i ] )
-        if ( i % maxReq == 0 && i != 0 ) {
+        if ( i % maxReq === 0 && i !== 0 ) {
           this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
           bucket = [ ]
           if ( !this.isRequesting ) this.bucketProcessor( )
@@ -132,14 +132,19 @@ export default {
       this.bucketProcessor( )
     },
 
+    // pauses and any bucket loading and waits for it to stop,
+    // then triggers the real remove stream
     async removeStream( streamId ) {
       this.pauseRequesting = true
       if ( this.streamsToRemove.indexOf( streamId ) === -1 )
         this.streamsToRemove.push( streamId )
-      this.removeInterval = setInterval( this.removeStreamInt.bind( this ), 100 )
+      this.removeInterval = setInterval( this.removeStreamInternal.bind( this ), 250 )
     },
 
-    removeStreamInt( ) {
+    // removes any objects pertaining to one stream, even half loaded ones
+    // works with a temporary state. Restarts the bucket processor
+    // in case there were other buckets queued from other stream loads.
+    removeStreamInternal( ) {
       if ( this.bucketInProgress ) return
       clearInterval( this.removeInterval )
       // create a list of all objects, including ones that are possibly still "accumulating"
