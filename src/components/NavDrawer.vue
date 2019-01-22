@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='the-navbar'>
     <md-list v-if='$store.state.isAuth' style='padding-top: 0 !impotant'>
       <md-list-item to='/'>
         <md-icon>home</md-icon>
@@ -68,7 +68,7 @@ ul {
   background-color: transparent !important;
 }
 
-.md-list-item-text {
+.the-navbar .md-list-item-text {
   color: white !important;
   /*transition: none !important;*/
 }

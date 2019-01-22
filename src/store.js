@@ -210,10 +210,28 @@ export default new Vuex.Store( {
         layer.orderIndex = k
       } )
     },
+
     // OBJECTS
     ADD_OBJECTS( state, objects ) {
       state.objects.push( ...objects )
     },
+    UPDATE_OBJECTS_STREAMS( state, { objIds, streamToAdd, streamToRemove } ) {
+      objIds.forEach( id => {
+        let myObject = state.objects.find( o => o._id === id )
+        if ( myObject ) {
+          if ( streamToAdd && myObject.streams.indexOf( streamToAdd ) === -1)
+            myObject.streams.push( streamToAdd )
+          if ( streamToRemove ) {
+            let index = myObject.streams.indexOf( streamToRemove )
+            if ( index !== -1 ) myObject.streams.splice( index, 1 )
+          }
+        }
+      } )
+    },
+    REMOVE_OBJECTS( state, objectIds ) {
+      state.objects = state.objects.filter( obj => objectIds.indexOf( obj._id ) === -1 )
+    },
+
     // Projects
     ADD_PROJECTS( state, projects ) {
       projects.forEach( project => {
@@ -280,11 +298,14 @@ export default new Vuex.Store( {
     SET_USER( state, user ) {
       state.user = user
     },
+
     // End of life
     FLUSH_ALL( state ) {
       state.token = null
       state.user = {}
       state.streams = [ ]
+      state.objects = [ ]
+      state.deStreams = [ ]
       state.projects = [ ]
       state.clients = [ ]
       state.users = [ ]
