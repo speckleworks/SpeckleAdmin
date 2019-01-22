@@ -1,10 +1,10 @@
 <template>
   <div class='md-layout'>
-    <div class="md-layout-item md-size-100">
-      <h3>Analysis</h3>
-    </div>
     <div class="md-layout-item md-size-100 md-layout md-alignment-center-left">
-      <md-field class='md-layout-item md-size-80'>
+      <div class="md-layout-item md-size-20">
+        <h3>Analyze:</h3>
+      </div>
+      <md-field class='md-layout-item md-size-50'>
         <label>Color objects by</label>
         <md-select v-model='selectedColorByKey' md-dense>
           <md-option v-for='key in propertyKeys' :value='key'>{{key}}</md-option>
@@ -13,18 +13,14 @@
       <md-button v-show='selectedColorByKey!==null' class='md-raised-xxx md-primary' @click.native='clearColorBy()'>clear</md-button>
     </div>
     <div class="md-layout-item md-size-100">
-      <h3>Filters</h3>
-      <p>TODO</p>
-    </div>
-    <div class="md-layout-item md-size-100">
       <h3>Data</h3>
-      <p class='md-caption'>Total items: {{$store.state.objects.length}}. Now showing {{currentIndex}}.</p>
+      <p class='md-caption'>Total items: {{$store.state.objects.length}}. Now showing {{objects.length}}.</p>
     </div>
     <div class="md-layout-item md-size-100" v-for='object in objects'>
       <object-detail-row :object='object'></object-detail-row>
     </div>
     <div class="md-layout-item md-size-100">
-      <md-button class='md-raised btn-no-margin md-primary' style='width: 100%' @click.native='currentIndex+=paginationIncrement'>
+      <md-button class='md-raised btn-no-margin md-primary' style='width: 100%' @click.native='currentIndex+=paginationIncrement' :disabled='$store.state.objects.length === 0 || currentIndex >= $store.state.objects.length'>
         Show More
       </md-button>
     </div>
@@ -41,9 +37,9 @@ export default {
     ObjectDetailRow
   },
   props: {
-    selectedObjetcs: {
+    selectedObjects: {
       type: Array,
-      default: () => []
+      default: ( ) => [ ]
     }
   },
   watch: {

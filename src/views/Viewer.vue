@@ -13,10 +13,10 @@
         </md-tab>
         <md-tab id="tab-data" md-label="Data" md-icon="storage">
           <md-content style='padding:16px;'>
-            <object-data-view></object-data-view>
+            <object-data-view :selected-objects='selectedObjects'></object-data-view>
           </md-content>
         </md-tab>
-       <!--  <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
+        <!--  <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
           <h3>Test</h3>
         </md-tab> -->
       </md-tabs>
@@ -55,7 +55,8 @@ export default {
       pauseRequesting: false,
       bucketInProgress: false,
       removeInterval: null,
-      streamsToRemove: [ ]
+      streamsToRemove: [ ],
+      selectedObjects: [ ]
     }
   },
   methods: {
@@ -195,9 +196,10 @@ export default {
 
     window.renderer = this.renderer // let's pollute the global scope yea!
 
-    this.renderer.on( 'clicked-on-object', id => {
-      console.log( `sel ${id}` )
+    this.renderer.on( 'select-objects', ids => {
+      this.selectedObjects = ids
     } )
+
   }
 }
 

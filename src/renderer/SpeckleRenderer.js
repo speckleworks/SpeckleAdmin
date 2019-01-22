@@ -201,22 +201,26 @@ export default class SpeckleRenderer extends EE {
           this.selectionBox.collection[ i ].material = this.selectionBox.collection[ i ].__oldMaterialPreMassHighlight
         }
         this.selectionBox.collection = [ ]
+        this.emit( 'select-objects', [ ] )
       }
 
       if ( this.hoveredObject ) {
         if ( event.shiftKey ) {
           console.log( 'emit add to selection' )
+          this.emit( 'select-add-objects', [ this.hoveredObject.userData._id ] )
         } else if ( event.ctrlKey ) {
           console.log( 'remove from selection' )
+          this.emit( 'select-remove-objects', [ this.hoveredObject.userData._id ] )
         } else {
           console.log( 'emit single selection' )
-          this.emit( 'clicked-on-object', this.hoveredObject.userData._id )
+          this.emit( 'select-objects', [ this.hoveredObject.userData._id ] )
         }
       }
     } else {
       if ( !this.controls.enabled ) {
         console.log( 'emit mass selection' )
         console.log( this.selectionBox.collection )
+        this.emit( 'select-objects', this.selectionBox.collection.map( o => o.userData._id ) )
       }
     }
   }
