@@ -147,11 +147,11 @@ export default class SpeckleRenderer extends EE {
 
   keydown( event ) {
     if ( !this.enableKeyobardEvents ) return
-    console.log( `key: ${event.code}` )
     switch ( event.code ) {
       case 'Space':
         this.computeSceneBoundingSphere( )
         this.zoomExtents( )
+        event.stopPropagation( )
         break
       case 'ShiftLeft':
         this.controls.enabled = false
@@ -206,20 +206,15 @@ export default class SpeckleRenderer extends EE {
 
       if ( this.hoveredObject ) {
         if ( event.shiftKey ) {
-          console.log( 'emit add to selection' )
           this.emit( 'select-add-objects', [ this.hoveredObject.userData._id ] )
         } else if ( event.ctrlKey ) {
-          console.log( 'remove from selection' )
           this.emit( 'select-remove-objects', [ this.hoveredObject.userData._id ] )
         } else {
-          console.log( 'emit single selection' )
           this.emit( 'select-objects', [ this.hoveredObject.userData._id ] )
         }
       }
     } else {
       if ( !this.controls.enabled ) {
-        console.log( 'emit mass selection' )
-        console.log( this.selectionBox.collection )
         this.emit( 'select-objects', this.selectionBox.collection.map( o => o.userData._id ) )
       }
     }
@@ -363,6 +358,7 @@ export default class SpeckleRenderer extends EE {
       min -= 1
     }
     console.log( `bounds: ${min}, ${max} 🌈` )
+    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: true, min: min, max: max, objectCount: foundObjs.length } )
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
@@ -386,7 +382,8 @@ export default class SpeckleRenderer extends EE {
   // attempts to color all objects in the scene by a string property
   // uses colorHasher to get a hex color out of a string
   colorByStringProperty( { propertyName } ) {
-    let toReset = [ ]
+    let toReset = [ ],
+      foundCount = 0
     for ( let obj of this.scene.children ) {
       if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ propertyName ] ) ) {
         toReset.push( obj )
@@ -396,9 +393,10 @@ export default class SpeckleRenderer extends EE {
       let color = new THREE.Color( this.colorHasher.hex( value.toString( ) ) )
       obj._oldMaterial = obj.material
       obj.material = Converter.materialManager.getMeshVertexMat( )
-
+      foundCount++
       this.setObjVertexColors( { obj: obj, color: color } )
     }
+    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, objectCount: foundCount } )
   }
 
   // sets vertex colors on objects by their type (mesh, line, points)
@@ -431,6 +429,7 @@ export default class SpeckleRenderer extends EE {
       if ( !( obj._oldMaterial ) ) continue
       obj.material = obj._oldMaterial
     }
+    this.emit( 'clear-analysis-legend' )
   }
 
   // TODO

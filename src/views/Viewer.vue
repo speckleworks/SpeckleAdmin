@@ -13,7 +13,7 @@
         </md-tab>
         <md-tab id="tab-data" md-label="Data" md-icon="storage">
           <md-content style='padding:16px;'>
-            <object-data-view :selected-objects='selectedObjects'></object-data-view>
+            <object-data-view :selected-objects='selectedObjects' :analysis-legend='analysisLegend'></object-data-view>
           </md-content>
         </md-tab>
         <!--  <md-tab id="tab-comments" md-label="Comments" md-icon="question_answer">
@@ -56,7 +56,8 @@ export default {
       bucketInProgress: false,
       removeInterval: null,
       streamsToRemove: [ ],
-      selectedObjects: [ ]
+      selectedObjects: [ ],
+      analysisLegend: null
     }
   },
   methods: {
@@ -198,6 +199,24 @@ export default {
 
     this.renderer.on( 'select-objects', ids => {
       this.selectedObjects = ids
+    } )
+    this.renderer.on( 'select-add-objects', ids => {
+      ids.forEach( id => {
+        if ( this.selectedObjects.indexOf( id ) === -1 ) this.selectedObjects.push( id )
+      } )
+    } )
+    this.renderer.on( 'select-remove-objects', ids => {
+      ids.forEach( id => {
+        let index = this.selectedObjects.indexOf( id )
+        if ( index != -1 ) this.selectedObjects.splice( index, 1 )
+      } )
+    } )
+
+    this.renderer.on( 'analysis-legend', legend => {
+      this.analysisLegend = legend
+    } )
+    this.renderer.on( 'clear-analysis-legend', ( ) => {
+      this.analysisLegend = null
     } )
 
   }

@@ -1,5 +1,5 @@
 <template>
-  <md-card class='row-container md-elevation-0' @mouseover.native='hover()' @mouseleave.native='unhover()' md-with-hover style='margin:0'>
+  <md-card class='row-container md-elevation-0' @mouseover.native='hover()' @mouseleave.native='unhover()' md-with-hover style='margin:0' v-if='object'>
     <div class='md-layout object-row md-elevation-0' ref='rowdiv'>
       <div class="md-layout-item md-size-10 row-cell">
         <md-icon @click.native='zoomTo()' class='pointer-hover'>zoom_out_map</md-icon>
@@ -41,6 +41,7 @@ export default {
   name: 'ObjectDetailRow',
   props: {
     object: Object,
+    expandRow: { type: Boolean, default: false }
   },
   computed: {
     limitKvps( ) {
@@ -67,17 +68,18 @@ export default {
       if ( this.isHovering ) return
       this.isHovering = true
       renderer.highlightObjects( [ this.object._id ] )
-      console.log( 'hover', this.object._id )
     },
     unhover( ) {
       if ( !this.isHovering ) return
       this.isHovering = false
       renderer.unHighlightObjects( [ this.object._id ] )
-      console.log( 'unhover', this.object._id )
     },
     zoomTo( ) {
       renderer.zoomToObject( this.object._id )
     }
+  },
+  created( ) {
+    this.expanded = this.expandRow
   }
 }
 
