@@ -282,8 +282,12 @@ export default class SpeckleRenderer extends EE {
   loadObjects( { objs, zoomExtents } ) {
     objs.forEach( ( obj, index ) => {
       try {
-        if ( Converter.hasOwnProperty( obj.type ) )
-          Converter[ obj.type ]( { obj: obj }, ( err, threeObj ) => {
+        let splitType = obj.type.split("/")
+        let convertType = splitType.pop()
+        while (splitType.length > 0 & !Converter.hasOwnProperty( convertType ))
+          convertType = splitType.pop()
+        if ( Converter.hasOwnProperty( convertType ) )
+        Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
             threeObj.userData._id = obj._id
             threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
             threeObj.geometry.computeBoundingSphere( )
