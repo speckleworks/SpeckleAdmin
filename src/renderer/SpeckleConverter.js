@@ -454,7 +454,7 @@ let Converter = {
     let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
     // mesh.hasVertexColors = false
 
-    if ( args.obj.colors.length > 0 ) {
+    if ( args.obj.colors && args.obj.colors.length > 0 ) {
       mesh.hasVertexColors = true
       mesh.material = args.layer.threeMeshVertexColorsMaterial
     }

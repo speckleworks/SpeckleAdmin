@@ -26,7 +26,7 @@
           <md-card class="md-elevation-0">
             <md-card-content class='md-layout md-alignment-center-center' v-for='resource in allResourcesFiltered' :key='resource._id'>
               <div class="md-layout-item md-size-5">
-                <md-avatar class="md-avatar-icon md-small" :style='{ "background" : resource.streamId ? "#448aff" : "#E639B9" }'>{{resource.name.substring(0,1).toUpperCase()}}</md-avatar>
+                <md-avatar class="md-avatar-icon md-small" :style='{ "background" : resource.streamId ? "#448aff" : "#E639B9" }'>A</md-avatar>
               </div>
               <div class="md-layout-item">
                 <router-link :to='resource.streamId ? "/streams/"+resource.streamId : "/projects/"+resource._id'>{{resource.name}}</router-link>

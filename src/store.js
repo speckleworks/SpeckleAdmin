@@ -69,7 +69,7 @@ export default new Vuex.Store( {
             base = base.filter( stream => stream.owner !== state.user._id )
             break;
           case 'name':
-            base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
+            base = base.filter( stream => stream.name ? stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) : true )
             break
           case 'streamid':
           case 'id':

@@ -281,21 +281,39 @@ export default class SpeckleRenderer extends EE {
   // of the scene bounding sphere.
   loadObjects( { objs, zoomExtents } ) {
     objs.forEach( ( obj, index ) => {
-      try {
-        let splitType = obj.type.split("/")
-        let convertType = splitType.pop()
-        while (splitType.length > 0 & !Converter.hasOwnProperty( convertType ))
-          convertType = splitType.pop()
-        if ( Converter.hasOwnProperty( convertType ) )
-        Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
-            threeObj.userData._id = obj._id
-            threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
-            threeObj.geometry.computeBoundingSphere( )
-            this.scene.add( threeObj )
-          } )
-      } catch ( e ) {
-        console.warn( `Something went wrong in the conversion of ${obj._id} (${obj.type})` )
-      }
+      // try {
+        let splitType = obj.type.split( "/" ).reverse( )
+
+        console.log( 'starting to convert ' )
+        console.log( obj )
+        console.log( splitType )
+
+        // while ( splitType.length > 0 && !Converter.hasOwnProperty( convertType ) ) {
+        //   console.log( splitType )
+        //   convertType = splitType.pop( )
+        // }
+        for ( let i = 0; i < splitType.length; i++ ) {
+          if ( Converter.hasOwnProperty( splitType[ i ] ) ) {
+            Converter[ splitType[ i ] ]( { obj: obj }, ( err, threeObj ) => {
+              threeObj.userData._id = obj._id
+              threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
+              threeObj.geometry.computeBoundingSphere( )
+              this.scene.add( threeObj )
+            } )
+          }
+        }
+
+        // if ( Converter.hasOwnProperty( convertType ) )
+        //   Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
+        //     threeObj.userData._id = obj._id
+        //     threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
+        //     threeObj.geometry.computeBoundingSphere( )
+        //     this.scene.add( threeObj )
+        //   } )
+
+      // } catch ( e ) {
+      //   console.warn( `Something went wrong in the conversion of ${obj._id} (${obj.type})` )
+      // }
 
       if ( zoomExtents && ( index === objs.length - 1 ) ) {
         console.log( this.scene.children.length )
