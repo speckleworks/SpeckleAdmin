@@ -171,7 +171,6 @@ export default {
       } catch {
         this.filters = [ { key: 'name', value: e } ]
       }
-
     }, 1000 ),
     selectAll( ) {
       this.paginatedStreams.forEach( stream => {

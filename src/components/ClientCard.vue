@@ -1,19 +1,19 @@
 <template>
   <v-layout row wrap>
     <v-flex>
-      <v-icon :class='{"blue": icon === "cloud_upload"}'>{{icon}}</v-icon>
+      <v-icon small :class='{"blue": icon === "cloud_upload"}'>{{icon}}</v-icon>
     </v-flex>
-    <v-flex>
-      {{client.documentType}} <span v-if='client.documentName'>doc: {{client.documentName}}</span>
+    <v-flex class='caption'>
+      <strong>{{client.documentType}}</strong>&nbsp;<span v-if='client.documentName'>doc name: {{client.documentName}}</span>
     </v-flex>
-    <v-flex>
+    <v-flex class='caption'>
       <!-- {{client.online ? "online" : "offline"}}, -->
       last seen: <strong>
         <timeago :datetime='client.updatedAt'></timeago>
       </strong>
     </v-flex>
-    <v-flex>
-      <span v-if='owner'>{{ owner.name }} {{owner.surname}}</span>
+    <v-flex class='caption'>
+      <span v-if='owner'>Client Owner: <strong>{{ owner.name }} {{owner.surname}}</strong></span>
     </v-flex>
   </v-layout>
 </template>

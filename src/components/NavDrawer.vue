@@ -7,7 +7,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Home</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-thin caption'>Everything at a glance.</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>Everything at a glance.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile to='/streams'>
@@ -16,7 +16,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Streams</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-thin caption'>Create and manage your streams.</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>Create and manage your streams.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile to='/projects'>
@@ -25,7 +25,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Projects</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-thin caption'>Group your data and share it with others.</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>Group your data and share it with others.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile to='/trash'>
@@ -34,7 +34,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Archive</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-thin caption'>The good old recycle bin.</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>The good old recycle bin.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile v-if='$store.state.user.role==="admin"'>
@@ -43,7 +43,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Admin</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-thin caption'>Server administration (TODO)</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>Server administration (TODO)</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-divider class='ma-3'></v-divider>

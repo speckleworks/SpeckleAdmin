@@ -1,5 +1,5 @@
 <template>
-  <v-card class='elevation-0 pa-3 transparent'>
+  <v-card class='elevation-1 pa-3'>
     <v-layout row wrap>
       <v-flex xs12 class='display-1 font-weight-light text-capitalize'>
         <editable-span v-if='canEdit' :text='stream.name' @update='updateName'></editable-span>

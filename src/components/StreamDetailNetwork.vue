@@ -12,7 +12,6 @@
       Receivers
     </v-toolbar>
     <v-card-text>
-      <br>
       <client-card v-for='client in receivers' :key='client._id' :client='client'></client-card>
       <p v-if='receivers.length===0'>There seem to be no stream receivers.</p>
     </v-card-text>

@@ -10,7 +10,7 @@
         <stream-detail-title :stream='stream'></stream-detail-title>
       </v-flex>
       <v-flex xs12>
-        <v-tabs v-model="active" xxx-grow class='pa-0 ma-0'>
+        <v-tabs v-model="active" grow class='pa-0 ma-0'>
           <v-tab key="Overview" ripple :to='{name:"stream overview"}'>
             Overview
           </v-tab>
