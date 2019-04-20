@@ -39,41 +39,43 @@ export default new Vuex.Store( {
       if ( !filters || filters.length === 0 ) return base
       filters.forEach( query => {
         query.key = query.key.toLowerCase( )
-        switch ( query.key ) {
-          case 'private':
-            if ( query.value )
-              base = base.filter( stream => stream.private.toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === true )
-            break
-          case 'public':
-            if ( query.value )
-              base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === false )
-            break
-          case 'tag':
-          case 'tags':
-            let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
-            base = base.filter( stream => {
-              let streamTags = stream.tags.map( t => t.toLowerCase( ) )
-              return myTags.every( t => streamTags.includes( t ) )
-            } )
-            break
-          case 'mine':
-            base = base.filter( stream => stream.owner === state.user._id )
-            break;
-          case 'shared':
-            base = base.filter( stream => stream.owner !== state.user._id )
-            break;
-          case 'name':
-            base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-          case 'streamid':
-          case 'id':
-            base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-        }
+        if ( query.value === null ) base = base
+        else
+          switch ( query.key ) {
+            case 'private':
+              if ( query.value )
+                base = base.filter( stream => stream.private.toString( ) === query.value )
+              else
+                base = base.filter( stream => stream.private === true )
+              break
+            case 'public':
+              if ( query.value )
+                base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
+              else
+                base = base.filter( stream => stream.private === false )
+              break
+            case 'tag':
+            case 'tags':
+              let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
+              base = base.filter( stream => {
+                let streamTags = stream.tags.map( t => t.toLowerCase( ) )
+                return myTags.every( t => streamTags.includes( t ) )
+              } )
+              break
+            case 'mine':
+              base = base.filter( stream => stream.owner === state.user._id )
+              break;
+            case 'shared':
+              base = base.filter( stream => stream.owner !== state.user._id )
+              break;
+            case 'name':
+              base = base.filter( stream => stream.name ? stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) : true )
+              break
+            case 'streamid':
+            case 'id':
+              base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
+              break
+          }
       } )
       return base
     }

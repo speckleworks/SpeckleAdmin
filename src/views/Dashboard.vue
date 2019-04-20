@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-md row>
+  <v-container grid-list-md>
     <v-layout row wrap>
       <v-flex xs12 py-5 class='headline font-weight-light'>
         Hi {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
