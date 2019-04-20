@@ -1,9 +1,53 @@
 <template>
-  <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
-    <p> You can create a new one here or through <router-link to='/plugins'>existing CAD integrations.</router-link></p>
+  <v-container grid-list-xl>
+    <v-toolbar fixed v-if='selectedStreams.length > 0' style='z-index:100'>
+      <!-- <div class="md-layout-item md-size-100" xxxv-if='selectedStreams.length > 0' style="margin-top: 10px;"> -->
+      <v-toolbar-items>
+        <v-btn icon color='primary' class='md-raised md-dense md-primary' @click.native='clearSelection'>
+          <v-icon>close</v-icon>
+          <!-- clear -->
+        </v-btn>
+      </v-toolbar-items>
+        <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn color='error' class='md-raised-xx md-dense md-accent' @click.native='deleteStreams'>delete</v-btn>
+        <v-btn class='md-raised md-dense' @click.native='togglePermissions'>Make {{defaultPermission}}</v-btn>
+        <v-btn class='md-raised md-dense' @click.native='createProjectFromSelection'>Create Project</v-btn>
+      </v-toolbar-items>
+      <!-- </div> -->
+    </v-toolbar>
+    <v-layout row wrap>
+      <v-flex xs12 py-5 class='headline font-weight-light'>
+        Streams are the channels your design data flows into.
+      </v-flex>
+      <v-flex xs12 v-if='streams.length === 0'>
+        <p class='title font-weight-light'>Hmm, you don't have any streams yet. Don't worry! You can create a new one here (big blue button in the lower right corner) or through <router-link to='/plugins'>existing CAD integrations.</router-link>
+        </p>
+      </v-flex>
+      <v-flex xs12 class='main-toolbar'>
+        search
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap>
+      <v-flex xs12 sm6 v-for='stream in paginatedStreams' :key='stream._id'>
+        <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
+      </v-flex>
+      <v-flex xs12>
+        <v-btn block class='md-raised btn-no-margin md-primary' @click.native='endIndex+=12' :disabled='paginatedStreams.length===filteredStreams.length'>
+          Show More ({{paginatedStreams.length}} / {{filteredStreams.length}})
+        </v-btn>
+      </v-flex>
+    </v-layout>
+    <v-btn color="primary" dark fixed large bottom right fab>
+      <v-icon>add</v-icon>
+    </v-btn>
+  </v-container>
+  <!--   <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
+    <p> You can create a new one here or through <router-link to='/plugins'>existing CAD integrations.</router-link>
+    </p>
     <md-button class="md-primary md-raised" @click.native='createStream'>Create your first stream!</md-button>
-  </md-empty-state>
-  <div class='md-layout' v-else>
+  </md-empty-state> -->
+  <!--   <div class='md-layout' v-else>
     <md-card class="md-elevation-0 md-layout-item md-size-100">
       <md-card-content>
         <h1 class='md-display-2'>Streams</h1>
@@ -42,7 +86,7 @@
         </md-button>
       </md-card>
     </div>
-  </div>
+  </div> -->
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -87,14 +131,14 @@ export default {
     }
   },
   methods: {
-    createStream() {
+    createStream( ) {
       this.$store.dispatch( 'createStream', { name: 'A New Speckle Stream', onlineEditable: true } )
-      .then( res => {
-        this.$router.push(`/streams/${res.streamId}`)
-      })
-      .catch( err => {
-        console.error( err )
-      })
+        .then( res => {
+          this.$router.push( `/streams/${res.streamId}` )
+        } )
+        .catch( err => {
+          console.error( err )
+        } )
     },
     createProjectFromSelection( ) {
       this.$store.dispatch( 'createProject', { name: 'Speckle Project', streams: this.selectedStreams.map( s => s.streamId ) } )
@@ -157,16 +201,15 @@ export default {
   opacity: 0.5;
 }
 
+/*
 .main-toolbar {
   position: -webkit-sticky;
-  /* Safari */
   position: sticky;
-  top: 0;
+  top:120px;
   width: 100%;
-  background-color: white;
   z-index: 100;
   margin-bottom: 30px;
-}
+}*/
 
 .md-field {
   margin: 0 !important;

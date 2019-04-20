@@ -1,23 +1,30 @@
 <template>
-  <div id="app">
-    <md-app md-waterfall>
-      <md-app-drawer :md-active="showSidebar" class='super-bg md-primary nav-sidebar' md-persistent="mini">
-        <md-list>
-          <md-list-item @click='showSidebar=!showSidebar'>
-            <md-icon>{{ showSidebar ? "chevron_left" : "chevron_right"}}</md-icon>
-            <span class="md-list-item-text"></span>
-          </md-list-item>
-        </md-list>
-        <nav-drawer></nav-drawer>
-        <div class='md-caption credits'><a href='https://speckle.works' target="_blank"><img src='https://speckle.works/img/logos/logo-xs.png' width="19px"></a></div>
-      </md-app-drawer>
-      <md-app-content>
+  <v-app :dark='dark'>
+    <v-navigation-drawer floating app class='elevation-5' v-model='drawer'>
+      <v-toolbar flat prominent class='super-bg' dark>
+        <div class='text-uppercase caption ml-0'>
+          <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none">Speckle,
+            <span class='font-weight-light caption'>the data platform for AEC.</span></a>
+        </div>
+      </v-toolbar>
+      <nav-drawer></nav-drawer>
+    </v-navigation-drawer>
+    <v-toolbar app flat class=''>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn flat icon @click.native='toggleDark()'>
+        <v-icon>wb_sunny</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <v-content>
+      <!-- <v-container fluid> -->
         <keep-alive exclude='StreamDetailView'>
           <router-view></router-view>
         </keep-alive>
-      </md-app-content>
-    </md-app>
-  </div>
+      <!-- </v-container> -->
+    </v-content>
+  </v-app>
 </template>
 <script>
 import NavDrawer from './components/NavDrawer.vue'
@@ -28,8 +35,15 @@ export default {
     NavDrawer
   },
   data: _ => ( {
-    showSidebar: true
+    drawer: true,
+    dark: false
   } ),
+  methods:{
+    toggleDark(){
+      this.dark = !this.dark
+      // TODO: persist to local storage
+    }
+  },
   created( ) {
     if ( this.$store.state.isAuth ) {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
@@ -48,32 +62,6 @@ export default {
 
 </script>
 <style lang='scss'>
-$SpeckleBlue: #448aff;
-
-.credits {
-  position: absolute;
-  bottom:20px;
-  width: 100%;
-  text-align: center;
-}
-.credits a {
-  color: white !important;
-}
-.md-app-content {
-  @media only screen and (max-width: 600px) {
-    padding: 0 !important;
-  }
-}
-.text-center-small {
-  @media only screen and (max-width: 600px) {
-    text-align: center;
-  }
-}
-
-.md-drawer.md-persistent-mini {
-  transform: translate3D(0, 0px, 0) !important;
-}
-
 .super-bg {
   background: #448aff;
   /* fallback for old browsers */
@@ -83,17 +71,14 @@ $SpeckleBlue: #448aff;
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
+.other-bg {
+  background: #0052D4;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #6FB1FC, #4364F7, #0052D4);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #6FB1FC, #4364F7, #0052D4);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
-#app {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.md-app {
-  height: 100%;
 }
 
 .fade-enter-active,
@@ -104,56 +89,6 @@ $SpeckleBlue: #448aff;
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
-}
-
-.btn-no-margin,
-.no-margin {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-.md-card.md-with-hover {
-  cursor: default !important;
-}
-
-button {
-  /*cursor: pointer !important;*/
-}
-
-.stream-chips:after {
-  display: none !important;
-}
-
-.stream-chips:before {
-  display: none !important;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center !important;
-}
-
-.bg-ghost-white {
-  background-color: ghostwhite;
-}
-
-.sticky-top {
-  position: -webkit-sticky;
-  /* Safari */
-  position: sticky;
-  top: 0;
-  width: 100%;
-  background-color: white;
-  z-index: 100;
-  /*margin-bottom: 30px;*/
-}
-
-.md-select-menu {
-  /*z-index: 10000 !important;*/
-  background-color: white !important;
 }
 
 </style>

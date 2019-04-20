@@ -1,46 +1,108 @@
 <template>
   <div>
-    <md-list v-if='$store.state.isAuth'>
-      <md-list-item to='/'>
-        <md-icon>home</md-icon>
-        <span class="md-list-item-text">Home</span>
-      </md-list-item>
-      <md-list-item to='/streams'>
-        <md-icon>import_export</md-icon>
-        <span class="md-list-item-text">Streams</span>
-      </md-list-item>
-      <md-list-item to='/projects'>
-        <md-icon>business</md-icon>
-        <span class="md-list-item-text">Projects</span>
-      </md-list-item>
-      <md-list-item to='/trash'>
-        <md-icon>delete_outline</md-icon>
-        <span class="md-list-item-text">Trash</span>
-      </md-list-item>
-      <md-divider md-inset></md-divider>
-      <md-list-item to='/profile'>
-        <md-icon>face</md-icon>
-        <span class="md-list-item-text">Profile</span>
-      </md-list-item>
-      <md-list-item to='/plugins'>
-        <md-icon>category</md-icon>
-        <span class="md-list-item-text">Plugins</span>
-      </md-list-item>
-      <md-list-item to='/feedback'>
-        <md-icon>feedback</md-icon>
-        <span class="md-list-item-text">Feedback</span>
-      </md-list-item>
-    </md-list>
-    <md-list v-else>
-      <md-list-item to='/login'>
-        <md-icon>face</md-icon>
-        <span class="md-list-item-text">Login</span>
-      </md-list-item>
-      <md-list-item to='/register'>
-        <md-icon>add</md-icon>
-        <span class="md-list-item-text">Register</span>
-      </md-list-item>
-    </md-list>
+    <v-list v-if='$store.state.isAuth' two-line class='pa-0'>
+      <v-list-tile to='/'>
+        <v-list-tile-action>
+          <v-icon>home</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Home</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-thin caption'>Everything at a glance.</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/streams'>
+        <v-list-tile-action>
+          <v-icon>import_export</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Streams</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-thin caption'>Create and manage your streams.</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/projects'>
+        <v-list-tile-action>
+          <v-icon>business</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Projects</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-thin caption'>Group your data and share it with others.</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/trash'>
+        <v-list-tile-action>
+          <v-icon>delete_outline</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Archive</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-thin caption'>The good old recycle bin.</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile v-if='$store.state.user.role==="admin"'>
+        <v-list-tile-action>
+          <v-icon>settings</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Admin</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-thin caption'>Server administration (TODO)</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-divider class='ma-3'></v-divider>
+    </v-list>
+    <v-list v-if='$store.state.isAuth'>
+      <v-list-tile to='/profile'>
+        <v-list-tile-action>
+          <v-icon>face</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Profile</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/plugins'>
+        <v-list-tile-action>
+          <v-icon>category</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Plugins</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/feedback'>
+        <v-list-tile-action>
+          <v-icon>feedback</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Feedback</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+          <!-- <v-icon>feedback</v-icon> -->
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <!-- <v-list-tile-title>Feedback</v-list-tile-title> -->
+          <v-list-tile-sub-title class='font-weight-thin caption'>{{$store.state.server}}</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+    </v-list>
+    <v-list v-else three-line>
+      <v-list-tile to='/login'>
+        <v-list-tile-action>
+          <v-icon>face</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Login</v-list-tile-title>
+          <v-list-tile-sub-title>If you already have an account, login here!</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/register'>
+        <v-list-tile-action>
+          <v-icon>add</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Register</v-list-tile-title>
+          <v-list-tile-sub-title>If you don't have an account, create one here!</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+    </v-list>
   </div>
 </template>
 <script>
@@ -50,27 +112,4 @@ export default {
 
 </script>
 <style lang='scss'>
-$SpeckleBlue: #448aff;
-
-.nav-sidebar {
-  width: 200px !important;
-  /*background-color: $SpeckleBlue !important;*/
-  /*background-color: ghostwhite !important;*/
-  padding-top: 30px;
-}
-
-ul {
-  background-color: transparent !important;
-}
-
-.md-list-item-text {
-  color: white !important;
-  /*transition: none !important;*/
-}
-
-.is-active * {
-  color: white !important;
-  background-color: #3190FD;
-}
-
 </style>

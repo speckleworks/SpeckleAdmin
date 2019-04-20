@@ -17,22 +17,22 @@
           <div class="md-layout-item md-layout md-size-55 md-large-size-65 md-medium-size-100" style="padding-left:16px; padding-right:16px; box-sizing: border-box">
             <!-- <div class='md-layout md-alignment-center-center' style='width:90%;'> -->
             <div class='md-layout-item'>
-              <md-button :to='{name:"streamoverview"}' class='link-button'>
+              <md-button :to='{name:"stream overview"}' class='link-button'>
                 Overview
               </md-button>
             </div>
             <div class='md-layout-item'>
-              <md-button :to='{name:"streamsharing"}' class='link-button'>
+              <md-button :to='{name:"stream sharing"}' class='link-button'>
                 Sharing
               </md-button>
             </div>
             <div class='md-layout-item' v-if='stream.onlineEditable'>
-              <md-button :to='{name:"streamdata"}' class='link-button'>
+              <md-button :to='{name:"stream data"}' class='link-button'>
                 Edit Data
               </md-button>
             </div>
             <div class='md-layout-item'>
-              <md-button :to='{name:"streamhistory"}' class='link-button'>
+              <md-button :to='{name:"stream history"}' class='link-button'>
                 History <span class='md-caption'>({{stream.children.length}})</span>
               </md-button>
             </div>

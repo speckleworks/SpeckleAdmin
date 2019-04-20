@@ -1,20 +1,89 @@
 <template>
-  <div class='md-layout'>
+  <v-container grid-list-md row>
+    <v-layout row wrap>
+      <v-flex xs12 py-5 class='headline font-weight-light'>
+        Hi {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
+            <strong>{{projects.length}}</strong> projects</router-link> in total.
+      </v-flex>
+      <v-flex xs12 md6>
+        <v-card class="elevation-0">
+          <v-card-title>
+            <v-icon left>
+              import_export
+            </v-icon>
+            <span class="title font-weight-light">Latest Streams:</span>
+          </v-card-title>
+          <v-card-text>
+            <v-list two-line>
+              <v-list-tile v-for='stream in latestStreams' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
+                <v-list-tile-content>
+                  <v-list-tile-title>
+                    <code>{{stream.streamId}}</code>
+                    &nbsp<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
+                    {{stream.name}}
+                  </v-list-tile-title>
+                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
+                    last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}
+                  </v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn to='/streams/' class=''>See all your {{streams.length}} streams</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+      <v-flex xs12 md6>
+        <v-card class="elevation-0">
+          <v-card-title>
+            <v-icon left>
+              business
+            </v-icon>
+            <span class="title font-weight-light">Latest Projects</span>
+          </v-card-title>
+          <v-card-text>
+            <v-list two-line>
+              <v-list-tile v-for='project in latestProjects' :to='"/projects/" + project._id' :key='project._id'>
+                <v-list-tile-content>
+                  <v-list-tile-title>
+                    <!-- <code>{{stream.streamId}}</code> -->
+                    <v-icon small>person</v-icon> <span class='caption'>{{project.canRead.length}}</span>
+                    <v-icon small>import_export</v-icon> <span class='caption'>{{project.streams.length}}</span>
+                    {{project.name}}
+                  </v-list-tile-title>
+                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
+                    last changed <timeago :datetime='project.updatedAt'></timeago>, created on {{new Date( project.createdAt ).toLocaleString()}}
+                  </v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn to='/projects/' class=''>See all your {{this.$store.state.projects.length}} projects</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+  <!-- <div class='md-layout'>
     <md-card class="md-elevation-0 md-layout-item md-size-60 md-small-size-100">
       <md-card-content>
-        <h1 class='md-display-2'>Hello {{$store.state.user.name}}!</h1>
-        <h2 class='md-title'>You have <router-link to='/streams'><md-chip class='md-primary md-elevation-5' md-clickable><md-icon style='color:white;font-size: 16px !important;'>import_export</md-icon><strong>{{streams.length}}</strong>  streams &nbsp</md-chip></router-link> and <router-link to='/projects'>
-          <md-chip class='md-primary md-elevation-5' md-clickable><md-icon style='color:white;font-size: 16px !important;'>business</md-icon><strong>{{projects.length}}</strong>  projects &nbsp</md-chip></router-link> in total.
-
+        <h1 class='title'></h1>
+        <h2 class='display-1'>
+          Hello {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
+            <strong>{{projects.length}}</strong> projects</router-link> in total.
         </h2>
         <br>
-        <md-divider></md-divider>
+        <v-divider></v-divider>
         <p style="line-height: 50px;" v-if='latestStreams.length>0'>Your latest streams:
           <span v-for='stream in latestStreams' style="margin:5px;">
             <router-link :to='"/streams/" + stream.streamId'>
-            <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{stream.name}}</strong>
-            </md-chip>
-          </router-link>
+              <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{stream.name}}</strong>
+              </md-chip>
+            </router-link>
           </span>
           <router-link to='/streams'>more...</router-link>
         </p>
@@ -26,9 +95,9 @@
         <p style="line-height: 50px;" v-if='latestProjects.length > 0'>Your latest projects:
           <span v-for='project in latestProjects' style="margin:5px;">
             <router-link :to='"/projects/" + project._id'>
-            <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{project.name}}</strong>
-            </md-chip>
-          </router-link>
+              <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{project.name}}</strong>
+              </md-chip>
+            </router-link>
           </span>
           <router-link to='/projects'>more...</router-link>
         </p>
@@ -41,10 +110,9 @@
         <p class="md-caption">Did you know that: <span class='catFact' @click='getAFact()' v-html='currentCatFact'></span></p>
       </md-card-content>
     </md-card>
-  </div>
+  </div> -->
 </template>
 <script>
-// @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
@@ -52,10 +120,10 @@ export default {
   components: {},
   computed: {
     latestStreams( ) {
-      return this.streams.slice( 0, 5 )
+      return this.streams.slice( 0, 7 )
     },
     latestProjects( ) {
-      return this.projects.slice( 0, 5 )
+      return this.projects.slice( 0, 7 )
     },
     projects( ) {
       return this.$store.state.projects.filter( p => p.deleted === false )
