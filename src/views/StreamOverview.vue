@@ -1,25 +1,26 @@
 <template>
-  <div>
-    <detail-description :resource='stream'></detail-description>
-    <br>
-    <stream-detail-network :stream='stream'></stream-detail-network>
-    <br>
-    <md-card>
-      <md-card-header class='bg-ghost-white'>
-        <md-card-header-text>
-          <h2 class='md-title'>Projects</h2>
-          <p class="md-caption">Projects this stream is part of.</p>
-        </md-card-header-text>
-      </md-card-header>
-      <md-card-content>
-        <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
-          <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
-        </md-chip></span>
-        <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
-      </md-card-content>
-    </md-card>
-    <br>
-  </div>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <detail-description :resource='stream'></detail-description>
+<!--     </v-flex>
+    <v-flex xs12> -->
+      <stream-detail-network :stream='stream'></stream-detail-network>
+<!--     </v-flex>
+    <v-flex xs12> -->
+      <v-toolbar dense class='elevation-0'>
+        <h2 class='title font-weight-light'>Projects</h2>
+        <!-- <p class="md-caption">Projects this stream is part of.</p> -->
+      </v-toolbar>
+      <v-card class='elevation-0'>
+        <v-card-text>
+          <v-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
+            <router-link :to='"/projects/"+proj._id'>{{proj.name}}</router-link>&nbsp
+          </v-chip></span>
+          <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import debounce from 'lodash.debounce'

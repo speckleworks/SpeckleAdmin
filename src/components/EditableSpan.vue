@@ -1,14 +1,5 @@
 <template>
-  <span>
-  <span
-    :title='hint'
-    :contenteditable='!disabled'
-    @blur='updateOnBlur'
-    @keydown.enter='updateOnEnter'
-    v-html='getContent()'>
-  </span>
-  <md-tooltip>{{hint}}</md-tooltip>
-  </span>
+  <span :title='hint' :contenteditable='!disabled' @blur='updateOnBlur' @keydown.enter='updateOnEnter' v-html='getContent()'></span>
 </template>
 <script>
 export default {

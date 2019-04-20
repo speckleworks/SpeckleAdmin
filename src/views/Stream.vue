@@ -1,63 +1,41 @@
 <template>
-  <div>
-    <div class='md-layout md-alignment-center-center' v-if='stream'>
-      <div class="md-layout-item md-size-100 text-center sticky-top" v-if='stream.deleted'>
-        <md-content class='md-accent md-caption  md-layout md-alignment-center-center' style='width:100%;padding:10px; border-radius: 2px;'>
-          <div class='md-layout-item'>This stream is in your trashbin.</div>
-          <div class='md-layout-item'>
-            <md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button>
-          </div>
-        </md-content>
-      </div>
-      <div class="md-layout-item md-size-100">
-        <div class='md-layout md-alignment-center-center'>
-          <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
-            <stream-detail-title :stream='stream'></stream-detail-title>
-          </div>
-          <div class="md-layout-item md-layout md-size-55 md-large-size-65 md-medium-size-100" style="padding-left:16px; padding-right:16px; box-sizing: border-box">
-            <!-- <div class='md-layout md-alignment-center-center' style='width:90%;'> -->
-            <div class='md-layout-item'>
-              <md-button :to='{name:"stream overview"}' class='link-button'>
-                Overview
-              </md-button>
-            </div>
-            <div class='md-layout-item'>
-              <md-button :to='{name:"stream sharing"}' class='link-button'>
-                Sharing
-              </md-button>
-            </div>
-            <div class='md-layout-item' v-if='stream.onlineEditable'>
-              <md-button :to='{name:"stream data"}' class='link-button'>
-                Edit Data
-              </md-button>
-            </div>
-            <div class='md-layout-item'>
-              <md-button :to='{name:"stream history"}' class='link-button'>
-                History <span class='md-caption'>({{stream.children.length}})</span>
-              </md-button>
-            </div>
-            <!--       <div class='md-layout-item'>
-                <md-button xxx-to='{name:"streamdata"}' class='link-button'>
-                  Discussion
-                </md-button>
-              </div> -->
-            <!-- </div> -->
-          </div>
-          <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
-            <br>
-            <keep-alive>
-              <router-view></router-view>
-            </keep-alive>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
+  <v-container grid-list-xl v-if='stream'>
+    <v-toolbar absolute v-if='stream.deleted'>
+      <span>This stream is in your trashbin. </span>
+      <v-spacer></v-spacer>
+      <v-btn color='primary' v-if='canEdit' @click.native='restore'> Restore? </v-btn>
+    </v-toolbar>
+    <v-layout row wrap>
+      <v-flex xs12>
+        <stream-detail-title :stream='stream'></stream-detail-title>
+      </v-flex>
+      <v-flex xs12>
+        <v-tabs v-model="active" xxx-grow class='pa-0 ma-0'>
+          <v-tab key="Overview" ripple :to='{name:"stream overview"}'>
+            Overview
+          </v-tab>
+          <v-tab key="Sharing" ripple :to='{name:"stream sharing"}'>
+            Sharing
+          </v-tab>
+          <v-tab key="History" ripple :to='{name:"stream history"}'>
+            History
+          </v-tab>
+          <v-tab key="Data" ripple :to='{name:"stream data"}'>
+            Data
+          </v-tab>
+        </v-tabs>
+      </v-flex>
+    </v-layout>
+    <!-- Where the sub routes live -->
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
+<!--     <div class='md-layout md-alignment-center-center'>
       <div class='md-layout-item md-size-50'>
         <md-progress-bar md-mode="indeterminate"></md-progress-bar>
       </div>
-    </div>
-  </div>
+    </div> -->
+  </v-container>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -80,7 +58,7 @@ export default {
   },
   watch: {
     stream( ) {
-      this.fetchData()
+      this.fetchData( )
     }
   },
   computed: {
@@ -101,7 +79,8 @@ export default {
   data( ) {
     return {
       error: '',
-      editDescription: false
+      editDescription: false,
+      active: null
     }
   },
   methods: {
@@ -132,7 +111,7 @@ export default {
     }
   },
   mounted( ) {
-    this.fetchData()
+    this.fetchData( )
   }
 }
 

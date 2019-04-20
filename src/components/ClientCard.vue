@@ -1,18 +1,21 @@
 <template>
-  <div class='md-layout client md-alignment-center-center'>
-    <div class='md-layout-item md-size-10'>
-      <md-icon :class='{"blue": icon === "cloud_upload"}'>{{icon}}</md-icon>
-    </div>
-    <div class='md-layout-item md-caption'>
+  <v-layout row wrap>
+    <v-flex>
+      <v-icon :class='{"blue": icon === "cloud_upload"}'>{{icon}}</v-icon>
+    </v-flex>
+    <v-flex>
       {{client.documentType}} <span v-if='client.documentName'>doc: {{client.documentName}}</span>
-    </div>
-    <div class='md-layout-item md-caption'>
-      <!-- {{client.online ? "online" : "offline"}}, --> last seen: <strong><timeago :datetime='client.updatedAt'></timeago></strong>
-    </div>
-    <div class='md-layout-item md-caption'>
+    </v-flex>
+    <v-flex>
+      <!-- {{client.online ? "online" : "offline"}}, -->
+      last seen: <strong>
+        <timeago :datetime='client.updatedAt'></timeago>
+      </strong>
+    </v-flex>
+    <v-flex>
       <span v-if='owner'>{{ owner.name }} {{owner.surname}}</span>
-    </div>
-  </div>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 export default {
@@ -42,7 +45,9 @@ export default {
   padding-bottom: 5px;
   padding-top: 5px;
 }
-.blue  {
-  color:#448aff !important;
+
+.blue {
+  color: #448aff !important;
 }
+
 </style>

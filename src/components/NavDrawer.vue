@@ -75,11 +75,10 @@
       </v-list-tile>
       <v-list-tile>
         <v-list-tile-action>
-          <!-- <v-icon>feedback</v-icon> -->
+          <v-icon>developer_board</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
-          <!-- <v-list-tile-title>Feedback</v-list-tile-title> -->
-          <v-list-tile-sub-title class='font-weight-thin caption'>{{$store.state.server}}</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>{{$store.state.serverManifest.serverName}}<br>{{$store.state.server}}</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
     </v-list>

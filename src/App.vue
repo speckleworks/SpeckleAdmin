@@ -14,14 +14,14 @@
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn flat icon @click.native='toggleDark()'>
-        <v-icon>wb_sunny</v-icon>
+        <v-icon>{{dark ? "wb_sunny" : "brightness_4"}}</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>
       <!-- <v-container fluid> -->
-        <keep-alive exclude='StreamDetailView'>
-          <router-view></router-view>
-        </keep-alive>
+      <keep-alive exclude='StreamDetailView'>
+        <router-view></router-view>
+      </keep-alive>
       <!-- </v-container> -->
     </v-content>
   </v-app>
@@ -38,9 +38,10 @@ export default {
     drawer: true,
     dark: false
   } ),
-  methods:{
-    toggleDark(){
+  methods: {
+    toggleDark( ) {
       this.dark = !this.dark
+      localStorage.setItem( 'dark', this.dark )
       // TODO: persist to local storage
     }
   },
@@ -49,6 +50,8 @@ export default {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
       this.$store.dispatch( 'getProjects' )
     }
+    if ( localStorage.getItem( 'dark' ) === 'true' ) this.dark = true
+
   },
   updated( ) {
     let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
