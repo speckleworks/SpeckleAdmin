@@ -68,49 +68,6 @@
       </v-flex>
     </v-layout>
   </v-container>
-  <!-- <div class='md-layout'>
-    <md-card class="md-elevation-0 md-layout-item md-size-60 md-small-size-100">
-      <md-card-content>
-        <h1 class='title'></h1>
-        <h2 class='display-1'>
-          Hello {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
-            <strong>{{projects.length}}</strong> projects</router-link> in total.
-        </h2>
-        <br>
-        <v-divider></v-divider>
-        <p style="line-height: 50px;" v-if='latestStreams.length>0'>Your latest streams:
-          <span v-for='stream in latestStreams' style="margin:5px;">
-            <router-link :to='"/streams/" + stream.streamId'>
-              <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{stream.name}}</strong>
-              </md-chip>
-            </router-link>
-          </span>
-          <router-link to='/streams'>more...</router-link>
-        </p>
-        <p v-else>You don't seem to have any streams. You can create them either via the existing <router-link to='/plugins'> application plugins</router-link> or right <router-link to='streams'>here!</router-link>
-        </p>
-        <p class='md-caption'> What are streams? Streams are the place where your design data lives: geometry, complex objects and other information come together here, either from any of the <router-link to='/plugins'>supported applications</router-link>, or created online to serve as central repositories for design parameters.</p>
-        <br>
-        <md-divider></md-divider>
-        <p style="line-height: 50px;" v-if='latestProjects.length > 0'>Your latest projects:
-          <span v-for='project in latestProjects' style="margin:5px;">
-            <router-link :to='"/projects/" + project._id'>
-              <md-chip class='md-primary md-elevation-5' md-clickable> <strong>{{project.name}}</strong>
-              </md-chip>
-            </router-link>
-          </span>
-          <router-link to='/projects'>more...</router-link>
-        </p>
-        <p v-else>You don't seem to have any projects. You can create them right <router-link to='projects'>here!</router-link>
-        </p>
-        <p class='md-caption'> What are projects? Projects help you group streams and teams together, and share permissions in bulk. This also allows you to group your streams in logical categories that you define.</p>
-        <br>
-        <md-divider></md-divider>
-        <br>
-        <p class="md-caption">Did you know that: <span class='catFact' @click='getAFact()' v-html='currentCatFact'></span></p>
-      </md-card-content>
-    </md-card>
-  </div> -->
 </template>
 <script>
 import HelloWorld from '@/components/HelloWorld.vue'
