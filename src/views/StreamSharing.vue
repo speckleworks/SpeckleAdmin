@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
-  </div>
+  <stream-detail-user-perms :stream='stream'></stream-detail-user-perms>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -28,8 +26,7 @@ export default {
   data( ) {
     return {}
   },
-  methods: {
-  }
+  methods: {}
 }
 
 </script>

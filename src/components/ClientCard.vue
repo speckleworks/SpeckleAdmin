@@ -1,18 +1,15 @@
 <template>
-  <v-layout row wrap>
-    <v-flex>
-      <v-icon small :class='{"blue": icon === "cloud_upload"}'>{{icon}}</v-icon>
-    </v-flex>
+  <v-layout row wrap justfiy-space-between class='text-xs-left'>
     <v-flex class='caption'>
       <strong>{{client.documentType}}</strong>&nbsp;<span v-if='client.documentName'>doc name: {{client.documentName}}</span>
     </v-flex>
-    <v-flex class='caption'>
+    <v-flex class='caption' xs3>
       <!-- {{client.online ? "online" : "offline"}}, -->
       last seen: <strong>
         <timeago :datetime='client.updatedAt'></timeago>
       </strong>
     </v-flex>
-    <v-flex class='caption'>
+    <v-flex class='caption' xs4>
       <span v-if='owner'>Client Owner: <strong>{{ owner.name }} {{owner.surname}}</strong></span>
     </v-flex>
   </v-layout>

@@ -2,19 +2,16 @@
   <v-layout row wrap>
     <v-flex xs12>
       <detail-description :resource='stream'></detail-description>
-<!--     </v-flex>
-    <v-flex xs12> -->
       <stream-detail-network :stream='stream'></stream-detail-network>
-<!--     </v-flex>
-    <v-flex xs12> -->
-      <v-toolbar dense class='elevation-0'>
-        <h2 class='title font-weight-light'>Projects</h2>
-        <!-- <p class="md-caption">Projects this stream is part of.</p> -->
-      </v-toolbar>
-      <v-card class='elevation-0'>
+      <v-card class='elevation-0 pt-4'>
+        <v-toolbar dense class='elevation-0 transparent'>
+          <v-icon small left>business</v-icon>&nbsp;
+          <span class='title font-weight-light'>Projects</span>
+        </v-toolbar>
+        <v-divider></v-divider>
         <v-card-text>
           <v-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
-            <router-link :to='"/projects/"+proj._id'>{{proj.name}}</router-link>&nbsp
+            <router-link :to='"/projects/"+proj._id'>{{proj.name}}</router-link>&nbsp;
           </v-chip></span>
           <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
         </v-card-text>

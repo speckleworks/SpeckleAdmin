@@ -1,5 +1,20 @@
 <template>
-  <div>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <v-card class='elevation-0'>
+        <v-toolbar class='elevation-0 transparent'>
+          <v-icon small left>history</v-icon>&nbsp;
+          <span class='title font-weight-light'>History</span>
+        </v-toolbar>
+        <v-layout>
+          <v-flex xs12 class='pa-5'>
+            <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='streamChildren.length>0'></vue-slider>
+          </v-flex>
+        </v-layout>
+      </v-card>
+    </v-flex>
+  </v-layout>
+  <!--   <div>
     <md-card class='md-elevation-3' md-with-hover>
       <md-card-header class='bg-ghost-white' v-if='stream.parent'>
         <md-card-header-text>
@@ -37,14 +52,13 @@
             <md-divider></md-divider>
           </div>
         </div>
-        <!-- <stream-detail-history :stream='stream'></stream-detail-history> -->
       </md-card-content>
       <md-card-content v-else>
         <br>
         <p>This stream has no children.</p>
       </md-card-content>
     </md-card>
-  </div>
+  </div> -->
 </template>
 <script>
 import Axios from 'axios'
@@ -58,13 +72,13 @@ export default {
     VueSlider
   },
   watch: {
-    'stream.children'() {
-      this.fetchData()
+    'stream.children'( ) {
+      this.fetchData( )
     }
   },
   computed: {
     sizeBound( ) {
-      return this.timeFiltered.slice( 0, this.currentMax ).reverse()
+      return this.timeFiltered.slice( 0, this.currentMax ).reverse( )
     },
     timeFiltered( ) {
       return this.streamChildren.slice( this.lowerIndex, this.upperIndex + 1 )

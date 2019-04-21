@@ -1,22 +1,30 @@
 <template>
-  <md-card md-with-hover class='md-elevation-0 user-search'>
-    <md-card-content>
-    <md-field md-clearable>
-      <md-icon>search</md-icon>
-      <label>Search for a user to add</label>
-      <md-input v-model='userSearch' @input='startSearchUsers'></md-input>
-    </md-field>
-    <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
-    <div class='md-layout xxxsearch-results xxxmd-elevation-1'>
-      <md-chip md-clickable class='md-primary' style='margin: 3px;' v-for='user in foundUsers' :key='user._id' v-if='userSearch!==null && foundUsers.length > 0' @click='selectUser(user._id)'>
-        {{user.name}} {{user.surname}} <span v-if='user.company' class='md-caption'>({{user.company}})</span>
-      </md-chip>
-      <div v-if='foundUsers.length === 0 && userSearch!=="" && !searchInProgress' class='md-caption'>
-        No users found. Try a different search!
-      </div>
-    </div>
-  </md-card-content>
-  </md-card>
+  <v-layout align-center row wrap>
+    <v-flex xs12 class=''>
+      <v-text-field box label='Search for a user to add' clearable v-model='userSearch' flat :loading='searchInProgress' prepend-inner-icon="search" @input='startSearchUsers'></v-text-field>
+    </v-flex>
+    <v-flex xs12>
+      <v-container grid-list-lg v-if='userSearch!==null && foundUsers.length > 0' class='ma-0 pa-0 mb-4'>
+        <v-layout row wrap>
+          <v-flex xs12 sm6 lg4 v-for='user in foundUsers' :key='user._id'>
+            <v-hover>
+              <v-card @click.native='selectUser(user._id)' tile slot-scope="{ hover }" :class="`px-3 py-2 elevation-${hover ? 12 : 1} ${hover ? 'hovered' : '' }`">
+                <span></span>
+                <v-avatar size='21' dark :color="getHexFromString( user.name )">
+                  {{user.name.substring(0,1).toUpperCase()}}
+                </v-avatar>&nbsp;
+                <span>{{user.name}} {{user.surname}}</span>&nbsp;
+                <span class='caption'>{{user.company}}</span>
+              </v-card>
+            </v-hover>
+          </v-flex>
+        </v-layout>
+      </v-container>
+      <v-container class='ma-0 pa-0' v-if='foundUsers.length === 0 && userSearch && userSearch!=="" && !searchInProgress'>
+        No users found. Try a different search criteria.
+      </v-container>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -53,9 +61,10 @@ export default {
       this.searchUsers( this.userSearch )
     },
     searchUsers: debounce( function( searchString ) {
-      if ( searchString === '' ) {
+      if ( searchString === '' || searchString === null ) {
         this.foundUsers = [ ]
         this.searchInProgress = false
+        return
       }
       if ( searchString.length < 3 ) {
         // TODO: Show an error
@@ -80,26 +89,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.user-search {
-  border-radius: 10px;
-  @media only screen and (max-width: 600px) {
-    margin: 0 !important;
-  }
-}
-.search-results {
-  position: absolute;
-  background-color: white;
-  z-index: 40;
-  padding: 10px;
-  box-sizing: border-box;
-}
-.user-list {
-  margin-bottom: 5px;
-  padding: 5px;
-}
-
-.user-list:hover {
-  background-color: #F4F4F4;
+.hovered {
   cursor: pointer;
 }
 

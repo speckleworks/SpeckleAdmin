@@ -1,16 +1,19 @@
 <template>
-  <v-card class='elevation-0'>
-    <v-toolbar dense class='elevation-0 title font-weight-light'>
-      Source
+  <v-card class='elevation-0 pt-4'>
+    <v-toolbar dense class='elevation-0 transparent title font-weight-light'>
+      <v-icon small left>cloud_upload</v-icon>&nbsp;
+      <span class='title font-weight-light'>Source</span>
     </v-toolbar>
-    <!-- <div class="md-caption">Where this stream is originating from.</div> -->
+    <v-divider></v-divider>
     <v-card-text>
       <client-card v-for='client in senders' :key='client._id' :client='client'></client-card>
       <p v-if='senders.length===0'>There seem to be no source clients for this stream.</p>
     </v-card-text>
-    <v-toolbar dense class='elevation-0 title font-weight-light'>
-      Receivers
+    <v-toolbar dense class='elevation-0 transparent title font-weight-light mt-4'>
+      <v-icon small left>cloud_download</v-icon>&nbsp;
+      <span class='title font-weight-light'>Receivers</span>
     </v-toolbar>
+    <v-divider></v-divider>
     <v-card-text>
       <client-card v-for='client in receivers' :key='client._id' :client='client'></client-card>
       <p v-if='receivers.length===0'>There seem to be no stream receivers.</p>

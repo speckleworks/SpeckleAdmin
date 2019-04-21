@@ -11,16 +11,16 @@
             <v-icon left>
               import_export
             </v-icon>
-            <span class="title font-weight-light">Latest Streams:</span>
+            <span class="title font-weight-light">Latest Streams</span>
           </v-card-title>
           <v-card-text>
             <v-list two-line>
               <v-list-tile v-for='stream in latestStreams' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
                 <v-list-tile-content>
                   <v-list-tile-title>
-                    <code>{{stream.streamId}}</code>
-                    &nbsp<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
-                    {{stream.name}}
+                    <span class='caption'><v-icon small>fingerprint</v-icon> {{stream.streamId}}
+                    &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon></span>&nbsp;
+                    <span class='text-capitalize'>{{stream.name}}</span>
                   </v-list-tile-title>
                   <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
                     last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}

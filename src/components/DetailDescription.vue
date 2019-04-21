@@ -1,6 +1,7 @@
 <template>
   <v-card v-if='resource' class='elevation-0'>
-    <v-toolbar transparent class='elevation-0' dense>
+    <v-toolbar class='elevation-0 transparent'>
+      <v-icon left small>book</v-icon>
       <span class='title font-weight-light'>{{isStream ? "Stream" : "Project"}} Description</span>
       <v-spacer></v-spacer>
       <v-toolbar-items>
@@ -8,10 +9,12 @@
         <v-btn flat color='primary' v-if='editDescription===true' @click.native='updateDescription'>Done</v-btn>
       </v-toolbar-items>
     </v-toolbar>
+    <v-divider></v-divider>
     <v-card-text>
       <v-layout v-show='!editDescription'>
         <v-flex xs12 v-html='compiledDescription'></v-flex>
       </v-layout>
+
       <v-layout v-show='editDescription' row wrap>
         <v-flex xs12 class="caption">
           Supports <a class='' target="_blank" href='https://en.wikipedia.org/wiki/Markdown#Example'>markdown:</a><strong> ** bold **</strong>, <i>* italic *</i>, <code># Heading 1</code>, <code>## Heading 2</code>, <code>[links](http://example.com)</code>, etc.
@@ -22,9 +25,11 @@
         </md-field>
       </v-layout>
     </v-card-text>
-     <v-toolbar transparent class='elevation-0' dense>
+     <v-toolbar transparent class='elevation-0 transparent' dense>
+      <v-icon left small>power_input</v-icon>
       <span class='title font-weight-light'>Units</span>
      </v-toolbar>
+     <v-divider></v-divider>
     <v-card-text class='md-caption' v-if='resource.baseProperties'>
       <span><strong>Units:</strong> {{resource.baseProperties.units}}</span>;
       <span><strong>Tolerance:</strong> {{resource.baseProperties.tolerance}}</span>.

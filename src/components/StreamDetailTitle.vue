@@ -1,11 +1,11 @@
 <template>
-  <v-card class='elevation-1 pa-3'>
+  <v-card class='elevation-0 pa-3'>
     <v-layout row wrap>
-      <v-flex xs12 class='display-1 font-weight-light text-capitalize'>
+      <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
         <editable-span v-if='canEdit' :text='stream.name' @update='updateName'></editable-span>
         <span v-else>{{stream.name}}</span>
       </v-flex>
-      <v-flex xs12 class='caption px-1 mx-2' style='line-height: 32px'>
+      <v-flex xs12 class='caption' style='line-height: 32px'>
         <v-icon small>fingerprint</v-icon>&nbsp;<strong style="user-select:all">{{stream.streamId}}</strong>&nbsp;
         <v-icon small>edit</v-icon>&nbsp;<timeago :datetime='stream.updatedAt'></timeago>&nbsp;
         <v-icon small>access_time</v-icon>&nbsp; {{createdAt}}&nbsp;
@@ -15,7 +15,7 @@
         <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong></span>
       </v-flex>
       <v-flex xs12 class='ma-0 pa-0 mb-2'>
-        <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="stream.tags" :items='stream.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips flat transparent multiple tags>
+        <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="stream.tags" :items='stream.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
         <template v-slot:no-data>stream has no tags.</template>
         </v-combobox>
       </v-flex>
