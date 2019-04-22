@@ -97,12 +97,13 @@ export default new Vuex.Store( {
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
+      found.updatedAt = ( new Date( ) ).toISOString( )
     },
     UPDATE_STREAM_DATA( state, props ) {
       let found = state.streams.find( s => s.streamId === props.streamId )
       if ( props.layers )
         found.layers = props.layers
-
+      found.updatedAt = ( new Date( ) ).toISOString( )
       // console.log('TODO')
     },
     DELETE_STREAM( state, stream ) {
@@ -224,6 +225,7 @@ export default new Vuex.Store( {
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
+      found.updatedAt = ( new Date( ) ).toISOString( )
     },
     DELETE_PROJECT( state, props ) {
       let index = state.projects.findIndex( p => p._id === props._id )
