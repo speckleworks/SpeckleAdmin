@@ -122,9 +122,9 @@ export default {
         this.$store.dispatch( 'updateProject', { _id: resource._id, deleted: false } )
     },
     clearSelection( ) {
-      this.allResourcesPaginated.forEach( resource => {
-        bus.$emit('unselect-all-resources')
-      })
+      this.selectedResources.forEach( resource => {
+        bus.$emit( 'unselect-all-resources' )
+      } )
     },
     selectAll( ) {
       this.allResourcesPaginated.forEach( resource => {
