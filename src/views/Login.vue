@@ -1,45 +1,36 @@
 <template>
-  <md-content class='md-layout md-alignment-center-center' style="min-height: 100%">
-    <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
-      <md-card class="md-elevation-3">
-        <md-card-header>
-          <md-card-header-text>
-            <div class="md-title">Login</div>
-            <div class="md-caption">
-            <span v-if='$store.state.serverManifest'>at <strong><a :href='$store.state.server' target="_blank">{{$store.state.serverManifest.serverName}}</a></strong>.</span>
-            Do you want to <router-link to='/register'>register</router-link>?</div>
-          </md-card-header-text>
-        </md-card-header>
-        <md-card-content>
-          <md-field>
-            <md-icon>{{serverOk ? "check" : "chevron_right"}}</md-icon>
-            <label>Server API address</label>
-            <md-input type="url" v-model='server' name='server' @blur='checkServer'></md-input>
-          </md-field>
-          <md-field>
-            <label>Email adress</label>
-            <md-input type="email" v-model='email' name='email'></md-input>
-          </md-field>
-          <md-field>
-            <label>Password</label>
-            <md-input v-model='password' type="password" name='password'></md-input>
-          </md-field>
-        </md-card-content>
-        <md-card-actions v-if='!$store.state.isAuth'>
-          <md-button type="submit" class="md-primary md-raised">Login</md-button>
-        </md-card-actions>
-        <br>
-        <speckle-alert type='error' v-on:closed='showError=false' v-show='showError'>
-          {{errorMessage}}
-        </speckle-alert>
-      </md-card>
-    </form>
-    <md-card class="md-elevation-3" v-else>
+  <v-container fluid fill-height>
+    <v-layout align-center justify-center>
+      <v-flex xs11 lg6>
+        <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
+          <v-card class="elevation-3">
+            <v-toolbar class='title text-uppercase elevation-0'>
+              <v-icon left small>face</v-icon>&nbsp;Login&nbsp;&nbsp;<span class='font-weight-thin'>or <router-link to='/register'>register</router-link>?</span>
+            </v-toolbar>
+            <v-card-text>
+              <label>Server API address</label>
+              <v-text-field prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' @blur='checkServer'></v-text-field>
+              <label>Email adress</label>
+              <v-text-field type="email" v-model='email' name='email'></v-text-field>
+              <label>Password</label>
+              <v-text-field v-model='password' type="password" name='password'></v-text-field>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn ype="submit" class="md-primary md-raised">Login</v-btn>
+            </v-card-actions>
+            <v-alert :value="showError" type="warning" dismissible>
+              {{errorMessage}}
+            </v-alert>
+          </v-card>
+        </form>
+      </v-flex>
+    </v-layout>
+    <!-- <md-card class="md-elevation-3" v-else>
       <md-card-content>
         You are already logged in.
       </md-card-content>
-    </md-card>
-  </md-content>
+    </md-card> -->
+  </v-container>
 </template>
 <script>
 import Axios from 'axios'
@@ -51,8 +42,7 @@ export default {
     SpeckleAlert
   },
   computed: {},
-  watch: {
-  },
+  watch: {},
   data( ) {
     return {
       server: null,
