@@ -1,21 +1,16 @@
 <template>
-  <md-card class='md-layout md-layout-item md-size-100 md-alignment-top-left md-elevation-0' v-if='user'>
-    <md-card-content class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100">
-      <h1 class="md-layout-item md-size-100 md-display-2">Hello!</h1>
-      <div class="md-layout-item md-size-100 md-display-1">
-
-        Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>.<br>&nbsp
-      </div>
-      <div class="md-layout-item md-size-100">
-        Your email address is {{user.email}}.<br>&nbsp
-      </div>
-      <md-button class='no-margin md-raised md-primary' @click.native='logout'>Logout</md-button>
-      <p class='md-caption'>You have logged in {{user.logins.length}} times. <a @click='showToken = !showToken'>{{showToken ? "Hide" : "Show"}} your api token.</a></p>
-      <div class='code md-caption' v-if='showToken'>{{user.apitoken}}</div>
-      <br>
-      <br>
-    </md-card-content>
-  </md-card>
+  <v-container grid-list-xl>
+    <v-layout row wrap>
+      <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
+        Hello 👋 <br>Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp;<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>. <v-btn @click.native='logout'>Logout</v-btn depressed>
+      </v-flex>
+      <v-flex xs12 my-5>
+      <!-- <v-divider></v-divider> -->
+        <v-btn class='ma-0' @click.native='showToken = !showToken'>{{showToken ? "Hide" : "Show"}} Token</v-btn depressed><br>&nbsp;<br>
+        <code v-if='showToken' class='caption' style="user-select:all">{{user.apitoken}}</code>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <script>
 export default {
