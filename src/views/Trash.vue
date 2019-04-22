@@ -10,8 +10,8 @@
       </v-toolbar-items>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn flat color='error' @click.native='deleteAllSelected'>Delete Permanently ({{selectedResources.length}})</v-btn>
-        <v-btn color='primary' depressed @click.native='restoreAllSelected'>Restore</v-btn>
+        <v-btn flat color='error' @click.native='deleteAllSelected()'>Delete Permanently ({{selectedResources.length}})</v-btn>
+        <v-btn color='primary' depressed @click.native='restoreAllSelected()'>Restore</v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <v-layout row wrap>
@@ -115,11 +115,29 @@ export default {
       else
         this.$store.dispatch( 'deleteProject', { _id: resource._id } )
     },
+    deleteAllSelected( ) {
+      for ( let resource of this.selectedResources ) {
+        if ( resource.streamId )
+          this.$store.dispatch( 'deleteStream', { streamId: resource.streamId } )
+        else
+          this.$store.dispatch( 'deleteProject', { _id: resource._id } )
+      }
+      this.clearSelection( )
+    },
     restore( resource ) {
       if ( resource.streamId )
         this.$store.dispatch( 'updateStream', { streamId: resource.streamId, deleted: false } )
       else
         this.$store.dispatch( 'updateProject', { _id: resource._id, deleted: false } )
+    },
+    restoreAllSelected( ) {
+      for ( let resource of this.selectedResources ) {
+        if ( resource.streamId )
+          this.$store.dispatch( 'updateStream', { streamId: resource.streamId, deleted: false } )
+        else
+          this.$store.dispatch( 'updateProject', { _id: resource._id, deleted: false } )
+      }
+      this.clearSelection( )
     },
     clearSelection( ) {
       this.selectedResources.forEach( resource => {
