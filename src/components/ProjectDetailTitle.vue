@@ -1,28 +1,28 @@
 <template>
-  <md-card class='md-elevation-0 title-card'>
-    <md-card-content>
-      <h1 class='md-display-1'>
-      <router-link to='/projects'>Projects</router-link> /
-      <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span>
-      <span v-else>{{project.name}}</span>
-    </h1>
-      <p>
-        <md-chip class='md-primary'>projectId: <span style="user-select:all">
-        <strong>{{project._id}}</strong></span>
-        </md-chip>
-        <div class='md-xlarge-hide md-large-hide md-medium-hide md-small-hide'><br>&nbsp</div>
-        <md-chip class=''>
-          <span v-if='canEdit'><md-icon>lock_open</md-icon> you can edit</span>
-          <span v-else><md-icon>lock</md-icon> you cannot edit</span>
-        </md-chip>
-      </p>
-      <md-divider></md-divider>
-      <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips>
-    </md-card-content>
-  </md-card>
+  <v-card class='elevation-0 pa-3'>
+    <v-layout row wrap>
+      <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
+        <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span>
+        <span v-else>{{project.name}}</span>
+      </v-flex>
+      <v-flex xs12 class='caption' style='line-height: 32px'>
+        <v-icon small>person</v-icon> <span class='caption'>{{project.canRead.length}}</span>&nbsp;
+        <v-icon small>import_export</v-icon> <span class='caption'>{{project.streams.length}}</span>&nbsp;
+        <v-icon small>fingerprint</v-icon>&nbsp;<strong style="user-select:all">{{project._id}}</strong>&nbsp;
+        <v-icon small>access_time</v-icon>&nbsp;<timeago :datetime='project.updatedAt'></timeago>&nbsp;
+        <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong></span>
+      </v-flex>
+      <v-flex xs12 class='ma-0 pa-0 mb-2'>
+        <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="project.tags" :items='project.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+          <template v-slot:no-data>project has no tags.</template>
+        </v-combobox>
+      </v-flex>
+    </v-layout>
+  </v-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'
+import uniq from 'lodash.uniq'
 
 export default {
   name: 'HelloWorld',
@@ -33,6 +33,20 @@ export default {
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
     },
+    owner( ) {
+      let u = this.$store.state.users.find( user => user._id === this.project.owner )
+      if ( !u ) {
+        this.$store.dispatch( 'getUser', { _id: this.project.owner } )
+      }
+      return u ? u.surname.includes( "is you" ) ? `you` : `${u.name} ${u.surname}` : 'Loading'
+    },
+    canReadProject( ) { return this.project.canRead },
+    canWriteProject( ) { return this.project.canWrite },
+    canReadStreams( ) { return this.project.permissions.canRead },
+    canWriteStreams( ) { return this.project.permissions.canWrite },
+    allUsers( ) {
+      return uniq( [ ...this.canReadProject, ...this.canWriteProject, ...this.canReadStreams, ...this.canWriteProject, this.project.owner ] )
+    }
   },
   data( ) { return {} },
   methods: {

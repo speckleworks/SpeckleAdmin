@@ -14,7 +14,6 @@
       <v-layout v-show='!editDescription'>
         <v-flex xs12 v-html='compiledDescription'></v-flex>
       </v-layout>
-
       <v-layout v-show='editDescription' row wrap>
         <v-flex xs12 class="caption">
           Supports <a class='' target="_blank" href='https://en.wikipedia.org/wiki/Markdown#Example'>markdown:</a><strong> ** bold **</strong>, <i>* italic *</i>, <code># Heading 1</code>, <code>## Heading 2</code>, <code>[links](http://example.com)</code>, etc.
@@ -25,7 +24,7 @@
         </md-field>
       </v-layout>
     </v-card-text>
-     <v-toolbar transparent class='elevation-0 transparent' dense>
+     <v-toolbar transparent class='elevation-0 transparent' dense v-if='isStream'>
       <v-icon left small>power_input</v-icon>
       <span class='title font-weight-light'>Units</span>
      </v-toolbar>

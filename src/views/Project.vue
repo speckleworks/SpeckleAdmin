@@ -1,14 +1,44 @@
 <template>
-  <div>
+  <v-container grid-list-xl v-if='project'>
+    <v-toolbar absolute v-if='project.deleted'>
+      <span>This stream is in your trashbin. </span>
+      <v-spacer></v-spacer>
+      <v-btn color='primary' v-if='canEdit' @click.native='restore'> Restore? </v-btn>
+    </v-toolbar>
+    <v-layout row wrap class='mb-3'>
+      <v-flex xs12>
+        <project-detail-title :project='project'></project-detail-title>
+      </v-flex>
+      <v-flex xs12>
+        <detail-description :resource='project'></detail-description>
+      </v-flex>
+      <v-flex xs12 sm12 lg6>
+        <v-card class='elevation-0'>
+          <v-card-title class='title font-weight-light'>
+            <v-icon small left>supervisor_account</v-icon>&nbsp;
+            Users
+          </v-card-title>
+          <v-card-text>
+            <user-search v-on:selected-user='addUserToTeam' v-if='canEdit'></user-search>
+            <permission-table :project='project' :global-disabled='!canEdit' @remove-user='' @move-user=''></permission-table>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex xs12 sm12 lg6>
+        <v-card  class='elevation-0'>
+          <v-card-title class='title font-weight-light'>
+            <v-icon small left>import_export</v-icon>&nbsp;
+            Streams
+          </v-card-title>
+          <v-card-text>
+            <project-detail-streams :project='project' v-on:selected-stream='addStream' v-on:remove-stream='removeStream'></project-detail-streams>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+  <!-- <div>
     <div class='md-layout md-alignment-center-center' v-if='project'>
-      <div class="md-layout-item md-size-100 text-center sticky-top" v-if='project.deleted'>
-        <md-content class='md-accent md-caption md-layout md-alignment-center-center' style='width:100%;padding:10px; border-radius: 2px;'>
-          <div class='md-layout-item'>This project is in your trashbin.</div>
-          <div class='md-layout-item'>
-            <md-button class='md-dense md-raised' v-if='canEdit' @click.native='restore'> Restore? </md-button>
-          </div>
-        </md-content>
-      </div>
       <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100 detail-card">
         <project-detail-title :project='project'></project-detail-title>
         <detail-description :resource='project'></detail-description>
@@ -34,7 +64,7 @@
         <md-progress-bar md-mode="indeterminate"></md-progress-bar>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 <script>
 import union from 'lodash.union'
