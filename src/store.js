@@ -459,7 +459,16 @@ export default new Vuex.Store( {
       if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
       Axios.put( `projects/${projectId}/upgradeuser/${userId}` )
         .then( res => {
-          context.commit( 'UPDATE_PROJECT', { _id: projectId, permissions: { canRead: uniq( [ ...project.canRead, userId ] ), canWrite: uniq( [ ...project.canWrite, userId ] ) } } )
+          return Axios.get( `projects/${projectId}?fields=permissions` )
+        } )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', {
+            _id: projectId,
+            permissions: {
+              canRead: res.data.resource.permissions.canRead, //[ ...new Set( [ ...project.canRead, userId ] ) ],
+              canWrite: res.data.resource.permissions.canWrite //[ ...new Set( [ ...project.canWrite, userId ] ) ]
+            }
+          } )
           project.streams.forEach( streamId => {
             let myStream = context.state.streams.find( s => s.streamId === streamId )
             context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: uniq( [ ...myStream.canWrite, userId ] ), canRead: uniq( [ ...myStream.canRead, userId ] ) } )
