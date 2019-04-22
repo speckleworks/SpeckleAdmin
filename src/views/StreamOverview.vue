@@ -10,7 +10,7 @@
         </v-toolbar>
         <v-divider></v-divider>
         <v-card-text>
-          <v-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
+          <v-chip v-for='(proj, index) in streamProjects' :key='proj._id' class='md-primary' md-clickable>
             <router-link :to='"/projects/"+proj._id'>{{proj.name}}</router-link>&nbsp;
           </v-chip></span>
           <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>

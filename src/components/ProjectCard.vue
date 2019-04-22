@@ -17,7 +17,7 @@
         <v-icon small>access_time</v-icon>&nbsp; {{createdAt}}&nbsp;
       </v-flex>
       <v-flex xs12 ma-2 v-if='resource.tags.length > 0'>
-        <v-chip small outline v-for='tag in resource.tags'>{{tag}}</v-chip>
+        <v-chip small outline v-for='tag in resource.tags' :key='tag'>{{tag}}</v-chip>
       </v-flex>
       <v-flex xs12 ma-2>
         <div class="md-caption md-small-hide" v-html='compiledDescription'> </div>

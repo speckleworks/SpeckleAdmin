@@ -1,33 +1,40 @@
 <template>
   <v-container grid-list-sm v-if='allUsersPop.length > 0 && project' class='pa-0 ma-0'>
     <v-layout row wrap>
-      <v-flex xs12 sm12 lg12 v-for='user in allUsersPop' v-if='user' :key='user._id'>
-        <v-card tile class='pa-3 elevation-1'>
+      <v-flex xs12 v-for='user in allUsersPop' v-if='user' :key='user._id'>
+        <user-perm-card
+        @change-permission-streams='changePermissionStreams'
+        @change-permission-project='changePermissionProject'
+        @remove-user='removeUser'
+        :user='user' :project='project' :global-disabled='globalDisabled'></user-perm-card>
+      </v-flex>
+      <v-divider></v-divider>
+      <v-divider></v-divider>
+      <v-divider></v-divider>
+<!--       <v-flex xs12 sm12 lg12 v-for='user in allUsersPop' v-if='user'>
+        <v-card tile class='pa-3 elevation-0' :key='user._id'>
           <v-layout row wrap align-center justify-space-between>
-            <v-flex xs12>
-              <v-avatar size='21' dark :color="getHexFromString( user.name )">
-                {{user.name.substring(0,1).toUpperCase()}}
-              </v-avatar>&nbsp;
-              <span>{{user.name}} {{user.surname}}</span>&nbsp;
+            <v-flex xs8>
+              <span>{{user.name}} {{user.surname}}</span><br>
               <span class='caption'>{{user.company}}</span>
             </v-flex>
-            <v-flex xs12 class='xxxtext-xs-right'>
-              <!-- write streams -->
-              <v-btn depressed small :color='hasWritePermissionStreams(user._id)?"primary":""' @click.native='changePermissionStreams(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
+            <v-flex xs4>
+
+              <v-btn block depressed small :color='hasWritePermissionStreams(user._id)?"primary":""' @click.native='changePermissionStreams(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
                 {{ user.isOwner ? "write streams" : hasWritePermissionStreams(user._id) ? "write streams" : "read streams"}}
               </v-btn>
-              <!-- write project -->
-              <v-btn depressed small :color='hasWritePermissionProject(user._id)?"primary":""' @click.native='changePermissionProject(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
+
+              <v-btn block depressed small :color='hasWritePermissionProject(user._id)?"primary":""' @click.native='changePermissionProject(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
                 {{ user.isOwner ? "write project" : hasWritePermissionProject(user._id) ? "write project" : "read project"}}
               </v-btn>
-              <!-- remove user -->
-              <v-btn small icon @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-                <v-icon>close</v-icon>
+
+              <v-btn block flat small @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
+                remove user
               </v-btn>
             </v-flex>
           </v-layout>
         </v-card>
-      </v-flex>
+      </v-flex> -->
     </v-layout>
   </v-container>
 </template>
@@ -35,9 +42,13 @@
 import union from 'lodash.union'
 import uniq from 'lodash.uniq'
 
+import UserPermCard from '@/components/UserPermissionProjectCard.vue'
 
 export default {
   name: 'PermissionTable',
+  components: {
+    UserPermCard
+  },
   props: {
     project: Object,
     globalDisabled: {
@@ -60,7 +71,7 @@ export default {
         if ( !u ) this.$store.dispatch( 'getUser', { _id: userId } )
         if ( u ) u.isOwner = u._id === this.project.owner
         return u
-      } ).sort( ( a, b ) => a.name > b.name ? 1 : -1 )
+      } ) //.sort( ( a, b ) => a.name > b.name ? 1 : -1 )
     }
   },
   data( ) {
@@ -93,6 +104,7 @@ export default {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, permissions: { canRead: streamCanRead, canWrite: streamCanWrite }, canRead: localCanRead, canWrite: localCanWrite } )
     },
     changePermissionStreams( userId ) {
+      console.log('stream change perms for ' + userId )
       let hasWritePermission = this.project.permissions.canWrite.indexOf( userId ) > -1 ? true : false
       if ( !hasWritePermission ) this.upgradeUser( userId )
       else this.downgradeUser( userId )

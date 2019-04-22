@@ -19,7 +19,7 @@
         <v-icon small>history</v-icon> {{ stream.children.length }} &nbsp
       </v-flex>
       <v-flex xs12 ma-2 v-if='stream.tags.length > 0'>
-        <v-chip small outline v-for='tag in stream.tags'>{{tag}}</v-chip>
+        <v-chip small outline v-for='tag in stream.tags' :key='tag'>{{tag}}</v-chip>
       </v-flex>
       <v-flex xs12 ma-2>
         <div class="md-caption md-small-hide" v-html='compiledDescription'> </div>
