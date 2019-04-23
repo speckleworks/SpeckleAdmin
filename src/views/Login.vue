@@ -35,7 +35,6 @@ import Axios from 'axios'
 export default {
   name: 'LoginView',
   components: {
-    SpeckleAlert
   },
   computed: {},
   watch: {},
