@@ -51,9 +51,7 @@ import Axios from 'axios'
 
 export default {
   name: 'RegisterView',
-  mixins: [ validationMixin ],
   components: {
-    SpeckleAlert
   },
   computed: {},
   data( ) {
