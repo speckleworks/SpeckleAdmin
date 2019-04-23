@@ -1,44 +1,37 @@
 <template>
-  <md-card class='md-elevation-3'>
-    <md-card-content class='bg-ghost-white'>
-      <div class="md-layout md-alignment-center-center">
-        <div class="md-layout-item md-title md-size-70">Link Sharing</div>
-        <div class="md-layout-item md-title md-size-30 text-right">
-          <md-button :class='{ "md-raised": true, "md-primary" : !stream.private }' @click.native='changeLinkSharing' :disabled='!canEdit'>
-            {{stream.private ? "OFF" : "ON"}}
-          </md-button>
-        </div>
-        <div class='md-layout-item md-size-100 md-caption'>
-          {{ stream.private ? "Private resource. Only people with read or write persmissions can access it." : "Public resource. Anyone with the id can access it."}}
-          <span class='md-layout-item md-size-100 md-caption' v-if='isOwner'>
-          You are the <strong>owner</strong> of this stream.
-        </span>
-          <span class='md-layout-item md-size-100 md-caption' v-else>
-          This stream was shared with you by <strong>{{streamOwner}}.</strong>
-        </span></div>
-      </div>
-    </md-card-content>
-    <md-card-content class='bg-ghost-white'>
-      <div class="md-layout">
-        <div class='md-layout-item md-size-100' style="margin-top:20px;">
-          <div class="md-title">Permissions</div>
-          <p class='md-caption' v-if='canEdit'>
-            <span v-if='streamProjects.length>0'>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' :key='proj._id'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
-            <span v-else>Add or remove users below.</span>
-          </p>
-          <p class='md-caption' v-else>You cannot edit the permissions of this stream.</p>
-        </div>
-      </div>
-    </md-card-content>
-    <md-card-content>
-      <div class="md-layout">
-        <div class='md-layout-item md-size-100' style="margin-top:0px;">
-          <user-search v-on:selected-user='addUserToWrite' v-if='canEdit'></user-search>
-          <permission-table :resource='stream' :disabled-users='usersFromProjects' :global-disabled='!canEdit' v-on:update-table='updatePerms'></permission-table>
-        </div>
-      </div>
-    </md-card-content>
-  </md-card>
+  <v-card class='elevation-0'>
+    <v-toolbar class='elevation-0 transparent'>
+      <v-icon small left>share</v-icon>&nbsp;
+      <span class='title font-weight-light'>Link Sharing</span> &nbsp;
+    </v-toolbar>
+    <v-divider></v-divider>
+    <v-card-text class='mx-2'>
+      <v-btn depressed color='primary' @click.native='changeLinkSharing' :disabled='!canEdit'>{{stream.private ? "OFF" : "ON"}}</v-btn>
+      {{ stream.private ? "Private resource. Only people with read or write persmissions can access it." : "Public resource. Anyone with the id can access it."}}
+      <span class='' v-if='isOwner'>
+        You are the <strong>owner</strong> of this stream.
+      </span>
+      <span class='' v-else>
+        This stream was shared with you by <strong>{{streamOwner}}.</strong>
+      </span>
+    </v-card-text>
+    <!-- <v-divider></v-divider> -->
+    <v-toolbar class='elevation-0 transparent title font-weight-light'>
+      <v-icon small left>supervisor_account</v-icon>&nbsp;
+      <span class='title font-weight-light'>User Permissions</span> &nbsp;
+    </v-toolbar>
+    <v-card-text class='mx-2' v-if='streamProjects.length>0'>
+      <span>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' :key='proj._id'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
+    </v-card-text>
+    <v-card-text class='mx-2' v-if='!canEdit'>
+      You cannot edit the permissions of this stream.
+    </v-card-text>
+    <v-divider></v-divider>
+    <v-card-text class='' v-if='canEdit'>
+      <user-search v-on:selected-user='addUserToWrite'></user-search>
+      <permission-table :resource='stream' :disabled-users='usersFromProjects' :global-disabled='!canEdit' v-on:update-table='updatePerms'></permission-table>
+    </v-card-text>
+  </v-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'

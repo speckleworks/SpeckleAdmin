@@ -1,56 +1,35 @@
 <template>
-  <md-card md-with-hover :class="{'stream-card':true, 'selected':selected}">
-    <md-card-header @click='selected=!selected'>
-      <md-card-header-text>
-        <router-link :to='"/projects/"+project._id'>
-          <div class="md-title">{{project.name}}</div>
-          <div class="md-subhead md-small-hide" stlye='user-select:all;'>{{project._id}}</div>
-          <div class="md-caption md-small-hide" v-html='compiledDescription'></div>
-        </router-link>
-      </md-card-header-text>
-      <!-- <md-checkbox v-model="selected" value="1" @click.native='$emit("selected", stream)'></md-checkbox> -->
-    </md-card-header>
-    <md-card-content>
-      <div class="md-layout md-alignment-center-center">
-        <div class="md-layout-item md-size-10">
-          <md-icon>access_time</md-icon>
-        </div>
-        <div class="md-layout-item md-caption">
-          <strong><timeago :datetime='project.updatedAt'></timeago></strong>
-        </div>
-        <div class="md-layout-item md-size-10">
-          <md-icon>create</md-icon>
-        </div>
-        <div class="md-layout-item md-caption">
-          {{createdAt}}
-        </div>
-        <div class="md-layout-item md-size-100" style="padding: 10px 0px;">
-          <div class="md-layout md-alignment-center-left">
-            <div class='md-layout-item md-size-10'>
-              <md-icon>person</md-icon>
-            </div>
-            <div class='md-layout-item xxxmd-size-10 md-caption'>
-              <strong>{{projectTeamMembers.length}}</strong> team members.
-            </div>
-            <div class='md-layout-item md-size-10'>
-              <md-icon>import_export</md-icon>
-            </div>
-            <div class='md-layout-item xxxmd-size-25 md-caption'>
-              <strong>{{project.streams.length}}</strong> streams.
-            </div>
-          </div>
-        </div>
-        <div class='md-layout-item md-size-100 md-small-hide'>
-          <md-chips v-model="project.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
-        </div>
-      </div>
-    </md-card-content>
-    <md-card-actions>
-      <md-button class='md-accent' @click.native='archiveProject' v-show='isOwner'>Archive</md-button>
-      <md-button class='md-raised-xxx' :to='"/projects/"+project._id'>More...</md-button>
-    </md-card-actions>
-    <!-- {{stream.streamId}} -->
-  </md-card>
+  <v-card :class="{'elevation-10':selected, 'elevation-1': true}">
+    <v-card-title>
+      <span class='title font-weight-light'>{{resource.name ? resource.name : "No Name"}}</span>
+      <v-spacer></v-spacer>
+      <span></span>
+      <span>
+        <v-checkbox color='primary' v-model="selected"></v-checkbox>
+      </span>
+    </v-card-title>
+    <v-divider class='mx-0 my-0'></v-divider>
+    <v-layout row wrap>
+      <v-flex xs12 class='caption' ma-2>
+        <v-icon small>import_export</v-icon>&nbsp<strong style="user-select:all">{{project.streams.length}}</strong>&nbsp;
+        <v-icon small>person_outline</v-icon> {{ allUsers.length }} &nbsp;
+        <v-icon small>edit</v-icon>&nbsp;<timeago :datetime='resource.updatedAt'></timeago>&nbsp;
+        <v-icon small>access_time</v-icon>&nbsp; {{createdAt}}&nbsp;
+      </v-flex>
+      <v-flex xs12 ma-2 v-if='resource.tags.length > 0'>
+        <v-chip small outline v-for='tag in resource.tags' :key='tag'>{{tag}}</v-chip>
+      </v-flex>
+      <v-flex xs12 ma-2>
+        <div class="md-caption md-small-hide" v-html='compiledDescription'> </div>
+      </v-flex>
+    </v-layout>
+    <v-card-actions>
+      <span class='caption font-weight-light'>Owned by <strong>{{owner}}</strong></span>
+      <v-spacer></v-spacer>
+      <v-btn depressed class='transparent' @click.native='archiveProject' v-show='isOwner'>Archive</v-btn>
+      <v-btn color='primary' :to='"/projects/"+resource._id'>Details</v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -85,6 +64,16 @@ export default {
     },
     isOwner( ) {
       return this.project.owner === this.$store.state.user._id
+    },
+    allUsers( ) {
+      return union( this.project.canRead, this.project.canWrite )
+    },
+    owner( ) {
+      let u = this.$store.state.users.find( user => user._id === this.resource.owner )
+      if ( !u ) {
+        this.$store.dispatch( 'getUser', { _id: this.resource.owner } )
+      }
+      return u ? u.surname.includes( "is you" ) ? `you` : `${u.name} ${u.surname}` : 'Loading'
     }
   },
   data( ) {
@@ -103,7 +92,10 @@ export default {
     }, 1000 )
   },
   mounted( ) {
-    bus.$on( 'unselect-all', ( ) => {
+    bus.$on( 'select-project', id => {
+      if ( id === this.project._id ) this.selected = true
+    } )
+    bus.$on( 'unselect-all-projects', ( ) => {
       this.selected = false
     } )
   }
@@ -111,37 +103,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.stream-chips:after {
-  display: none !important;
-}
-
-.stream-chips:before {
-  display: none !important;
-}
-
-.md-card-actions,
-.md-card-header {
-  background: ghostwhite;
-}
-
-.md-card-header {
-  margin-bottom: 10px;
-}
-
-.stream-chips {
-  margin-bottom: 0;
-}
-
-.stream-chips input {
-  font-size: 10px;
-}
-
-.stream-card {
-  margin-bottom: 20px;
-}
-
-i {
-  color: #4C4C4C;
-}
-
 </style>

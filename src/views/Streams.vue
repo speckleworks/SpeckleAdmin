@@ -1,48 +1,81 @@
 <template>
-  <md-empty-state md-icon="import_export" md-label="" md-description="You don't have any streams yet." v-if='streams.length === 0'>
-    <p> You can create a new one here or through <router-link to='/plugins'>existing CAD integrations.</router-link></p>
-    <md-button class="md-primary md-raised" @click.native='createStream'>Create your first stream!</md-button>
-  </md-empty-state>
-  <div class='md-layout' v-else>
-    <md-card class="md-elevation-0 md-layout-item md-size-100">
-      <md-card-content>
-        <h1 class='md-display-2'>Streams</h1>
-        <p>Streams are the place where your project data (objects and other information) is kept.</p>
-      </md-card-content>
-    </md-card>
-    <md-card class="md-primary-xx main-toolbar md-elevation-3">
-      <md-card-content class='md-layout md-alignment-center-space-between'>
-        <div class="md-layout-item md-size-95 md-small-size-70">
-          <md-field md-clearable>
-            <md-icon>search</md-icon>
-            <label>filter query</label>
-            <md-input @input="updateSearch" spellcheck="false"></md-input>
-          </md-field>
+  <v-container grid-list-xl>
+    <!-- Toolbar for stream selection/bulk operations -->
+    <v-toolbar fixed v-if='selectedStreams.length > 0' style='z-index:100'>
+      <v-toolbar-items>
+        <v-btn icon color='primary' class='md-raised md-dense md-primary' @click.native='clearSelection'>
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-btn flat @click.native='selectAll()'>select all</v-btn>
+      </v-toolbar-items>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn flat color='error' @click.native='deleteStreams'>Archive</v-btn>
+        <v-btn flat @click.native='togglePermissions'>Make {{defaultPermission}}</v-btn>
+        <v-btn flat @click.native='createProjectFromSelection'>Create Project</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <!-- End toolbar -->
+    <v-layout row wrap>
+      <v-flex xs12 py-5 class='headline font-weight-light'>
+        Streams are the channels your design data flows into.
+      </v-flex>
+      <!-- Empty state handler -->
+      <v-flex xs12 v-if='streams.length === 0'>
+        <p class='title font-weight-light'>Hmm, you don't have any streams yet. Don't worry! You can create a new one here (big blue button in the lower right corner) or through <router-link to='/plugins'>existing CAD integrations.</router-link>
+        </p>
+      </v-flex>
+      <v-flex xs12>
+        <v-text-field solo clearable :hint='searchHint' label="Search for a stream" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
+        <div v-if='searchfilter && searchfilter!==""'>
+          <p class='title font-weight-light my-3 mx-1'>Found {{filteredStreams.length}} streams matching your search criteria.</p>
         </div>
-        <div class="md-layout-item md-size-5 md-small-size-30 text-right">
-          <md-button class='md-icon-button md-raised md-primary' @click.native='createStream'>
-            <md-icon>add</md-icon>
-          </md-button>
-        </div>
-        <div class="md-layout-item md-size-100" v-if='selectedStreams.length > 0' style="margin-top: 10px;">
-          <md-button class='md-raised md-dense md-primary' @click.native='clearSelection'>clear selection ({{selectedStreams.length}})</md-button>
-          <md-button class='md-raised-xx md-dense md-accent' @click.native='deleteStreams'>delete</md-button>
-          <md-button class='md-raised md-dense' @click.native='togglePermissions'>Make {{defaultPermission}}</md-button>
-          <md-button class='md-raised md-dense' @click.native='createProjectFromSelection'>Create Project</md-button>
-        </div>
-      </md-card-content>
-    </md-card>
-    <div class='md-layout-item md-small-size-100 md-medium-size-50 md-large-size-50 md-xlarge-size-33' v-for='stream in paginatedStreams' :key='stream._id'>
-      <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
-    </div>
-    <div class="md-layout-item md-size-100">
-      <md-card class='md-elevation-0'>
-        <md-button class='md-raised btn-no-margin md-primary' @click.native='endIndex+=12' :disabled='paginatedStreams.length===filteredStreams.length'>
-          Show More ({{paginatedStreams.length}} / {{filteredStreams.length}})
-        </md-button>
-      </md-card>
-    </div>
-  </div>
+      </v-flex>
+    </v-layout>
+    <!-- All the stream cards will flow below -->
+    <v-layout row wrap>
+      <!-- Pagination top (TODO: extract to component) -->
+      <v-flex xs12>
+        <v-btn icon small @click.native='pageNumber=0' :disabled='pageNumber===0'>
+          <v-icon>first_page</v-icon>
+        </v-btn>
+        <v-btn icon small @click.native='pageNumber-=1' :disabled='pageNumber===0'>
+          <v-icon>chevron_left</v-icon>
+        </v-btn>
+        <v-btn icon @click.native='pageNumber+=1' :disabled='pageNumber >= Math.round(filteredStreams.length/sliceSize)'>
+          <v-icon>chevron_right</v-icon>
+        </v-btn>
+        <v-btn icon small @click.native='pageNumber=Math.round(filteredStreams.length/sliceSize)' :disabled='pageNumber >= Math.round(filteredStreams.length/sliceSize)'>
+          <v-icon>last_page</v-icon>
+        </v-btn>
+        <span class='caption' xxxstyle="position: relative;top:8px;">{{pageNumber}} / {{(filteredStreams.length/sliceSize).toFixed(0)}}</span>
+      </v-flex>
+      <!-- The actual stream cards -->
+      <v-flex xs12 sm6 v-for='stream in paginatedStreams' :key='stream._id'>
+        <stream-card :stream='stream' v-on:selected='selectThis' v-on:deleted='clearSelection'></stream-card>
+      </v-flex>
+      <!-- Pagination bottom  -->
+      <v-flex xs12>
+        <v-btn icon small @click.native='pageNumber=0' :disabled='pageNumber===0'>
+          <v-icon>first_page</v-icon>
+        </v-btn>
+        <v-btn icon small @click.native='pageNumber-=1' :disabled='pageNumber===0'>
+          <v-icon>chevron_left</v-icon>
+        </v-btn>
+        <v-btn icon @click.native='pageNumber+=1' :disabled='pageNumber >= Math.round(filteredStreams.length/sliceSize)'>
+          <v-icon>chevron_right</v-icon>
+        </v-btn>
+        <v-btn icon small @click.native='pageNumber=Math.round(filteredStreams.length/sliceSize)' :disabled='pageNumber >= Math.round(filteredStreams.length/sliceSize)'>
+          <v-icon>last_page</v-icon>
+        </v-btn>
+        <span class='caption' xxxstyle="position: relative;top:8px;">{{pageNumber}} / {{(filteredStreams.length/sliceSize).toFixed(0)}}</span>
+      </v-flex>
+    </v-layout>
+    <!-- Big fat fab button to create a new stream -->
+    <v-btn color="primary" dark fixed large bottom right fab @click.native='createStream'>
+      <v-icon>add</v-icon>
+    </v-btn>
+  </v-container>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -61,21 +94,27 @@ export default {
       return this.$store.getters.filteredStreams( this.filters )
     },
     paginatedStreams( ) {
-      return this.filteredStreams.slice( this.startIndex, this.endIndex )
+      // return this.filteredStreams.slice( this.startIndex, this.endIndex )
+      return this.filteredStreams.slice( this.currentIndex + this.pageNumber * this.sliceSize, this.sliceSize * ( this.pageNumber + 1 ) )
     },
   },
   data( ) {
     return {
-      startIndex: 0,
-      itemsPerPage: 12,
-      endIndex: 12,
+      currentIndex: 0,
+      sliceSize: 6,
+      pageNumber: 0,
       selectedStreams: [ ],
       searchfilter: '',
       filters: [ ],
       defaultPermission: 'private',
+      isSearching: false,
+      searchHint: `You can restrict your search to the stream's id by prepending id:{your stream id}, similarly for name, tags etc.`
     }
   },
   watch: {
+    searchfilter( ) {
+      this.isSearching = true
+    },
     selectedStreams( ) {
       let priv = 0,
         pub = 0
@@ -87,14 +126,14 @@ export default {
     }
   },
   methods: {
-    createStream() {
+    createStream( ) {
       this.$store.dispatch( 'createStream', { name: 'A New Speckle Stream', onlineEditable: true } )
-      .then( res => {
-        this.$router.push(`/streams/${res.streamId}`)
-      })
-      .catch( err => {
-        console.error( err )
-      })
+        .then( res => {
+          this.$router.push( `/streams/${res.streamId}` )
+        } )
+        .catch( err => {
+          console.error( err )
+        } )
     },
     createProjectFromSelection( ) {
       this.$store.dispatch( 'createProject', { name: 'Speckle Project', streams: this.selectedStreams.map( s => s.streamId ) } )
@@ -116,6 +155,8 @@ export default {
       this.clearSelection( )
     },
     updateSearch: debounce( function( e ) {
+      this.pageNumber = 0
+      this.isSearching = false
       this.searchfilter = e
       try {
         let filters = this.searchfilter.split( ' ' ).map( t => {
@@ -131,6 +172,14 @@ export default {
         this.filters = [ { key: 'name', value: e } ]
       }
     }, 1000 ),
+    selectAll( ) {
+      this.paginatedStreams.forEach( stream => {
+        let index = this.selectedStreams.findIndex( s => s.streamId === stream.streamId )
+        if ( index === -1 ) {
+          bus.$emit( 'select-stream', stream.streamId )
+        }
+      } )
+    },
     selectThis( stream ) {
       let index = this.selectedStreams.findIndex( s => s.streamId === stream.streamId )
       if ( index === -1 )
@@ -147,29 +196,9 @@ export default {
     }
   },
   created( ) {
-    // this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
   }
 }
 
 </script>
 <style scoped lang='scss'>
-.md-field label {
-  opacity: 0.5;
-}
-
-.main-toolbar {
-  position: -webkit-sticky;
-  /* Safari */
-  position: sticky;
-  top: 0;
-  width: 100%;
-  background-color: white;
-  z-index: 100;
-  margin-bottom: 30px;
-}
-
-.md-field {
-  margin: 0 !important;
-}
-
 </style>

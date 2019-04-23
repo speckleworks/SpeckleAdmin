@@ -1,42 +1,40 @@
 <template>
-  <md-card md-with-hover :class="{'stream-card':true, 'selected':selected}">
-    <md-card-header @click='selected=!selected'>
-      <md-card-header-text>
-        <router-link :to='"/streams/"+stream.streamId'>
-          <div class="md-title">{{stream.name}}</div>
-          <div class="md-subhead" stlye='user-select:all;'>{{stream.streamId}}</div>
-          <div class="md-caption md-small-hide" v-html='compiledDescription'></div>
-        </router-link>
-      </md-card-header-text>
-      <md-checkbox v-model="selected" value="1" @click.native='$emit("selected", stream)'></md-checkbox>
-    </md-card-header>
-    <md-card-content>
-      <div class="md-layout md-alignment-center-center">
-        <div class="md-layout-item md-size-10">
-          <md-icon>access_time</md-icon>
-        </div>
-        <div class="md-layout-item md-caption">
-          <strong><timeago :datetime='stream.updatedAt'></timeago></strong>
-        </div>
-        <div class="md-layout-item md-size-10">
-          <md-icon>create</md-icon>
-        </div>
-        <div class="md-layout-item md-caption">
-          {{createdAt}}
-        </div>
-        <div class='md-layout-item md-size-100 md-small-hide'>
-          <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips'></md-chips>
-        </div>
-      </div>
-    </md-card-content>
-    <md-card-actions>
-      <md-button class='md-accent' @click.native='deleteStream' v-show='isOwner'>Archive</md-button>
-      <md-button class='md-raised-xxx' :to='"/streams/"+stream.streamId'>Details</md-button>
-    </md-card-actions>
-    <!-- {{stream.streamId}} -->
-  </md-card>
+  <v-card :class="{'stream-card':true, 'elevation-10':selected, 'elevation-1': true}">
+    <v-card-title>
+      <span class='title font-weight-light'>{{stream.name ? stream.name : "Stream Has No Name"}}</span>
+      <v-spacer></v-spacer>
+      <span></span>
+      <span>
+        <v-checkbox color='primary' v-model="selected"></v-checkbox>
+      </span>
+    </v-card-title>
+    <v-divider class='mx-0 my-0'></v-divider>
+    <v-layout row wrap>
+      <v-flex xs12 class='caption' ma-2>
+        <v-icon small>fingerprint</v-icon>&nbsp<strong style="user-select:all">{{stream.streamId}}</strong>&nbsp
+        <v-icon small>edit</v-icon>&nbsp<timeago :datetime='stream.updatedAt'></timeago>&nbsp
+        <v-icon small>access_time</v-icon>&nbsp {{createdAt}}&nbsp
+        <v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon> link sharing {{stream.private ? "off" : "on" }} &nbsp
+        <v-icon small>person_outline</v-icon> {{ allUsers.length }} &nbsp
+        <v-icon small>history</v-icon> {{ stream.children.length }} &nbsp
+      </v-flex>
+      <v-flex xs12 ma-2 v-if='stream.tags.length > 0'>
+        <v-chip small outline v-for='tag in stream.tags' :key='tag'>{{tag}}</v-chip>
+      </v-flex>
+      <v-flex xs12 ma-2>
+        <div class="md-caption md-small-hide" v-html='compiledDescription'> </div>
+      </v-flex>
+    </v-layout>
+    <v-card-actions>
+      <span class='caption font-weight-light'>Owned by {{owner}}</span>
+      <v-spacer></v-spacer>
+      <v-btn depressed class='transparent' @click.native='deleteStream' v-show='isOwner'>Archive</v-btn>
+      <v-btn color='primary' :to='"/streams/"+stream.streamId'>Details</v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 <script>
+import union from 'lodash.union'
 import debounce from 'lodash.debounce'
 import marked from 'marked'
 
@@ -61,6 +59,16 @@ export default {
     },
     isOwner( ) {
       return this.stream.owner === this.$store.state.user._id
+    },
+    allUsers( ) {
+      return union( this.stream.canRead, this.stream.canWrite )
+    },
+    owner( ) {
+      let u = this.$store.state.users.find( user => user._id === this.stream.owner )
+      if ( !u ) {
+        this.$store.dispatch( 'getUser', { _id: this.stream.owner } )
+      }
+      return u ? u.surname.includes( "is you" ) ? `you` : `${u.name} ${u.surname}` : 'Loading'
     }
   },
   data( ) {
@@ -78,6 +86,9 @@ export default {
     }, 1000 )
   },
   mounted( ) {
+    bus.$on( 'select-stream', ( streamId ) => {
+      if ( this.stream.streamId === streamId ) this.selected = true
+    } )
     bus.$on( 'unselect-all', ( ) => {
       this.selected = false
     } )
@@ -86,7 +97,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.stream-chips:after {
+/*.stream-chips:after {
   display: none !important;
 }
 
@@ -109,22 +120,6 @@ export default {
 
 .stream-chips input {
   font-size: 10px;
-}
-
-.stream-card {
-  margin-bottom: 20px;
-}
-
-.selected .md-card-header {
-  /*background-color: #CCCCCC !important;*/
-}
-
-/*.selected .xx-md-card-content, .selected .md-card-header, .selected .xxx-md-card-actions {
-  background-color: #CCCCCC !important;
 }*/
-
-i {
-  color: #4C4C4C;
-}
 
 </style>

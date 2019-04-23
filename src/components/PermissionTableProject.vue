@@ -1,48 +1,27 @@
 <template>
-  <div>
-    <div class='' v-if='project'>
-      <div v-if='allUsersPop.length === 0'>
-        No sharing buddies so far!
-      </div>
-      <div :class='{ "md-layout md-alignment-center-left user":true, "bg-ghost-white": user.isOwner}' v-for='user in allUsersPop' v-if='user'>
-        <div class="md-layout-item md-size-10 md-small-hide">
-          <md-avatar class="md-avatar-icon md-small" :style='{ "background" : getHexFromString( user.name ) }'>{{user.name.substring(0,1).toUpperCase()}}</md-avatar>
-        </div>
-        <div class="md-layout-item xxx-md-size-40 md-xsmall-size-100 text-center">
-          {{user.name}} {{user.surname}}&nbsp<span v-if='user.company' class='md-caption'>({{user.company}})</span>&nbsp<span v-if='user.isOwner'><strong>owner</strong> </span>
-        </div>
-        <div class="md-layout-item text-center md-xsmall-size-100">
-          <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionStreams(user._id)}' @click.native='changePermissionStreams(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-            {{ user.isOwner ? "write streams" : hasWritePermissionStreams(user._id) ? "write streams" : "read streams"}}
-          </md-button>
-        </div>
-        <div class="md-layout-item text-center md-xsmall-size-100">
-          <md-button :class='{ "md-dense md-raised-xx": true, "md-primary" : hasWritePermissionProject(user._id)}' @click.native='changePermissionProject(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-            {{ user.isOwner ? "write project" : hasWritePermissionProject(user._id) ? "write project" : "read project"}}
-          </md-button>
-        </div>
-        <div class="md-layout-item text-center md-size-5 md-xsmall-size-100">
-          <md-button class='md-dense-xxx md-icon-button md-accent' @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || user.isOwner'>
-            <md-icon>delete</md-icon>
-          </md-button>
-        </div>
-        <div class="md-layout-item md-size-100">
-          <!-- <md-divider></md-divider> -->
-        </div>
-        <div class="md-layout-item md-size-100">
-          <!-- <md-divider></md-divider> -->
-        </div>
-      </div>
-    </div>
-  </div>
+  <v-container grid-list-sm v-if='allUsersPop.length > 0 && project' class='pa-0 ma-0'>
+    <v-layout row wrap>
+      <v-flex xs12 v-for='user in allUsersPop' v-if='user' :key='user._id'>
+        <user-perm-card
+        @change-permission-streams='changePermissionStreams'
+        @change-permission-project='changePermissionProject'
+        @remove-user='removeUser'
+        :user='user' :project='project' :global-disabled='globalDisabled'></user-perm-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <script>
 import union from 'lodash.union'
 import uniq from 'lodash.uniq'
 
+import UserPermCard from '@/components/UserPermissionProjectCard.vue'
 
 export default {
   name: 'PermissionTable',
+  components: {
+    UserPermCard
+  },
   props: {
     project: Object,
     globalDisabled: {
@@ -65,7 +44,7 @@ export default {
         if ( !u ) this.$store.dispatch( 'getUser', { _id: userId } )
         if ( u ) u.isOwner = u._id === this.project.owner
         return u
-      } ).sort( ( a, b ) => a.name > b.name ? 1 : -1 )
+      } ) //.sort( ( a, b ) => a.name > b.name ? 1 : -1 )
     }
   },
   data( ) {

@@ -1,19 +1,16 @@
 <template>
-  <div>
-    <h1>Hello world.</h1>
-  </div>
-</template>
 
+</template>
 <script>
 export default {
   name: 'HelloWorld',
-  props: { },
+  props: {
+  },
   computed: {},
   data( ) { return {} },
   methods: {}
 }
+
 </script>
-
 <style scoped lang='scss'>
-
 </style>

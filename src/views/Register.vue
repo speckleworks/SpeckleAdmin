@@ -1,67 +1,53 @@
 <template>
-  <md-content class='md-layout md-alignment-center-center' style="min-height: 100%">
-    <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='validateForm'>
-      <md-card class="md-elevation-3">
-        <md-card-header>
-          <md-card-header-text>
-            <div class="md-title">Register</div>
-            <div class="md-caption"><span v-if='$store.state.serverManifest'>at <strong><a :href='$store.state.server' target="_blank">{{$store.state.serverManifest.serverName}}</a></strong>.</span>Do you want to <router-link to='/login'>login</router-link>?</div>
-          </md-card-header-text>
-        </md-card-header>
-        <md-card-content>
-          <md-field>
-            <md-icon>{{serverOk ? "check" : "chevron_right"}}</md-icon>
-            <label>Server API address</label>
-            <md-input type="url" v-model='server' name='server' @blur='checkServer'></md-input>
-          </md-field>
-          <md-field :class="getValidationClass('email')">
-            <label>Email adress</label>
-            <md-input v-model='email' name='email'></md-input>
-            <span class="md-error" v-if="!$v.email.required">The email is required</span>
-            <span class="md-error" v-else-if="!$v.email.email">Invalid email</span>
-          </md-field>
-          <md-field :class="getValidationClass('name')">
-            <label>Name</label>
-            <md-input v-model='name' name='name'></md-input>
-            <span class="md-error" v-if="!$v.name.required">The name is required</span>
-            <span class="md-error" v-else-if="!$v.name.minlength">Invalid name</span>
-          </md-field>
-          <md-field :class="getValidationClass('surname')">
-            <label>Surname</label>
-            <md-input v-model='surname' name='surname'></md-input>
-            <span class="md-error" v-if="!$v.surname.required">The surname is required</span>
-            <span class="md-error" v-else-if="!$v.surname.minlength">Invalid surname</span>
-          </md-field>
-          <md-field :class="getValidationClass('company')">
-            <label>Company</label>
-            <md-input v-model='company'></md-input>
-            <span class="md-error" v-if="!$v.company.required">The company is required</span>
-            <span class="md-error" v-else-if="!$v.company.minlength">Invalid company (too short).</span>
-          </md-field>
-          <md-field :class="getValidationClass('password')">
-            <label>Password</label>
-            <md-input v-model='password' type="password" name='password' autocomplete="new-password"></md-input>
-            <span class="md-error" v-if="!$v.password.required">The password is required</span>
-            <span class="md-error" v-else-if="!$v.password.minlength">Password too short.</span>
-          </md-field>
-        </md-card-content>
-        <md-card-actions>
-          <md-button type="submit" class="md-primary md-raised">Register</md-button>
-        </md-card-actions>
-        <br>
-        <speckle-alert type='error' v-on:closed='showError=false' v-show='showError'>
-          {{errorMessage}}
-        </speckle-alert>
-      </md-card>
-    </form>
-  </md-content>
+  <v-container fluid fill-height>
+    <v-layout align-center justify-center>
+      <v-flex xs11 lg6>
+        <form v-model='valid' @submit.prevent='register' v-if='$store.state.isAuth === false'>
+          <v-card class="elevation-3">
+            <v-toolbar class='title text-uppercase elevation-0'>
+              <span>Register&nbsp;&nbsp;</span>
+              <v-spacer></v-spacer>
+              <span class='font-weight-light caption'>or <router-link to='/login'>login</router-link>?</span>
+            </v-toolbar>
+            <v-card-text>
+              <v-layout row wrap>
+                <v-flex xs12>
+                  <v-text-field prepend-inner-icon='developer_board' hint='The server url you want to connect to.' type="url" v-model='server' label='server api adress' name='server' @blur='checkServer'></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-text-field :rules="emailRules" prepend-inner-icon='email' required type="email" v-model='email' label='your email' name='email'></v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                  <v-text-field :rules='nameRules' prepend-inner-icon='face' required type="" v-model='name' label='your name' name='name'></v-text-field>
+                </v-flex>
+                <v-flex xs6 pl-2>
+                  <v-text-field :rules='surnameRules' required type="" v-model='surname' label='your surname' name='surname'></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-text-field  prepend-inner-icon='business' required type="" v-model='company' label='your company' name='company'></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-text-field :rules='passwordRules' prepend-inner-icon='lock' required v-model='password' type="password" label='your password' name='password'></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  Please be careful with what you do with your data.
+                </v-flex>
+              </v-layout>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn type="submit" class="md-primary md-raised">Register</v-btn>
+            </v-card-actions>
+            <v-alert v-model="showError" type="warning" dismissible>
+              {{errorMessage}}
+            </v-alert>
+          </v-card>
+        </form>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <script>
 import Axios from 'axios'
-import { validationMixin } from 'vuelidate'
-import { required, email, minLength, maxLength } from 'vuelidate/lib/validators'
-
-import SpeckleAlert from '../components/SpeckleAlert.vue'
 
 export default {
   name: 'RegisterView',
@@ -72,23 +58,33 @@ export default {
   computed: {},
   data( ) {
     return {
+      valid: false,
       server: null,
       email: null,
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /.+@.+/.test( v ) || 'E-mail must be valid'
+      ],
       password: null,
+      passwordRules: [
+        v => !!v || 'Password is required',
+        v => ( v && v.length >= 8 ) || 'Password must be at least 8 characters long'
+      ],
       name: null,
+      nameRules: [
+        v => !!v || 'Name is required',
+        v => ( v && v.length <= 12 ) || 'Name must be less than 12 characters'
+      ],
       surname: null,
+      surnameRules: [
+        v => !!v || 'Surname (family name) is required',
+        v => ( v && v.length <= 12 ) || 'Name must be less than 12 characters'
+      ],
       company: null,
       errorMessage: null,
       showError: false,
       serverOk: false,
     }
-  },
-  validations: {
-    email: { required, email },
-    password: { required, minLength: minLength( 8 ) },
-    name: { required, minLength: minLength( 3 ), maxLength: maxLength( 20 ) },
-    surname: { required, minLength: minLength( 3 ), maxLength: maxLength( 20 ) },
-    company: { required, minLength: minLength( 3 ) }
   },
   methods: {
     register( ) {
@@ -162,7 +158,6 @@ export default {
     }
   }
 }
-
 </script>
 <style scoped lang='scss'>
 </style>

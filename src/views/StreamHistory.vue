@@ -1,50 +1,52 @@
 <template>
-  <div>
-    <md-card class='md-elevation-3' md-with-hover>
-      <md-card-header class='bg-ghost-white' v-if='stream.parent'>
-        <md-card-header-text>
-          <div class="md-title"><router-link :to='"/streams/" + stream.parent'>Parent: {{stream.parent}}</router-link></div>
-        </md-card-header-text>
-      </md-card-header>
-      <md-card-header class='bg-ghost-white' v-if='stream.children.length>0'>
-        <md-card-header-text>
-          <div class="md-title">History</div>
-        </md-card-header-text>
-      </md-card-header>
-      <md-card-content class='md-layout md-center-center' v-if='stream.children.length>0'>
-        <div class="md-layout-item md-size-100 md-caption" style="height:50px">&nbsp</div>
-        <div class="md-layout-item md-size-15 md-small-hide md-caption" style=''>Oldest</div>
-        <div class="md-layout-item md-size-70 md-small-size-100 md-caption">
-          <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='streamChildren.length>0'></vue-slider>
-        </div>
-        <div class="md-layout-item md-size-15 md-small-hide md-caption text-right">Latest</div>
-        <div class="md-layout-item md-size-100 md-caption" style="height:10px">&nbsp</div>
-        <div class="md-layout-item md-size-100 md-caption">Showing first {{currentMax > sizeBound.length ? sizeBound.length : currentMax}} out of {{timeFiltered.length}} streams in the specified time range.<br>&nbsp</div>
-        <div class='md-layout-item md-size-100 md-layout' v-for='stream in sizeBound'>
-          <div class="md-layout-item md-caption">
-            <timeago :datetime='stream.updatedAt'></timeago>
-          </div>
-          <div class="md-layout-item md-caption">
-            <router-link :to='"/streams/" + stream.streamId'>{{stream.streamId}}</router-link>
-          </div>
-          <div class="md-layout-item md-caption">
-            {{stream.name}}
-          </div>
-          <div class="md-layout-item md-caption">
-            {{stream.commitMessage ? stream.commitMessage : 'no commit message'}}
-          </div>
-          <div class="md-layout-item md-size-100" style="margin-top:10px;padding-bottom: 10px">
-            <md-divider></md-divider>
-          </div>
-        </div>
-        <!-- <stream-detail-history :stream='stream'></stream-detail-history> -->
-      </md-card-content>
-      <md-card-content v-else>
-        <br>
-        <p>This stream has no children.</p>
-      </md-card-content>
-    </md-card>
-  </div>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <v-card class='elevation-0'>
+        <v-toolbar class='elevation-0 transparent' v-if='stream.parent'>
+          <v-icon small left>home</v-icon>&nbsp;
+          <!-- <v-icon small left>settings_backup_restore</v-icon>&nbsp; -->
+          <span class="title font-weight-light">
+            Parent stream: <router-link :to='"/streams/" + stream.parent'>{{stream.parent}}</router-link>
+          </span>
+        </v-toolbar>
+        <v-toolbar class='elevation-0 transparent'>
+          <v-icon small left>history</v-icon>&nbsp;
+          <span class='title font-weight-light' v-if='stream.children.length>0'>
+            Showing first {{currentMax > sizeBound.length ? sizeBound.length : currentMax}} out of {{timeFiltered.length}} streams in the specified time range.
+          </span>
+          <span class='title font-weight-light' v-else>
+            This stream has no history.
+          </span>
+        </v-toolbar>
+        <v-layout row wrap>
+          <v-flex xs12 class='pa-5'>
+            <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='streamChildren.length>0'></vue-slider>
+          </v-flex>
+          <v-flex xs12 class='caption font-weight-light px-5 py-0'>
+            <v-list three-line>
+              <v-list-tile v-for='stream in sizeBound' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
+                <v-list-tile-content>
+                  <v-list-tile-title>
+                    <span class='caption'>
+                      <v-icon small>fingerprint</v-icon> {{stream.streamId}}
+                      &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
+                    </span>&nbsp;
+                    <span class='text-capitalize'>{{stream.name}}</span>
+                  </v-list-tile-title>
+                  <v-list-tile-sub-title class='caption'>
+                    <strong>{{stream.commitMessage ? stream.commitMessage : 'no commit message'}}</strong>
+                  </v-list-tile-sub-title>
+                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
+                    last changed <timeago :datetime='stream.updatedAt'></timeago>
+                  </v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+          </v-flex>
+        </v-layout>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import Axios from 'axios'
@@ -58,13 +60,13 @@ export default {
     VueSlider
   },
   watch: {
-    'stream.children'() {
-      this.fetchData()
+    'stream.children'( ) {
+      this.fetchData( )
     }
   },
   computed: {
     sizeBound( ) {
-      return this.timeFiltered.slice( 0, this.currentMax ).reverse()
+      return this.timeFiltered.slice( 0, this.currentMax ).reverse( )
     },
     timeFiltered( ) {
       return this.streamChildren.slice( this.lowerIndex, this.upperIndex + 1 )

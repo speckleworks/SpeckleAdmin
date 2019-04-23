@@ -1,49 +1,36 @@
 <template>
-  <md-content class='md-layout md-alignment-center-center' style="min-height: 100%">
-    <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
-      <md-card class="md-elevation-3">
-        <md-card-header>
-          <md-card-header-text>
-            <div class="md-title">Login</div>
-            <div class="md-caption">
-            <span v-if='$store.state.serverManifest'>at <strong><a :href='$store.state.server' target="_blank">{{$store.state.serverManifest.serverName}}</a></strong>.</span>
-            Do you want to <router-link to='/register'>register</router-link>?</div>
-          </md-card-header-text>
-        </md-card-header>
-        <md-card-content>
-          <md-field>
-            <md-icon>{{serverOk ? "check" : "chevron_right"}}</md-icon>
-            <label>Server API address</label>
-            <md-input type="url" v-model='server' name='server' @blur='checkServer'></md-input>
-          </md-field>
-          <md-field>
-            <label>Email adress</label>
-            <md-input type="email" v-model='email' name='email'></md-input>
-          </md-field>
-          <md-field>
-            <label>Password</label>
-            <md-input v-model='password' type="password" name='password'></md-input>
-          </md-field>
-        </md-card-content>
-        <md-card-actions v-if='!$store.state.isAuth'>
-          <md-button type="submit" class="md-primary md-raised">Login</md-button>
-        </md-card-actions>
-        <br>
-        <speckle-alert type='error' v-on:closed='showError=false' v-show='showError'>
-          {{errorMessage}}
-        </speckle-alert>
-      </md-card>
-    </form>
-    <md-card class="md-elevation-3" v-else>
-      <md-card-content>
-        You are already logged in.
-      </md-card-content>
-    </md-card>
-  </md-content>
+  <v-container fluid fill-height>
+    <v-layout align-center justify-center>
+      <v-flex xs11 lg6>
+        <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
+          <v-card class="elevation-3">
+            <v-toolbar class='title text-uppercase elevation-0'>
+              <span>Login&nbsp;&nbsp;</span>
+              <v-spacer></v-spacer>
+              <span class='font-weight-light caption'>or <router-link to='/register'>register</router-link>?</span>
+            </v-toolbar>
+            <v-card-text>
+              <v-text-field prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' @blur='checkServer'></v-text-field>
+              <v-text-field :rules="emailRules" prepend-inner-icon='email' type="email" v-model='email' name='email' label='your email'></v-text-field>
+              <v-text-field prepend-inner-icon='lock' v-model='password' type="password" name='password' label='your password'></v-text-field>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn type="submit" class="md-primary md-raised">Login</v-btn>
+            </v-card-actions>
+            <v-alert v-model="showError" type="warning" dismissible>
+              {{errorMessage}}
+            </v-alert>
+          </v-card>
+        </form>
+        <v-card v-else>
+          <v-card-text>You are already logged in.</v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <script>
 import Axios from 'axios'
-import SpeckleAlert from '../components/SpeckleAlert.vue'
 
 export default {
   name: 'LoginView',
@@ -51,12 +38,15 @@ export default {
     SpeckleAlert
   },
   computed: {},
-  watch: {
-  },
+  watch: {},
   data( ) {
     return {
       server: null,
       email: null,
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /.+@.+/.test( v ) || 'E-mail must be valid'
+      ],
       password: null,
       errorMessage: null,
       showError: false,
@@ -79,6 +69,7 @@ export default {
         } )
         .catch( err => {
           console.log( err )
+          console.log( "login error" )
           this.errorMessage = `Failed to log in.`
           this.showError = true
         } )

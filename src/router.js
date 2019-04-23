@@ -33,19 +33,19 @@ let myRouter = new Router( {
       component: ( ) => import( './views/Stream.vue' ),
       meta: { requiresAuth: true },
       children: [ {
-        name: 'streamoverview',
+        name: 'stream overview',
         path: '',
         component: ( ) => import( './views/StreamOverview.vue' )
       }, {
-        name: 'streamdata',
+        name: 'stream data',
         path: 'data',
         component: ( ) => import( './views/StreamData.vue' )
       },{
-        name: 'streamsharing',
+        name: 'stream sharing',
         path: 'sharing',
         component: ( ) => import( './views/StreamSharing.vue' )
       } ,{
-        name: 'streamhistory',
+        name: 'stream history',
         path: 'history',
         component: ( ) => import( './views/StreamHistory.vue' )
       } ]
@@ -57,7 +57,7 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     }, {
       path: '/projects/:projectId',
-      name: 'singleproject',
+      name: 'project overview',
       component: ( ) => import( './views/Project.vue' ),
       meta: { requiresAuth: true },
     },

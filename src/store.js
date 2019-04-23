@@ -39,41 +39,43 @@ export default new Vuex.Store( {
       if ( !filters || filters.length === 0 ) return base
       filters.forEach( query => {
         query.key = query.key.toLowerCase( )
-        switch ( query.key ) {
-          case 'private':
-            if ( query.value )
-              base = base.filter( stream => stream.private.toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === true )
-            break
-          case 'public':
-            if ( query.value )
-              base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
-            else
-              base = base.filter( stream => stream.private === false )
-            break
-          case 'tag':
-          case 'tags':
-            let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
-            base = base.filter( stream => {
-              let streamTags = stream.tags.map( t => t.toLowerCase( ) )
-              return myTags.every( t => streamTags.includes( t ) )
-            } )
-            break
-          case 'mine':
-            base = base.filter( stream => stream.owner === state.user._id )
-            break;
-          case 'shared':
-            base = base.filter( stream => stream.owner !== state.user._id )
-            break;
-          case 'name':
-            base = base.filter( stream => stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-          case 'streamid':
-          case 'id':
-            base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
-            break
-        }
+        if ( query.value === null ) base = base
+        else
+          switch ( query.key ) {
+            case 'private':
+              if ( query.value )
+                base = base.filter( stream => stream.private.toString( ) === query.value )
+              else
+                base = base.filter( stream => stream.private === true )
+              break
+            case 'public':
+              if ( query.value )
+                base = base.filter( stream => ( !stream.private ).toString( ) === query.value )
+              else
+                base = base.filter( stream => stream.private === false )
+              break
+            case 'tag':
+            case 'tags':
+              let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
+              base = base.filter( stream => {
+                let streamTags = stream.tags.map( t => t.toLowerCase( ) )
+                return myTags.every( t => streamTags.includes( t ) )
+              } )
+              break
+            case 'mine':
+              base = base.filter( stream => stream.owner === state.user._id )
+              break;
+            case 'shared':
+              base = base.filter( stream => stream.owner !== state.user._id )
+              break;
+            case 'name':
+              base = base.filter( stream => stream.name ? stream.name.toLowerCase( ).includes( query.value.toLowerCase( ) ) : true )
+              break
+            case 'streamid':
+            case 'id':
+              base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
+              break
+          }
       } )
       return base
     }
@@ -95,12 +97,13 @@ export default new Vuex.Store( {
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
+      found.updatedAt = ( new Date( ) ).toISOString( )
     },
     UPDATE_STREAM_DATA( state, props ) {
       let found = state.streams.find( s => s.streamId === props.streamId )
       if ( props.layers )
         found.layers = props.layers
-
+      found.updatedAt = ( new Date( ) ).toISOString( )
       // console.log('TODO')
     },
     DELETE_STREAM( state, stream ) {
@@ -222,6 +225,7 @@ export default new Vuex.Store( {
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
+      found.updatedAt = ( new Date( ) ).toISOString( )
     },
     DELETE_PROJECT( state, props ) {
       let index = state.projects.findIndex( p => p._id === props._id )
@@ -457,7 +461,16 @@ export default new Vuex.Store( {
       if ( !project ) return reject( new Error( 'Failed to find project in state.' ) )
       Axios.put( `projects/${projectId}/upgradeuser/${userId}` )
         .then( res => {
-          context.commit( 'UPDATE_PROJECT', { _id: projectId, permissions: { canRead: uniq( [ ...project.canRead, userId ] ), canWrite: uniq( [ ...project.canWrite, userId ] ) } } )
+          return Axios.get( `projects/${projectId}?fields=permissions` )
+        } )
+        .then( res => {
+          context.commit( 'UPDATE_PROJECT', {
+            _id: projectId,
+            permissions: {
+              canRead: res.data.resource.permissions.canRead, //[ ...new Set( [ ...project.canRead, userId ] ) ],
+              canWrite: res.data.resource.permissions.canWrite //[ ...new Set( [ ...project.canWrite, userId ] ) ]
+            }
+          } )
           project.streams.forEach( streamId => {
             let myStream = context.state.streams.find( s => s.streamId === streamId )
             context.commit( 'UPDATE_STREAM', { streamId: streamId, canWrite: uniq( [ ...myStream.canWrite, userId ] ), canRead: uniq( [ ...myStream.canRead, userId ] ) } )

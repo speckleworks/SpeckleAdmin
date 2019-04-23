@@ -1,38 +1,20 @@
 <template>
-  <div class='md-layout layer md-alignment-center-space-between' v-if='layer'>
-    <div class="md-layout-item md-size-20 md-body-2" style="padding-left:12px; box-sizing:border-box;">
-      <span class="md-caption">Name: </span><editable-span :text='layer.name' :data-key='layer.guid' @update='updateName'></editable-span>
-    </div>
-    <div class="md-layout-item md-size-60" style="box-sizing: border-box; padding-left: 10px">
-      <md-field v-if='!expanded'>
-        <label>data</label>
-        <md-input v-model='rawData'></md-input>
-      </md-field>
-    </div>
-    <div class="md-layout-item md-size-10 text-right">
-      <md-button class='md-icon-button md-dense md-primary' @click.native='expanded=!expanded'>
-        <md-icon>{{ expanded ? "expand_less" : "expand_more" }}</md-icon>
-      </md-button>
-      <md-button class='md-icon-button md-dense md-accent' @click.native='removeLayer()'>
-        <md-icon>delete_forever</md-icon>
-      </md-button>
-    </div>
-    <div class='md-layout-item md-size-100 md-layout md-gutter' style="box-sizing: border-box; padding: 10px" v-if='expanded'>
-      <div class="md-layout-item md-size-100">
-        <md-switch v-model="splitArray">{{splitArray ? "split at commas" : "single"}}</md-switch>
-      </div>
-      <div class="md-layout-item md-size-50">
-        <md-field>
-          <label>data</label>
-          <md-textarea v-model='rawData'></md-textarea>
-        </md-field>
-      </div>
-      <div class="md-layout-item md-size-50">
-        <span class='md-caption'>Parsed data:</span>
-        <pre>{{parsedData}}</pre>
-      </div>
-    </div>
-  </div>
+  <v-layout row wrap align-center class='pa-2 my-5'>
+    <v-flex xs12 md3 mb-3>
+      <v-btn icon @click.native='removeLayer()'>
+        <v-icon>delete_forever</v-icon>
+      </v-btn>
+      <span class='subheading font-weight-lightxxx'>
+        <editable-span :text='layer.name' :data-key='layer.guid' @update='updateName'></editable-span>
+      </span>
+    </v-flex>
+    <v-flex xs12 md9 pl-2>
+      <v-text-field box v-model='rawData' :label='`Layer "${layer.name}" data`' hint='values will be separated by commas and parsed into their natural types (strings, numbers, booleans)' />
+    </v-flex>
+    <v-flex xs12>
+      <v-divider></v-divider>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -104,7 +86,7 @@ export default {
       this.layer.name = args.text.trim( )
       this.emitUpdate( )
     },
-    __emitUpdate() {
+    __emitUpdate( ) {
       this.$emit( 'update', { layer: this.layer, objects: this.speckledData } )
     },
     emitUpdate: debounce( function( ) {

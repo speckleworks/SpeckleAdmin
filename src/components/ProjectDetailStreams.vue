@@ -1,23 +1,33 @@
 <template>
-  <md-card md-with-hover>
-    <md-card-header class='bg-ghost-white'>
-      <md-card-header-text>
-        <h2 class='md-title'><md-icon>import_export</md-icon> Streams</h2>
-        <p class='md-caption'>These are this project's streams. Adding a stream here will automatically grant write permission to the project's team members.<span v-if='canEdit'><br>&nbsp<md-divider></md-divider><br>You can only add streams that you have write permissions to.</span></p>
-      </md-card-header-text>
-    </md-card-header>
-    <md-card-content class='md-layout'>
-      <div class='md-layout-item md-size-100'>
-        <stream-search :streams-to-omit='streams' write-only v-on:selected-stream='selectStream' v-if='canEdit'></stream-search>
-      </div>
-      <div class='md-layout-item md-size-100' v-if='streams.length === 0'>
-        <p>This project has no streams. Add some using the form below!</p>
-      </div>
-      <div class='md-layout-item md-size-100' v-else>
-        <stream-card-small v-for='stream in streams' :key='stream' :streamId='stream' v-on:remove-stream='removeStream' :removable='canEdit'></stream-card-small>
-      </div>
-    </md-card-content>
-  </md-card>
+  <v-card class='elevation-0'>
+    <stream-search :streams-to-omit='streams' write-only v-on:selected-stream='selectStream' v-if='canEdit'></stream-search>
+    <v-card-text class='md-layout-item md-size-100' v-if='streams.length === 0'>
+      <p>This project has no streams. Add some using the form below!</p>
+    </v-card-text>
+    <v-card-text v-else class='pa-0'>
+      <v-list two-line>
+        <v-list-tile v-for='stream in populatedStreams' :key='stream.streamId'>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              <span class='caption'>
+                <v-icon small>fingerprint</v-icon> {{stream.streamId}}
+                &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
+              </span>&nbsp;
+              <span class='text-capitalize'>{{stream.name}}</span>&nbsp;<router-link :to='"/streams/" + stream.streamId'><v-icon small>open_in_new</v-icon></router-link>
+            </v-list-tile-title>
+            <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
+              last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+          <v-list-tile-action>
+            <v-btn small icon @click.stop.native='removeStream(stream.streamId)'><v-icon>close</v-icon></v-btn>
+          </v-list-tile-action>
+        </v-list-tile>
+      </v-list>
+      </v-list>
+      <!-- <stream-card-small v-for='stream in streams' :key='stream' :streamId='stream' v-on:remove-stream='removeStream' :removable='canEdit'></stream-card-small> -->
+    </v-card-text>
+  </v-card>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -35,6 +45,9 @@ export default {
   },
   computed: {
     streams( ) { return this.project.streams ? this.project.streams : [ ] },
+    populatedStreams( ) {
+      return this.$store.state.streams.filter( stream => this.streams.indexOf( stream.streamId ) !== -1 )
+    },
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
     },

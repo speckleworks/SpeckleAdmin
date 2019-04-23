@@ -1,22 +1,35 @@
 <template>
-  <md-card md-with-hover class='md-elevation-0 stream-search'>
-    <md-card-content>
-      <md-field md-clearable>
-        <md-icon>search</md-icon>
-        <md-input @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled'></md-input>
-        <label>Search for a stream to add</label>
-      </md-field>
-      <md-progress-bar md-mode="indeterminate" :md-diameter='20' :md-stroke='2' v-show='searchInProgress'></md-progress-bar>
-      <div class='search-results' v-if='showSearchResults'>
-        <md-chip md-clickable class='md-primary' style='margin: 3px;' v-for='stream in paginatedStreams' v-if='filters.length > 0' :key='stream.streamId' @click='selectStream(stream.streamId)'>
-          <strong>{{stream.name}}</strong> {{stream.streamId}} </span>
-          <!-- <span v-if='stream.tags'> | </span> -->
-          <span v-for='tag in stream.tags' v-if='stream.tags' style="background: #0B5DE8; border-radius:3px; margin-right:4px; padding:1px"> {{tag}} </span>
-        </md-chip>
-        <p v-if='paginatedStreams.length === 0' class="md-caption">No streams found. Existing streams ignored.</p>
-      </div>
-    </md-card-content>
-  </md-card>
+  <v-layout align-center row wrap>
+    <v-flex xs12 class='pb-0'>
+      <v-text-field box flat clearable prepend-inner-icon="search" label='search for streams' @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled' :loading='searchInProgress' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
+    </v-flex>
+    <v-flex xs12 v-if='showSearchResults' style='margin-top:-30px' class='mb-5'>
+      <v-card class='elevation-10'>
+        <v-card-title class='subheading'>Search results ({{paginatedStreams.length}} streams)</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style='max-height: 410px; overflow-y: auto; overflow-x: hidden;' v-if='paginatedStreams.length>0'>
+          <v-list two-line v-if='filters.length > 0'>
+            <v-list-tile v-for='stream in paginatedStreams' :key='stream.streamId'>
+              <v-list-tile-content>
+                <v-list-tile-title>
+                  {{stream.name}}
+                </v-list-tile-title>
+                <v-list-tile-sub-title class='caption'>
+                  <v-icon small>fingerprint</v-icon><span class='caption' style="user-select:all;">{{stream.streamId}}</span>&nbsp;<v-icon small>edit</v-icon>
+                  <timeago :datetime='stream.updatedAt'></timeago>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <v-btn fab small depressed @click.native='selectStream(stream.streamId)'>
+                  <v-icon>add</v-icon>
+                </v-btn>
+              </v-list-tile-action>
+            </v-list-tile>
+          </v-list>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -29,7 +42,7 @@ export default {
       default ( ) { return [ ] }
     },
     globalDisabled: {
-      type:Boolean,
+      type: Boolean,
       default: false
     },
     writeOnly: Boolean
@@ -40,14 +53,14 @@ export default {
     },
     paginatedStreams( ) {
       let toReturn = this.filteredStreams.slice( this.startIndex, this.endIndex )
-      if( this.writeOnly )
+      if ( this.writeOnly )
         toReturn = toReturn.filter( s => s.owner === this.$store.state.user._id || s.canWrite.indexOf( this.$store.state.user._id ) > -1 )
       return toReturn
     }
   },
   watch: {
     searchfilter( val ) {
-      if ( val === '' ) {
+      if ( val === '' || val === null ) {
         this.showSearchResults = false
         this.searchInProgress = false
       } else
@@ -63,13 +76,16 @@ export default {
     }
   },
   methods: {
+    refreshStreams( ) {
+      this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
+    },
     selectStream( streamId ) {
       this.$emit( 'selected-stream', streamId )
     },
     updateSearch: debounce( function( e ) {
       this.searchfilter = e
 
-      if ( e === '' ) {
+      if ( e === '' || e === null ) {
         this.showSearchResults = false
         return
       }
@@ -94,7 +110,8 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.stream-search {
-  border-radius: 10px;
+.hovered {
+  cursor: pointer;
 }
+
 </style>

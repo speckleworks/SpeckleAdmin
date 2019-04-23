@@ -1,25 +1,23 @@
 <template>
-  <div>
-    <detail-description :resource='stream'></detail-description>
-    <br>
-    <stream-detail-network :stream='stream'></stream-detail-network>
-    <br>
-    <md-card>
-      <md-card-header class='bg-ghost-white'>
-        <md-card-header-text>
-          <h2 class='md-title'>Projects</h2>
-          <p class="md-caption">Projects this stream is part of.</p>
-        </md-card-header-text>
-      </md-card-header>
-      <md-card-content>
-        <md-chip v-for='(proj, index) in streamProjects' class='md-primary' md-clickable>
-          <router-link :to='"/projects/"+proj._id' style='color:white !important;'>{{proj.name}}</router-link>&nbsp
-        </md-chip></span>
-        <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
-      </md-card-content>
-    </md-card>
-    <br>
-  </div>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <detail-description :resource='stream'></detail-description>
+      <stream-detail-network :stream='stream'></stream-detail-network>
+      <v-card class='elevation-0 pt-4'>
+        <v-toolbar dense class='elevation-0 transparent'>
+          <v-icon small left>business</v-icon>&nbsp;
+          <span class='title font-weight-light'>Projects</span>
+        </v-toolbar>
+        <v-divider></v-divider>
+        <v-card-text>
+          <v-chip v-for='(proj, index) in streamProjects' :key='proj._id' class='md-primary' md-clickable>
+            <router-link :to='"/projects/"+proj._id'>{{proj.name}}</router-link>&nbsp;
+          </v-chip></span>
+          <p v-if='streamProjects.length===0'>This stream is not part of any projects.</p>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import debounce from 'lodash.debounce'
@@ -85,19 +83,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.detail-card {
-  margin-bottom: 20px;
-}
-
-.md-content {
-  padding: 30px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-a:hover {
-  cursor: pointer;
-}
-
 </style>
