@@ -57,16 +57,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.code {
-  position: relative;
-  width: 100%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  user-select: all;
-  font-family: monospace;
-  background-color: ghostwhite;
-}
-
 </style>

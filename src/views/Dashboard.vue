@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-md>
+  <v-container grid-list-xl>
     <v-layout row wrap>
       <v-flex xs12 py-5 class='headline font-weight-light' v-if='streams.length !== 0 || projects.length !== 0'>
         👋 Hi {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
@@ -19,14 +19,18 @@
           </ul>
         </div>
       </v-flex>
+      <v-flex xs12 v-if='streams.length !== 0 || projects.length !== 0'>
+        <search-everything />
+      </v-flex>
       <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
-        <v-card class="elevation-0">
+        <v-card class="elevation-1">
           <v-card-title>
             <v-icon left>
               import_export
             </v-icon>
             <span class="title font-weight-light">Latest Streams</span>
           </v-card-title>
+          <v-divider />
           <v-card-text>
             <v-list two-line>
               <v-list-tile v-for='stream in latestStreams' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
@@ -52,13 +56,14 @@
         </v-card>
       </v-flex>
       <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
-        <v-card class="elevation-0">
+        <v-card class="elevation-1">
           <v-card-title>
             <v-icon left>
               business
             </v-icon>
             <span class="title font-weight-light">Latest Projects</span>
           </v-card-title>
+          <v-divider />
           <v-card-text>
             <v-list two-line>
               <v-list-tile v-for='project in latestProjects' :to='"/projects/" + project._id' :key='project._id'>
@@ -87,10 +92,10 @@
 </template>
 <script>
 import HelloWorld from '@/components/HelloWorld.vue'
-
+import SearchEverything from '@/components/SearchEverything.vue'
 export default {
   name: 'HomeView',
-  components: {},
+  components: { SearchEverything },
   computed: {
     latestStreams( ) {
       return this.streams.slice( 0, 7 )
@@ -118,102 +123,10 @@ export default {
     }
   },
   data( ) {
-    return {
-      currentFact: 0,
-      facts: [ {
-          "fact": "Cats come back to full alertness from the sleep state faster than any other creature."
-        },
-        {
-          "fact": "Cats have supersonic hearing"
-        },
-        {
-          "fact": "A cat's normal pulse is 140-240 beats per minute, with an average of 195."
-        },
-        {
-          "fact": "A happy cat holds her tail high and steady."
-        },
-        {
-          "fact": "It has been scientifically proven that stroking a cat can lower one's blood pressure."
-        },
-        {
-          "fact": "A cat usually has about 12 whiskers on each side of its face."
-        },
-        {
-          "fact": "Cats spend nearly 1/3 of their waking hours cleaning themselves."
-        },
-        {
-          "fact": "A healthy cat has a temperature between 38 and 39 degrees Celcius."
-        },
-        {
-          "fact": "On average, a cat will sleep for 16 hours a day."
-        },
-        {
-          "fact": "Cats can jump up to 7 times their tail length."
-        },
-        {
-          "fact": "Cats dislike citrus scent."
-        },
-        {
-          "fact": "Cats walk on their toes."
-        },
-        {
-          "fact": "A cat's field of vision is about 200 degrees."
-        },
-        {
-          "fact": "Julius Ceasar, Henri II, Charles XI, and Napoleon were all afraid of cats."
-        },
-        {
-          "fact": "The first cat show was organized in 1871 in London. Cat shows later became a worldwide craze."
-        },
-        {
-          "fact": "A cat can sprint at about thirty-one miles per hour."
-        },
-        {
-          "fact": "The cat's footpads absorb the shocks of the landing when the cat jumps."
-        },
-        {
-          "fact": "Most cats adore sardines."
-        },
-        {
-          "fact": "Cats purr at the same frequency as an idling diesel engine, about 26 cycles per second."
-        },
-        {
-          "fact": "A cat can travel at a top speed of approximately 31 mph (49 km) over a short distance."
-        },
-        {
-          "fact": "A cat has two vocal chords, and can make over 100 sounds."
-        },
-        {
-          "fact": "A cat’s heart beats nearly twice as fast as a human heart, at 110 to 140 beats a minute."
-        },
-        {
-          "fact": "Speckle is frequently misspelled as Speck, which means bacon in german."
-        },
-        {
-          "fact": "Speckle has a <a href='https://twitter.com/speckle_works' target='_blank'>twitter account you should follow!</a>"
-        }, {
-          "fact": "Speckle is a recursive acronym for <strong>S</strong>peckle <strong>P</strong>refers <strong>E</strong>ating <strong>C</strong>hives, <strong>K</strong>ale, <strong>L</strong>ime, and <strong>E</strong>ggplant."
-        },
-        {
-          "fact": "Speckle is a recursive acronym for <strong>S</strong>peckle <strong>P</strong>owered <strong>E</strong>ngines <strong>C</strong>urrently <strong>K</strong>nead <strong>L</strong>inear <strong>E</strong>nergies."
-        },
-        {
-          "fact": "Speckle is a recursive acronym for <strong>S</strong>peckle <strong>P</strong>lanted <strong>E</strong>ggs <strong>C</strong>onvert <strong>K</strong>ey <strong>L</strong>anguage <strong>E</strong>rrors."
-        },
-        {
-          "fact": "Speckle is a recursive acronym for <strong>S</strong>peckled, <strong>P</strong>urring, and <strong>E</strong>ffervescent <strong>C</strong>ats <strong>K</strong>indly <strong>L</strong>ick <strong>E</strong>ars."
-        }
-      ]
-    }
+    return {}
   }
 }
 
 </script>
 <style scoped lang='scss'>
-.catFact {
-  /*padding: 2px 10px;*/
-  cursor: pointer;
-  user-select: none;
-}
-
 </style>

@@ -48,10 +48,6 @@
 </template>
 <script>
 import Axios from 'axios'
-import { validationMixin } from 'vuelidate'
-import { required, email, minLength, maxLength } from 'vuelidate/lib/validators'
-
-import SpeckleAlert from '../components/SpeckleAlert.vue'
 
 export default {
   name: 'RegisterView',
@@ -162,7 +158,6 @@ export default {
     }
   }
 }
-
 </script>
 <style scoped lang='scss'>
 </style>

@@ -165,23 +165,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.md-field label {
-  opacity: 0.5;
-}
-
-.main-toolbar {
-  position: -webkit-sticky;
-  /* Safari */
-  position: sticky;
-  top: 0;
-  width: 100%;
-  background-color: white;
-  z-index: 100;
-  margin-bottom: 30px;
-}
-
-.md-field {
-  margin: 0 !important;
-}
-
 </style>

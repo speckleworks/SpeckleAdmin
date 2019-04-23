@@ -5,7 +5,7 @@
     </v-flex>
     <v-flex xs12 style='margin-top:-30px' class='mb-5' v-if='userSearch!==null && foundUsers.length > 0'>
       <v-card class='elevation-10'>
-        <v-card-title class='subheading' v-if='userSearch' >Search results ({{foundUsers.length}} users)</v-card-title>
+        <v-card-title class='subheading' v-if='userSearch'>Search results ({{foundUsers.length}} users)</v-card-title>
         <v-divider></v-divider>
         <v-card-text style='max-height: 410px; overflow-y: auto; overflow-x: hidden;' v-if='foundUsers.length>0'>
           <v-list two-line xxxv-if='filters.length > 0'>
@@ -27,25 +27,6 @@
           </v-list>
         </v-card-text>
       </v-card>
-      <!-- <v-container grid-list-lg v-if='userSearch!==null && foundUsers.length > 0' class='ma-0 pa-0 mb-4'>
-        <v-layout row wrap>
-          <v-flex xs12 sm12 lg6 v-for='user in foundUsers' :key='user._id'>
-            <v-hover>
-              <v-card @click.native='selectUser(user._id)' tile slot-scope="{ hover }" :class="`px-3 py-2 elevation-${hover ? 12 : 1} ${hover ? 'hovered' : '' }`">
-                <span></span>
-                <v-avatar size='21' dark :color="getHexFromString( user.name )">
-                  {{user.name.substring(0,1).toUpperCase()}}
-                </v-avatar>&nbsp;
-                <span>{{user.name}} {{user.surname}}</span>&nbsp;
-                <span class='caption'>{{user.company}}</span>
-              </v-card>
-            </v-hover>
-          </v-flex>
-        </v-layout>
-      </v-container> -->
-<!--       <v-container class='ma-0 pa-0' v-if='foundUsers.length === 0 && userSearch && userSearch!=="" && !searchInProgress'>
-        No users found. Try a different search criteria.
-      </v-container> -->
     </v-flex>
   </v-layout>
 </template>
@@ -115,5 +96,4 @@ export default {
 .hovered {
   cursor: pointer;
 }
-
 </style>

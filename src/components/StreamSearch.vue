@@ -110,5 +110,4 @@ export default {
 .hovered {
   cursor: pointer;
 }
-
 </style>

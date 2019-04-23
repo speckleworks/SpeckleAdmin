@@ -31,7 +31,6 @@
 </template>
 <script>
 import Axios from 'axios'
-import SpeckleAlert from '../components/SpeckleAlert.vue'
 
 export default {
   name: 'LoginView',
