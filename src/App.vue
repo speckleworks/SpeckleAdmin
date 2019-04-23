@@ -5,7 +5,7 @@
       <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} other-bg`' dark xxxstyle='position: absolute; bottom:0'>
         <div class='text-uppercase caption ml-0'>
           <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none">Speckle,
-            <span class='font-weight-light caption'>the data platform for AEC.</span></a>
+            <span class='font-weight-light caption'>the open source data platform for AEC.</span></a>
         </div>
       </v-toolbar>
     </v-hover>
@@ -17,6 +17,9 @@
       <v-spacer></v-spacer>
       <v-btn flat icon @click.native='toggleDark()'>
         <v-icon>{{dark ? "wb_sunny" : "brightness_4"}}</v-icon>
+      </v-btn>
+      <v-btn small flat @click.native='logout()'>
+        Logout
       </v-btn>
     </v-toolbar>
     <v-content>
@@ -44,7 +47,10 @@ export default {
     toggleDark( ) {
       this.dark = !this.dark
       localStorage.setItem( 'dark', this.dark )
-      // TODO: persist to local storage
+    },
+    logout() {
+      this.$store.dispatch( 'logout' )
+      this.$router.push( '/login' )
     }
   },
   created( ) {

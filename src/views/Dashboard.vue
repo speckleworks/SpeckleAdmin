@@ -1,11 +1,25 @@
 <template>
   <v-container grid-list-md>
     <v-layout row wrap>
-      <v-flex xs12 py-5 class='headline font-weight-light'>
-        Hi {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
-            <strong>{{projects.length}}</strong> projects</router-link> in total.
+      <v-flex xs12 py-5 class='headline font-weight-light' v-if='streams.length !== 0 || projects.length !== 0'>
+        👋 Hi {{$store.state.user.name}}! You have <router-link to='/streams'><strong>{{streams.length}}</strong> streams</router-link> and <router-link to='/projects'>
+          <strong>{{projects.length}}</strong> projects</router-link> in total.
       </v-flex>
-      <v-flex xs12 md6>
+      <v-flex xs12 py-5 class='' v-if='streams.length === 0 && projects.length === 0'>
+        <div class='headline font-weight-light mb-4'>
+          👋 Hello {{$store.state.user.name}}! You seem short on <i>data</i> - maybe it's your first time here. If so, why don't you check out the <a href='https://www.speckle.works/log/speckle-guide' target='_blank'>guide for dynamo and grasshopper</a>?
+        </div>
+        <v-divider></v-divider>
+        <div class='mt-4 subheading'>
+          You can also get in touch with the rest of the speckle community via:
+          <ul>
+            <li><a href='https://discourse.speckle.works' target="_blank">Discourse</a></li>
+            <li><a href='https://slacker.speckle.works' target="_blank">Slack</a></li>
+            <li><a href='https://twitter.com/speckle_works' target="_blank">Twitter</a></li>
+          </ul>
+        </div>
+      </v-flex>
+      <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
         <v-card class="elevation-0">
           <v-card-title>
             <v-icon left>
@@ -18,8 +32,10 @@
               <v-list-tile v-for='stream in latestStreams' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
                 <v-list-tile-content>
                   <v-list-tile-title>
-                    <span class='caption'><v-icon small>fingerprint</v-icon> {{stream.streamId}}
-                    &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon></span>&nbsp;
+                    <span class='caption'>
+                      <v-icon small>fingerprint</v-icon> {{stream.streamId}}
+                      &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
+                    </span>&nbsp;
                     <span class='text-capitalize'>{{stream.name}}</span>
                   </v-list-tile-title>
                   <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
@@ -35,7 +51,7 @@
           </v-card-actions>
         </v-card>
       </v-flex>
-      <v-flex xs12 md6>
+      <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
         <v-card class="elevation-0">
           <v-card-title>
             <v-icon left>

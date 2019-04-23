@@ -2,12 +2,22 @@
   <v-container grid-list-xl>
     <v-layout row wrap>
       <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
-        Hello 👋 <br>Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp;<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>. <v-btn @click.native='logout'>Logout</v-btn depressed>
+        Hello 👋 <br>Your name is <editable-span :text='user.name' hint='edit your name' @update='updateName'></editable-span>&nbsp;<editable-span :text.sync='user.surname' hint='edit your surname' @update='updateSurname'></editable-span> and you work at <editable-span :text='user.company' hint='edit your company' @update='updateCompany'></editable-span>.
       </v-flex>
       <v-flex xs12 my-5>
-      <!-- <v-divider></v-divider> -->
-        <v-btn class='ma-0' @click.native='showToken = !showToken'>{{showToken ? "Hide" : "Show"}} Token</v-btn depressed><br>&nbsp;<br>
-        <code v-if='showToken' class='caption' style="user-select:all">{{user.apitoken}}</code>
+        <v-layout row wrap align-top>
+          <v-flex xs12 md2>
+            <v-btn class='ma-0' @click.native='showToken = !showToken'>{{showToken ? "Hide" : "Show"}} Token</v-btn depressed><br>&nbsp;
+          </v-flex>
+          <v-flex xs12 md6 v-if='showToken'>
+            <v-alert :value="true" type="warning">
+              Take care, this token is unique to you. Do not share it with others as it grants full access on your behalf to the api.
+            </v-alert>
+<!--           </v-flex>
+          <v-flex xs12> -->
+            <code  class='pa-3' style="user-select:all; max-width:100%; overflow-wrap: break-word;">{{user.apitoken}}</code>
+          </v-flex>
+        </v-layout>
       </v-flex>
     </v-layout>
   </v-container>
@@ -37,7 +47,7 @@ export default {
     },
     logout( ) {
       this.$store.dispatch( 'logout' )
-      this.$router.push( '/' )
+      this.$router.push( '/login' )
     }
   },
   mounted( ) {
