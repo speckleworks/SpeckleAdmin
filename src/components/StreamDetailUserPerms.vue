@@ -20,7 +20,7 @@
       <v-icon small left>supervisor_account</v-icon>&nbsp;
       <span class='title font-weight-light'>User Permissions</span> &nbsp;
     </v-toolbar>
-    <v-card-text class='mx-2'  v-if='streamProjects.length>0'>
+    <v-card-text class='mx-2' v-if='streamProjects.length>0'>
       <span>Some users might be disabled as their permissions are set through the following projects: <router-link v-for='(proj, index) in streamProjects' :to='"/projects/"+proj._id' :key='proj._id'>{{proj.name}}<span v-if='index<streamProjects.length-1'>, </span></router-link></span>
     </v-card-text>
     <v-card-text class='mx-2' v-if='!canEdit'>

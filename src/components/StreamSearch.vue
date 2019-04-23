@@ -1,7 +1,7 @@
 <template>
   <v-layout align-center row wrap>
     <v-flex xs12 class='pb-0'>
-      <v-text-field box flat clearable prepend-inner-icon="search" label='search for streams' @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled' :loading='searchInProgress'></v-text-field>
+      <v-text-field box flat clearable prepend-inner-icon="search" label='search for streams' @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled' :loading='searchInProgress' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
     </v-flex>
     <v-flex xs12 v-if='showSearchResults' style='margin-top:-30px' class='mb-5'>
       <v-card class='elevation-10'>
@@ -76,6 +76,9 @@ export default {
     }
   },
   methods: {
+    refreshStreams( ) {
+      this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
+    },
     selectStream( streamId ) {
       this.$emit( 'selected-stream', streamId )
     },
@@ -110,4 +113,5 @@ export default {
 .hovered {
   cursor: pointer;
 }
+
 </style>

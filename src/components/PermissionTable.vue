@@ -1,7 +1,7 @@
 <template>
-  <v-container grid-list-sm v-if='allUsersPop.length > 0' class='pa-0 ma-0'>
+  <v-container grid-list-xl v-if='allUsersPop.length > 0' class='pa-0 ma-0'>
     <v-layout row wrap>
-      <v-flex xs12 sm6 lg6 v-for='user in allUsersPop' v-if='user' :key='user._id'>
+      <v-flex xs12 sm6 lg4 v-for='user in allUsersPop' v-if='user' :key='user._id'>
         <v-card tile class='pa-3 elevation-1'>
           <v-layout row wrap align-center justify-space-between>
             <v-flex xs8>

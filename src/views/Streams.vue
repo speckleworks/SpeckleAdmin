@@ -26,7 +26,7 @@
         </p>
       </v-flex>
       <v-flex xs12>
-        <v-text-field solo clearable :hint='searchHint' label="Search for a stream" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching'></v-text-field>
+        <v-text-field solo clearable :hint='searchHint' label="Search for a stream" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
         <div v-if='searchfilter && searchfilter!==""'>
           <p class='title font-weight-light my-3 mx-1'>Found {{filteredStreams.length}} streams matching your search criteria.</p>
         </div>

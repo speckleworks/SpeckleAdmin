@@ -24,7 +24,7 @@
         </p>
       </v-flex>
       <v-flex xs12>
-        <v-text-field solo clearable label="Search for a project" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching'></v-text-field>
+        <v-text-field solo clearable label="Search for a project" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getProjects' )"></v-text-field>
         <div v-if='searchfilter && searchfilter!==""'>
           <p class='title font-weight-light my-3 mx-1'>Found {{filteredProjects.length}} project{{filteredProjects.length===1?'':'s'}} matching your search criteria.</p>
         </div>

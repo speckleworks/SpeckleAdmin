@@ -24,7 +24,7 @@
             <span class='caption pl-3' v-else>No streams with that name found.</span>
           </v-flex>
           <v-flex xs12 md6 pa-3>
-            <div class='title font-weight-light mb-3'>Projects ({{filteredProjects.length}})</div>
+            <div class='title font-weight-light mb-3 pl-3'>Projects ({{filteredProjects.length}})</div>
             <v-list two-line v-if='filteredProjects.length > 0' style='max-height: 210px; overflow-y: auto; overflow-x: hidden;'>
               <v-list-tile v-for='project in filteredProjects' :key='project._id' :to='`/projects/${project._id}`'>
                 <v-list-tile-content>
@@ -38,7 +38,7 @@
                 </v-list-tile-content>
               </v-list-tile>
             </v-list>
-            <span class='caption' v-else>No projects with that name found.</span>
+            <span class='caption pl-3' v-else>No projects with that name found.</span>
           </v-flex>
         </v-layout>
       </V-card>
