@@ -37,34 +37,6 @@
       </v-flex>
     </v-layout>
   </v-container>
-  <!-- <div>
-    <div class='md-layout md-alignment-center-center' v-if='project'>
-      <div class="md-layout-item md-size-55 md-large-size-65 md-medium-size-100 detail-card">
-        <project-detail-title :project='project'></project-detail-title>
-        <detail-description :resource='project'></detail-description>
-        <br>
-        <md-card md-with-hover>
-          <md-card-header class='bg-ghost-white'>
-            <md-card-header-text>
-              <h2 class='md-title'><md-icon>group</md-icon> Team Members</h2>
-              <p class='md-caption'>The following people will have access to the streams in this project, and will be able to view this project. Please note, users with higher privileges from other projects will not be downgraded or removed.</p>
-            </md-card-header-text>
-          </md-card-header>
-          <md-card-content>
-            <user-search v-on:selected-user='addUserToTeam' v-if='canEdit'></user-search>
-            <permission-table :project='project' :global-disabled='!canEdit' @remove-user='' @move-user=''></permission-table>
-          </md-card-content>
-        </md-card>
-        <br>
-        <project-detail-streams :project='project' v-on:selected-stream='addStream' v-on:remove-stream='removeStream'></project-detail-streams>
-      </div>
-    </div>
-    <div class='md-layout md-alignment-center-center' style="height: 95vh" v-else>
-      <div class='md-layout-item md-size-55'>
-        <md-progress-bar md-mode="indeterminate"></md-progress-bar>
-      </div>
-    </div>
-  </div> -->
 </template>
 <script>
 import union from 'lodash.union'

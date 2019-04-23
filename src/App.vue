@@ -2,13 +2,13 @@
   <v-app :dark='dark'>
     <v-navigation-drawer floating app class='elevation-5' v-model='drawer'>
       <v-hover>
-      <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} other-bg`' dark xxxstyle='position: absolute; bottom:0'>
-        <div class='text-uppercase caption ml-0'>
-          <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none">Speckle,
-            <span class='font-weight-light caption'>the open source data platform for AEC.</span></a>
-        </div>
-      </v-toolbar>
-    </v-hover>
+        <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} other-bg`' dark xxxstyle='position: absolute; bottom:0'>
+          <div class='text-uppercase caption ml-0'>
+            <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none">Speckle,
+              <span class='font-weight-light caption'>the open source data platform for AEC.</span></a>
+          </div>
+        </v-toolbar>
+      </v-hover>
       <nav-drawer></nav-drawer>
     </v-navigation-drawer>
     <v-toolbar app flat class=''>
@@ -48,7 +48,7 @@ export default {
       this.dark = !this.dark
       localStorage.setItem( 'dark', this.dark )
     },
-    logout() {
+    logout( ) {
       this.$store.dispatch( 'logout' )
       this.$router.push( '/login' )
     }

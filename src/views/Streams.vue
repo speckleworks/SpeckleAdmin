@@ -196,7 +196,6 @@ export default {
     }
   },
   created( ) {
-    // this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&deleted=false&sort=-lastModified' )
   }
 }
 

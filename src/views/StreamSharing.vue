@@ -31,23 +31,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.detail-card {
-  margin-bottom: 20px;
-}
-
-.md-content {
-  padding: 30px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.md-card-content {
-  padding: 0;
-}
-
-a:hover {
-  cursor: pointer;
-}
-
 </style>

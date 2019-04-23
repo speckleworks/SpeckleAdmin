@@ -30,11 +30,6 @@
     <!-- <keep-alive> -->
       <router-view></router-view>
     <!-- </keep-alive> -->
-<!--     <div class='md-layout md-alignment-center-center'>
-      <div class='md-layout-item md-size-50'>
-        <md-progress-bar md-mode="indeterminate"></md-progress-bar>
-      </div>
-    </div> -->
   </v-container>
 </template>
 <script>
@@ -117,33 +112,4 @@ export default {
 
 </script>
 <style scoped lang='scss'>
-.link-button {
-  width: 100%;
-  height: 60px;
-  border-bottom: 2px solid white;
-  transition: all .3s ease;
-  margin: 0;
-}
-
-.link-button.is-active {
-  border-bottom: 2px solid #448aff;
-  color: #448aff !important;
-  background-color: ghostwhite;
-}
-
-.detail-card {
-  margin-bottom: 20px;
-}
-
-.md-content {
-  padding: 30px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-a:hover {
-  cursor: pointer;
-}
-
 </style>

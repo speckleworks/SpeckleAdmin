@@ -7,15 +7,6 @@ import './registerServiceWorker'
 
 Vue.config.productionTip = false
 
-// import comps
-// NOTE: The VueMaterial in this is specially built to incroporate a fix
-// to the router links. See https://github.com/vuematerial/vue-material/pull/1978
-import VueMaterial from 'vue-material'
-// import 'vue-material/dist/vue-material.min.css'
-// import 'vue-material/dist/theme/default.css'
-Vue.use( VueMaterial )
-
-// switching ui to vuetify now...
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'
