@@ -5,31 +5,28 @@
         <form class="md-layout-item md-size-33 md-small-size-100 md-medium-size-50" @submit.prevent='login' v-if='$store.state.isAuth === false'>
           <v-card class="elevation-3">
             <v-toolbar class='title text-uppercase elevation-0'>
-              <v-icon left small>face</v-icon>&nbsp;Login&nbsp;&nbsp;<span class='font-weight-thin'>or <router-link to='/register'>register</router-link>?</span>
+              <span>Login&nbsp;&nbsp;</span>
+              <v-spacer></v-spacer>
+              <span class='font-weight-light caption'>or <router-link to='/register'>register</router-link>?</span>
             </v-toolbar>
             <v-card-text>
-              <label>Server API address</label>
               <v-text-field prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' @blur='checkServer'></v-text-field>
-              <label>Email adress</label>
-              <v-text-field type="email" v-model='email' name='email'></v-text-field>
-              <label>Password</label>
-              <v-text-field v-model='password' type="password" name='password'></v-text-field>
+              <v-text-field :rules="emailRules" prepend-inner-icon='email' type="email" v-model='email' name='email' label='your email'></v-text-field>
+              <v-text-field prepend-inner-icon='lock' v-model='password' type="password" name='password' label='your password'></v-text-field>
             </v-card-text>
             <v-card-actions>
-              <v-btn ype="submit" class="md-primary md-raised">Login</v-btn>
+              <v-btn type="submit" class="md-primary md-raised">Login</v-btn>
             </v-card-actions>
-            <v-alert :value="showError" type="warning" dismissible>
+            <v-alert v-model="showError" type="warning" dismissible>
               {{errorMessage}}
             </v-alert>
           </v-card>
         </form>
+        <v-card v-else>
+          <v-card-text>You are already logged in.</v-card-text>
+        </v-card>
       </v-flex>
     </v-layout>
-    <!-- <md-card class="md-elevation-3" v-else>
-      <md-card-content>
-        You are already logged in.
-      </md-card-content>
-    </md-card> -->
   </v-container>
 </template>
 <script>
@@ -47,6 +44,10 @@ export default {
     return {
       server: null,
       email: null,
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /.+@.+/.test( v ) || 'E-mail must be valid'
+      ],
       password: null,
       errorMessage: null,
       showError: false,
@@ -69,6 +70,7 @@ export default {
         } )
         .catch( err => {
           console.log( err )
+          console.log( "login error" )
           this.errorMessage = `Failed to log in.`
           this.showError = true
         } )
