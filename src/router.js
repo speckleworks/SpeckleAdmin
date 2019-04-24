@@ -40,11 +40,11 @@ let myRouter = new Router( {
         name: 'stream data',
         path: 'data',
         component: ( ) => import( './views/StreamData.vue' )
-      },{
+      }, {
         name: 'stream sharing',
         path: 'sharing',
         component: ( ) => import( './views/StreamSharing.vue' )
-      } ,{
+      }, {
         name: 'stream history',
         path: 'history',
         component: ( ) => import( './views/StreamHistory.vue' )
@@ -55,11 +55,18 @@ let myRouter = new Router( {
       name: 'projects',
       component: ( ) => import( './views/Projects.vue' ),
       meta: { requiresAuth: true },
-    }, {
+    },
+    {
       path: '/projects/:projectId',
       name: 'project overview',
       component: ( ) => import( './views/Project.vue' ),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/view/:streamIds*',
+      name: 'viewer',
+      component: ( ) => import( './views/Viewer.vue' ),
+      meta: { requiresAuth: false },
     },
     {
       path: '/trash',

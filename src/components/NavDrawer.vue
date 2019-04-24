@@ -47,6 +47,16 @@
         </v-list-tile-content>
       </v-list-tile>
       <v-divider class='ma-3'></v-divider>
+      <v-list-tile to='/view'>
+        <v-list-tile-action>
+          <v-icon>360</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Viewer</v-list-tile-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>View Things!</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-divider class='ma-3'></v-divider>
     </v-list>
     <v-list v-if='$store.state.isAuth'>
       <v-list-tile to='/profile'>
