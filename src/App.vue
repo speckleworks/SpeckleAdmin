@@ -2,9 +2,9 @@
   <v-app :dark='dark'>
     <v-navigation-drawer floating app class='elevation-5' v-model='drawer'>
       <v-hover>
-        <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} other-bg`' dark xxxstyle='position: absolute; bottom:0'>
+        <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} ${dark ? "royal-bg" : "light-bg" }`' dark xxxstyle='position: absolute; bottom:0'>
           <div class='text-uppercase caption ml-0'>
-            <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none">Speckle,
+            <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none;"><b>Speckle</b>,
               <span class='font-weight-light caption'>the open source data platform for AEC.</span></a>
           </div>
         </v-toolbar>
@@ -89,7 +89,24 @@ export default {
   /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #6FB1FC, #4364F7, #0052D4);
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
 
+.royal-bg {
+  background: #536976;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #292E49, #536976);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #292E49, #536976);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.light-bg {
+  background: #56CCF2;
+  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #2F80ED, #56CCF2);
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #2F80ED, #56CCF2);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 .fade-enter-active,

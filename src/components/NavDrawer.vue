@@ -53,7 +53,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Viewer</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-light caption'>View Things!</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>View Things! In Dimensions! With 3D!</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-divider class='ma-3'></v-divider>

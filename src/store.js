@@ -28,7 +28,10 @@ export default new Vuex.Store( {
     comments: [ ],
     // global store for users. it's dynamically assembled as the end-user moves through
     // the admin ui, and new user profiles need to be requested.
-    users: [ ]
+    users: [ ],
+    // viewer related
+    loadedStreamIds: [ ],
+    objects: [ ]
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -286,7 +289,55 @@ export default new Vuex.Store( {
       state.users = [ ]
       state.comments = [ ]
       state.isAuth = false
-    }
+    },
+
+    // Viewer related
+    ADD_LOADED_STREAMID( state, streamId ) {
+      state.loadedStreamIds = [ ...new Set( [ ...state.loadedStreamIds, streamId ] ) ]
+    },
+    REMOVE_LOADED_STREAMID( state, streamId ) {
+      let index = state.loadedStreamIds.indexOf( streamId )
+      if ( index !== -1 )
+        state.loadedStreamIds.splice( index, 1 )
+      else
+        console.warn( `Failed to remove loaded streamid: ${streamId} from ${state.loadedStreamIds}` )
+    },
+    // OBJECTS
+    ADD_OBJECTS( state, objects ) {
+      state.objects.push( ...objects )
+    },
+    UPDATE_OBJECTS_STREAMS( state, { objIds, streamToAdd, streamToRemove } ) {
+      objIds.forEach( id => {
+        let myObject = state.objects.find( o => o._id === id )
+        if ( myObject ) {
+          if ( streamToAdd && myObject.streams.indexOf( streamToAdd ) === -1 )
+            myObject.streams.push( streamToAdd )
+          if ( streamToRemove ) {
+            let index = myObject.streams.indexOf( streamToRemove )
+            if ( index !== -1 ) myObject.streams.splice( index, 1 )
+          }
+        }
+      } )
+    },
+    REMOVE_OBJECTS( state, objectIds ) {
+      state.objects = state.objects.filter( obj => objectIds.indexOf( obj._id ) === -1 )
+    },
+    // Selected objects setters
+    SET_SELECTED_OBJECTS( state, { objectIds } ) {
+      if ( objectIds.length > 0 )
+        state.selectedObjects = [ ...new Set( [ ...state.selectedObjects, ...objectIds ] ) ]
+      else
+        state.selectedObjects = [ ]
+    },
+    ADD_SELECTED_OBJECTS( state, { objectIds } ) {
+      state.selectedObjects = [ ...new Set( [ ...state.selectedObjects, ...objectIds ] ) ]
+    },
+    REMOVE_SELECTED_OBJECTS( state, { objectIds } ) {
+      objectIds.forEach( id => {
+        let index = state.selectedObjects.indexOf( id )
+        if ( index !== -1 ) state.selectedObjects.splice( index, 1 )
+      } )
+    },
   },
   actions: {
     // Streams
@@ -385,6 +436,33 @@ export default new Vuex.Store( {
         .catch( err => {
           console.log( err )
         } )
+    },
+
+    // objects
+    getStreamObjects( context, streamId ) {
+      let found = context.state.streams.find( s => s.streamId === streamId )
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `streams/${streamId}?fields=objects,layers` )
+          .then( res => {
+            let ids = res.data.resource.objects.map( o => o._id )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, objects: ids, layers: res.data.resource.layers } )
+            resolve( ids )
+          } )
+          .catch( err => {
+            reject( err )
+          } )
+      } )
+    },
+    getObjects( context, objectIds ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `objects/getbulk?omit=base64,rawData,canRead,canWrite,children,anonymousComments,name`, objectIds )
+          .then( res => {
+            // context.state.objects.push( ...res.data.resources )
+            // context.commit( 'ADD_OBJECTS', res.data.resources )
+            resolve( res.data.resources )
+          } )
+          .catch( err => reject( err ) )
+      } )
     },
 
     // projects
