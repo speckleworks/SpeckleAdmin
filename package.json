@@ -22,6 +22,7 @@
     "event-emitter-es6": "^1.1.5",
     "flat": "^4.1.0",
     "lodash.debounce": "^4.0.8",
+    "lodash.get": "^4.4.2",
     "lodash.union": "^4.6.0",
     "lodash.uniq": "^4.5.0",
     "marked": "^0.5.2",

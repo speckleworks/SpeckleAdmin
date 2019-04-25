@@ -1,5 +1,5 @@
 <template>
-  <v-card class='mb-1'>
+  <v-card class='mb-3'>
     <v-card-text>
       <v-layout row wrap>
         <v-flex xs12>{{stream.name}}</v-flex>

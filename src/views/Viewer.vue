@@ -2,16 +2,46 @@
   <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='420' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
-        <v-layout style="direction:ltr;" pa-3 pl-5>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
+        <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
-            <v-card class='elevation-0 transparent'>
-              <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
-              <v-card-text>
-                <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
-                <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId'></stream-card>
-              </v-card-text>
-            </v-card>
+            <v-tabs grow>
+              <v-tab key='streams'>
+                <v-icon>import_export</v-icon>
+              </v-tab>
+              <v-tab key='filter'>
+                <v-icon>dns</v-icon>
+              </v-tab>
+              <v-tab key='colorize'>
+                <v-icon>color_lens</v-icon>
+              </v-tab>
+              <v-tab>
+                <v-icon>code</v-icon>
+              </v-tab>
+              <v-tab-item key='streams'>
+                <v-card class='elevation-0 transparent'>
+                  <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
+                  <v-card-text>
+                    <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
+                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId'></stream-card>
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
+              <v-tab-item key='filter'>
+                <v-card class='elevation-0 transparent'>
+                  <v-card-text>
+                    <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.stringKeys"></v-autocomplete>
+                    <object-groups :group-key='selectedFilter'></object-groups>
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
+              <v-tab-item key='colorize'>
+                <v-card class='elevation-0 transparent'>
+                  <v-card-text>colorize</v-card-text>
+                </v-card>
+              </v-tab-item>
+              <!-- </v-tabs-items> -->
+            </v-tabs>
           </v-flex>
         </v-layout>
       </v-navigation-drawer>
@@ -23,11 +53,13 @@ import debounce from 'lodash.debounce'
 
 import StreamCard from '@/components/ViewerLoadedStreamsCard.vue'
 import StreamSearch from '@/components/StreamSearch.vue'
+import ObjectGroups from '@/components/ViewerObjectGroups.vue'
+
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
 export default {
   name: 'ViewerView',
-  components: { StreamSearch, StreamCard },
+  components: { StreamSearch, StreamCard, ObjectGroups },
   computed: {
     loadedStreamIds( ) {
       return this.$store.state.loadedStreamIds
@@ -46,6 +78,7 @@ export default {
       bucketInProgress: false,
       removeInterval: null,
       streamsToRemove: [ ],
+      selectedFilter: null
     }
   },
   methods: {
@@ -197,11 +230,11 @@ export default {
   },
   activated( ) {
     console.log( 'activated' )
-    document.body.classList.add('no-scroll')
+    document.body.classList.add( 'no-scroll' )
   },
-  deactivated() {
+  deactivated( ) {
     console.log( 'de-activated' )
-    document.body.classList.remove('no-scroll')
+    document.body.classList.remove( 'no-scroll' )
   },
   mounted( ) {
     console.log( 'mounted' )
@@ -246,4 +279,5 @@ export default {
   height: 99.8%;
   /*z-index: 10000;*/
 }
+
 </style>

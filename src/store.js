@@ -4,6 +4,7 @@ import Axios from 'axios'
 
 import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
+import flatten from 'flat'
 
 Vue.use( Vuex )
 
@@ -81,6 +82,25 @@ export default new Vuex.Store( {
           }
       } )
       return base
+    },
+    objectPropertyKeys: ( state ) => {
+      let keySet = new Set( )
+      let stringKeySet = new Set( )
+      state.objects.forEach( obj => {
+        if ( !obj.properties ) return
+        let flatProps = flatten( obj.properties )
+        for ( let key in flatProps ) {
+          if ( key === 'hash' || key === 'id' || key.toLowerCase( ).includes( 'hash' ) || key.toLowerCase( ).includes( '_carbon' ) ) continue
+          keySet.add( key )
+          if ( typeof flatProps[ key ] === 'string' )
+            stringKeySet.add( key )
+        }
+      } )
+      let keySets = {
+        allKeys: [ ...keySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ),
+        stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ),
+      }
+      return keySets
     }
   },
   mutations: {
