@@ -91,8 +91,8 @@
   </v-container>
 </template>
 <script>
-import HelloWorld from '@/components/HelloWorld.vue'
 import SearchEverything from '@/components/SearchEverything.vue'
+
 export default {
   name: 'HomeView',
   components: { SearchEverything },

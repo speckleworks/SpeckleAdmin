@@ -119,4 +119,8 @@ export default {
   opacity: 0;
 }
 
+.no-scroll {
+  overflow: hidden !important;
+}
+
 </style>

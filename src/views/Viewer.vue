@@ -1,80 +1,33 @@
 <template>
-  <v-container fluid fill-height pa-0>
-    <v-navigation-drawer stateless floating permanent width='500' value="true" class='transparent pa-4'>
-      <v-container pa-0>
-        <v-layout row wrap>
+  <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
+    <div class='renderer' ref='render'></div>
+    <v-hover>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='420' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
+        <v-layout style="direction:ltr;" pa-3 pl-5>
           <v-flex xs12>
-            <v-card>
-              <v-card-title class='title font-weight-light'>
-                <v-icon>import_export</v-icon> Add/Remove streams
-              </v-card-title>
+            <v-card class='elevation-0 transparent'>
               <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
               <v-card-text>
                 <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
+                <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId'></stream-card>
               </v-card-text>
             </v-card>
-            <v-list three-line>
-              <v-list-tile v-for='stream in loadedStreams' :key='stream.streamId'>
-                <v-list-tile-content>
-                  <v-list-tile-title>
-                    <span class='caption'>
-                      <v-icon small>fingerprint</v-icon> {{stream.streamId}}
-                      &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
-                    </span>&nbsp;
-                    <span class='text-capitalize'>{{stream.name}}</span>
-                  </v-list-tile-title>
-                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
-                    last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}
-                  </v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
           </v-flex>
         </v-layout>
-      </v-container>
-    </v-navigation-drawer>
-    <v-container fluid fill-height pa-0 style='position: absolute;background-color: rgba(255,255,255, 0.01);' ref='render'>
-      <!--       <v-flex xs6 md4 lg4 class='elevation-0' px-4 py-4>
-        <v-card>
-          <v-card-title class='title font-weight-light'>
-            <v-icon>import_export</v-icon> Add/Remove streams
-          </v-card-title>
-          <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
-          <v-card-text>
-            <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
-            <v-list three-line>
-              <v-list-tile v-for='stream in loadedStreams' :key='stream.streamId'>
-                <v-list-tile-content>
-                  <v-list-tile-title>
-                    <span class='caption'>
-                      <v-icon small>fingerprint</v-icon> {{stream.streamId}}
-                      &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
-                    </span>&nbsp;
-                    <span class='text-capitalize'>{{stream.name}}</span>
-                  </v-list-tile-title>
-                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
-                    last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}
-                  </v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-flex> -->
-      <!-- <v-flex xs6 md8 lg8 ref='render' style='background-color: rgba(255,255,255, 0);'> -->
-      <!--       <v-flex xs12 md12 lg12 >
-      </v-flex> -->
-    </v-container>
+      </v-navigation-drawer>
+    </v-hover>
   </v-container>
 </template>
 <script>
 import debounce from 'lodash.debounce'
+
+import StreamCard from '@/components/ViewerLoadedStreamsCard.vue'
 import StreamSearch from '@/components/StreamSearch.vue'
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
 export default {
   name: 'ViewerView',
-  components: { StreamSearch },
+  components: { StreamSearch, StreamCard },
   computed: {
     loadedStreamIds( ) {
       return this.$store.state.loadedStreamIds
@@ -242,9 +195,13 @@ export default {
       this.bucketProcessor( )
     },
   },
-
   activated( ) {
     console.log( 'activated' )
+    document.body.classList.add('no-scroll')
+  },
+  deactivated() {
+    console.log( 'de-activated' )
+    document.body.classList.remove('no-scroll')
   },
   mounted( ) {
     console.log( 'mounted' )
@@ -282,4 +239,11 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.renderer {
+  position: absolute;
+  width: 100%;
+  /*don't ask re below*/
+  height: 99.8%;
+  /*z-index: 10000;*/
+}
 </style>
