@@ -467,7 +467,6 @@ export default new Vuex.Store( {
     getStreamObjects( context, streamId ) {
       let found = context.state.streams.find( s => s.streamId === streamId )
       return new Promise( ( resolve, reject ) => {
-        if ( !found )
           context.dispatch( 'getStream', { streamId: streamId } )
           .then( ( ) => {
             return Axios.get( `streams/${streamId}?fields=objects,layers` )
