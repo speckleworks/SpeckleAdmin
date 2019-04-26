@@ -2,6 +2,9 @@
   <v-card class='elevation-0 pa-3'>
     <v-layout row wrap>
       <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
+        <v-btn icon @click.native='$router.push(`/view/${stream.streamId}`)'>
+          <v-icon>360</v-icon>
+        </v-btn>
         <editable-span v-if='canEdit' :text='stream.name' @update='updateName'></editable-span>
         <span v-else>{{stream.name}}</span>
       </v-flex>
@@ -16,7 +19,7 @@
       </v-flex>
       <v-flex xs12 class='ma-0 pa-0 mb-2'>
         <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="stream.tags" :items='stream.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
-        <template v-slot:no-data>stream has no tags.</template>
+          <template v-slot:no-data>stream has no tags.</template>
         </v-combobox>
       </v-flex>
     </v-layout>

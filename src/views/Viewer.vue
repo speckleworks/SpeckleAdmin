@@ -23,7 +23,7 @@
                   <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
                   <v-card-text>
                     <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
-                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId'></stream-card>
+                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream'></stream-card>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -46,6 +46,18 @@
         </v-layout>
       </v-navigation-drawer>
     </v-hover>
+    <v-menu top offset-y :close-on-content-click="false">
+      <template v-slot:activator='{on}'>
+        <v-btn fab fixed bottom right v-on='on'>
+          <v-icon>share</v-icon>
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-text>
+          <v-icon small>link</v-icon>&nbsp; <span class='caption' style="user-select:all">{{ shareLink }}</span>
+        </v-card-text>
+      </v-card>
+    </v-menu>
   </v-container>
 </template>
 <script>
@@ -66,6 +78,16 @@ export default {
     },
     loadedStreams( ) {
       return this.$store.state.streams.filter( str => this.loadedStreamIds.indexOf( str.streamId ) !== -1 )
+    },
+    streams( ) {
+      return this.$store.state.streams.filter( s => this.streamIds.indexOf( s.streamId ) !== -1 )
+    },
+    streamIds( ) {
+      return this.$store.state.loadedStreamIds
+    },
+    shareLink( ) {
+      let streams = this.$store.state.loadedStreamIds.join( ',' )
+      return window.location.href + '/' + streams
     }
   },
   data( ) {
@@ -82,9 +104,15 @@ export default {
     }
   },
   methods: {
+    appendStreamsToRoute( streamId ) {
+      // NOTE: this functionality is disabled because o
+      // let streams = this.$store.state.loadedStreamIds.join( ',' )
+      // this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
+    },
     async addStream( streamId ) {
-      this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
       this.showLoading = true
+      this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
+      this.appendStreamsToRoute( )
       let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
       // loaded already?
@@ -231,6 +259,19 @@ export default {
   activated( ) {
     console.log( 'activated' )
     document.body.classList.add( 'no-scroll' )
+    console.log( this.$route.params )
+    console.log( this.$store.state.loadedStreamIds )
+    console.log( this.$route.query )
+
+    if ( this.$route.params.streamIds ) {
+      let urlStreams = this.$route.params.streamIds.split( ',' )
+      let streamsToLoad = urlStreams.filter( id => this.$store.state.loadedStreamIds.indexOf( id ) === -1 )
+      let streamsToUnload = this.$store.state.loadedStreamIds.filter( id => urlStreams.indexOf( id ) === -1 )
+      console.log( `i need to load ${streamsToLoad.join(", ")}` )
+      console.log( `i need to unload ${streamsToUnload.join(", ")}` )
+      streamsToUnload.forEach( sid => this.removeStream( sid ) )
+      streamsToLoad.forEach( sid => this.addStream( sid ) )
+    }
   },
   deactivated( ) {
     console.log( 'de-activated' )
@@ -244,6 +285,20 @@ export default {
 
     // if you like polluting the global scope, clap twice
     window.renderer = this.renderer
+
+    // add streams to viewer
+    if ( this.$route.params.streamIds ) {
+      let streamIds = this.$route.params.streamIds.split( ',' )
+      console.log( streamIds )
+      streamIds.forEach( id => {
+        if ( id ) {
+          this.$store.dispatch( 'getStream', { streamId: id } )
+            .then( res => {
+              this.addStream( id )
+            } )
+        }
+      } )
+    }
 
     // Set render events
     this.renderer.on( 'select-objects', debounce( function( ids ) {
@@ -260,13 +315,12 @@ export default {
 
 
     this.renderer.on( 'analysis-legend', legend => {
-      this.$store.commit( 'SET_LEGEND', legend )
+      // this.$store.commit( 'SET_LEGEND', legend )
     } )
 
     this.renderer.on( 'clear-analysis-legend', ( ) => {
-      this.$store.commit( 'SET_LEGEND', null )
+      // this.$store.commit( 'SET_LEGEND', null )
     } )
-
   }
 }
 
@@ -275,7 +329,7 @@ export default {
 .renderer {
   position: absolute;
   width: 100%;
-  /*don't ask re below*/
+  /*don't ask re below, i just don't like round numbers */
   height: 99.8%;
   /*z-index: 10000;*/
 }

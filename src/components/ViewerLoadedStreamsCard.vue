@@ -11,7 +11,7 @@
       </v-layout>
     </v-card-text>
     <v-card-actions>
-      <v-btn small>remove</v-btn>
+      <v-btn small @click='$emit("remove", stream.streamId)'>remove</v-btn>
     </v-card-actions>
   </v-card>
 </template>
