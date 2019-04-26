@@ -2,17 +2,20 @@
   <v-layout row wrap>
     <v-flex xs12>
       <v-text-field label="filter" v-model='filterText' hint='Search through the layers below' append-icon='filter_list' clearable></v-text-field>
-      <v-card v-for='group in myFilteredGroups' :key='group.name' class='mb-3' v-if='group.objects.length>0'>
+      <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
           <v-layout align-center>
+            <v-flex xs1>
+              <v-avatar size="20" :color="getHexFromString(group.name)"></v-avatar>
+            </v-flex>
             <v-flex class='caption'>
               <b>{{group.name}}</b>&nbsp;<span class='font-weight-light'>({{group.objects.length}} objects)</span>
             </v-flex>
             <v-flex xs4 class='text-xs-right'>
-              <v-btn icon small @click.native='toggleVisible(group.name)'>
+              <v-btn flat icon small @click.native='toggleVisible(group.name)' :color='group.visible ? "":"grey"'>
                 <v-icon>remove_red_eye</v-icon>
               </v-btn>
-              <v-btn icon small @click.native='toggleIsolation(group.name)'>
+              <v-btn flat icon small @click.native='toggleIsolation(group.name)' :color='group.isolated ? "":"grey"'>
                 <v-icon>location_searching</v-icon>
               </v-btn>
             </v-flex>
@@ -35,6 +38,7 @@ export default {
         this.generateGroups( newVal )
         this.filterText = ''
         window.renderer.resetColors( )
+        window.renderer.colorByProperty( { propertyName: newVal } )
         window.renderer.showObjects( [ ] )
       }
     }
@@ -101,9 +105,20 @@ export default {
         group.isolated = false
       } else {
         group.visible = true
-        window.renderer.isolateObjects( group.objects )
         group.isolated = true
+        window.renderer.isolateObjects( group.objects )
       }
+
+      this.myGroups.forEach( gr => {
+        if ( gr.name === groupName ) return
+        if ( group.isolated ) {
+          gr.isolated = false
+          gr.visible = false
+        } else {
+          gr.visible = true
+          window.renderer.showObjects( gr.objects )
+        }
+      } )
     },
   }
 }
