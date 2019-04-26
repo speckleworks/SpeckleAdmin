@@ -5,7 +5,7 @@
       <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height:auto; max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
         <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
-            <v-tabs grow>
+            <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
               <v-tab key='streams'>
                 <v-icon>import_export</v-icon>
               </v-tab>
