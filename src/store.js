@@ -32,7 +32,8 @@ export default new Vuex.Store( {
     users: [ ],
     // viewer related
     loadedStreamIds: [ ],
-    objects: [ ]
+    objects: [ ],
+    legend: null
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -117,6 +118,7 @@ export default new Vuex.Store( {
     },
     UPDATE_STREAM( state, props ) {
       let found = state.streams.find( s => s.streamId === props.streamId )
+      if ( !found ) throw new Error( "could not find stream." )
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
@@ -358,6 +360,9 @@ export default new Vuex.Store( {
         if ( index !== -1 ) state.selectedObjects.splice( index, 1 )
       } )
     },
+    SET_LEGEND( state, legend ) {
+      state.legend = legend
+    },
   },
   actions: {
     // Streams
@@ -462,7 +467,11 @@ export default new Vuex.Store( {
     getStreamObjects( context, streamId ) {
       let found = context.state.streams.find( s => s.streamId === streamId )
       return new Promise( ( resolve, reject ) => {
-        Axios.get( `streams/${streamId}?fields=objects,layers` )
+        if ( !found )
+          context.dispatch( 'getStream', { streamId: streamId } )
+          .then( ( ) => {
+            return Axios.get( `streams/${streamId}?fields=objects,layers` )
+          } )
           .then( res => {
             let ids = res.data.resource.objects.map( o => o._id )
             context.commit( 'UPDATE_STREAM', { streamId: streamId, objects: ids, layers: res.data.resource.layers } )

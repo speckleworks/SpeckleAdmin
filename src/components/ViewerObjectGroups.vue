@@ -38,7 +38,7 @@ export default {
         this.generateGroups( newVal )
         this.filterText = ''
         window.renderer.resetColors( )
-        window.renderer.colorByProperty( { propertyName: newVal } )
+        if ( newVal ) window.renderer.colorByProperty( { propertyName: newVal } )
         window.renderer.showObjects( [ ] )
       }
     }

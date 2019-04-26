@@ -2,7 +2,7 @@
   <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height:auto; max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
         <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
             <v-tabs grow>
@@ -15,7 +15,7 @@
               <v-tab key='colorize'>
                 <v-icon>color_lens</v-icon>
               </v-tab>
-              <v-tab>
+              <v-tab key='inspector'>
                 <v-icon>code</v-icon>
               </v-tab>
               <v-tab-item key='streams'>
@@ -37,10 +37,19 @@
               </v-tab-item>
               <v-tab-item key='colorize'>
                 <v-card class='elevation-0 transparent'>
-                  <v-card-text>colorize</v-card-text>
+                  <v-card-text>
+                    <!-- colorize -->
+                    <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.allKeys"></v-autocomplete>
+                  </v-card-text>
                 </v-card>
               </v-tab-item>
-              <!-- </v-tabs-items> -->
+              <v-tab-item key='inspector'>
+                <v-card class='elevation-0 transparent'>
+                  <v-card-text>
+                    {{$store.state.selectedObjects}}
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
             </v-tabs>
           </v-flex>
         </v-layout>
@@ -315,11 +324,11 @@ export default {
 
 
     this.renderer.on( 'analysis-legend', legend => {
-      // this.$store.commit( 'SET_LEGEND', legend )
+      this.$store.commit( 'SET_LEGEND', legend )
     } )
 
     this.renderer.on( 'clear-analysis-legend', ( ) => {
-      // this.$store.commit( 'SET_LEGEND', null )
+      this.$store.commit( 'SET_LEGEND', null )
     } )
   }
 }
