@@ -62,7 +62,7 @@ SelectionHelper.prototype.onSelectStart = function( event ) {
 
   this.element.style.border = '1px solid #55aaff'
   this.element.style.backgroundColor = 'rgba(255,255,255,0.1)'
-  this.element.style.position = 'fixed'
+  this.element.style.position = 'absolute'
   this.element.style.pointerEvents = 'none'
 
   this.startPoint.x = x;

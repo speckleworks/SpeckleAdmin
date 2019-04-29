@@ -33,7 +33,8 @@ export default new Vuex.Store( {
     // viewer related
     loadedStreamIds: [ ],
     objects: [ ],
-    legend: null
+    legend: null,
+    selectedObjects: []
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -98,8 +99,8 @@ export default new Vuex.Store( {
         }
       } )
       let keySets = {
-        allKeys: [ ...keySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ),
-        stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ),
+        allKeys: [ ...keySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
+        stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
       }
       return keySets
     }
@@ -467,7 +468,7 @@ export default new Vuex.Store( {
     getStreamObjects( context, streamId ) {
       let found = context.state.streams.find( s => s.streamId === streamId )
       return new Promise( ( resolve, reject ) => {
-          context.dispatch( 'getStream', { streamId: streamId } )
+        context.dispatch( 'getStream', { streamId: streamId } )
           .then( ( ) => {
             return Axios.get( `streams/${streamId}?fields=objects,layers` )
           } )

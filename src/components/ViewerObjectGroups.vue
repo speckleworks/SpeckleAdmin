@@ -34,13 +34,15 @@ export default {
   },
   watch: {
     groupKey( newVal, oldVal ) {
-      if ( newVal !== oldVal ) {
-        this.generateGroups( newVal )
-        this.filterText = ''
-        window.renderer.resetColors( )
-        if ( newVal ) window.renderer.colorByProperty( { propertyName: newVal } )
-        window.renderer.showObjects( [ ] )
+      console.log( newVal, oldVal )
+      this.filterText = ''
+      this.generateGroups( newVal )
+      window.renderer.resetColors( )
+      if ( newVal ) {
+        window.renderer.colorByProperty( { propertyName: newVal } )
       }
+      window.renderer.showObjects( [ ] )
+
     }
   },
   computed: {
@@ -48,6 +50,9 @@ export default {
       let filteredGroups = {}
       if ( !this.filterText || this.filterText === '' ) return this.myGroups
       return this.myGroups.filter( gr => gr.name.toLowerCase( ).includes( this.filterText.toLowerCase( ) ) )
+    },
+    isTextProperty() {
+
     }
   },
   data( ) {

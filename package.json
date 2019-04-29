@@ -33,6 +33,7 @@
     "three": "^0.103.0",
     "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",
+    "vue-json-pretty": "^1.6.0",
     "vue-slider-component": "^2.8.3",
     "vue-template-compiler": "^2.6.10",
     "vue-timeago": "^5.0.0",

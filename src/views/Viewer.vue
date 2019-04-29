@@ -12,11 +12,15 @@
               <v-tab key='filter'>
                 <v-icon>dns</v-icon>
               </v-tab>
-              <v-tab key='colorize'>
-                <v-icon>color_lens</v-icon>
-              </v-tab>
               <v-tab key='inspector'>
-                <v-icon>code</v-icon>
+                <v-badge small right :value='$store.state.selectedObjects.length>0' color='primary'>
+                  <template v-slot:badge>
+                    <span>{{$store.state.selectedObjects.length}}</span>
+                  </template>
+                  <v-icon>
+                    code
+                  </v-icon>
+                </v-badge>
               </v-tab>
               <v-tab-item key='streams'>
                 <v-card class='elevation-0 transparent'>
@@ -35,18 +39,11 @@
                   </v-card-text>
                 </v-card>
               </v-tab-item>
-              <v-tab-item key='colorize'>
-                <v-card class='elevation-0 transparent'>
-                  <v-card-text>
-                    <!-- colorize -->
-                    <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.allKeys"></v-autocomplete>
-                  </v-card-text>
-                </v-card>
-              </v-tab-item>
               <v-tab-item key='inspector'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    {{$store.state.selectedObjects}}
+                    <!-- {{$store.state.selectedObjects}} -->
+                    <selected-objects></selected-objects>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -75,12 +72,13 @@ import debounce from 'lodash.debounce'
 import StreamCard from '@/components/ViewerLoadedStreamsCard.vue'
 import StreamSearch from '@/components/StreamSearch.vue'
 import ObjectGroups from '@/components/ViewerObjectGroups.vue'
+import SelectedObjects from '@/components/ViewerSelectedObjects.vue'
 
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
 export default {
   name: 'ViewerView',
-  components: { StreamSearch, StreamCard, ObjectGroups },
+  components: { StreamSearch, StreamCard, ObjectGroups, SelectedObjects },
   computed: {
     loadedStreamIds( ) {
       return this.$store.state.loadedStreamIds
@@ -95,8 +93,8 @@ export default {
       return this.$store.state.loadedStreamIds
     },
     shareLink( ) {
-      let streams = this.$store.state.loadedStreamIds.join( ',' )
-      return window.location.href + '/' + streams
+      // let streams = this.$store.state.loadedStreamIds.join( ',' )
+      return window.location.href
     }
   },
   data( ) {
@@ -115,8 +113,8 @@ export default {
   methods: {
     appendStreamsToRoute( streamId ) {
       // NOTE: this functionality is disabled because o
-      // let streams = this.$store.state.loadedStreamIds.join( ',' )
-      // this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
+      let streams = this.$store.state.loadedStreamIds.join( ',' )
+      this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
     },
     async addStream( streamId ) {
       this.showLoading = true
@@ -255,6 +253,7 @@ export default {
       this.renderer.unloadObjects( { objIds: objIdsToUnload } )
       this.pauseRequesting = false
       this.streamsToRemove = [ ]
+      this.appendStreamsToRoute( )
       // restart the bucket processor
       this.bucketProcessor( )
     },
@@ -280,11 +279,9 @@ export default {
   activated( ) {
     console.log( 'activated' )
     document.body.classList.add( 'no-scroll' )
-    console.log( this.$route.params )
-    console.log( this.$store.state.loadedStreamIds )
-    console.log( this.$route.query )
 
-    this.fetchStreamsFromRoute()
+    this.fetchStreamsFromRoute( )
+    this.appendStreamsToRoute( )
   },
   deactivated( ) {
     console.log( 'de-activated' )
@@ -300,7 +297,7 @@ export default {
     window.renderer = this.renderer
 
     // add streams to viewer
-    this.fetchStreamsFromRoute()
+    this.fetchStreamsFromRoute( )
 
     // Set render events
     this.renderer.on( 'select-objects', debounce( function( ids ) {
@@ -324,6 +321,7 @@ export default {
     } )
   }
 }
+
 </script>
 <style scoped lang='scss'>
 .renderer {
