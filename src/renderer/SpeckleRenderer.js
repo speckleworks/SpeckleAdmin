@@ -427,8 +427,11 @@ export default class SpeckleRenderer extends EE {
   // entry point for any attempt to color things by their properties in the viewer
   // depending on the property, it will either call "colorByNumericProperty" or
   // "colorByStringProperty" (see below)
-  colorByProperty( { propertyName } ) {
-    // throw new Error('hs')
+  colorByProperty( { propertyName, propagateLegend } ) {
+    console.log( propagateLegend )
+    if ( propagateLegend === null || propagateLegend === undefined )
+      propagateLegend = true
+
     let first = this.scene.children.find( o => o.userData && o.userData.properties && o.userData.properties[ propertyName ] )
     if ( !first ) {
       console.warn( `no property found (${propertyName}) on any scene objects.` )
@@ -441,13 +444,15 @@ export default class SpeckleRenderer extends EE {
     let isNumeric = !isNaN( first.userData.properties[ propertyName ] )
     console.log( `coloring by ${propertyName}, which is (numeric: ${isNumeric})` )
 
-    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName } )
-    else this.colorByStringProperty( { propertyName: propertyName } )
+    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
+    else this.colorByStringProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
   }
 
   // attempts to color all objects  in the scene by a numeric property, computing its bounds
   // and generating a gradient from min (blue) to max (pinkish)
-  colorByNumericProperty( { propertyName } ) {
+  colorByNumericProperty( { propertyName, propagateLegend } ) {
+    if ( propagateLegend === null || propagateLegend === undefined )
+      propagateLegend = true
     // compute bounds
     let min = 10e6,
       max = -10e6,
@@ -475,7 +480,8 @@ export default class SpeckleRenderer extends EE {
     }
 
     console.log( `bounds: ${min}, ${max} 🌈` )
-    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: true, min: min, max: max, objectCount: foundObjs.length } )
+    if ( propagateLegend )
+      this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: true, min: min, max: max, objectCount: foundObjs.length } )
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
@@ -505,7 +511,9 @@ export default class SpeckleRenderer extends EE {
 
   // attempts to color all objects in the scene by a string property
   // uses colorHasher to get a hex color out of a string
-  colorByStringProperty( { propertyName } ) {
+  colorByStringProperty( { propertyName, propagateLegend } ) {
+    if ( propagateLegend === null || propagateLegend === undefined )
+      propagateLegend = true
     let toReset = [ ],
       foundCount = 0
 
@@ -537,19 +545,22 @@ export default class SpeckleRenderer extends EE {
       foundCount++
       if ( index === this.scene.children.length - 1 ) {
         this.isSettingColors = false
-        this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, objectCount: foundCount } )
+        if ( propagateLegend )
+          this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, objectCount: foundCount } )
       }
     }, 5000 )
   }
 
-  resetColors( ) {
+  resetColors( { propagateLegend } ) {
+    if ( propagateLegend === null || propagateLegend === undefined )
+      propagateLegend = true
     for ( let obj of this.scene.children ) {
       if ( !obj.material ) continue
       if ( !( obj.material._oldColor ) ) continue
       obj.material.color.copy( obj.material._oldColor )
     }
     this.currentColorByProp = null
-    this.emit( 'clear-analysis-legend' )
+    if ( propagateLegend ) this.emit( 'clear-analysis-legend' )
   }
 
   // TODO

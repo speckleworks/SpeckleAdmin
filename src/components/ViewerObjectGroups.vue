@@ -1,7 +1,10 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12>
-      <v-text-field label="filter" v-model='filterText' hint='Search through the layers below' append-icon='filter_list' clearable></v-text-field>
+      <v-autocomplete box label='select a property to group objects by' clearable v-model="groupKey" :items="$store.getters.objectPropertyKeys.allKeys"></v-autocomplete>
+      <v-text-field v-show='isTextProperty' label="filter" v-model='filterText' hint='Search through the layers below' append-icon='filter_list' clearable></v-text-field>
+    </v-flex>
+    <v-flex xs12 v-if='isTextProperty'>
       <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
           <v-layout align-center>
@@ -23,26 +26,74 @@
         </v-card-text>
       </v-card>
     </v-flex>
+    <v-flex xs12 v-else>
+      <v-card :class='`mb-3 ${ orphanGroup.isolated ? "elevation-15" : "elevation-1"} ${ orphanGroup.visible ? "elevation-1" : "elevation-0" }`' v-if='orphanGroup'>
+        <v-card-text>
+          <v-layout align-center>
+            <v-flex xs1>
+              <!-- <v-avatar size="20" :color="getHexFromString(orphanGroup.name)"></v-avatar> -->
+            </v-flex>
+            <v-flex class='caption'>
+              <b>{{orphanGroup.name}}</b>&nbsp;<span class='font-weight-light'>({{orphanGroup.objects.length}} objects)</span>
+            </v-flex>
+            <v-flex xs4 class='text-xs-right'>
+              <v-btn flat icon small @click.native='toggleVisible(orphanGroup.name)' :color='orphanGroup.visible ? "":"grey"'>
+                <v-icon>remove_red_eye</v-icon>
+              </v-btn>
+              <v-btn flat icon small @click.native='toggleIsolation(orphanGroup.name)' :color='orphanGroup.isolated ? "":"grey"'>
+                <v-icon>location_searching</v-icon>
+              </v-btn>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+      </v-card>
+      <!-- <v-divider></v-divider> -->
+      <v-card class='' v-if="$store.state.legend">
+        <v-card-text>
+          <h1 class='font-weight-light' style='color:#3498db;'>Minimum: {{$store.state.legend.min}}</h1>
+          <h1 class='font-weight-light' style='color:#f05b72;'>Maximum: {{$store.state.legend.max}}</h1>
+        </v-card-text>
+        <v-card-text>
+          <v-layout align-center row wrap>
+            <!-- <v-flex xs-2 class='caption'>{{selectedRange[0]}}</v-flex> -->
+            <v-flex xs-12 pa-2>
+              <v-range-slider v-model="selectedRange" :max="$store.state.legend.max" :min="$store.state.legend.min" :step="0" @end='filterProp'></v-range-slider>
+            </v-flex>
+            <v-flex xs12 class='caption'>
+              Now showing objects with <b>{{groupKey}}</b> in the range of <b>{{selectedRange[0]}}</b> to <b>{{selectedRange[1]}}.</b>
+            </v-flex>
+            <!-- <v-flex xs-2 class='caption'>{{selectedRange[1]}}</v-flex> -->
+          </v-layout>
+        </v-card-text>
+      </v-card>
+    </v-flex>
   </v-layout>
 </template>
 <script>
 import get from 'lodash.get'
 export default {
   name: 'ObjectGroups',
-  props: {
-    groupKey: { type: String }
-  },
+  props: {},
   watch: {
     groupKey( newVal, oldVal ) {
       console.log( newVal, oldVal )
       this.filterText = ''
       this.generateGroups( newVal )
-      window.renderer.resetColors( )
-      if ( newVal ) {
-        window.renderer.colorByProperty( { propertyName: newVal } )
-      }
       window.renderer.showObjects( [ ] )
-
+      window.renderer.resetColors( { propagateLegend: true } )
+      if ( newVal ) {
+        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true } )
+      }
+    },
+    isTextProperty( newVal, oldVal ) {},
+    legend: {
+      handler: function( newVal, oldVal ) {
+        if ( !newVal ) return
+        this.min = this.$store.state.legend.min
+        this.max = this.$store.state.legend.max
+        this.selectedRange = [ this.min, this.max ]
+      },
+      deep: true
     }
   },
   computed: {
@@ -51,15 +102,29 @@ export default {
       if ( !this.filterText || this.filterText === '' ) return this.myGroups
       return this.myGroups.filter( gr => gr.name.toLowerCase( ).includes( this.filterText.toLowerCase( ) ) )
     },
-    isTextProperty() {
-
+    orphanGroup( ) {
+      return this.myGroups[ 0 ] ? this.myGroups[ 0 ] : null
+    },
+    keys( ) {
+      return this.$store.getters.objectPropertyKeys
+    },
+    allKeys( ) {
+      return this.$store.getters.objectPropertyKeys.allKeys
+    },
+    isTextProperty( ) {
+      return this.keys.stringKeys.indexOf( this.groupKey ) !== -1
+    },
+    legend( ) {
+      return this.$store.state.legend
     }
   },
   data( ) {
     return {
+      groupKey: null,
       myGroups: [ ],
       loading: false,
-      filterText: null
+      filterText: null,
+      selectedRange: [ 0, 1000 ],
     }
   },
   methods: {
@@ -92,6 +157,23 @@ export default {
       } )
       Object.keys( groups ).forEach( key => this.myGroups.push( groups[ key ] ) )
       // this.myGroups = groups
+    },
+    filterProp( ) {
+      console.log( this.selectedRange )
+      let objIds = [ ]
+      this.$store.state.objects.forEach( ( obj, index ) => {
+        let propValue = get( obj.properties, this.groupKey )
+        if ( propValue )
+          if ( propValue >= this.selectedRange[ 0 ] && propValue <= this.selectedRange[ 1 ] )
+            objIds.push( obj._id )
+        if ( index === this.$store.state.objects.length - 1 ) {
+          if ( this.myGroups[ 0 ] && this.myGroups[ 0 ].visible )
+            objIds = [ ...objIds, ...this.myGroups[ 0 ].objects ]
+          window.renderer.isolateObjects( objIds )
+          window.renderer.resetColors( { propagateLegend: false } )
+          window.renderer.colorByProperty( { propertyName: this.groupKey, propagateLegend: false } )
+        }
+      } )
     },
     toggleVisible( groupName ) {
       let group = this.myGroups.find( gr => gr.name === groupName )

@@ -5,6 +5,7 @@
       <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height:auto; max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
         <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
+            <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
             <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
               <v-tab key='streams'>
                 <v-icon>import_export</v-icon>
@@ -24,7 +25,6 @@
               </v-tab>
               <v-tab-item key='streams'>
                 <v-card class='elevation-0 transparent'>
-                  <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
                   <v-card-text>
                     <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
                     <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream'></stream-card>
@@ -34,7 +34,7 @@
               <v-tab-item key='filter'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.stringKeys"></v-autocomplete>
+                    <!-- <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.stringKeys"></v-autocomplete> -->
                     <object-groups :group-key='selectedFilter'></object-groups>
                   </v-card-text>
                 </v-card>
