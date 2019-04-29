@@ -94,7 +94,7 @@ export default {
     },
     shareLink( ) {
       // let streams = this.$store.state.loadedStreamIds.join( ',' )
-      return window.location.href
+      return window.location
     }
   },
   data( ) {
