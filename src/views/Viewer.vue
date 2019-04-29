@@ -264,6 +264,18 @@ export default {
       this.requestBuckets = buckets
       this.bucketProcessor( )
     },
+
+    fetchStreamsFromRoute( ) {
+      if ( this.$route.params.streamIds ) {
+        let urlStreams = this.$route.params.streamIds.split( ',' )
+        let streamsToLoad = urlStreams.filter( id => this.$store.state.loadedStreamIds.indexOf( id ) === -1 )
+        let streamsToUnload = this.$store.state.loadedStreamIds.filter( id => urlStreams.indexOf( id ) === -1 )
+        console.log( `i need to load ${streamsToLoad.join(", ")}` )
+        console.log( `i need to unload ${streamsToUnload.join(", ")}` )
+        streamsToUnload.forEach( sid => this.removeStream( sid ) )
+        streamsToLoad.forEach( sid => this.addStream( sid ) )
+      }
+    }
   },
   activated( ) {
     console.log( 'activated' )
@@ -272,15 +284,7 @@ export default {
     console.log( this.$store.state.loadedStreamIds )
     console.log( this.$route.query )
 
-    if ( this.$route.params.streamIds ) {
-      let urlStreams = this.$route.params.streamIds.split( ',' )
-      let streamsToLoad = urlStreams.filter( id => this.$store.state.loadedStreamIds.indexOf( id ) === -1 )
-      let streamsToUnload = this.$store.state.loadedStreamIds.filter( id => urlStreams.indexOf( id ) === -1 )
-      console.log( `i need to load ${streamsToLoad.join(", ")}` )
-      console.log( `i need to unload ${streamsToUnload.join(", ")}` )
-      streamsToUnload.forEach( sid => this.removeStream( sid ) )
-      streamsToLoad.forEach( sid => this.addStream( sid ) )
-    }
+    this.fetchStreamsFromRoute()
   },
   deactivated( ) {
     console.log( 'de-activated' )
@@ -296,18 +300,7 @@ export default {
     window.renderer = this.renderer
 
     // add streams to viewer
-    if ( this.$route.params.streamIds ) {
-      let streamIds = this.$route.params.streamIds.split( ',' )
-      console.log( streamIds )
-      streamIds.forEach( id => {
-        if ( id ) {
-          this.$store.dispatch( 'getStream', { streamId: id } )
-            .then( res => {
-              this.addStream( id )
-            } )
-        }
-      } )
-    }
+    this.fetchStreamsFromRoute()
 
     // Set render events
     this.renderer.on( 'select-objects', debounce( function( ids ) {
@@ -322,7 +315,6 @@ export default {
       this.$store.commit( 'REMOVE_SELECTED_OBJECTS', { objectIds: ids } )
     }.bind( this ), 250 ) )
 
-
     this.renderer.on( 'analysis-legend', legend => {
       this.$store.commit( 'SET_LEGEND', legend )
     } )
@@ -332,7 +324,6 @@ export default {
     } )
   }
 }
-
 </script>
 <style scoped lang='scss'>
 .renderer {
