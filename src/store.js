@@ -34,7 +34,9 @@ export default new Vuex.Store( {
     loadedStreamIds: [ ],
     objects: [ ],
     legend: null,
-    selectedObjects: []
+    selectedObjects: [ ],
+    // client (used for ws requests, etc.)
+    myClient: null
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -302,6 +304,10 @@ export default new Vuex.Store( {
     SET_USER( state, user ) {
       state.user = user
     },
+    SET_WEB_APP_CLIENT( state, client ) {
+      state.client = client
+    },
+
     // End of life
     FLUSH_ALL( state ) {
       state.token = null
@@ -381,6 +387,18 @@ export default new Vuex.Store( {
           } )
       } )
     },
+
+    refreshStream( context, props ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `streams/${props.streamId}?omit=objects` )
+          .then( res => {
+            context.commit( 'UPDATE_STREAM', res.data.resource )
+            return resolve( res )
+          } )
+          .catch( err => reject( err ) )
+      } )
+    },
+
     getStreams( context, query ) {
       return new Promise( ( resolve, reject ) => {
         Axios.get( `streams?${query ? query : '' }` )
@@ -678,6 +696,26 @@ export default new Vuex.Store( {
           console.warn( err )
           return reject( err )
         } )
+    } ),
+
+    // client for ws ids, etc.
+    createClient: ( context, props ) => new Promise( ( resolve, reject ) => {
+
+      // NOTE: This is a stupid hack. To get a temp client, we need to be not auhtorised : /
+      delete Axios.defaults.headers.common[ 'Authorization' ]
+
+      Axios.post( `clients`, { role: 'online-client', documentName: 'Online interface', documentType: 'browser', online: true } )
+        .then( res => {
+          console.log( res )
+          context.commit( 'SET_WEB_APP_CLIENT', res.data.resource )
+          return resolve( res.data.resource )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+      // set the headers back. man what a stupid hack this is...
+      Axios.defaults.headers.common[ 'Authorization' ] = context.state.token
     } ),
 
     // users

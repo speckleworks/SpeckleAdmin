@@ -30,6 +30,7 @@
     "papaparse": "^4.6.2",
     "rainbowvis.js": "^1.0.1",
     "sass-loader": "^7.1.0",
+    "sockette": "^2.0.5",
     "three": "^0.103.0",
     "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",

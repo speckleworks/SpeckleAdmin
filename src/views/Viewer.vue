@@ -27,7 +27,7 @@
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
                     <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
-                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream'></stream-card>
+                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream' @refresh='refreshStream'></stream-card>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -204,7 +204,8 @@ export default {
       // No freezing as we're modifying the props; mem footprint seems ok still
       // this.objectAccumulator.push( ...objs.map( obj => { return { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } } ) )
 
-      this.renderer.loadObjects( { objs: objs, zoomExtents: this.requestBuckets.length === 1 } )
+      // this.renderer.loadObjects( { objs: objs, zoomExtents: this.requestBuckets.length === 1 } )
+      this.renderer.loadObjects( { objs: objs, zoomExtents: false } )
       this.requestBuckets.splice( 0, 1 )
 
       this.bucketInProgress = false
@@ -262,6 +263,58 @@ export default {
       // this.showLoading = true
       this.requestBuckets = buckets
       this.bucketProcessor( )
+    },
+
+    async refreshStream( streamId ) {
+      this.showLoading = true
+      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
+
+      // loaded already?
+      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+      let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+
+      let toRemove = this.$store.state.objects.filter( obj => {
+        if ( obj.streams.length > 1 ) return false
+        if ( obj.streams.indexOf( streamId ) !== -1 && obj.streams.length === 1 && objectIds.indexOf( obj._id ) === -1 ) return true
+        // let noLongerInStream = objectIds.indexOf( obj._id ) === -1
+      } )
+
+      console.log( 'toRequest' )
+      console.log( toRequest )
+      console.log( 'toUpdate' )
+      console.log( toUpdate )
+      console.log( 'toRemove' )
+      console.log( toRemove )
+
+      // update some of the objects in the store?
+      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToRemove: streamId } )
+
+      // remove the objects that need removing
+      this.renderer.unloadObjects( { objIds: toRemove.map( o => o._id ) } )
+      this.$store.commit( 'REMOVE_OBJECTS', toRemove.map( o => o._id ) )
+
+      if ( toRequest.length === 0 ) {
+        this.showLoading = false
+        return
+      }
+
+      let bucket = [ ],
+        maxReq = 50 // magic number; maximum objects to request in a bucket
+
+      for ( let i = 0; i < toRequest.length; i++ ) {
+        bucket.push( toRequest[ i ] )
+        if ( i % maxReq === 0 && i !== 0 ) {
+          this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+          bucket = [ ]
+          if ( !this.isRequesting ) this.bucketProcessor( )
+        }
+      }
+
+      // last one
+      if ( bucket.length !== 0 ) {
+        this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+        if ( !this.isRequesting ) this.bucketProcessor( )
+      }
     },
 
     fetchStreamsFromRoute( ) {
