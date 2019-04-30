@@ -494,7 +494,7 @@ export default class SpeckleRenderer extends EE {
       if ( !isNaN( value ) && !!value )
         color = new THREE.Color( `#${rainbow.colourAt( value )}` )
       else
-        color = new THREE.Color( '#878787' )
+        color = new THREE.Color( '#B3B3B3' )
 
       if ( !obj.userData.selected ) {
         obj.material._oldColor = obj.material.color
@@ -506,6 +506,17 @@ export default class SpeckleRenderer extends EE {
       if ( index === foundObjs.length - 1 ) {
         this.isSettingColors = false
       }
+    } )
+
+    let defaultColor = new THREE.Color( '#B3B3B3' )
+    toReset.forEach( obj => {
+      // if ( !obj.userData.selected ) {
+      //   obj.material._oldColor = obj.material.color
+      if ( obj.material )
+        obj.material.color.copy( defaultColor )
+      // } else {
+      //   obj.material.__preSelectColor.copy( color )
+      // }
     } )
   }
 
@@ -528,7 +539,7 @@ export default class SpeckleRenderer extends EE {
       let color = null
       if ( !this.colorTable.hasOwnProperty( value.toString( ) ) ) {
         if ( value.toString( ) === 'no material' ) {
-          this.colorTable[ value.toString( ) ] = new THREE.Color( '#808080' )
+          this.colorTable[ value.toString( ) ] = new THREE.Color( '#B3B3B3' )
         } else {
           this.colorTable[ value.toString( ) ] = new THREE.Color( this.colorHasher.hex( value.toString( ) ) )
         }
@@ -549,14 +560,29 @@ export default class SpeckleRenderer extends EE {
           this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, objectCount: foundCount } )
       }
     }, 5000 )
+
+    let defaultColor = new THREE.Color( '#B3B3B3' )
+    toReset.forEach( obj => {
+      if ( obj.material )
+        obj.material.color.copy( defaultColor )
+    } )
   }
 
   resetColors( { propagateLegend } ) {
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
+
+    let defaultColor = new THREE.Color( '#B3B3B3' )
+
     for ( let obj of this.scene.children ) {
+      if ( obj.material ) obj.material.color.copy( defaultColor )
+      continue
       if ( !obj.material ) continue
-      if ( !( obj.material._oldColor ) ) continue
+      if ( !( obj.material._oldColor ) ) {
+        obj.material.color.copy( defaultColor )
+        continue
+      }
+
       obj.material.color.copy( obj.material._oldColor )
     }
     this.currentColorByProp = null

@@ -4,7 +4,7 @@
       <v-autocomplete box label='select a property to group objects by' clearable v-model="groupKey" :items="$store.getters.objectPropertyKeys.allKeys"></v-autocomplete>
       <v-text-field v-show='isTextProperty' label="filter" v-model='filterText' hint='Search through the layers below' append-icon='filter_list' clearable></v-text-field>
     </v-flex>
-    <v-flex xs12 v-if='isTextProperty'>
+    <v-flex xs12 v-if='isTextProperty && groupKey'>
       <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
           <v-layout align-center>
@@ -26,7 +26,7 @@
         </v-card-text>
       </v-card>
     </v-flex>
-    <v-flex xs12 v-else>
+    <v-flex xs12 v-if='!isTextProperty && groupKey'>
       <v-card :class='`mb-3 ${ orphanGroup.isolated ? "elevation-15" : "elevation-1"} ${ orphanGroup.visible ? "elevation-1" : "elevation-0" }`' v-if='orphanGroup'>
         <v-card-text>
           <v-layout align-center>
@@ -48,21 +48,19 @@
         </v-card-text>
       </v-card>
       <!-- <v-divider></v-divider> -->
-      <v-card class='' v-if="$store.state.legend">
-        <v-card-text>
-          <h1 class='font-weight-light' style='color:#3498db;'>Minimum: {{$store.state.legend.min}}</h1>
-          <h1 class='font-weight-light' style='color:#f05b72;'>Maximum: {{$store.state.legend.max}}</h1>
+      <v-card class='' v-if='groupKey !== undefined && !isTextProperty && $store.state.legend' xxxv-if="$store.state.legend && selectedRange.length !== 0">
+        <v-card-text v-if='selectedRange'>
+          <h1 class='font-weight-light' style='color:#3498db;'>Minimum: {{selectedRange[0].toLocaleString()}}</h1>
+          <h1 class='font-weight-light' style='color:#f05b72;'>Maximum: {{selectedRange[1].toLocaleString()}}</h1>
         </v-card-text>
         <v-card-text>
           <v-layout align-center row wrap>
-            <!-- <v-flex xs-2 class='caption'>{{selectedRange[0]}}</v-flex> -->
             <v-flex xs-12 pa-2>
               <v-range-slider v-model="selectedRange" :max="$store.state.legend.max" :min="$store.state.legend.min" :step="0" @end='filterProp'></v-range-slider>
             </v-flex>
-            <v-flex xs12 class='caption'>
-              Now showing objects with <b>{{groupKey}}</b> in the range of <b>{{selectedRange[0]}}</b> to <b>{{selectedRange[1]}}.</b>
+            <v-flex xs12 class='caption' v-if='$store.state.legend'>
+              Legend: <b>{{groupKey}}</b> min: <b>{{$store.state.legend.min.toLocaleString()}}</b>, max: <b>{{$store.state.legend.max.toLocaleString()}}.</b>
             </v-flex>
-            <!-- <v-flex xs-2 class='caption'>{{selectedRange[1]}}</v-flex> -->
           </v-layout>
         </v-card-text>
       </v-card>
@@ -78,16 +76,20 @@ export default {
     groupKey( newVal, oldVal ) {
       console.log( newVal, oldVal )
       this.filterText = ''
-      this.generateGroups( newVal )
       window.renderer.showObjects( [ ] )
       window.renderer.resetColors( { propagateLegend: true } )
       if ( newVal ) {
+        this.generateGroups( newVal )
         window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true } )
+      }
+
+      if ( newVal === undefined ) {
+        window.renderer.showObjects( [ ] )
       }
     },
     isTextProperty( newVal, oldVal ) {},
     legend: {
-      handler: function( newVal, oldVal ) {
+      handler: function ( newVal, oldVal ) {
         if ( !newVal ) return
         this.min = this.$store.state.legend.min
         this.max = this.$store.state.legend.max
@@ -103,7 +105,9 @@ export default {
       return this.myGroups.filter( gr => gr.name.toLowerCase( ).includes( this.filterText.toLowerCase( ) ) )
     },
     orphanGroup( ) {
-      return this.myGroups[ 0 ] ? this.myGroups[ 0 ] : null
+      let orphans = this.myGroups.find( gr => gr.name === "Orphaned Objects" )
+      return orphans
+      // return this.myGroups[ 0 ] ? this.myGroups[ 0 ] : null
     },
     keys( ) {
       return this.$store.getters.objectPropertyKeys

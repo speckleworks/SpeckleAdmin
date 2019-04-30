@@ -34,7 +34,6 @@
               <v-tab-item key='filter'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    <!-- <v-autocomplete box label='select a property to group objects by' clearable v-model="selectedFilter" :items="$store.getters.objectPropertyKeys.stringKeys"></v-autocomplete> -->
                     <object-groups :group-key='selectedFilter'></object-groups>
                   </v-card-text>
                 </v-card>
@@ -42,7 +41,6 @@
               <v-tab-item key='inspector'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    <!-- {{$store.state.selectedObjects}} -->
                     <selected-objects></selected-objects>
                   </v-card-text>
                 </v-card>
@@ -114,7 +112,9 @@ export default {
     appendStreamsToRoute( streamId ) {
       // NOTE: this functionality is disabled because o
       let streams = this.$store.state.loadedStreamIds.join( ',' )
-      this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
+      if ( streams !== '' )
+        this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
+      else this.$router.replace( { name: 'viewer' } )
     },
     async addStream( streamId ) {
       this.showLoading = true
@@ -300,15 +300,15 @@ export default {
     this.fetchStreamsFromRoute( )
 
     // Set render events
-    this.renderer.on( 'select-objects', debounce( function( ids ) {
+    this.renderer.on( 'select-objects', debounce( function ( ids ) {
       this.$store.commit( 'SET_SELECTED_OBJECTS', { objectIds: ids } )
     }.bind( this ), 250 ) )
 
-    this.renderer.on( 'select-add-objects', debounce( function( ids ) {
+    this.renderer.on( 'select-add-objects', debounce( function ( ids ) {
       this.$store.commit( 'ADD_SELECTED_OBJECTS', { objectIds: ids } )
     }.bind( this ), 250 ) )
 
-    this.renderer.on( 'select-remove-objects', debounce( function( ids ) {
+    this.renderer.on( 'select-remove-objects', debounce( function ( ids ) {
       this.$store.commit( 'REMOVE_SELECTED_OBJECTS', { objectIds: ids } )
     }.bind( this ), 250 ) )
 
