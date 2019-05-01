@@ -36,7 +36,9 @@ export default new Vuex.Store( {
     legend: null,
     selectedObjects: [ ],
     // client (used for ws requests, etc.)
-    myClient: null
+    myClient: null,
+    // app dark mode?
+    dark: false
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -108,6 +110,9 @@ export default new Vuex.Store( {
     }
   },
   mutations: {
+    SET_DARK( state, dark ) {
+      state.dark = dark
+    },
     // Streams
     ADD_STREAMS( state, streams ) {
       streams.forEach( stream => {

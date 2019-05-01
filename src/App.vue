@@ -59,13 +59,16 @@ export default {
       this.$store.dispatch( 'getProjects' )
       this.$store.dispatch( 'createClient' )
     }
-    if ( localStorage.getItem( 'dark' ) === 'true' ) this.dark = true
+    if ( localStorage.getItem( 'dark' ) === 'true' ) {
+      this.dark = true
+      this.$store.commit( 'SET_DARK', true )
+    }
 
   },
   updated( ) {
     let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
     if ( !overlay ) return
-    overlay.onclick = ( function( ) {
+    overlay.onclick = ( function ( ) {
       this.showSidebar = false
     } ).bind( this )
   }
