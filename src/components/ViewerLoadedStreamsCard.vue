@@ -56,9 +56,11 @@ export default {
         }
         let parsedMessage = JSON.parse( e.data )
         console.log( parsedMessage )
-        if ( parsedMessage.args.eventType === "update-global" ) {
-          this.isExpired = true
-        }
+        try {
+          if ( parsedMessage.args.eventType === "update-global" ) {
+            this.isExpired = true
+          }
+        } catch ( err ) {}
       },
       onclose: e => {
         console.log( e )

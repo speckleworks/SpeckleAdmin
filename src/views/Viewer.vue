@@ -98,6 +98,8 @@ export default {
   data( ) {
     return {
       showLoading: false,
+      looadingProgress: 0,
+      loadingIsDeterminate: false,
       toRequest: [ ],
       requestBuckets: [ ],
       isRequesting: false,
@@ -267,31 +269,21 @@ export default {
 
     async refreshStream( streamId ) {
       this.showLoading = true
-      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      // loaded already?
-      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
-      let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+      let oldObjectIds = this.$store.state.objects.filter( obj => obj.streams.indexOf( streamId ) !== -1 ).map( obj => obj._id )
+      let currObjectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      let toRemove = this.$store.state.objects.filter( obj => {
-        if ( obj.streams.length > 1 ) return false
-        if ( obj.streams.indexOf( streamId ) !== -1 && obj.streams.length === 1 && objectIds.indexOf( obj._id ) === -1 ) return true
-        // let noLongerInStream = objectIds.indexOf( obj._id ) === -1
-      } )
+      let toAdd = currObjectIds.filter( id => oldObjectIds.indexOf(id) === -1 )
+      let toRem = oldObjectIds.filter( id => currObjectIds.indexOf(id) === -1 )
 
-      console.log( 'toRequest' )
-      console.log( toRequest )
-      console.log( 'toUpdate' )
-      console.log( toUpdate )
-      console.log( 'toRemove' )
-      console.log( toRemove )
+      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toRem, streamToRemove: streamId } )
 
-      // update some of the objects in the store?
-      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToRemove: streamId } )
+      let toDelete = this.$store.state.objects.filter( obj => obj.streams.length === 0).map( o => o._id )
+      this.renderer.unloadObjects( { objIds: toDelete } )
+      this.$store.commit('REMOVE_OBJECTS', toDelete )
 
-      // remove the objects that need removing
-      this.renderer.unloadObjects( { objIds: toRemove.map( o => o._id ) } )
-      this.$store.commit( 'REMOVE_OBJECTS', toRemove.map( o => o._id ) )
+      // objects that i need to request for sure, as they have not been loaded before.
+      let toRequest = toAdd.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
 
       if ( toRequest.length === 0 ) {
         this.showLoading = false
