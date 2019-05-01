@@ -41,9 +41,10 @@ export default {
     },
     async initSocket( ) {}
   },
-  mounted( ) {
+  async mounted( ) {
     let wsUrl = this.$store.state.server.replace( 'http', 'ws' ).replace( '/api', '' )
-    console.log( wsUrl )
+    if ( !this.$store.state.client )
+      await this.$store.dispatch( 'createClient' )
     this.ws = new sockette( `${wsUrl}?client_id=${this.$store.state.client._id}`, {
       onopen: e => {
         this.ws.send( JSON.stringify( { eventName: "join", resourceId: this.stream.streamId, resourceType: "stream" } ) )
