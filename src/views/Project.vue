@@ -1,7 +1,7 @@
 <template>
   <v-container grid-list-xl v-if='project'>
     <v-toolbar absolute v-if='project.deleted'>
-      <span>This stream is in your trashbin. </span>
+      <span>This project is in your trashbin. </span>
       <v-spacer></v-spacer>
       <v-btn color='primary' v-if='canEdit' @click.native='restore'> Restore? </v-btn>
     </v-toolbar>

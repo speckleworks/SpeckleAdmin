@@ -4,6 +4,7 @@ import Axios from 'axios'
 
 import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
+import flatten from 'flat'
 
 Vue.use( Vuex )
 
@@ -28,7 +29,16 @@ export default new Vuex.Store( {
     comments: [ ],
     // global store for users. it's dynamically assembled as the end-user moves through
     // the admin ui, and new user profiles need to be requested.
-    users: [ ]
+    users: [ ],
+    // viewer related
+    loadedStreamIds: [ ],
+    objects: [ ],
+    legend: null,
+    selectedObjects: [ ],
+    // client (used for ws requests, etc.)
+    myClient: null,
+    // app dark mode?
+    dark: false
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -78,9 +88,31 @@ export default new Vuex.Store( {
           }
       } )
       return base
+    },
+    objectPropertyKeys: ( state ) => {
+      let keySet = new Set( )
+      let stringKeySet = new Set( )
+      state.objects.forEach( obj => {
+        if ( !obj.properties ) return
+        let flatProps = flatten( obj.properties )
+        for ( let key in flatProps ) {
+          if ( key === 'hash' || key === 'id' || key.toLowerCase( ).includes( 'hash' ) || key.toLowerCase( ).includes( '_carbon' ) ) continue
+          keySet.add( key )
+          if ( typeof flatProps[ key ] === 'string' )
+            stringKeySet.add( key )
+        }
+      } )
+      let keySets = {
+        allKeys: [ ...keySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
+        stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
+      }
+      return keySets
     }
   },
   mutations: {
+    SET_DARK( state, dark ) {
+      state.dark = dark
+    },
     // Streams
     ADD_STREAMS( state, streams ) {
       streams.forEach( stream => {
@@ -94,6 +126,7 @@ export default new Vuex.Store( {
     },
     UPDATE_STREAM( state, props ) {
       let found = state.streams.find( s => s.streamId === props.streamId )
+      if ( !found ) throw new Error( "could not find stream." )
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
@@ -276,6 +309,10 @@ export default new Vuex.Store( {
     SET_USER( state, user ) {
       state.user = user
     },
+    SET_WEB_APP_CLIENT( state, client ) {
+      state.client = client
+    },
+
     // End of life
     FLUSH_ALL( state ) {
       state.token = null
@@ -286,7 +323,58 @@ export default new Vuex.Store( {
       state.users = [ ]
       state.comments = [ ]
       state.isAuth = false
-    }
+    },
+
+    // Viewer related
+    ADD_LOADED_STREAMID( state, streamId ) {
+      state.loadedStreamIds = [ ...new Set( [ ...state.loadedStreamIds, streamId ] ) ]
+    },
+    REMOVE_LOADED_STREAMID( state, streamId ) {
+      let index = state.loadedStreamIds.indexOf( streamId )
+      if ( index !== -1 )
+        state.loadedStreamIds.splice( index, 1 )
+      else
+        console.warn( `Failed to remove loaded streamid: ${streamId} from ${state.loadedStreamIds}` )
+    },
+    // OBJECTS
+    ADD_OBJECTS( state, objects ) {
+      state.objects.push( ...objects )
+    },
+    UPDATE_OBJECTS_STREAMS( state, { objIds, streamToAdd, streamToRemove } ) {
+      objIds.forEach( id => {
+        let myObject = state.objects.find( o => o._id === id )
+        if ( myObject ) {
+          if ( streamToAdd && myObject.streams.indexOf( streamToAdd ) === -1 )
+            myObject.streams.push( streamToAdd )
+          if ( streamToRemove ) {
+            let index = myObject.streams.indexOf( streamToRemove )
+            if ( index !== -1 ) myObject.streams.splice( index, 1 )
+          }
+        }
+      } )
+    },
+    REMOVE_OBJECTS( state, objectIds ) {
+      state.objects = state.objects.filter( obj => objectIds.indexOf( obj._id ) === -1 )
+    },
+    // Selected objects setters
+    SET_SELECTED_OBJECTS( state, { objectIds } ) {
+      if ( objectIds.length > 0 )
+        state.selectedObjects = [ ...new Set( [ ...state.selectedObjects, ...objectIds ] ) ]
+      else
+        state.selectedObjects = [ ]
+    },
+    ADD_SELECTED_OBJECTS( state, { objectIds } ) {
+      state.selectedObjects = [ ...new Set( [ ...state.selectedObjects, ...objectIds ] ) ]
+    },
+    REMOVE_SELECTED_OBJECTS( state, { objectIds } ) {
+      objectIds.forEach( id => {
+        let index = state.selectedObjects.indexOf( id )
+        if ( index !== -1 ) state.selectedObjects.splice( index, 1 )
+      } )
+    },
+    SET_LEGEND( state, legend ) {
+      state.legend = legend
+    },
   },
   actions: {
     // Streams
@@ -304,6 +392,18 @@ export default new Vuex.Store( {
           } )
       } )
     },
+
+    refreshStream( context, props ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.get( `streams/${props.streamId}?omit=objects` )
+          .then( res => {
+            context.commit( 'UPDATE_STREAM', res.data.resource )
+            return resolve( res )
+          } )
+          .catch( err => reject( err ) )
+      } )
+    },
+
     getStreams( context, query ) {
       return new Promise( ( resolve, reject ) => {
         Axios.get( `streams?${query ? query : '' }` )
@@ -385,6 +485,36 @@ export default new Vuex.Store( {
         .catch( err => {
           console.log( err )
         } )
+    },
+
+    // objects
+    getStreamObjects( context, streamId ) {
+      let found = context.state.streams.find( s => s.streamId === streamId )
+      return new Promise( ( resolve, reject ) => {
+        context.dispatch( 'getStream', { streamId: streamId } )
+          .then( ( ) => {
+            return Axios.get( `streams/${streamId}?fields=objects,layers` )
+          } )
+          .then( res => {
+            let ids = res.data.resource.objects.map( o => o._id )
+            context.commit( 'UPDATE_STREAM', { streamId: streamId, objects: ids, layers: res.data.resource.layers } )
+            resolve( ids )
+          } )
+          .catch( err => {
+            reject( err )
+          } )
+      } )
+    },
+    getObjects( context, objectIds ) {
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `objects/getbulk?omit=base64,rawData,canRead,canWrite,children,anonymousComments,name`, objectIds )
+          .then( res => {
+            // context.state.objects.push( ...res.data.resources )
+            // context.commit( 'ADD_OBJECTS', res.data.resources )
+            resolve( res.data.resources )
+          } )
+          .catch( err => reject( err ) )
+      } )
     },
 
     // projects
@@ -571,6 +701,26 @@ export default new Vuex.Store( {
           console.warn( err )
           return reject( err )
         } )
+    } ),
+
+    // client for ws ids, etc.
+    createClient: ( context, props ) => new Promise( ( resolve, reject ) => {
+
+      // NOTE: This is a stupid hack. To get a temp client, we need to be not auhtorised : /
+      delete Axios.defaults.headers.common[ 'Authorization' ]
+
+      Axios.post( `clients`, { role: 'online-client', documentName: 'Online interface', documentType: 'browser', online: true } )
+        .then( res => {
+          console.log( res )
+          context.commit( 'SET_WEB_APP_CLIENT', res.data.resource )
+          return resolve( res.data.resource )
+        } )
+        .catch( err => {
+          console.warn( err )
+          return reject( err )
+        } )
+      // set the headers back. man what a stupid hack this is...
+      Axios.defaults.headers.common[ 'Authorization' ] = context.state.token
     } ),
 
     // users
