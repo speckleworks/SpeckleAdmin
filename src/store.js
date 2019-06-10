@@ -13,7 +13,7 @@ function removeArraysRecursive( foo ) {
 
   for ( let key in foo ) {
     if ( !foo.hasOwnProperty( key ) ) continue
-    else if ( Array.isArray( foo[ key ] ) ) {/*DO FUCKALL */} else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+    else if ( Array.isArray( foo[ key ] ) ) { /*DO FUCKALL */ } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
       bar[ key ] = removeArraysRecursive( foo[ key ] )
     } else {
       bar[ key ] = foo[ key ]
@@ -122,6 +122,15 @@ export default new Vuex.Store( {
         stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
       }
       return keySets
+    },
+    hasStructuralProperties: ( state ) => {
+      for ( let obj of state.objects ) {
+        try {
+          if ( obj.properties.structural.result !== null )
+            return true
+        } catch {}
+      }
+      return false
     }
   },
   mutations: {
