@@ -676,6 +676,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   zoomExtents( ) {
+    this.computeSceneBoundingSphere()
     let offset = this.sceneBoundingSphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
     let vector = new THREE.Vector3( 0, 0, 1 )
     let dir = vector.applyQuaternion( this.controls.object.quaternion );
@@ -706,8 +707,11 @@ export default class SpeckleRenderer extends EE {
         radius = obj.geometry.boundingSphere.radius
         continue
       }
+
       center.add( obj.geometry.boundingSphere.center )
+
       center.divideScalar( 2 )
+
       let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo( obj.geometry.boundingSphere.center )
       if ( radius < otherDist ) radius = otherDist
     }

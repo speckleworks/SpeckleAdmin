@@ -1,12 +1,7 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12 v-if='selectedObjectsId.length===0'>
-      <h1 class='font-weight-light'>
-        There are no selected objects 📦
-        <v-divider class='my-4'></v-divider>
-      </h1>
-      <p>
-        You can select objects in the 3d model:
+        There are no selected objects. You can select objects in the 3d model:
         <ul>
           <li>by clicking on them;</li>
           <li>by clicking on them and holding down shift;</li>

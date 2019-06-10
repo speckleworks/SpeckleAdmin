@@ -8,6 +8,20 @@ import flatten from 'flat'
 
 Vue.use( Vuex )
 
+function removeArraysRecursive( foo ) {
+  let bar = {}
+
+  for ( let key in foo ) {
+    if ( !foo.hasOwnProperty( key ) ) continue
+    else if ( Array.isArray( foo[ key ] ) ) {/*DO FUCKALL */} else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+      bar[ key ] = removeArraysRecursive( foo[ key ] )
+    } else {
+      bar[ key ] = foo[ key ]
+    }
+  }
+  return bar
+}
+
 export default new Vuex.Store( {
   state: {
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`
@@ -94,9 +108,10 @@ export default new Vuex.Store( {
       let stringKeySet = new Set( )
       state.objects.forEach( obj => {
         if ( !obj.properties ) return
-        let flatProps = flatten( obj.properties )
+        let flatProps = flatten( removeArraysRecursive( obj.properties ) )
         for ( let key in flatProps ) {
           if ( key === 'hash' || key === 'id' || key.toLowerCase( ).includes( 'hash' ) || key.toLowerCase( ).includes( '_carbon' ) ) continue
+          if ( key.includes( '__' ) ) continue
           keySet.add( key )
           if ( typeof flatProps[ key ] === 'string' )
             stringKeySet.add( key )

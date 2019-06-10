@@ -1,11 +1,14 @@
 <template>
   <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
+    <div style='position: absolute; top:0; width: 100%; z-index: 1000;'>
+      <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
+    </div>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height:auto; max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height: auto; max-height: calc(100vh - 164px); overflow-y: auto; direction: rtl; left: -20px; top:20px; position:relative; z-index:1; transition: all .3s ease;'>
         <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
-            <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
+            <!-- <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear> -->
             <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
               <v-tab key='streams'>
                 <v-icon>import_export</v-icon>
@@ -160,6 +163,8 @@ export default {
         this.objectAccumulator = [ ]
         console.log( `done processing buckets!` )
         this.showLoading = false
+
+        this.renderer.zoomExtents()
         bus.$emit( 'loading-done' )
         return
       }

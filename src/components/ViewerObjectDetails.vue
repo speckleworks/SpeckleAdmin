@@ -1,6 +1,6 @@
 <template>
   <div class='transparent'>
-    <vue-json-pretty :data='json' :deep='1' highlight-mouseover-node show-length :show-line='false' :show-double-quotes='false'></vue-json-pretty>
+    <vue-json-pretty :data='theObject' :deep='2' highlight-mouseover-node show-length :show-line='false' :show-double-quotes='false'></vue-json-pretty>
     <br>
     <v-divider></v-divider>
     <br>
@@ -15,11 +15,36 @@ export default {
   props: {
     json: Object,
   },
-  computed: {},
+  computed: {
+    theObject() {
+      return this.removeArraysRecursive( this.json )
+    }
+  },
   data( ) {
     return {}
   },
-  methods: {}
+  methods: {
+    removeArraysRecursive( foo ) {
+      let bar = {}
+
+      for ( let key in foo ) {
+        if ( !foo.hasOwnProperty( key ) ) continue
+        else if ( Array.isArray( foo[ key ] ) ) {
+          /*DO FUCKALL */
+          if( foo[key].length < 3 )
+            bar[key] = foo[key]
+          else {
+            bar[key] = [ ...foo[key].slice(0, 3), `... (${foo[key].length - 3} more values)` ]
+          }
+        } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+          bar[ key ] = this.removeArraysRecursive( foo[ key ] )
+        } else {
+          bar[ key ] = foo[ key ]
+        }
+      }
+      return bar
+    }
+  }
 }
 
 </script>
