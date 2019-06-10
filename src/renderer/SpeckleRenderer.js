@@ -55,7 +55,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   initialise( ) {
-    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } )
+    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
     this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight )
     // this.renderer.setClearColor( new THREE.Color(  ), 0.0 )
     this.renderer.shadowMap.enabled = true
@@ -90,6 +90,8 @@ export default class SpeckleRenderer extends EE {
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
+
+
     // this.controls.enableDamping = true
     // this.controls.dampingFactor = 0.45
     // this.controls = new TrackballControls( this.camera, this.renderer.domElement  )
@@ -122,11 +124,14 @@ export default class SpeckleRenderer extends EE {
 
     this.computeSceneBoundingSphere( )
     this.render( )
+
+    // this.controls.addEventListener( 'change', this.setFar(this).bind( this ) )
   }
 
   animate( ) {
     requestAnimationFrame( this.animate.bind( this ) );
     TWEEN.update( )
+    this.setFar( )
     this.controls.update( )
     this.render( )
   }
@@ -710,7 +715,12 @@ export default class SpeckleRenderer extends EE {
     this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.5 : 100 }
   }
 
-  setFar( ) {}
+  setFar( ) {
+    let camDistance = this.camera.position.distanceTo( this.sceneBoundingSphere.center )
+    this.camera.far = 2 * this.sceneBoundingSphere.radius + camDistance
+    this.camera.updateProjectionMatrix( )
+  }
+
   setCamera( where, time ) {
     let self = this
     let duration = time ? time : 350

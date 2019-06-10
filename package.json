@@ -26,7 +26,7 @@
     "lodash.union": "^4.6.0",
     "lodash.uniq": "^4.5.0",
     "marked": "^0.5.2",
-    "node-sass": "^4.10.0",
+    "node-sass": "^4.12.0",
     "papaparse": "^4.6.2",
     "rainbowvis.js": "^1.0.1",
     "sass-loader": "^7.1.0",
