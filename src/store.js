@@ -13,10 +13,26 @@ function removeArraysRecursive( foo ) {
 
   for ( let key in foo ) {
     if ( !foo.hasOwnProperty( key ) ) continue
-    else if ( Array.isArray( foo[ key ] ) ) { /*DO FUCKALL */ } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+    else if ( Array.isArray( foo[ key ] ) ) {
+      //bar[ key + ' (array)' ] = `Array with ${ foo[key].length } elements`
+    } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
       bar[ key ] = removeArraysRecursive( foo[ key ] )
     } else {
       bar[ key ] = foo[ key ]
+    }
+  }
+  return bar
+}
+
+function getStructuralArrPropKeys( foo ) {
+  let bar = {}
+
+  for ( let key in foo ) {
+    if ( !foo.hasOwnProperty( key ) ) continue
+    else if ( Array.isArray( foo[ key ] ) ) {
+      bar[ key ] = `Array with ${ foo[key].length } elements`
+    } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+      bar[ key ] = getStructuralArrPropKeys( foo[ key ] )
     }
   }
   return bar
@@ -123,6 +139,7 @@ export default new Vuex.Store( {
       }
       return keySets
     },
+    // NOTE: this assumes results from GSA
     hasStructuralProperties: ( state ) => {
       for ( let obj of state.objects ) {
         try {
@@ -131,6 +148,18 @@ export default new Vuex.Store( {
         } catch {}
       }
       return false
+    },
+    // NOTE: this assumes results from GSA
+    structuralKeys: ( state ) => {
+      let keys = new Set( )
+      for ( let obj of state.objects ) {
+        try {
+          let props = flatten( getStructuralArrPropKeys( obj.properties.structural.result ) )
+          for ( let key in props )
+            keys.add( key )
+        } catch {}
+      }
+      return [ ...keys ]
     }
   },
   mutations: {

@@ -5,7 +5,7 @@
     </div>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height: auto; max-height: calc(100vh - 164px); overflow-y: auto; direction: rtl; left: -20px; top:20px; position:relative; z-index:1; transition: all .3s ease;'>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height: auto; max-height: calc(100vh - 164px); overflow-y: auto; direction: rtl; left: -20px; top:0px; position:relative; z-index:1; transition: all .3s ease;'>
         <v-layout row wrap style="direction:ltr; padding-left:20px;">
           <v-flex xs12>
             <!-- <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear> -->
@@ -14,7 +14,7 @@
                 <v-icon>import_export</v-icon>
               </v-tab>
               <v-tab key='filter'>
-                <v-icon>dns</v-icon>
+                <v-icon>layers</v-icon>
               </v-tab>
               <v-tab key='inspector'>
                 <v-badge small right :value='$store.state.selectedObjects.length>0' color='primary'>

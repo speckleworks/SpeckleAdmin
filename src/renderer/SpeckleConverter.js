@@ -385,7 +385,7 @@ let Converter = {
         k += 5
       }
       // TRIANGLE FACE
-      if ( obj.faces[ k ] === 0 ) {
+      else if ( obj.faces[ k ] === 0 ) {
         indices.push( obj.faces[ k + 1 ], obj.faces[ k + 2 ], obj.faces[ k + 3 ] )
         k += 4
       }
@@ -396,6 +396,9 @@ let Converter = {
     geometry.computeVertexNormals( )
 
     let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
+
+    // NOTE: needed to rematch with face arr colors
+    mesh.userData.originalFaceArray = obj.faces
 
     return cb( null, mesh )
   },

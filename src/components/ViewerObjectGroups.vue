@@ -1,9 +1,12 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12>
-      <v-autocomplete box label='select a property to group objects by' clearable v-model="groupKey" :items="$store.getters.objectPropertyKeys.allKeys"></v-autocomplete>
+      <v-autocomplete box label='select a property to group objects by' clearable v-model="groupKey" :items="allKeys"></v-autocomplete>
       <v-text-field v-show='isTextProperty' label="filter" v-model='filterText' hint='Search through the layers below' append-icon='filter_list' clearable></v-text-field>
     </v-flex>
+    <!--     <v-flex xs12 v-if='$store.getters["hasStructuralProperties"]'>
+      <v-btn block>Show structural</v-btn>
+    </v-flex> -->
     <v-flex xs12 v-if='isTextProperty && groupKey'>
       <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
@@ -74,10 +77,17 @@ export default {
   props: {},
   watch: {
     groupKey( newVal, oldVal ) {
-      console.log( newVal, oldVal )
       this.filterText = ''
       window.renderer.showObjects( [ ] )
+
       window.renderer.resetColors( { propagateLegend: true } )
+
+      if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
+        console.log( 'its a structural propertyyyyyy' )
+        window.renderer.colorByVertexArray( { propertyName: newVal } )
+        return
+      }
+
       if ( newVal ) {
         this.generateGroups( newVal )
         window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true } )
@@ -87,7 +97,6 @@ export default {
         window.renderer.showObjects( [ ] )
       }
     },
-    isTextProperty( newVal, oldVal ) {},
     legend: {
       handler: function ( newVal, oldVal ) {
         if ( !newVal ) return
@@ -113,7 +122,10 @@ export default {
       return this.$store.getters.objectPropertyKeys
     },
     allKeys( ) {
-      return this.$store.getters.objectPropertyKeys.allKeys
+      return [ ...this.$store.getters.objectPropertyKeys.allKeys, ...this.$store.getters.structuralKeys ]
+    },
+    structuralKeys( ) {
+      return this.$store.getters.structuralKeys
     },
     isTextProperty( ) {
       return this.keys.stringKeys.indexOf( this.groupKey ) !== -1
@@ -211,6 +223,7 @@ export default {
         }
       } )
     },
+
   }
 }
 

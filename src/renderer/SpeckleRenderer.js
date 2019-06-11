@@ -382,7 +382,7 @@ export default class SpeckleRenderer extends EE {
         if ( Converter.hasOwnProperty( convertType ) )
           Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
             threeObj.userData._id = obj._id
-            threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
+            threeObj.userData.properties = obj.properties ? flatten( obj.properties, { safe: true } ) : null
             threeObj.userData.originalColor = threeObj.material.color.clone( )
             threeObj.geometry.computeBoundingSphere( )
             this.scene.add( threeObj )
@@ -490,7 +490,7 @@ export default class SpeckleRenderer extends EE {
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
-    rainbow.setSpectrum( '#0A66FF', '#FC4CA5' )
+    // rainbow.setSpectrum( '#0A66FF', '#FC4CA5' )
 
     foundObjs.forEach( ( obj, index ) => {
       let value = obj.userData.properties[ propertyName ],
@@ -573,6 +573,53 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  colorByVertexArray( { propertyName } ) {
+    let globalMin = Number.MAX_VALUE,
+      globalMax = -Number.MIN_VALUE,
+      toReset = [ ],
+      toColour = [ ]
+
+    for ( let obj of this.scene.children ) {
+      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ `structural.result.${propertyName}` ] ) ) {
+        toReset.push( obj )
+        continue
+      }
+      let min = Math.min( ...obj.userData.properties[ `structural.result.${propertyName}` ] )
+      let max = Math.max( ...obj.userData.properties[ `structural.result.${propertyName}` ] )
+      if ( min < globalMin ) globalMin = min
+      if ( max > globalMax ) globalMax = max
+      toColour.push( obj )
+    }
+
+    console.log( `👨‍🎨 ::: prop: ${propertyName} ::: min: ${globalMin}; max: ${globalMax}; objs: ${toColour.length}` )
+
+    let rainbow = new Rainbow( )
+    rainbow.setNumberRange( globalMin, globalMax )
+    // rainbow.setSpectrum( '#0A40FF', '#FC4CA5' )
+    rainbow.setSpectrum( '#0000FF', '#E4CB35', '#E200FF' )
+
+    for ( let obj of toColour ) {
+      let colors = new Uint8Array( obj.userData.properties[ `structural.result.${propertyName}` ].length * 3 ),
+        k = 0
+
+      for ( let val of obj.userData.properties[ `structural.result.${propertyName}` ] ) {
+        let myColour = hexToRgb( rainbow.colourAt( val ) )
+        // colors.push( myColour.r, myColour.g, myColour.b )
+        colors[ k++ ] = myColour.r
+        colors[ k++ ] = myColour.g
+        colors[ k++ ] = myColour.b
+      }
+
+      console.log( colors )
+      obj.geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) )
+      obj.geometry.attributes.color.needsUpdate = true
+      obj.geometry.colorsNeedUpdate = true
+      obj.material.vertexColors = THREE.VertexColors
+      obj.material.needsUpdate = true
+    }
+    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: true, min: globalMin, max: globalMax, objectCount: toColour.length } )
+  }
+
   resetColors( { propagateLegend } ) {
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
@@ -580,6 +627,10 @@ export default class SpeckleRenderer extends EE {
     let defaultColor = new THREE.Color( '#B3B3B3' )
 
     for ( let obj of this.scene.children ) {
+      if ( obj.material ) {
+        obj.material.vertexColors = THREE.NoColors
+        obj.material.needsUpdate = true
+      }
       if ( obj.material ) obj.material.color.copy( defaultColor )
       continue
       if ( !obj.material ) continue
@@ -676,7 +727,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   zoomExtents( ) {
-    this.computeSceneBoundingSphere()
+    this.computeSceneBoundingSphere( )
     let offset = this.sceneBoundingSphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
     let vector = new THREE.Vector3( 0, 0, 1 )
     let dir = vector.applyQuaternion( this.controls.object.quaternion );
@@ -774,4 +825,21 @@ export default class SpeckleRenderer extends EE {
     }
     doChunk( )
   }
+}
+
+
+// Helper
+function hexToRgb( hex ) {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace( shorthandRegex, function ( m, r, g, b ) {
+    return r + r + g + g + b + b;
+  } );
+
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
+  return result ? {
+    r: parseInt( result[ 1 ], 16 ),
+    g: parseInt( result[ 2 ], 16 ),
+    b: parseInt( result[ 3 ], 16 )
+  } : null;
 }
