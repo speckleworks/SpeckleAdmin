@@ -68,7 +68,9 @@ export default new Vuex.Store( {
     // client (used for ws requests, etc.)
     myClient: null,
     // app dark mode?
-    dark: false
+    dark: false,
+    // toggles viewer controls
+    viewerControls: true
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -165,6 +167,9 @@ export default new Vuex.Store( {
   mutations: {
     SET_DARK( state, dark ) {
       state.dark = dark
+    },
+    TOGGLE_VIEWER_CONTROLS( state ) {
+      state.viewerControls = !state.viewerControls
     },
     // Streams
     ADD_STREAMS( state, streams ) {
