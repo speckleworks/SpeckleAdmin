@@ -432,7 +432,7 @@ export default class SpeckleRenderer extends EE {
   // entry point for any attempt to color things by their properties in the viewer
   // depending on the property, it will either call "colorByNumericProperty" or
   // "colorByStringProperty" (see below)
-  colorByProperty( { propertyName, propagateLegend } ) {
+  colorByProperty( { propertyName, propagateLegend, colors } ) {
     console.log( propagateLegend )
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
@@ -449,7 +449,7 @@ export default class SpeckleRenderer extends EE {
     let isNumeric = !isNaN( first.userData.properties[ propertyName ] )
     console.log( `coloring by ${propertyName}, which is (numeric: ${isNumeric})` )
 
-    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
+    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName, propagateLegend: propagateLegend, colors } )
     else this.colorByStringProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
   }
 

@@ -84,13 +84,13 @@ export default {
       if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
         console.log( 'its a structural propertyyyyyy' )
         this.generateGroups( 'structural.result.' + newVal )
-        window.renderer.colorByVertexArray( { propertyName: newVal, colors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ] } )
+        window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
         return
       }
 
       if ( newVal ) {
         this.generateGroups( newVal )
-        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ] } )
+        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
       }
 
       if ( newVal === undefined ) {
@@ -141,6 +141,8 @@ export default {
       loading: false,
       filterText: null,
       selectedRange: [ 0, 1000 ],
+      rainbowColors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ],
+      coolColors: [ "#0A66FF", "#FF008A"],
     }
   },
   methods: {
@@ -187,7 +189,7 @@ export default {
             objIds = [ ...objIds, ...this.myGroups[ 0 ].objects ]
           window.renderer.isolateObjects( objIds )
           window.renderer.resetColors( { propagateLegend: false } )
-          window.renderer.colorByProperty( { propertyName: this.groupKey, propagateLegend: false } )
+          window.renderer.colorByProperty( { propertyName: this.groupKey, propagateLegend: false, colors: this.coolColors } )
         }
       } )
     },
