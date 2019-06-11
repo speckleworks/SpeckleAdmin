@@ -22,6 +22,24 @@
       <v-flex xs12 v-if='streams.length !== 0 || projects.length !== 0'>
         <search-everything />
       </v-flex>
+      <v-flex xs12 md6>
+        <v-toolbar dense class=' '>
+          <v-icon left>
+            fiber_new
+          </v-icon>
+          <span class='title font-weight-light'>
+            Speckle News
+          </span>
+          <v-spacer></v-spacer>
+          <!-- <v-toolbar-items>
+            <v-btn flat href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle!</v-btn>
+          </v-toolbar-items> -->
+        </v-toolbar>
+        <v-card style='max-height: 560px; overflow-y: auto;'>
+          <Timeline :id="'speckle_works'" :sourceType="'profile'" :options="{ theme: $store.state.dark ? 'dark' : '', tweetLimit: 10 }" />
+        </v-card>
+        <v-btn block large xxxcolor='black' href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle For More!</v-btn>
+      </v-flex>
       <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
         <v-card class="elevation-1">
           <v-card-title>
@@ -86,24 +104,6 @@
             <v-btn to='/projects/' class=''>See all your {{this.$store.state.projects.length}} projects</v-btn>
           </v-card-actions>
         </v-card>
-      </v-flex>
-      <v-flex xs12 md4 my-5>
-        <v-toolbar dense class=' '>
-          <v-icon left>
-            fiber_new
-          </v-icon>
-          <span class='title font-weight-light'>
-            Speckle News
-          </span>
-          <v-spacer></v-spacer>
-          <!-- <v-toolbar-items>
-            <v-btn flat href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle!</v-btn>
-          </v-toolbar-items> -->
-        </v-toolbar>
-        <v-card style='max-height: 840px; overflow-y: auto;'>
-          <Timeline :id="'speckle_works'" :sourceType="'profile'" :options="{ theme: $store.state.dark ? 'dark' : '', tweetLimit: 10 }" />
-        </v-card>
-        <v-btn block large color='primary' href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle For More!</v-btn>
       </v-flex>
     </v-layout>
   </v-container>
