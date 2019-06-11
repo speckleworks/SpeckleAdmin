@@ -53,16 +53,15 @@
       <!-- <v-divider></v-divider> -->
       <v-card class='' v-if='groupKey !== undefined && !isTextProperty && $store.state.legend' xxxv-if="$store.state.legend && selectedRange.length !== 0">
         <v-card-text v-if='selectedRange'>
-          <h1 class='font-weight-light' style='color:#3498db;'>Minimum: {{selectedRange[0].toLocaleString()}}</h1>
-          <h1 class='font-weight-light' style='color:#f05b72;'>Maximum: {{selectedRange[1].toLocaleString()}}</h1>
+          <h1 class='font-weight-light' >Min: <b>{{selectedRange[0].toLocaleString()}}</b>, Max: <b>{{selectedRange[1].toLocaleString()}}</b></h1>
         </v-card-text>
         <v-card-text>
           <v-layout align-center row wrap>
-            <v-flex xs-12 pa-2>
+            <v-flex xs-12 pa-2 v-if='legend.isNumeric'>
               <v-range-slider v-model="selectedRange" :max="$store.state.legend.max" :min="$store.state.legend.min" :step="0" @end='filterProp'></v-range-slider>
             </v-flex>
             <v-flex xs12 class='caption' v-if='$store.state.legend'>
-              Legend: <b>{{groupKey}}</b> min: <b>{{$store.state.legend.min.toLocaleString()}}</b>, max: <b>{{$store.state.legend.max.toLocaleString()}}.</b>
+              Legend key: <b>{{groupKey}}</b><br> min: <b>{{$store.state.legend.min}}</b>, max: <b>{{$store.state.legend.max}}.</b>
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -84,13 +83,14 @@ export default {
 
       if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
         console.log( 'its a structural propertyyyyyy' )
-        window.renderer.colorByVertexArray( { propertyName: newVal } )
+        this.generateGroups( 'structural.result.' + newVal )
+        window.renderer.colorByVertexArray( { propertyName: newVal, colors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ] } )
         return
       }
 
       if ( newVal ) {
         this.generateGroups( newVal )
-        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true } )
+        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ] } )
       }
 
       if ( newVal === undefined ) {

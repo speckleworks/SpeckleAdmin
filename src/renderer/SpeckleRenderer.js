@@ -455,7 +455,7 @@ export default class SpeckleRenderer extends EE {
 
   // attempts to color all objects  in the scene by a numeric property, computing its bounds
   // and generating a gradient from min (blue) to max (pinkish)
-  colorByNumericProperty( { propertyName, propagateLegend } ) {
+  colorByNumericProperty( { propertyName, propagateLegend, colors } ) {
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
     // compute bounds
@@ -490,7 +490,7 @@ export default class SpeckleRenderer extends EE {
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
-    // rainbow.setSpectrum( '#0A66FF', '#FC4CA5' )
+    rainbow.setSpectrum( ...colors )
 
     foundObjs.forEach( ( obj, index ) => {
       let value = obj.userData.properties[ propertyName ],
@@ -573,7 +573,7 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
-  colorByVertexArray( { propertyName } ) {
+  colorByVertexArray( { propertyName, colors } ) {
     let globalMin = Number.MAX_VALUE,
       globalMax = -Number.MIN_VALUE,
       toReset = [ ],
@@ -595,8 +595,7 @@ export default class SpeckleRenderer extends EE {
 
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( globalMin, globalMax )
-    // rainbow.setSpectrum( '#0A40FF', '#FC4CA5' )
-    rainbow.setSpectrum( '#0000FF', '#E4CB35', '#E200FF' )
+    rainbow.setSpectrum( ...colors )
 
     for ( let obj of toColour ) {
       let colors = new Uint8Array( obj.userData.properties[ `structural.result.${propertyName}` ].length * 3 ),
@@ -604,20 +603,18 @@ export default class SpeckleRenderer extends EE {
 
       for ( let val of obj.userData.properties[ `structural.result.${propertyName}` ] ) {
         let myColour = hexToRgb( rainbow.colourAt( val ) )
-        // colors.push( myColour.r, myColour.g, myColour.b )
         colors[ k++ ] = myColour.r
         colors[ k++ ] = myColour.g
         colors[ k++ ] = myColour.b
       }
-
-      console.log( colors )
       obj.geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) )
       obj.geometry.attributes.color.needsUpdate = true
       obj.geometry.colorsNeedUpdate = true
       obj.material.vertexColors = THREE.VertexColors
+      obj.material.opacity = 1
       obj.material.needsUpdate = true
     }
-    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: true, min: globalMin, max: globalMax, objectCount: toColour.length } )
+    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, min: globalMin, max: globalMax, objectCount: toColour.length } )
   }
 
   resetColors( { propagateLegend } ) {
@@ -628,6 +625,7 @@ export default class SpeckleRenderer extends EE {
 
     for ( let obj of this.scene.children ) {
       if ( obj.material ) {
+        obj.material.opacity = 0.84
         obj.material.vertexColors = THREE.NoColors
         obj.material.needsUpdate = true
       }
