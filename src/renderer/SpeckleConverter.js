@@ -70,7 +70,7 @@ class MaterialManager {
     if ( c !== false ) color.hex = c
     return new THREE.LineBasicMaterial( {
       color: new THREE.Color( color.hex ),
-      linewidth: 1,
+      linewidth: 2,
       opacity: color.a
     } )
   }
@@ -285,7 +285,7 @@ let Converter = {
       } )
 
       holeProfile.geometry.applyMatrix( mInverse )
-      holeProfile.geometry.vertices.forEach( function( vertex ) {
+      holeProfile.geometry.vertices.forEach( function ( vertex ) {
         holePts.push( new THREE.Vector2( vertex.x, vertex.y ) )
       } )
       let holePath = new THREE.Path( holePts )
@@ -328,18 +328,19 @@ let Converter = {
     cb( null, box )
   },
 
-  Polyline( args, cb ) {
-    //console.log( args.obj )
-    let geometry = new THREE.Geometry( )
-    if ( !args.obj.value ) return console.warn( 'Strange polyline.' )
-    if ( args.obj.closed == true ) {
-      args.obj.value.push.apply( args.obj.value, args.obj.value.slice( 0, 3 ) )
-    }
-    for ( let i = 2; i < args.obj.value.length; i += 3 )
-      geometry.vertices.push( new THREE.Vector3( args.obj.value[ i - 2 ], args.obj.value[ i - 1 ], args.obj.value[ i ] ) )
+  Structural1DElementPolyline( args, cb ) {
+    args.obj.value = args.obj.properties.structural.resultVertices
+    this.Polyline( { obj: args.obj }, ( err, obj ) => {
+      if ( err ) return cb( err, null )
+      return cb( null, obj )
+    } )
+  },
 
-    // prepare for potential coloring!
-    geometry.vertices.forEach( ( v, i ) => { geometry.colors.push( this.defaultColor ) } )
+  Polyline( args, cb ) {
+    let geometry = new THREE.BufferGeometry( )
+
+    geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
+    geometry.computeBoundingSphere( )
 
     let polyline = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
     polyline.hash = args.obj.hash
@@ -385,7 +386,7 @@ let Converter = {
         k += 5
       }
       // TRIANGLE FACE
-      if ( obj.faces[ k ] === 0 ) {
+      else if ( obj.faces[ k ] === 0 ) {
         indices.push( obj.faces[ k + 1 ], obj.faces[ k + 2 ], obj.faces[ k + 3 ] )
         k += 4
       }
@@ -396,6 +397,9 @@ let Converter = {
     geometry.computeVertexNormals( )
 
     let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
+
+    // NOTE: needed to rematch with face arr colors
+    mesh.userData.originalFaceArray = obj.faces
 
     return cb( null, mesh )
   },

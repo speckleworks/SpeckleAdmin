@@ -8,6 +8,36 @@ import flatten from 'flat'
 
 Vue.use( Vuex )
 
+function removeArraysRecursive( foo ) {
+  let bar = {}
+
+  for ( let key in foo ) {
+    if ( !foo.hasOwnProperty( key ) ) continue
+    else if ( Array.isArray( foo[ key ] ) ) {
+      //bar[ key + ' (array)' ] = `Array with ${ foo[key].length } elements`
+    } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+      bar[ key ] = removeArraysRecursive( foo[ key ] )
+    } else {
+      bar[ key ] = foo[ key ]
+    }
+  }
+  return bar
+}
+
+function getStructuralArrPropKeys( foo ) {
+  let bar = {}
+
+  for ( let key in foo ) {
+    if ( !foo.hasOwnProperty( key ) ) continue
+    else if ( Array.isArray( foo[ key ] ) ) {
+      bar[ key ] = `Array with ${ foo[key].length } elements`
+    } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+      bar[ key ] = getStructuralArrPropKeys( foo[ key ] )
+    }
+  }
+  return bar
+}
+
 export default new Vuex.Store( {
   state: {
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`
@@ -38,7 +68,9 @@ export default new Vuex.Store( {
     // client (used for ws requests, etc.)
     myClient: null,
     // app dark mode?
-    dark: false
+    dark: false,
+    // toggles viewer controls
+    viewerControls: true
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -94,9 +126,10 @@ export default new Vuex.Store( {
       let stringKeySet = new Set( )
       state.objects.forEach( obj => {
         if ( !obj.properties ) return
-        let flatProps = flatten( obj.properties )
+        let flatProps = flatten( removeArraysRecursive( obj.properties ) )
         for ( let key in flatProps ) {
           if ( key === 'hash' || key === 'id' || key.toLowerCase( ).includes( 'hash' ) || key.toLowerCase( ).includes( '_carbon' ) ) continue
+          if ( key.includes( '__' ) ) continue
           keySet.add( key )
           if ( typeof flatProps[ key ] === 'string' )
             stringKeySet.add( key )
@@ -107,11 +140,36 @@ export default new Vuex.Store( {
         stringKeys: [ ...stringKeySet ].sort( ( a, b ) => { return a.split( '.' ).length - b.split( '.' ).length } ).sort( ( a, b ) => { return a.length - b.length } ),
       }
       return keySets
+    },
+    // NOTE: this assumes results from GSA
+    hasStructuralProperties: ( state ) => {
+      for ( let obj of state.objects ) {
+        try {
+          if ( obj.properties.structural.result !== null )
+            return true
+        } catch {}
+      }
+      return false
+    },
+    // NOTE: this assumes results from GSA
+    structuralKeys: ( state ) => {
+      let keys = new Set( )
+      for ( let obj of state.objects ) {
+        try {
+          let props = flatten( getStructuralArrPropKeys( obj.properties.structural.result ) )
+          for ( let key in props )
+            keys.add( key )
+        } catch {}
+      }
+      return [ ...keys ]
     }
   },
   mutations: {
     SET_DARK( state, dark ) {
       state.dark = dark
+    },
+    TOGGLE_VIEWER_CONTROLS( state ) {
+      state.viewerControls = !state.viewerControls
     },
     // Streams
     ADD_STREAMS( state, streams ) {

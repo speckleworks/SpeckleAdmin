@@ -1,6 +1,9 @@
 <template>
   <v-card :class="{'stream-card':true, 'elevation-10':selected, 'elevation-1': true}">
     <v-card-title>
+      <v-btn icon @click.native='$router.push(`/view/${stream.streamId}`)'>
+        <v-icon>360</v-icon>
+      </v-btn>
       <span class='title font-weight-light'>{{stream.name ? stream.name : "Stream Has No Name"}}</span>
       <v-spacer></v-spacer>
       <span></span>
@@ -81,7 +84,7 @@ export default {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, deleted: true } )
       this.$emit( 'deleted' )
     },
-    updateTags: debounce( function( e ) {
+    updateTags: debounce( function ( e ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, tags: this.stream.tags } )
     }, 1000 )
   },

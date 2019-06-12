@@ -14,12 +14,15 @@
     <v-toolbar app flat class=''>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
+      <div v-if='$route.path.includes("view")' class='mt-1'>
+        <v-btn small round flat @click.native='toggleControlsViewer'>{{$store.state.viewerControls ? "close" :"show"}} controls</v-btn>
+      </div>
       <v-spacer></v-spacer>
-      <v-btn flat icon @click.native='toggleDark()'>
-        <v-icon>{{dark ? "wb_sunny" : "brightness_4"}}</v-icon>
-      </v-btn>
       <v-btn small flat @click.native='logout()'>
         Logout
+      </v-btn>
+      <v-btn flat small icon @click.native='toggleDark()'>
+        <v-icon small>wb_sunny</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>
@@ -41,7 +44,8 @@ export default {
   },
   data: _ => ( {
     drawer: true,
-    dark: false
+    dark: false,
+    viewerControls: true
   } ),
   methods: {
     toggleDark( ) {
@@ -51,6 +55,9 @@ export default {
     logout( ) {
       this.$store.dispatch( 'logout' )
       this.$router.push( '/login' )
+    },
+    toggleControlsViewer( ) {
+      this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
     }
   },
   created( ) {

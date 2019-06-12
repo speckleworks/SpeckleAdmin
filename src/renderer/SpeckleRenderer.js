@@ -55,7 +55,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   initialise( ) {
-    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } )
+    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
     this.renderer.setSize( this.domObject.offsetWidth, this.domObject.offsetHeight )
     // this.renderer.setClearColor( new THREE.Color(  ), 0.0 )
     this.renderer.shadowMap.enabled = true
@@ -90,6 +90,8 @@ export default class SpeckleRenderer extends EE {
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
+
+
     // this.controls.enableDamping = true
     // this.controls.dampingFactor = 0.45
     // this.controls = new TrackballControls( this.camera, this.renderer.domElement  )
@@ -122,11 +124,14 @@ export default class SpeckleRenderer extends EE {
 
     this.computeSceneBoundingSphere( )
     this.render( )
+
+    // this.controls.addEventListener( 'change', this.setFar(this).bind( this ) )
   }
 
   animate( ) {
     requestAnimationFrame( this.animate.bind( this ) );
     TWEEN.update( )
+    this.setFar( )
     this.controls.update( )
     this.render( )
   }
@@ -377,7 +382,7 @@ export default class SpeckleRenderer extends EE {
         if ( Converter.hasOwnProperty( convertType ) )
           Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
             threeObj.userData._id = obj._id
-            threeObj.userData.properties = obj.properties ? flatten( obj.properties ) : null
+            threeObj.userData.properties = obj.properties ? flatten( obj.properties, { safe: true } ) : null
             threeObj.userData.originalColor = threeObj.material.color.clone( )
             threeObj.geometry.computeBoundingSphere( )
             this.scene.add( threeObj )
@@ -427,7 +432,7 @@ export default class SpeckleRenderer extends EE {
   // entry point for any attempt to color things by their properties in the viewer
   // depending on the property, it will either call "colorByNumericProperty" or
   // "colorByStringProperty" (see below)
-  colorByProperty( { propertyName, propagateLegend } ) {
+  colorByProperty( { propertyName, propagateLegend, colors } ) {
     console.log( propagateLegend )
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
@@ -444,13 +449,13 @@ export default class SpeckleRenderer extends EE {
     let isNumeric = !isNaN( first.userData.properties[ propertyName ] )
     console.log( `coloring by ${propertyName}, which is (numeric: ${isNumeric})` )
 
-    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
+    if ( isNumeric ) this.colorByNumericProperty( { propertyName: propertyName, propagateLegend: propagateLegend, colors } )
     else this.colorByStringProperty( { propertyName: propertyName, propagateLegend: propagateLegend } )
   }
 
   // attempts to color all objects  in the scene by a numeric property, computing its bounds
   // and generating a gradient from min (blue) to max (pinkish)
-  colorByNumericProperty( { propertyName, propagateLegend } ) {
+  colorByNumericProperty( { propertyName, propagateLegend, colors } ) {
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
     // compute bounds
@@ -485,7 +490,7 @@ export default class SpeckleRenderer extends EE {
     // gen rainbow 🌈
     let rainbow = new Rainbow( )
     rainbow.setNumberRange( min, max )
-    rainbow.setSpectrum( '#0A66FF', '#FC4CA5' )
+    rainbow.setSpectrum( ...colors )
 
     foundObjs.forEach( ( obj, index ) => {
       let value = obj.userData.properties[ propertyName ],
@@ -568,6 +573,50 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  colorByVertexArray( { propertyName, colors } ) {
+    let globalMin = Number.MAX_VALUE,
+      globalMax = -Number.MIN_VALUE,
+      toReset = [ ],
+      toColour = [ ]
+
+    for ( let obj of this.scene.children ) {
+      if ( !( obj.userData && obj.userData.properties && obj.userData.properties[ `structural.result.${propertyName}` ] ) ) {
+        toReset.push( obj )
+        continue
+      }
+      let min = Math.min( ...obj.userData.properties[ `structural.result.${propertyName}` ] )
+      let max = Math.max( ...obj.userData.properties[ `structural.result.${propertyName}` ] )
+      if ( min < globalMin ) globalMin = min
+      if ( max > globalMax ) globalMax = max
+      toColour.push( obj )
+    }
+
+    console.log( `👨‍🎨 ::: prop: ${propertyName} ::: min: ${globalMin}; max: ${globalMax}; objs: ${toColour.length}` )
+
+    let rainbow = new Rainbow( )
+    rainbow.setNumberRange( globalMin, globalMax )
+    rainbow.setSpectrum( ...colors )
+
+    for ( let obj of toColour ) {
+      let colors = new Uint8Array( obj.userData.properties[ `structural.result.${propertyName}` ].length * 3 ),
+        k = 0
+
+      for ( let val of obj.userData.properties[ `structural.result.${propertyName}` ] ) {
+        let myColour = hexToRgb( rainbow.colourAt( val ) )
+        colors[ k++ ] = myColour.r
+        colors[ k++ ] = myColour.g
+        colors[ k++ ] = myColour.b
+      }
+      obj.geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) )
+      obj.geometry.attributes.color.needsUpdate = true
+      obj.geometry.colorsNeedUpdate = true
+      obj.material.vertexColors = THREE.VertexColors
+      obj.material.opacity = 1
+      obj.material.needsUpdate = true
+    }
+    this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, min: globalMin, max: globalMax, objectCount: toColour.length } )
+  }
+
   resetColors( { propagateLegend } ) {
     if ( propagateLegend === null || propagateLegend === undefined )
       propagateLegend = true
@@ -575,6 +624,11 @@ export default class SpeckleRenderer extends EE {
     let defaultColor = new THREE.Color( '#B3B3B3' )
 
     for ( let obj of this.scene.children ) {
+      if ( obj.material ) {
+        obj.material.opacity = 0.84
+        obj.material.vertexColors = THREE.NoColors
+        obj.material.needsUpdate = true
+      }
       if ( obj.material ) obj.material.color.copy( defaultColor )
       continue
       if ( !obj.material ) continue
@@ -655,6 +709,7 @@ export default class SpeckleRenderer extends EE {
     }
     if ( !obj ) return
     let bsphere = obj.geometry.boundingSphere
+    if ( bsphere.radius < 1 ) bsphere.radius = 2
     // let r = bsphere.radius
 
     let offset = bsphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
@@ -671,6 +726,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   zoomExtents( ) {
+    this.computeSceneBoundingSphere( )
     let offset = this.sceneBoundingSphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
     let vector = new THREE.Vector3( 0, 0, 1 )
     let dir = vector.applyQuaternion( this.controls.object.quaternion );
@@ -685,32 +741,46 @@ export default class SpeckleRenderer extends EE {
   }
 
   computeSceneBoundingSphere( ) {
-    // console.log( 'computing bs', this.scene.children.length )
-    let time = Date.now( )
     let center = null,
       radius = 0,
-      count = null
+      k = 0
 
     for ( let obj of this.scene.children ) {
-
       if ( !obj.userData._id ) continue
       if ( !obj.geometry ) continue
 
-      if ( !center ) {
-        center = new THREE.Vector3( obj.geometry.boundingSphere.center.X, obj.geometry.boundingSphere.center.Y, obj.geometry.boundingSphere.center.Z )
+      if ( k === 0 ) {
+        center = new THREE.Vector3( obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z )
         radius = obj.geometry.boundingSphere.radius
+        k++
         continue
       }
-      center.add( obj.geometry.boundingSphere.center )
-      center.divideScalar( 2 )
+
       let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo( obj.geometry.boundingSphere.center )
-      if ( radius < otherDist ) radius = otherDist
+      if ( radius < otherDist )
+        radius = otherDist
+
+      center.x += obj.geometry.boundingSphere.center.x
+      center.y += obj.geometry.boundingSphere.center.y
+      center.z += obj.geometry.boundingSphere.center.z
+      center.divideScalar( 2 )
+
+      k++
     }
-    center ? center.divideScalar( 2 ) : null
-    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.5 : 100 }
+
+    if ( !center ) {
+      center = new THREE.Vector3(0, 0, 0)
+    }
+
+    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.1 : 100 }
   }
 
-  setFar( ) {}
+  setFar( ) {
+    let camDistance = this.camera.position.distanceTo( this.sceneBoundingSphere.center )
+    this.camera.far = 2 * this.sceneBoundingSphere.radius + camDistance
+    this.camera.updateProjectionMatrix( )
+  }
+
   setCamera( where, time ) {
     let self = this
     let duration = time ? time : 350
@@ -760,4 +830,21 @@ export default class SpeckleRenderer extends EE {
     }
     doChunk( )
   }
+}
+
+
+// Helper
+function hexToRgb( hex ) {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace( shorthandRegex, function ( m, r, g, b ) {
+    return r + r + g + g + b + b;
+  } );
+
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
+  return result ? {
+    r: parseInt( result[ 1 ], 16 ),
+    g: parseInt( result[ 2 ], 16 ),
+    b: parseInt( result[ 3 ], 16 )
+  } : null;
 }

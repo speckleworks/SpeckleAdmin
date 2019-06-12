@@ -1,17 +1,19 @@
 <template>
   <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
+    <div style='position: absolute; top:0; width: 100%; z-index: 1000;'>
+      <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
+    </div>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless width='520' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='height:auto; max-height: calc(100vh - 64px); overflow-y: auto; direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;'>
-        <v-layout row wrap style="direction:ltr; padding-left:20px;">
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless disable-resize-watcher width='420' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show ='$store.state.viewerControls'>
+        <v-layout row wrap style="direction:ltr; padding-left:20px; height: auto;">
           <v-flex xs12>
-            <v-progress-linear :indeterminate="true" v-show='showLoading' height='2'></v-progress-linear>
             <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
               <v-tab key='streams'>
                 <v-icon>import_export</v-icon>
               </v-tab>
               <v-tab key='filter'>
-                <v-icon>dns</v-icon>
+                <v-icon>layers</v-icon>
               </v-tab>
               <v-tab key='inspector'>
                 <v-badge small right :value='$store.state.selectedObjects.length>0' color='primary'>
@@ -107,7 +109,8 @@ export default {
       bucketInProgress: false,
       removeInterval: null,
       streamsToRemove: [ ],
-      selectedFilter: null
+      selectedFilter: null,
+      showTheThing: true
     }
   },
   methods: {
@@ -160,6 +163,8 @@ export default {
         this.objectAccumulator = [ ]
         console.log( `done processing buckets!` )
         this.showLoading = false
+
+        this.renderer.zoomExtents( )
         bus.$emit( 'loading-done' )
         return
       }
@@ -273,14 +278,14 @@ export default {
       let oldObjectIds = this.$store.state.objects.filter( obj => obj.streams.indexOf( streamId ) !== -1 ).map( obj => obj._id )
       let currObjectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      let toAdd = currObjectIds.filter( id => oldObjectIds.indexOf(id) === -1 )
-      let toRem = oldObjectIds.filter( id => currObjectIds.indexOf(id) === -1 )
+      let toAdd = currObjectIds.filter( id => oldObjectIds.indexOf( id ) === -1 )
+      let toRem = oldObjectIds.filter( id => currObjectIds.indexOf( id ) === -1 )
 
       this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toRem, streamToRemove: streamId } )
 
-      let toDelete = this.$store.state.objects.filter( obj => obj.streams.length === 0).map( o => o._id )
+      let toDelete = this.$store.state.objects.filter( obj => obj.streams.length === 0 ).map( o => o._id )
       this.renderer.unloadObjects( { objIds: toDelete } )
-      this.$store.commit('REMOVE_OBJECTS', toDelete )
+      this.$store.commit( 'REMOVE_OBJECTS', toDelete )
 
       // objects that i need to request for sure, as they have not been loaded before.
       let toRequest = toAdd.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
