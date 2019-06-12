@@ -1,5 +1,5 @@
 <template>
-  <v-layout align-center row wrap>
+  <v-layout align-center row wrap @mouseenter='mouseEnter' @mouseleave='mouseLeave'>
     <v-flex xs12 class='pb-0'>
       <v-text-field box flat clearable prepend-inner-icon="search" label='search for streams' @input="updateSearch" v-model='searchfilter' spellcheck="false" :disabled='globalDisabled' :loading='searchInProgress' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
     </v-flex>
@@ -72,10 +72,19 @@ export default {
       searchfilter: '',
       filters: [ ],
       showSearchResults: false,
-      searchInProgress: false
+      searchInProgress: false,
+      startIndex: 0,
+      endIndex: 42
     }
   },
   methods: {
+    mouseEnter() {
+      console.log('mouse enter')
+    },
+    mouseLeave() {
+
+      console.log('mouse leave')
+    },
     refreshStreams( ) {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
     },

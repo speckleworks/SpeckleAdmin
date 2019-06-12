@@ -709,7 +709,7 @@ export default class SpeckleRenderer extends EE {
     }
     if ( !obj ) return
     let bsphere = obj.geometry.boundingSphere
-    if(bsphere.radius < 1 ) bsphere.radius = 2
+    if ( bsphere.radius < 1 ) bsphere.radius = 2
     // let r = bsphere.radius
 
     let offset = bsphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
@@ -745,28 +745,48 @@ export default class SpeckleRenderer extends EE {
     let time = Date.now( )
     let center = null,
       radius = 0,
-      count = null
+      count = null,
+      k = 0
 
     for ( let obj of this.scene.children ) {
-
       if ( !obj.userData._id ) continue
       if ( !obj.geometry ) continue
 
-      if ( !center ) {
-        center = new THREE.Vector3( obj.geometry.boundingSphere.center.X, obj.geometry.boundingSphere.center.Y, obj.geometry.boundingSphere.center.Z )
+      obj.geometry.computeBoundingSphere( )
+      console.log( obj.geometry.boundingSphere )
+
+      if ( k === 0 ) {
+        center = new THREE.Vector3( obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z )
         radius = obj.geometry.boundingSphere.radius
+        k++
         continue
       }
 
-      center.add( obj.geometry.boundingSphere.center )
+      let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo( obj.geometry.boundingSphere.center )
+      if ( radius < otherDist )
+        radius = otherDist
 
+      center.x += obj.geometry.boundingSphere.center.x
+      center.y += obj.geometry.boundingSphere.center.y
+      center.z += obj.geometry.boundingSphere.center.z
       center.divideScalar( 2 )
 
-      let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo( obj.geometry.boundingSphere.center )
-      if ( radius < otherDist ) radius = otherDist
+      k++
     }
-    center ? center.divideScalar( 2 ) : null
-    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.5 : 100 }
+    console.log( center )
+    if ( center )
+    {
+      // center.divideScalar( k )
+    }
+    else {
+      center = new THREE.Vector3(0, 0, 0)
+      radius = 1
+    }
+    console.log( center )
+
+    console.log( radius )
+    // center ? center.divideScalar( 2 ) : null
+    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.2 : 100 }
   }
 
   setFar( ) {
