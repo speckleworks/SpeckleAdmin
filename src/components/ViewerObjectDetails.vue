@@ -29,6 +29,9 @@ export default {
 
       for ( let key in foo ) {
         if ( !foo.hasOwnProperty( key ) ) continue
+        if( key.includes('__')) {
+          /*SKIP*/
+        }
         else if ( Array.isArray( foo[ key ] ) ) {
           /*DO FUCKALL */
           if( foo[key].length < 3 )
