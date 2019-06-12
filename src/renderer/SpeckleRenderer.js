@@ -741,19 +741,13 @@ export default class SpeckleRenderer extends EE {
   }
 
   computeSceneBoundingSphere( ) {
-    // console.log( 'computing bs', this.scene.children.length )
-    let time = Date.now( )
     let center = null,
       radius = 0,
-      count = null,
       k = 0
 
     for ( let obj of this.scene.children ) {
       if ( !obj.userData._id ) continue
       if ( !obj.geometry ) continue
-
-      obj.geometry.computeBoundingSphere( )
-      console.log( obj.geometry.boundingSphere )
 
       if ( k === 0 ) {
         center = new THREE.Vector3( obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z )
@@ -773,20 +767,12 @@ export default class SpeckleRenderer extends EE {
 
       k++
     }
-    console.log( center )
-    if ( center )
-    {
-      // center.divideScalar( k )
-    }
-    else {
-      center = new THREE.Vector3(0, 0, 0)
-      radius = 1
-    }
-    console.log( center )
 
-    console.log( radius )
-    // center ? center.divideScalar( 2 ) : null
-    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.2 : 100 }
+    if ( !center ) {
+      center = new THREE.Vector3(0, 0, 0)
+    }
+
+    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.1 : 100 }
   }
 
   setFar( ) {
