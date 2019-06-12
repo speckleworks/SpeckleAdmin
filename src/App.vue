@@ -18,11 +18,11 @@
         <v-btn small round flat @click.native='toggleControlsViewer'>{{$store.state.viewerControls ? "close" :"show"}} controls</v-btn>
       </div>
       <v-spacer></v-spacer>
-      <v-btn flat icon @click.native='toggleDark()'>
-        <v-icon>{{dark ? "wb_sunny" : "brightness_4"}}</v-icon>
-      </v-btn>
       <v-btn small flat @click.native='logout()'>
         Logout
+      </v-btn>
+      <v-btn flat small icon @click.native='toggleDark()'>
+        <v-icon small>wb_sunny</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>

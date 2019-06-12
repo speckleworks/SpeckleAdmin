@@ -709,6 +709,7 @@ export default class SpeckleRenderer extends EE {
     }
     if ( !obj ) return
     let bsphere = obj.geometry.boundingSphere
+    if(bsphere.radius < 1 ) bsphere.radius = 2
     // let r = bsphere.radius
 
     let offset = bsphere.radius / Math.tan( Math.PI / 180.0 * this.controls.object.fov * 0.5 )
