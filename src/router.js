@@ -91,6 +91,12 @@ let myRouter = new Router( {
       name: 'feedback',
       component: ( ) => import( './views/Feedback.vue' ),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/processor/:streamIds*',
+      name: 'processor',
+      component: ( ) => import( './views/Processor.vue' ),
+      meta: { requiresAuth: true },
     }
   ],
   // scrollBehavior( to, from, savedPosition ) {
