@@ -3,69 +3,114 @@
     <v-layout row wrap>
       <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
         Processor allows you to run scripts on streams.
-      </v-flex>
-      <v-flex xs6>
-        <v-btn
-          :color='buttonColor'
-          @click="runProcess()"
-          >Run
+        <v-btn color="primary" @click="runProcessor">
+          Run
         </v-btn>
       </v-flex>
       <v-flex xs12>
-        <v-textarea
-          solo
-          :hint='searchHint'
-          v-model='scriptText'
-          label="Your script"
-          :auto-grow="true"
-          :spellcheck="false"
-          style="font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace"
-        >
-        </v-textarea>
+      <v-text-field v-model="initInput">
+      </v-text-field>
+      </v-flex>
+      <v-flex xs12 v-for='(block, index) in chosenBlocks' :key='index'>
+        <processor-block
+          :index='index'
+          :block='block'
+          :output='blockOutput[index]'
+          :successRun='blockSuccess[index]'
+          v-on:remove-block="removeBlock"
+          v-on:update-param="updateParam"/>
+      </v-flex>
+      <v-flex xs12>
+        <v-combobox
+          :items="allBlocks"
+          :item-text="(block) => block.name"
+          v-on:change="addBlock"
+          label="Add new block">
+        </v-combobox>
       </v-flex>
     </v-layout>
   </v-container>
 </template>
 <script>
+import ProcessorBlock from '../components/ProcessorBlock.vue'
+
 export default {
   name: 'ProcessorView',
-  computed: {},
+  components: {
+    ProcessorBlock,
+  },
+  computed: {
+    allBlocks () {
+      return this.$store.state.blocks
+    }
+  },
   data( ) {
     return {
-      showLoading: false,
-      buttonColor: "info",
-      scriptText: '',
-      searchHint: 'Script your life!',
-      outputText: '',
+      initInput: "",
+      chosenBlocks: [ ],
+      blockSuccess: [ ],
+      blockOutput: [ ],
+      blockParams: [ ],
       
-      showLoading: false,
-      loadingProgress: 0,
-      loadingIsDeterminate: false,
       toRequest: [ ],
       requestBuckets: [ ],
       isRequesting: false,
       pauseRequesting: false,
       bucketInProgress: false,
-      removeInterval: null,
-      streamsToRemove: [ ],
-      selectedFilter: null,
     }
   },
+  mutations: {
+
+  },
   methods: {
-    runProcess( ) {
-      try
+    runProcessor ( ) {
+      var input = this.initInput
+      var output = null
+
+      this.blockOutput.splice(0, this.blockOutput.length)
+      this.blockSuccess.splice(0, this.blockSuccess.length)
+
+      for (let i = 0; i < this.chosenBlocks.length; i++)
       {
-        eval(this.scriptText)
-        this.buttonColor = "success"
-      }
-      catch (err)
-      {
-        this.buttonColor = "error"
-        alert(err.message)
+        try
+        {
+          var params = this.blockParams[i]
+          eval(this.chosenBlocks[i].script)
+          this.blockSuccess.push(true)
+          this.blockOutput.push(output)
+          input = output
+          console.log(output)
+        }
+        catch (error) {
+          this.blockSuccess.push(false)
+          this.blockOutput.push(error)
+          return
+        }
       }
     },
 
+    addBlock ( sender ) {
+      this.blockOutput.splice(0, this.blockOutput.length)
+      this.blockSuccess.splice(0, this.blockSuccess.length)
+
+      if (sender != null)
+        this.chosenBlocks.push( sender )
+    },
+
+    removeBlock ( index ) {
+      this.blockOutput.splice(0, this.blockOutput.length)
+      this.blockSuccess.splice(0, this.blockSuccess.length)
+
+      this.chosenBlocks.splice(index, 1)
+    },
+
+    updateParam ( o ) {
+      this.blockParams[o.index] = o.params
+      console.log(this.blockParams)
+    },
+
     appendStreamsToRoute( streamId ) {
+      // NOTE: this functionality is disabled because o
       let streams = this.$store.state.loadedStreamIds.join( ',' )
       if ( streams !== '' )
         this.$router.replace( { name: 'processor', params: { streamIds: streams } } )
@@ -102,7 +147,7 @@ export default {
       }
     },
 
-    // Goes through all the request buckets and requests them from the server,
+    // Goes through all the request buckets and requests them from the server
     async bucketProcessor( ) {
       if ( this.pauseRequesting ) return
       if ( this.requestBuckets.length === 0 ) {
@@ -124,7 +169,7 @@ export default {
 
       let objs = await this.$store.dispatch( 'getObjects', this.requestBuckets[ 0 ].objectIds )
       let stream = this.$store.state.streams.find( s => s.streamId === this.requestBuckets[ 0 ].streamId )
-      
+
       objs.forEach( ( o, index ) => {
         if ( !o.properties ) o.properties = {}
         o.properties.id = o._id ? o._id : 'no id'
@@ -132,7 +177,7 @@ export default {
         o.properties.speckle_type = o.type
         let objIndexInStream = stream.objects.indexOf( o._id )
         o.properties.objIndexInStream = objIndexInStream
-  
+
         let layer = null
         for ( let ll of stream.layers ) {
           if ( objIndexInStream >= ll.startIndex )
@@ -157,62 +202,11 @@ export default {
 
       } )
 
-      this.objectAccumulator.push( ...objs )//.map( obj => { return Object.freeze( { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } ) } ) )
-      
-      // No freezing as we're modifying the props; mem footprint seems ok still
-      // this.streamObjects.push( ...objs.map( obj => { return { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } } ) )
+      this.objectAccumulator.push( ...objs.map( obj => { return Object.freeze( { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } ) } ) )
 
-      // this.renderer.loadObjects( { objs: objs, zoomExtents: this.requestBuckets.length === 1 } )
       this.requestBuckets.splice( 0, 1 )
 
       this.bucketInProgress = false
-      this.bucketProcessor( )
-    },
-
-    // pauses and any bucket loading and waits for it to stop,
-    // then triggers the real remove stream
-    async removeStream( streamId ) {
-      this.pauseRequesting = true
-      if ( this.streamsToRemove.indexOf( streamId ) === -1 )
-        this.streamsToRemove.push( streamId )
-      this.removeInterval = setInterval( this.removeStreamInternal.bind( this ), 250 )
-    },
-
-    // removes any objects pertaining to one stream, even half loaded ones
-    // works with a temporary state. Restarts the bucket processor
-    // in case there were other buckets queued from other stream loads.
-    removeStreamInternal( ) {
-      if ( this.bucketInProgress ) return
-      clearInterval( this.removeInterval )
-      // create a list of all objects, including ones that are possibly still "accumulating"
-      let tempState = [ ...this.$store.state.objects, ...this.objectAccumulator ]
-
-      // clean future loading buckets, if any are present
-      this.requestBuckets = this.requestBuckets.filter( b => this.streamsToRemove.indexOf( b.streamId ) === -1 )
-
-      let objIdsToUnload = [ ]
-      this.streams.forEach( s => this.streamsToRemove.indexOf( s.streamId ) !== -1 ? objIdsToUnload.push( ...s.objects ) : null )
-
-      this.streamsToRemove.forEach( stream => this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: objIdsToUnload, streamToRemove: stream } ) )
-
-      // filter out objects that are in another stream.
-      objIdsToUnload = objIdsToUnload.filter( id => {
-        let x = tempState.find( o => o._id === id )
-        if ( x ) return x.streams.length === 0
-        return false // means the object was not loaded yet
-      } )
-
-      this.streamsToRemove.forEach( sId => {
-        this.$store.commit( 'REMOVE_LOADED_STREAMID', sId )
-      } )
-
-      this.$store.commit( 'REMOVE_OBJECTS', objIdsToUnload )
-
-      this.renderer.unloadObjects( { objIds: objIdsToUnload } )
-      this.pauseRequesting = false
-      this.streamsToRemove = [ ]
-      this.appendStreamsToRoute( )
-      // restart the bucket processor
       this.bucketProcessor( )
     },
 
@@ -230,12 +224,13 @@ export default {
   },
 
   mounted( ) {
+    console.log( 'mounted' )
     this.objectAccumulator = [ ]
 
+    // add streams to viewer
     this.fetchStreamsFromRoute( )
   }
 }
-
 </script>
 <style scoped lang='scss'>
 </style>

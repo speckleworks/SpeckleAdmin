@@ -60,7 +60,7 @@ export default new Vuex.Store( {
     // global store for users. it's dynamically assembled as the end-user moves through
     // the admin ui, and new user profiles need to be requested.
     users: [ ],
-    // viewer related
+    // viewer/processor related
     loadedStreamIds: [ ],
     objects: [ ],
     legend: null,
@@ -70,7 +70,41 @@ export default new Vuex.Store( {
     // app dark mode?
     dark: false,
     // toggles viewer controls
-    viewerControls: true
+    viewerControls: true,
+
+    // processor related
+    blocks: [
+      {
+        id: "1231251241241251",
+        name: "String Splitter",
+        script: `output = input.split(params.delimiter)`,
+        params: ["delimiter"],
+      },
+      {
+        id: "121321",
+        name: "String Concatenator",
+        script: `var stringOut = ''\ninput.forEach(x => stringOut += x)\noutput = stringOut`,
+        params: [ ],
+      },
+      {
+        id: "hohho",
+        name: "String Reverser",
+        script: `output = input.split('').reverse().join('')`,
+        params: [ ],
+      },
+      {
+        id: "TEREREREWTEW",
+        name: "Speckle Object Receiver",
+        script: `output = this.$store.state.objects`,
+        params: [ ],
+      },
+      {
+        id: "HOHOHO",
+        name: "Filter Type",
+        script: `console.log(params)\noutput = input.filter( o => o.type.includes(params.filterType))`,
+        params: ["filterType"],
+      },
+    ],
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
