@@ -2,9 +2,12 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
 
+import get from 'lodash.get'
+import set from 'lodash.set'
 import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
 import flatten from 'flat'
+import md5 from 'md5'
 
 Vue.use( Vuex )
 
@@ -36,6 +39,35 @@ function getStructuralArrPropKeys( foo ) {
     }
   }
   return bar
+}
+
+window.restApi = function ( payload ) {
+  return new Promise( async (resolve, reject ) => {
+    let result = await Axios({
+      method: payload.method,
+      url: payload.url,
+      baseURL: '',
+      data: payload.data,
+    })
+    console.log(result)
+    return resolve( result )
+  })
+}
+
+window.setProperty = function ( payload ) {
+  set(payload.target,
+    payload.targetPath,
+    payload.source
+  )
+  return payload.target
+}
+
+window.getProperty = function ( payload ) {
+  return get(payload.source, payload.sourcePath)
+}
+
+window.md5Hash = function( foo ) {
+  return md5(JSON.stringify(foo))
 }
 
 export default new Vuex.Store( {
@@ -75,35 +107,138 @@ export default new Vuex.Store( {
     // processor related
     blocks: [
       {
-        id: "1231251241241251",
-        name: "String Splitter",
-        script: `output = input.split(params.delimiter)`,
-        params: ["delimiter"],
-      },
-      {
-        id: "121321",
-        name: "String Concatenator",
-        script: `var stringOut = ''\ninput.forEach(x => stringOut += x)\noutput = stringOut`,
-        params: [ ],
-      },
-      {
-        id: "hohho",
-        name: "String Reverser",
-        script: `output = input.split('').reverse().join('')`,
-        params: [ ],
-      },
-      {
         id: "TEREREREWTEW",
         name: "Speckle Object Receiver",
-        script: `output = this.$store.state.objects`,
+        script: `
+        console.log(self);
+        return self.$store.state.objects;`,
         params: [ ],
       },
       {
         id: "HOHOHO",
         name: "Filter Type",
-        script: `console.log(params)\noutput = input.filter( o => o.type.includes(params.filterType))`,
+        script: `return input.filter( o => o.type.includes(params.filterType))`,
         params: ["filterType"],
       },
+      {
+        id: "MAMAMIA",
+        name: "Create Stream",
+        script: `
+        return new Promise( async (resolve) => {
+          let objectIds = [ ]
+
+          let bucket = [ ],
+            maxReq = 50 // magic number; maximum objects to request in a bucket
+
+          for ( let i = 0; i < input.length; i++ ) {
+            bucket.push( input[ i ] )
+            if ( i % maxReq === 0 && i !== 0 ) {
+              let res = await self.$store.dispatch('createObjects', bucket);
+              objectIds.push(...res)
+              bucket = [ ]
+            }
+          }
+
+          if ( bucket.length !== 0 ) {
+            let res = await self.$store.dispatch('createObjects', bucket);
+            objectIds.push(...res)
+          }
+
+          console.log(objectIds)
+
+          var stream = {name: params.streamName, objects: objectIds};
+          let result = await self.$store.dispatch('createStream', stream);
+          return resolve( result.streamId );
+        });`,
+        params: ["streamName"],
+      },
+      {
+        id: "computeAllTheStuff",
+        name: "Arup Compute",
+        script: `
+        return new Promise( async (resolve) => {
+          var output = [ ]
+          var validObjects = [ ]
+          var invalidObjects = [ ]
+          var dataArray = [ ]
+
+          var sourceProperties = params.sourceProperty.split(',')
+          var targetProperties = params.targetProperty.split(',')
+          
+          var restInput = {
+            method: 'post',
+            url: params.apiUrl,
+            data: { }
+          }
+
+          for (let obj of input) {
+            var skip = false
+
+            var tempDict = { }
+
+            for (let i = 0; i < sourceProperties.length; i++)
+            {
+              tempDict[targetProperties[i]] = window.getProperty({ source: obj, sourcePath: sourceProperties[i] })
+              if (tempDict[targetProperties[i]] == null)
+              {
+                skip = true
+                break
+              }
+            }
+            
+            if (skip)
+            {
+              invalidObjects.push(obj)
+              continue
+            }
+            
+            for (let k in tempDict) {
+              var arr = window.getProperty({ source: restInput, sourcePath: 'data.' + k })
+              if (arr == null)
+                arr = [ ]
+              arr.push(tempDict[k])
+
+              restInput = window.setProperty({
+                target: restInput,
+                targetPath: 'data.' + k,
+                source: arr
+              })
+            }
+            
+            validObjects.push(obj)
+          }
+          
+          console.log(restInput)
+
+          let result = await window.restApi(restInput)
+
+          console.log(result)
+
+          for (let obj of validObjects) {
+            var objResult = result.data.splice(0,1)[0]
+            var outputObj = JSON.parse(JSON.stringify(obj))
+            outputObj = window.setProperty({
+              target: outputObj,
+              targetPath: params.targetResponse,
+              source: window.getProperty({ source: objResult, sourcePath: params.sourceResponse })
+            })
+
+            delete outputObj._id
+            outputObj.hash = window.md5Hash(outputObj)
+
+            output.push(outputObj)
+          }
+
+          for (let obj of invalidObjects) {
+            var outputObj = JSON.parse(JSON.stringify(obj))
+            
+            output.push(outputObj)
+          }
+
+          return resolve( output )
+        });`,
+        params: ["apiUrl", "sourceProperty", "targetProperty", "sourceResponse", "targetResponse"]
+      }
     ],
   },
   getters: {
@@ -608,6 +743,13 @@ export default new Vuex.Store( {
           .catch( err => reject( err ) )
       } )
     },
+    createObjects( context, objects ) {
+      return new Promise( (resolve, reject) => {
+        Axios.post(`objects`, objects)
+        .then( res => resolve( res.data.resources ) )
+        .catch( err => reject( err ))
+      })
+    },
 
     // projects
     getProject( context, props ) {
@@ -862,6 +1004,6 @@ export default new Vuex.Store( {
       context.commit( 'FLUSH_ALL' )
       localStorage.removeItem( 'token' )
       Axios.defaults.headers.common[ 'Authorization' ] = ''
-    }
-  },
-} )
+    },
+  }
+})

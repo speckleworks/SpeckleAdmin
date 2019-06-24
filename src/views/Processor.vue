@@ -8,8 +8,8 @@
         </v-btn>
       </v-flex>
       <v-flex xs12>
-      <v-text-field v-model="initInput">
-      </v-text-field>
+        <v-text-field v-model="initInput">
+        </v-text-field>
       </v-flex>
       <v-flex xs12 v-for='(block, index) in chosenBlocks' :key='index'>
         <processor-block
@@ -33,6 +33,7 @@
 </template>
 <script>
 import ProcessorBlock from '../components/ProcessorBlock.vue'
+
 
 export default {
   name: 'ProcessorView',
@@ -63,29 +64,31 @@ export default {
 
   },
   methods: {
-    runProcessor ( ) {
+    async runProcessor ( ) {
       var input = this.initInput
-      var output = null
 
       this.blockOutput.splice(0, this.blockOutput.length)
       this.blockSuccess.splice(0, this.blockSuccess.length)
 
+      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
       for (let i = 0; i < this.chosenBlocks.length; i++)
       {
-        try
-        {
-          var params = this.blockParams[i]
-          eval(this.chosenBlocks[i].script)
+        // try
+        // {
+          var params = this.blockParams[i] ? this.blockParams[i] : new Object
+          let foo = new AsyncFunction("self", "input", "params", this.chosenBlocks[i].script)
+          let output = await foo(this, input, params)
           this.blockSuccess.push(true)
           this.blockOutput.push(output)
-          input = output
           console.log(output)
-        }
-        catch (error) {
-          this.blockSuccess.push(false)
-          this.blockOutput.push(error)
-          return
-        }
+          input = output
+        // }
+        // catch (error) {
+        //   this.blockSuccess.push(false)
+        //   this.blockOutput.push(error)
+        //   return
+        // }
       }
     },
 
@@ -106,7 +109,6 @@ export default {
 
     updateParam ( o ) {
       this.blockParams[o.index] = o.params
-      console.log(this.blockParams)
     },
 
     appendStreamsToRoute( streamId ) {
@@ -170,39 +172,7 @@ export default {
       let objs = await this.$store.dispatch( 'getObjects', this.requestBuckets[ 0 ].objectIds )
       let stream = this.$store.state.streams.find( s => s.streamId === this.requestBuckets[ 0 ].streamId )
 
-      objs.forEach( ( o, index ) => {
-        if ( !o.properties ) o.properties = {}
-        o.properties.id = o._id ? o._id : 'no id'
-        o.properties.hash = o.hash ? o.hash : 'no hash'
-        o.properties.speckle_type = o.type
-        let objIndexInStream = stream.objects.indexOf( o._id )
-        o.properties.objIndexInStream = objIndexInStream
-
-        let layer = null
-        for ( let ll of stream.layers ) {
-          if ( objIndexInStream >= ll.startIndex )
-            if ( objIndexInStream < ll.startIndex + ll.objectCount )
-              layer = ll
-        }
-
-        o.streams = [ this.requestBuckets[ 0 ].streamId ]
-
-        if ( layer && layer.properties ) {
-          o.color = { hex: '#B3B3B3', a: 0.65 }
-          o.properties.layer_guid = layer.guid ? layer.guid : 'no layer guid'
-          o.properties.layer_name = layer.name
-        } else if ( layer ) {
-          o.properties.layer_guid = layer.guid
-          o.properties.layer_name = layer.name
-          o.color = { hex: '#B3B3B3', a: 0.65 }
-        } else {
-          o.properties.layer_name = 'no layer'
-          o.color = { hex: '#B3B3B3', a: 0.65 }
-        }
-
-      } )
-
-      this.objectAccumulator.push( ...objs.map( obj => { return Object.freeze( { type: obj.type, properties: obj.properties ? obj.properties : null, streams: obj.streams, _id: obj._id, hash: obj.hash } ) } ) )
+      this.objectAccumulator.push( ...objs.map( obj => { return obj } ) )
 
       this.requestBuckets.splice( 0, 1 )
 
