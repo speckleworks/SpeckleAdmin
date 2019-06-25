@@ -95,9 +95,9 @@ export default {
         })
 
         this.blockSuccess.push(true)
-        this.blockOutput.push(output)
-        console.log(output)
-        blockInput = output
+        this.blockOutput.push(output.data)
+        console.log(output.data)
+        blockInput = output.data
       }
     },
 
@@ -125,7 +125,7 @@ export default {
     console.log( 'mounted' )
 
     if ( this.$route.params.streamIds ) {
-      this.$store.state.streamId = this.$route.params.streamIds
+      this.streamId = this.$route.params.streamIds
     }
 
     let lambdas = this.$store.state.blocks
