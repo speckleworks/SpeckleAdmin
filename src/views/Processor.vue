@@ -33,6 +33,7 @@
 </template>
 <script>
 import ProcessorBlock from '../components/ProcessorBlock.vue'
+import Axios from 'axios'
 
 
 export default {
@@ -65,6 +66,19 @@ export default {
   },
   methods: {
     async runProcessor ( ) {
+      let result = await Axios({
+        method: 'POST',
+        url: '.netlify/functions/receiver',
+        data: {
+          baseUrl: Axios.defaults.baseURL,
+          token: Axios.defaults.headers.common[ 'Authorization' ],
+          streamId: `SsQ_U00IU-`,
+        },
+      })
+
+      console.log(result)
+      return;
+
       var input = this.initInput
 
       this.blockOutput.splice(0, this.blockOutput.length)
