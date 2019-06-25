@@ -95,7 +95,7 @@ export default {
         })
 
         this.blockSuccess.push(true)
-        this.blockOutput.push(output)
+        this.blockOutput.push(JSON.parse(output))
         console.log(output)
         blockInput = output
       }
@@ -139,7 +139,7 @@ export default {
       })
         .then( res => {
           res.function = lambdas[i]
-          this.blocks.push(res)
+          this.blocks.push(JSON.parse(res))
         } ) 
         .catch( err => console.log(err) )
     }
