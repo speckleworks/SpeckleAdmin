@@ -95,7 +95,7 @@ export default {
         })
 
         this.blockSuccess.push(true)
-        this.blockOutput.push(JSON.parse(output))
+        this.blockOutput.push(output)
         console.log(output)
         blockInput = output
       }
@@ -138,10 +138,9 @@ export default {
         baseURL: location.protocol + '//' + location.host,
       })
         .then( res => {
-          console.log(res)
-          var parsed = JSON.parse(res)
-          parsed.function = lambdas[i]
-          this.blocks.push(JSON.parse(parsed))
+          var data = res.data
+          data.function = lambdas[i]
+          this.blocks.push(data)
         } ) 
         .catch( err => console.log(err) )
     }
