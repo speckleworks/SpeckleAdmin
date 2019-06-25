@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build && netlify-lambda build ./src/lambda",
+    "serve-lambda": "netlify-lambda serve ./src/lambda",
+    "dev-all": "vue-cli-service serve & netlify-lambda serve ./src/lambda"
   },
   "dependencies": {
     "lodash.set": "^4.3.2",
     "md5": "^2.2.1",
     "register-service-worker": "^1.5.2",
     "vue": "^2.6.10",
-    "vue-cli-plugin-netlify-lambda": "^0.1.1",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },
@@ -29,6 +30,7 @@
     "lodash.union": "^4.6.0",
     "lodash.uniq": "^4.5.0",
     "marked": "^0.5.2",
+    "netlify-lambda": "^1.4.13",
     "node-sass": "^4.12.0",
     "papaparse": "^4.6.2",
     "rainbowvis.js": "^1.0.1",

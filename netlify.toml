@@ -1,2 +1,3 @@
+
 [build]
-functions = "./src/lambda"
+functions = "./dist/lambda"
