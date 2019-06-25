@@ -69,8 +69,9 @@ export default {
       let result = await Axios({
         method: 'POST',
         url: '.netlify/functions/receiver',
+        baseURL: location.protocol + '//' + location.host,
         data: {
-          baseUrl: Axios.defaults.baseURL,
+          baseUrl: this.$store.state.server,
           token: Axios.defaults.headers.common[ 'Authorization' ],
           streamId: `SsQ_U00IU-`,
         },
