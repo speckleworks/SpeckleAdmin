@@ -138,8 +138,10 @@ export default {
         baseURL: location.protocol + '//' + location.host,
       })
         .then( res => {
-          res.function = lambdas[i]
-          this.blocks.push(JSON.parse(res))
+          console.log(res)
+          var parsed = JSON.parse(res)
+          parsed.function = lambdas[i]
+          this.blocks.push(JSON.parse(parsed))
         } ) 
         .catch( err => console.log(err) )
     }
