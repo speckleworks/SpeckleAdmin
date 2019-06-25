@@ -101,10 +101,10 @@ function createStream( stream ) {
           data: stream,
         })
       } )
-      .then( res => return resolve( stream ) )
+      .then( res => resolve( stream ) )
       .catch( err => {
         console.error( err )
-        return reject( err )
+        reject( err )
       } )
   } )
 }

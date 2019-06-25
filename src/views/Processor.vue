@@ -150,6 +150,7 @@ export default {
       Axios({
         method: 'GET',
         url: `.netlify/functions/${lambdas[i]}`,
+        baseURL: location.protocol + '//' + location.host,
       })
         .then( res => {
           res.function = lambdas[i]

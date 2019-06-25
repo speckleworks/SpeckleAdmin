@@ -105,7 +105,7 @@ export default new Vuex.Store( {
     viewerControls: true,
 
     // processor related
-    blocks: [ "receiver", "filter", "createstream", "helloworld" ]
+    blocks: [ "receiver", "filter", "createstream", "restAPI", "helloworld" ]
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
