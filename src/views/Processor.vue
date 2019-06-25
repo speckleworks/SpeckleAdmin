@@ -22,7 +22,7 @@
       </v-flex>
       <v-flex xs12>
         <v-combobox
-          :items="allBlocks"
+          :items="blocks"
           :item-text="(block) => block.name"
           v-on:change="addBlock"
           label="Add new block">
@@ -42,13 +42,15 @@ export default {
     ProcessorBlock,
   },
   computed: {
-    allBlocks () {
-      return this.$store.state.blocks
-    }
   },
   data( ) {
     return {
+      streamId: '',
+
       initInput: "",
+
+      blocks: [ ],
+
       chosenBlocks: [ ],
       blockSuccess: [ ],
       blockOutput: [ ],
@@ -66,21 +68,20 @@ export default {
   },
   methods: {
     async runProcessor ( ) {
-      let result = await Axios({
-        method: 'POST',
-        url: '.netlify/functions/receiver',
-        baseURL: location.protocol + '//' + location.host,
-        data: {
-          baseUrl: this.$store.state.server,
-          token: Axios.defaults.headers.common[ 'Authorization' ],
-          streamId: `SsQ_U00IU-`,
-        },
-      })
+      // let result = await Axios({
+      //   method: 'POST',
+      //   url: '.netlify/functions/receiver',
+      //   baseURL: location.protocol + '//' + location.host,
+      //   data: {
+      //     baseUrl: this.$store.state.server,
+      //     token: Axios.defaults.headers.common[ 'Authorization' ],
+      //     streamId: `SsQ_U00IU-`,
+      //     input: '',
+      //     parameters: { },
+      //   },
+      // })
 
-      console.log(result)
-      return;
-
-      var input = this.initInput
+      var blockInput = this.initInput
 
       this.blockOutput.splice(0, this.blockOutput.length)
       this.blockSuccess.splice(0, this.blockSuccess.length)
@@ -89,21 +90,29 @@ export default {
 
       for (let i = 0; i < this.chosenBlocks.length; i++)
       {
-        // try
-        // {
-          var params = this.blockParams[i] ? this.blockParams[i] : new Object
-          let foo = new AsyncFunction("self", "input", "params", this.chosenBlocks[i].script)
-          let output = await foo(this, input, params)
-          this.blockSuccess.push(true)
-          this.blockOutput.push(output)
-          console.log(output)
-          input = output
-        // }
-        // catch (error) {
-        //   this.blockSuccess.push(false)
-        //   this.blockOutput.push(error)
-        //   return
-        // }
+        var params = this.blockParams[i] ? this.blockParams[i] : new Object
+        
+        let output = await new Promise((resolve, reject) => {
+          Axios({
+            method: 'POST',
+            url: `.netlify/functions/${this.chosenBlocks[i].function}`,
+            baseURL: location.protocol + '//' + location.host,
+            data: {
+              baseUrl: this.$store.state.server,
+              token: Axios.defaults.headers.common[ 'Authorization' ],
+              streamId: this.streamId,
+              input: blockInput,
+              parameters: params,
+            },
+          })
+            .then( res => resolve(res) )
+            .catch ( err => reject(err) )
+        })
+
+        this.blockSuccess.push(true)
+        this.blockOutput.push(output)
+        console.log(output)
+        blockInput = output
       }
     },
 
@@ -125,95 +134,31 @@ export default {
     updateParam ( o ) {
       this.blockParams[o.index] = o.params
     },
-
-    appendStreamsToRoute( streamId ) {
-      // NOTE: this functionality is disabled because o
-      let streams = this.$store.state.loadedStreamIds.join( ',' )
-      if ( streams !== '' )
-        this.$router.replace( { name: 'processor', params: { streamIds: streams } } )
-      else this.$router.replace( { name: 'processor' } )
-    },
-
-    async addStream( streamId ) {
-      this.showLoading = true
-      this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
-      this.appendStreamsToRoute( )
-      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
-
-      // loaded already?
-      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
-      let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
-      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
-
-      let bucket = [ ],
-        maxReq = 50 // magic number; maximum objects to request in a bucket
-
-      for ( let i = 0; i < toRequest.length; i++ ) {
-        bucket.push( toRequest[ i ] )
-        if ( i % maxReq === 0 && i !== 0 ) {
-          this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-          bucket = [ ]
-          if ( !this.isRequesting ) this.bucketProcessor( )
-        }
-      }
-
-      // last one
-      if ( bucket.length !== 0 ) {
-        this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-        if ( !this.isRequesting ) this.bucketProcessor( )
-      }
-    },
-
-    // Goes through all the request buckets and requests them from the server
-    async bucketProcessor( ) {
-      if ( this.pauseRequesting ) return
-      if ( this.requestBuckets.length === 0 ) {
-        this.isRequesting = false
-        // as we don't want to flood the vue store with a lotta add objects calls,
-        // we store all objects in an accumulator and commit that once we're done
-        if ( this.objectAccumulator.length > 0 )
-          this.$store.commit( 'ADD_OBJECTS', this.objectAccumulator )
-        this.objectAccumulator = [ ]
-        console.log( `done processing buckets!` )
-        this.showLoading = false
-
-        bus.$emit( 'loading-done' )
-        return
-      }
-
-      this.isRequesting = true
-      this.bucketInProgress = true
-
-      let objs = await this.$store.dispatch( 'getObjects', this.requestBuckets[ 0 ].objectIds )
-      let stream = this.$store.state.streams.find( s => s.streamId === this.requestBuckets[ 0 ].streamId )
-
-      this.objectAccumulator.push( ...objs.map( obj => { return obj } ) )
-
-      this.requestBuckets.splice( 0, 1 )
-
-      this.bucketInProgress = false
-      this.bucketProcessor( )
-    },
-
-    fetchStreamsFromRoute( ) {
-      if ( this.$route.params.streamIds ) {
-        let urlStreams = this.$route.params.streamIds.split( ',' )
-        let streamsToLoad = urlStreams.filter( id => this.$store.state.loadedStreamIds.indexOf( id ) === -1 )
-        let streamsToUnload = this.$store.state.loadedStreamIds.filter( id => urlStreams.indexOf( id ) === -1 )
-        console.log( `i need to load ${streamsToLoad.join(", ")}` )
-        console.log( `i need to unload ${streamsToUnload.join(", ")}` )
-        streamsToUnload.forEach( sid => this.removeStream( sid ) )
-        streamsToLoad.forEach( sid => this.addStream( sid ) )
-      }
-    }
   },
 
   mounted( ) {
     console.log( 'mounted' )
-    this.objectAccumulator = [ ]
 
-    // add streams to viewer
-    this.fetchStreamsFromRoute( )
+    if ( this.$route.params.streamIds ) {
+      this.$store.state.streamId = this.$route.params.streamIds
+    }
+
+    let lambdas = this.$store.state.blocks
+
+    for(let i = 0; i < lambdas.length; i++)
+    {
+      Axios({
+        method: 'GET',
+        url: `.netlify/functions/${lambdas[i]}`,
+      })
+        .then( res => {
+          res.function = lambdas[i]
+          this.block.push(res)
+        } ) 
+        .catch( err => console.log(err) )
+    }
+    
+    console.log( 'loaded blocks' )
   }
 }
 </script>

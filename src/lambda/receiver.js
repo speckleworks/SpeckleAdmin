@@ -1,6 +1,17 @@
 import Axios from 'axios'
 
 exports.handler = async (event, context, callback) => {
+  if (event.httpMethod == 'GET') {
+    callback(null, {
+      statusCode: 200,
+      body: JSON.stringify({
+        name: "Speckle Object Receiver",
+        parameters : [ ],
+      }),
+    })
+    return;
+  }
+
   if (event.httpMethod !== 'POST' || !event.body) {
     callback(null, {
       statusCode: 400,
@@ -12,13 +23,15 @@ exports.handler = async (event, context, callback) => {
   const {
     baseUrl,
     token,
-    streamId
+    streamId,
+    input,
+    parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !streamId) {
+  if (!baseUrl || !token || !streamId || !parameters ) {
     callback(null, {
       statusCode: 400,
-      body: JSON.stringify({ status: 'ohnooo' }),
+      body: JSON.stringify({ status: 'Bad Request' }),
     });
     return;
   }
