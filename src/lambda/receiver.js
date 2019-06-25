@@ -8,7 +8,7 @@ exports.handler = async (event, context, callback) => {
     });
     return;
   }
-  
+
   const {
     baseUrl,
     token,
