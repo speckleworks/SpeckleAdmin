@@ -42,6 +42,8 @@ exports.handler = async (event, context, callback) => {
   }
 
   // Try to send stream objects
+  Axios.defaults.headers.common[ 'Authorization' ] = token
+  
   let objectIds = [ ]
 
   let bucket = [ ],
@@ -78,8 +80,8 @@ function createObjects( objects ) {
       url: `objects`,
       data: objects,
     })
-    .then( res => resolve( res.data.resources ) )
-    .catch( err => reject( err ))
+      .then( res => resolve( res.data.resources ) )
+      .catch( err => reject( err ))
   })
 }
 

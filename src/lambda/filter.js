@@ -14,11 +14,7 @@ exports.handler = async (event, context, callback) => {
           {
             name: "criteria",
             type: "string",
-          },
-          {
-            name: "exactMatch",
-            type: "boolean",
-          },
+          }
         ],
       }),
     })
@@ -52,10 +48,7 @@ exports.handler = async (event, context, callback) => {
   // Try to receive stream objects
   var returnObjects = []
 
-  if (parameters.exactMatch)
-    returnObjects = input.filter( o => JSON.stringify(getProperty(o, parameters.criteria)) == parameters.criteria)
-  else
-    returnObjects = input.filter( o => JSON.stringify(getProperty(o, parameters.criteria)).includes(parameters.criteria))
+  returnObjects = input.filter( o => JSON.stringify(getProperty(o, parameters.criteria)).includes(parameters.criteria))
 
   callback(null, {
     statusCode: 200,
