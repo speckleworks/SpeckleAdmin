@@ -68,25 +68,10 @@ export default {
   },
   methods: {
     async runProcessor ( ) {
-      // let result = await Axios({
-      //   method: 'POST',
-      //   url: '.netlify/functions/receiver',
-      //   baseURL: location.protocol + '//' + location.host,
-      //   data: {
-      //     baseUrl: this.$store.state.server,
-      //     token: Axios.defaults.headers.common[ 'Authorization' ],
-      //     streamId: `SsQ_U00IU-`,
-      //     input: '',
-      //     parameters: { },
-      //   },
-      // })
-
       var blockInput = this.initInput
 
       this.blockOutput.splice(0, this.blockOutput.length)
       this.blockSuccess.splice(0, this.blockSuccess.length)
-
-      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 
       for (let i = 0; i < this.chosenBlocks.length; i++)
       {
@@ -154,7 +139,7 @@ export default {
       })
         .then( res => {
           res.function = lambdas[i]
-          this.block.push(res)
+          this.blocks.push(res)
         } ) 
         .catch( err => console.log(err) )
     }
