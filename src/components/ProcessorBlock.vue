@@ -10,7 +10,7 @@
           v-if="output != null"
           max-width="500">
           <template v-slot:activator="{ on }">
-            <v-btn fab small dark v-on="on" :color="dialogColor">
+            <v-btn fab small dark depressed v-on="on" :color="dialogColor">
               <v-icon>{{popUpIcon}}</v-icon>
             </v-btn>
           </template>
@@ -26,7 +26,7 @@
             </v-card-text>
           </v-card>
         </v-dialog>
-        <v-btn icon @click="$emit('remove-block', index)">
+        <v-btn fab small depressed @click="$emit('remove-block', index)">
           <v-icon>close</v-icon>
         </v-btn>
       </span>
