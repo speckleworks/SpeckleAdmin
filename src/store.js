@@ -41,35 +41,6 @@ function getStructuralArrPropKeys( foo ) {
   return bar
 }
 
-window.restApi = function ( payload ) {
-  return new Promise( async (resolve, reject ) => {
-    let result = await Axios({
-      method: payload.method,
-      url: payload.url,
-      baseURL: '',
-      data: payload.data,
-    })
-    console.log(result)
-    return resolve( result )
-  })
-}
-
-window.setProperty = function ( payload ) {
-  set(payload.target,
-    payload.targetPath,
-    payload.source
-  )
-  return payload.target
-}
-
-window.getProperty = function ( payload ) {
-  return get(payload.source, payload.sourcePath)
-}
-
-window.md5Hash = function( foo ) {
-  return md5(JSON.stringify(foo))
-}
-
 export default new Vuex.Store( {
   state: {
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`
@@ -105,7 +76,7 @@ export default new Vuex.Store( {
     viewerControls: true,
 
     // processor related
-    blocks: [ "receiver", "filter", "createstream", "restAPI", "helloworld" ]
+    blocks: [ "receiver", "filter", "sender", "restAPI", "uploadobjects", "helloworld" ]
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {

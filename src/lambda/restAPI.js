@@ -1,4 +1,7 @@
 import Axios from 'axios'
+import get from 'lodash.get'
+import set from 'lodash.set'
+import md5 from 'md5'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
@@ -6,6 +9,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "REST API Result Embedder",
+        allowBucketing: true,
         parameters : [
           {
             name: "apiUrl",
@@ -61,14 +65,13 @@ exports.handler = async (event, context, callback) => {
   var output = [ ]
   var validObjects = [ ]
   var invalidObjects = [ ]
-  var dataArray = [ ]
   
   var sourceProperties = parameters.sourceProperty.split(',')
   var targetProperties = parameters.targetProperty.split(',')
   
   var restInput = {
-    method: 'post',
-    url: params.apiUrl,
+    method: 'POST',
+    url: parameters.apiUrl,
     data: { }
   }
 
@@ -78,7 +81,7 @@ exports.handler = async (event, context, callback) => {
 
     for (let i = 0; i < sourceProperties.length; i++)
     {
-      tempDict[targetProperties[i]] = window.getProperty({ source: obj, sourcePath: sourceProperties[i] })
+      tempDict[targetProperties[i]] = get(obj, sourceProperties[i])
       if (tempDict[targetProperties[i]] == null)
       {
         skip = true
@@ -93,40 +96,44 @@ exports.handler = async (event, context, callback) => {
     }
     
     for (let k in tempDict) {
-      var arr = window.getProperty({ source: restInput, sourcePath: 'data.' + k })
+      var arr = get(restInput, 'data.' + k)
       if (arr == null)
         arr = [ ]
       arr.push(tempDict[k])
 
-      restInput = window.setProperty({
-        target: restInput,
-        targetPath: 'data.' + k,
-        source: arr
-      })
+      restInput = set(
+        restInput,
+        'data.' + k,
+        arr
+      )
     }
-
-    console.log(restInput)
 
     validObjects.push(obj)
   }
 
-  console.log(restInput)
+  if (Object.keys(restInput.data).length == 0)
+  {
+    callback(null, {
+      statusCode: 200,
+      body: JSON.stringify(input)
+    })
+    return
+  }
 
   let result = await callAPI(restInput)
-
-  console.log(result)
 
   for (let obj of validObjects) {
     var objResult = result.data.splice(0,1)[0]
     var outputObj = JSON.parse(JSON.stringify(obj))
-    outputObj = window.setProperty({
-      target: outputObj,
-      targetPath: parameters.targetResponse,
-      source: window.getProperty({ source: objResult, sourcePath: parameters.sourceResponse })
-    })
+
+    outputObj = set(
+      outputObj,
+      parameters.targetResponse,
+      get(objResult, parameters.sourceResponse)
+    )
 
     delete outputObj._id
-    outputObj.hash = window.md5Hash(outputObj)
+    outputObj.hash = md5(JSON.stringify(outputObj))
 
     output.push(outputObj)
   }
@@ -144,7 +151,7 @@ exports.handler = async (event, context, callback) => {
 }
 
 function callAPI ( payload ) {
-  return new Promise( async (resolve, reject ) => {
+  return new Promise( async ( resolve, reject ) => {
     Axios({
       method: payload.method,
       url: payload.url,

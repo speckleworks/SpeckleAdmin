@@ -35,7 +35,6 @@
 import ProcessorBlock from '../components/ProcessorBlock.vue'
 import Axios from 'axios'
 
-
 export default {
   name: 'ProcessorView',
   components: {
@@ -69,54 +68,123 @@ export default {
   methods: {
     async runProcessor ( ) {
       var blockInput = this.initInput
+      var i = 0
 
-      this.blockOutput.splice(0, this.blockOutput.length)
-      this.blockSuccess.splice(0, this.blockSuccess.length)
+      if (this.blockOutput.length > 0)
+      {
+        blockInput = this.blockOutput[this.blockOutput.length - 1]
+        i = this.blockOutput.length
+      }
 
-      for (let i = 0; i < this.chosenBlocks.length; i++)
+      for (; i < this.chosenBlocks.length; i++)
       {
         var params = this.blockParams[i] ? this.blockParams[i] : new Object
         
-        let output = await new Promise((resolve, reject) => {
-          Axios({
-            method: 'POST',
-            url: `.netlify/functions/${this.chosenBlocks[i].function}`,
-            baseURL: location.protocol + '//' + location.host,
-            data: {
-              baseUrl: this.$store.state.server,
-              token: Axios.defaults.headers.common[ 'Authorization' ],
-              streamId: this.streamId,
-              input: blockInput,
-              parameters: params,
-            },
-          })
-            .then( res => resolve(res) )
-            .catch ( err => reject(err) )
-        })
+        if (this.chosenBlocks[i].allowBucketing && blockInput.constructor === Array)
+        {
+          // Try to chunk the payload if it is an array
+          var bucket = [ ],
+            maxReq = 50 // magic number; maximum objects to request in a bucket
 
-        this.blockSuccess.push(true)
-        this.blockOutput.push(output.data)
-        console.log(output.data)
-        blockInput = output.data
+          var output = [ ]
+
+          for (let j = 0; j < blockInput.length; j++)
+          {
+            bucket.push( blockInput[j] )
+
+            if ( j % maxReq === 0 && j !== 0 ) {
+              let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
+                .catch( err => {
+                  console.log(err.response.data)
+                  this.blockSuccess.push(false)
+                  this.blockOutput.push(err.response.data)
+                  return
+                })
+
+              if (result.data.constructor === Array)
+                output.push(...result.data)
+              else
+                output.push(result.data)
+
+              bucket = [ ]
+            }
+          }
+
+          if ( bucket.length > 0 ) {
+            let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
+              .catch( err => {
+                console.log(err.response.data)
+                this.blockSuccess.push(false)
+                this.blockOutput.push(err.response.data)
+                return
+              })
+
+            if (result.data.constructor === Array)
+              output.push(...result.data)
+            else
+              output.push(result.data)
+            
+            bucket = [ ]
+          }
+
+          console.log(output)
+          this.blockSuccess.push(true)
+          this.blockOutput.push(output)
+          blockInput = output
+        }
+        else
+        {
+          let result = await this.callLambda( this.chosenBlocks[i].function, blockInput, params )
+            .catch( err => {
+              console.log(err.response.data)
+              this.blockSuccess.push(false)
+              this.blockOutput.push(err.response.data)
+              return
+            })
+          this.blockSuccess.push(true)
+          this.blockOutput.push(result.data)
+          blockInput = result.data
+          console.log(result.data)
+        }
       }
     },
 
-    addBlock ( sender ) {
-      this.blockOutput.splice(0, this.blockOutput.length)
-      this.blockSuccess.splice(0, this.blockSuccess.length)
+    callLambda( func, input, params ) {
+      return new Promise((resolve, reject) => {
+        Axios({
+          method: 'POST',
+          url: `.netlify/functions/${func}`,
+          baseURL: location.protocol + '//' + location.host,
+          data: {
+            baseUrl: this.$store.state.server,
+            token: Axios.defaults.headers.common[ 'Authorization' ],
+            streamId: this.streamId,
+            input: input,
+            parameters: params,
+          },
+        })
+          .then( res => resolve(res) )
+          .catch ( err => reject(err) )
+      })
+    },
 
+    addBlock ( sender ) {
       if (sender != null)
         this.chosenBlocks.push( sender )
     },
 
     removeBlock ( index ) {
-      this.blockOutput.splice(0, this.blockOutput.length)
-      this.blockSuccess.splice(0, this.blockSuccess.length)
+      this.blockOutput.splice(index, this.blockOutput.length - index)
+      this.blockSuccess.splice(index, this.blockSuccess.length - index)
 
+      this.blockParams.splice(index, 1)
       this.chosenBlocks.splice(index, 1)
     },
 
     updateParam ( o ) {
+      this.blockOutput.splice(o.index, this.blockOutput.length - o.index)
+      this.blockSuccess.splice(o.index, this.blockSuccess.length - o.index)
+
       this.blockParams[o.index] = o.params
     },
   },

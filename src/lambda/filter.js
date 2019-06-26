@@ -6,6 +6,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Filter",
+        allowBucketing: true,
         parameters : [
           {
             name: "path",
@@ -36,7 +37,7 @@ exports.handler = async (event, context, callback) => {
     input,
     parameters,
   } = JSON.parse(event.body)
-
+  
   if (!baseUrl || !token || !streamId || !parameters ) {
     callback(null, {
       statusCode: 400,
@@ -48,7 +49,12 @@ exports.handler = async (event, context, callback) => {
   // Try to receive stream objects
   var returnObjects = []
 
-  returnObjects = input.filter( o => JSON.stringify(getProperty(o, parameters.criteria)).includes(parameters.criteria))
+  returnObjects = input.filter( o => { 
+    let prop = JSON.stringify(getProperty(o, parameters.path))
+    if (prop == null)
+      return false
+    return JSON.stringify(getProperty(o, parameters.path)).toLowerCase().includes(parameters.criteria.toLowerCase())
+  })
 
   callback(null, {
     statusCode: 200,

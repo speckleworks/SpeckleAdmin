@@ -5,7 +5,8 @@ exports.handler = async (event, context, callback) => {
     callback(null, {
       statusCode: 200,
       body: JSON.stringify({
-        name: "Speckle Object Receiver",
+        name: "Speckle Stream Receiver",
+        allowBucketing: false,
         parameters : [ ],
       }),
     })

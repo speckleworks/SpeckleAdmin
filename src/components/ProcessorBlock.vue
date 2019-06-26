@@ -11,8 +11,8 @@
         </v-btn>
       </span>
     </v-card-title>
-    <v-flex xs12 sm6 md3 v-if="Object.keys(params).length > 0">
-      <v-text-field  v-for='param in block.parameters' :key='param.name' :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index, params})">
+    <v-flex xs12 sm6 md3 v-if="this.block.parameters.length > 0">
+      <v-text-field  v-for='param in block.parameters' :key='param.name' :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
       </v-text-field>
     </v-flex>
     <v-alert
@@ -46,7 +46,7 @@ export default {
   methods: {
   },
   created () {
-    this.params = Object.keys(this.block.parameters)
+    this.params = { }
   }
 }
 </script>
