@@ -15,6 +15,10 @@ exports.handler = async (event, context, callback) => {
           {
             name: "criteria",
             type: "string",
+          },
+          {
+            name: "exactMatch",
+            type: "boolean",
           }
         ],
       }),
@@ -53,7 +57,10 @@ exports.handler = async (event, context, callback) => {
     let prop = JSON.stringify(getProperty(o, parameters.path))
     if (prop == null)
       return false
-    return JSON.stringify(getProperty(o, parameters.path)).toLowerCase().includes(parameters.criteria.toLowerCase())
+    if (parameters.exactMatch)
+      return JSON.stringify(getProperty(o, parameters.path)).toLowerCase() === parameters.criteria.toLowerCase()
+    else
+      return JSON.stringify(getProperty(o, parameters.path)).toLowerCase().includes(parameters.criteria.toLowerCase())
   })
 
   callback(null, {

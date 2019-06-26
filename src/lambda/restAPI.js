@@ -17,19 +17,19 @@ exports.handler = async (event, context, callback) => {
           },
           {
             name: "sourceProperty",
-            type: "string",
+            type: "array",
           },
           {
             name: "targetProperty",
-            type: "string",
+            type: "array",
           },
           {
             name: "sourceResponse",
-            type: "string",
+            type: "array",
           },
           {
             name: "targetResponse",
-            type: "string",
+            type: "array",
           },
         ],
       }),
@@ -52,7 +52,7 @@ exports.handler = async (event, context, callback) => {
     input,
     parameters,
   } = JSON.parse(event.body)
-
+  console.log(parameters)
   if (!baseUrl || !token || !streamIds || !parameters ) {
     callback(null, {
       statusCode: 400,
@@ -66,9 +66,6 @@ exports.handler = async (event, context, callback) => {
   var validObjects = [ ]
   var invalidObjects = [ ]
   
-  var sourceProperties = parameters.sourceProperty.split(',')
-  var targetProperties = parameters.targetProperty.split(',')
-  
   var restInput = {
     method: 'POST',
     url: parameters.apiUrl,
@@ -79,16 +76,16 @@ exports.handler = async (event, context, callback) => {
     var skip = false
     var tempDict = { }
 
-    for (let i = 0; i < sourceProperties.length; i++)
+    for (let i = 0; i < parameters.sourceProperty.length; i++)
     {
-      tempDict[targetProperties[i]] = get(obj, sourceProperties[i])
-      if (tempDict[targetProperties[i]] == null)
+      tempDict[parameters.targetProperty[i]] = get(obj, parameters.sourceProperty[i])
+      if (tempDict[parameters.targetProperty[i]] == null)
       {
         skip = true
         break
       }
     }
-    
+
     if (skip)
     {
       invalidObjects.push(obj)
@@ -119,18 +116,21 @@ exports.handler = async (event, context, callback) => {
     })
     return
   }
-
+  
   let result = await callAPI(restInput)
 
   for (let obj of validObjects) {
     var objResult = result.data.splice(0,1)[0]
     var outputObj = JSON.parse(JSON.stringify(obj))
 
-    outputObj = set(
-      outputObj,
-      parameters.targetResponse,
-      get(objResult, parameters.sourceResponse)
-    )
+    for (let i = 0; i < parameters.sourceResponse.length; i++)
+    {
+      outputObj = set(
+        outputObj,
+        parameters.targetResponse[i],
+        get(objResult, parameters.sourceResponse[i])
+      )
+    }
 
     delete outputObj._id
     outputObj.hash = md5(JSON.stringify(outputObj))

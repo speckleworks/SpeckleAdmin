@@ -7,16 +7,12 @@
           Run
         </v-btn>
       </v-flex>
-      <v-flex xs12>
-        <v-text-field v-model="initInput">
-        </v-text-field>
-      </v-flex>
       <v-flex xs12 v-for='(block, index) in chosenBlocks' :key='index'>
         <processor-block
           :index='index'
           :block='block'
           :output='blockOutput[index]'
-          :successRun='blockSuccess[index]'
+          :status='blockStatus[index]'
           v-on:remove-block="removeBlock"
           v-on:update-param="updateParam"/>
       </v-flex>
@@ -51,7 +47,7 @@ export default {
       blocks: [ ],
 
       chosenBlocks: [ ],
-      blockSuccess: [ ],
+      blockStatus: [ ],
       blockOutput: [ ],
       blockParams: [ ],
       
@@ -78,6 +74,8 @@ export default {
 
       for (; i < this.chosenBlocks.length; i++)
       {
+        this.blockStatus.push('running')
+
         var params = this.blockParams[i] ? this.blockParams[i] : new Object
         
         if (this.chosenBlocks[i].allowBucketing && blockInput.constructor === Array)
@@ -93,58 +91,71 @@ export default {
             bucket.push( blockInput[j] )
 
             if ( j % maxReq === 0 && j !== 0 ) {
-              let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
-                .catch( err => {
-                  console.log(err.response.data)
-                  this.blockSuccess.push(false)
-                  this.blockOutput.push(err.response.data)
-                  return
-                })
-
-              if (result.data.constructor === Array)
-                output.push(...result.data)
-              else
-                output.push(result.data)
+              try
+              {
+                let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
+                if (result.data.constructor === Array)
+                  output.push(...result.data)
+                else
+                  output.push(result.data)
+              }
+              catch (err)
+              {
+                this.blockStatus.pop()
+                this.blockStatus.push('error')
+                this.blockOutput.push(err.response.data)
+                return
+              }
 
               bucket = [ ]
             }
           }
 
           if ( bucket.length > 0 ) {
-            let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
-              .catch( err => {
-                console.log(err.response.data)
-                this.blockSuccess.push(false)
-                this.blockOutput.push(err.response.data)
-                return
-              })
+            try
+            {
+              let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
 
-            if (result.data.constructor === Array)
-              output.push(...result.data)
-            else
-              output.push(result.data)
-            
+              if (result.data.constructor === Array)
+                output.push(...result.data)
+              else
+                output.push(result.data)
+            }
+            catch (err) 
+            {
+              this.blockStatus.pop()
+              this.blockStatus.push('error')
+              this.blockOutput.push(err.response.data)
+              return
+            }
+
             bucket = [ ]
           }
 
           console.log(output)
-          this.blockSuccess.push(true)
+          this.blockStatus.pop()
+          this.blockStatus.push('success')
           this.blockOutput.push(output)
           blockInput = output
         }
         else
         {
-          let result = await this.callLambda( this.chosenBlocks[i].function, blockInput, params )
-            .catch( err => {
-              console.log(err.response.data)
-              this.blockSuccess.push(false)
-              this.blockOutput.push(err.response.data)
-              return
-            })
-          this.blockSuccess.push(true)
-          this.blockOutput.push(result.data)
-          blockInput = result.data
-          console.log(result.data)
+          try
+          {
+            let result = await this.callLambda( this.chosenBlocks[i].function, blockInput, params )
+            this.blockStatus.pop()
+            this.blockStatus.push('success')
+            this.blockOutput.push(result.data)
+            blockInput = result.data
+            console.log(result.data)
+          }
+          catch (err) 
+          {
+            this.blockStatus.pop()
+            this.blockStatus.push('error')
+            this.blockOutput.push(err.response.data)
+            return
+          }
         }
       }
     },
@@ -175,7 +186,7 @@ export default {
 
     removeBlock ( index ) {
       this.blockOutput.splice(index, this.blockOutput.length - index)
-      this.blockSuccess.splice(index, this.blockSuccess.length - index)
+      this.blockStatus.splice(index, this.blockStatus.length - index)
 
       this.blockParams.splice(index, 1)
       this.chosenBlocks.splice(index, 1)
@@ -183,7 +194,7 @@ export default {
 
     updateParam ( payload ) {
       this.blockOutput.splice(payload.index, this.blockOutput.length - payload.index)
-      this.blockSuccess.splice(payload.index, this.blockSuccess.length - payload.index)
+      this.blockStatus.splice(payload.index, this.blockStatus.length - payload.index)
 
       this.blockParams[payload.index] = payload.params
     },
