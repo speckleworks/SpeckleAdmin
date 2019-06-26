@@ -44,7 +44,7 @@ export default {
   },
   data( ) {
     return {
-      streamId: '',
+      streamIds: [ ],
 
       initInput: "",
 
@@ -158,7 +158,7 @@ export default {
           data: {
             baseUrl: this.$store.state.server,
             token: Axios.defaults.headers.common[ 'Authorization' ],
-            streamId: this.streamId,
+            streamIds: this.streamIds,
             input: input,
             parameters: params,
           },
@@ -181,39 +181,43 @@ export default {
       this.chosenBlocks.splice(index, 1)
     },
 
-    updateParam ( o ) {
-      this.blockOutput.splice(o.index, this.blockOutput.length - o.index)
-      this.blockSuccess.splice(o.index, this.blockSuccess.length - o.index)
+    updateParam ( payload ) {
+      this.blockOutput.splice(payload.index, this.blockOutput.length - payload.index)
+      this.blockSuccess.splice(payload.index, this.blockSuccess.length - payload.index)
 
-      this.blockParams[o.index] = o.params
+      this.blockParams[payload.index] = payload.params
     },
+
+    loadBlocks ( ) {
+      let lambdas = this.$store.state.blocks
+
+      for(let i = 0; i < lambdas.length; i++)
+      {
+        Axios({
+          method: 'GET',
+          url: `.netlify/functions/${lambdas[i]}`,
+          baseURL: location.protocol + '//' + location.host,
+        })
+          .then( res => {
+            var data = res.data
+            data.function = lambdas[i]
+            this.blocks.push(data)
+          } ) 
+          .catch( err => console.log(err) )
+      }
+      
+      console.log( 'loaded blocks' )
+    }
   },
 
   mounted( ) {
     console.log( 'mounted' )
 
     if ( this.$route.params.streamIds ) {
-      this.streamId = this.$route.params.streamIds
+      this.streamIds = this.$route.params.streamIds.split( ',' )
     }
 
-    let lambdas = this.$store.state.blocks
-
-    for(let i = 0; i < lambdas.length; i++)
-    {
-      Axios({
-        method: 'GET',
-        url: `.netlify/functions/${lambdas[i]}`,
-        baseURL: location.protocol + '//' + location.host,
-      })
-        .then( res => {
-          var data = res.data
-          data.function = lambdas[i]
-          this.blocks.push(data)
-        } ) 
-        .catch( err => console.log(err) )
-    }
-    
-    console.log( 'loaded blocks' )
+    this.loadBlocks()
   }
 }
 </script>

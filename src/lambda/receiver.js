@@ -24,12 +24,13 @@ exports.handler = async (event, context, callback) => {
   const {
     baseUrl,
     token,
-    streamId,
+    streamIds,
     input,
     parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !streamId || !parameters ) {
+
+  if (!baseUrl || !token || !streamIds || !parameters ) {
     callback(null, {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
@@ -42,7 +43,11 @@ exports.handler = async (event, context, callback) => {
 
   Axios.defaults.headers.common[ 'Authorization' ] = token
 
-  let objectIds = await getStreamObjectIds( baseUrl, streamId )
+  let objectIds = [ ]
+  for (let i = 0; i < streamIds.length; i++)
+    objectIds.push(... await getStreamObjectIds( baseUrl, streamIds[i] ))
+
+  objectIds = [...new Set(objectIds)]
 
   let bucket = [ ],
     maxReq = 50 // magic number; maximum objects to request in a bucket

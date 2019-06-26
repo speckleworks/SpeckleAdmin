@@ -24,12 +24,12 @@ exports.handler = async (event, context, callback) => {
   const {
     baseUrl,
     token,
-    streamId,
+    streamIds,
     input,
     parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !streamId || !parameters ) {
+  if (!baseUrl || !token || !streamIds || !parameters ) {
     callback(null, {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
