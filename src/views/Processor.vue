@@ -1,21 +1,26 @@
 <template>
   <v-container grid-list-xl>
+    <div style='position: absolute; top:0; left: 0; width: 100%;'>
+      <v-progress-linear :indeterminate="true" v-show='isLoading' height='2' class='ma-0'></v-progress-linear>
+    </div>
     <v-layout row wrap>
       <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
         Processor allows you to run scripts on streams.
       </v-flex>
       <v-flex>
         <v-card>
-          <v-flex xs12 ma-0 pa-0 v-for='(block, index) in chosenBlocks' :key='index'>
-            <processor-block
-              :index='index'
-              :block='block'
-              :output='blockOutput[index]'
-              :status='blockStatus[index]'
-              :params='blockParams[index]'
-              v-on:remove-block="removeBlock"
-              v-on:update-param="updateParam"/>
-          </v-flex>
+          <template v-if="!isLoading">
+            <v-flex xs12 ma-0 pa-0 v-for='(block, index) in chosenBlocks' :key='index'>
+              <processor-block
+                :index='index'
+                :block='block'
+                :output='blockOutput[index]'
+                :status='blockStatus[index]'
+                :params='blockParams[index]'
+                v-on:remove-block="removeBlock"
+                v-on:update-param="updateParam"/>
+            </v-flex>
+          </template>
           <v-flex xs12>
             <v-select
               return-object

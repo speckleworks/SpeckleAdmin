@@ -13,8 +13,8 @@
           v-if="output != null"
           max-width="500">
           <template v-slot:activator="{ on }">
-            <v-btn fab small dark depressed v-on="on" :color="dialogColor">
-              <v-icon>{{popUpIcon}}</v-icon>
+            <v-btn fab small dark depressed v-on="on" :color="status == 'success' ? 'green' : 'red'">
+              <v-icon>{{status == "success" ? "check" : "warning"}}</v-icon>
             </v-btn>
           </template>
           <v-card>
@@ -73,14 +73,6 @@ export default {
     params: { },
   },
   computed: {
-    popUpIcon( ) {
-      if (this.status == "success") return "check"
-      else if (this.status == "error") return "error"
-    },
-    dialogColor( ){
-      if (this.status == "success") return "green"
-      else if (this.status == "error") return "red"
-    },
     arrayParams( ) {
       return this.block.parameters.filter(p => p.type == 'array')
     },
