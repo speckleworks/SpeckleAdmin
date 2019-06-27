@@ -6,6 +6,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Speckle Stream Sender",
+        icon: "cloud_upload",
         allowBucketing: false,
         parameters : [
           {
@@ -29,12 +30,11 @@ exports.handler = async (event, context, callback) => {
   const {
     baseUrl,
     token,
-    streamIds,
     input,
     parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !streamIds || !parameters ) {
+  if (!baseUrl || !token || !parameters ) {
     callback(null, {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),

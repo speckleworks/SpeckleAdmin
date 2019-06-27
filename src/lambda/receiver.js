@@ -6,8 +6,14 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Speckle Stream Receiver",
+        icon: "cloud_download",
         allowBucketing: false,
-        parameters : [ ],
+        parameters : [
+          {
+            name: "streamIds",
+            type: "array",
+          }, 
+        ],
       }),
     })
     return;
@@ -24,13 +30,12 @@ exports.handler = async (event, context, callback) => {
   const {
     baseUrl,
     token,
-    streamIds,
     input,
     parameters,
   } = JSON.parse(event.body)
 
 
-  if (!baseUrl || !token || !streamIds || !parameters ) {
+  if (!baseUrl || !token || !parameters ) {
     callback(null, {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
@@ -44,8 +49,8 @@ exports.handler = async (event, context, callback) => {
   Axios.defaults.headers.common[ 'Authorization' ] = token
 
   let objectIds = [ ]
-  for (let i = 0; i < streamIds.length; i++)
-    objectIds.push(... await getStreamObjectIds( baseUrl, streamIds[i] ))
+  for (let i = 0; i < parameters.streamIds.length; i++)
+    objectIds.push(... await getStreamObjectIds( baseUrl, parameters.streamIds[i] ))
 
   objectIds = [...new Set(objectIds)]
 

@@ -93,7 +93,7 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
-      path: '/processor/:streamIds*',
+      path: '/processor',
       name: 'processor',
       component: ( ) => import( './views/Processor.vue' ),
       meta: { requiresAuth: true },

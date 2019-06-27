@@ -3,28 +3,44 @@
     <v-layout row wrap>
       <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
         Processor allows you to run scripts on streams.
-        <v-btn color="primary" @click="runProcessor">
-          Run
-        </v-btn>
       </v-flex>
-      <v-flex xs12 v-for='(block, index) in chosenBlocks' :key='index'>
-        <processor-block
-          :index='index'
-          :block='block'
-          :output='blockOutput[index]'
-          :status='blockStatus[index]'
-          v-on:remove-block="removeBlock"
-          v-on:update-param="updateParam"/>
-      </v-flex>
-      <v-flex xs12>
-        <v-combobox
-          :items="blocks"
-          :item-text="(block) => block.name"
-          v-on:change="addBlock"
-          label="Add new block">
-        </v-combobox>
+      <v-flex>
+        <v-card>
+          <v-flex xs12 ma-0 pa-0 v-for='(block, index) in chosenBlocks' :key='index'>
+            <processor-block
+              :index='index'
+              :block='block'
+              :output='blockOutput[index]'
+              :status='blockStatus[index]'
+              :params='blockParams[index]'
+              v-on:remove-block="removeBlock"
+              v-on:update-param="updateParam"/>
+          </v-flex>
+          <v-flex xs12>
+            <v-select
+              return-object
+              :items="blocks"
+              v-on:input="addBlock"
+              label="Add new block">
+              <template slot="selection">
+                {{null}}
+              </template>
+              <template slot="item" slot-scope="blocks">
+                <v-icon class="mr-2">
+                  {{blocks.item.icon ? blocks.item.icon : 'code'}}
+                </v-icon>
+                {{blocks.item.name}}
+              </template>
+            </v-select>
+          </v-flex>
+        </v-card>
       </v-flex>
     </v-layout>
+    <v-btn color="primary" dark fixed large bottom right fab @click="runProcessor">
+      <v-icon>
+        {{this.reRun ? "replay" : "play_arrow"}}
+      </v-icon>
+    </v-btn>
   </v-container>
 </template>
 <script>
@@ -37,12 +53,17 @@ export default {
     ProcessorBlock,
   },
   computed: {
+    reRun: function () {
+      if (this.blockStatus.length > 0 && this.blockStatus.length == this.chosenBlocks.length)
+        return this.blockStatus[this.blockStatus.length - 1] == 'success'
+
+      return false
+    }
   },
   data( ) {
     return {
-      streamIds: [ ],
-
       initInput: "",
+      isLoading: false,
 
       blocks: [ ],
 
@@ -66,10 +87,20 @@ export default {
       var blockInput = this.initInput
       var i = 0
 
-      if (this.blockOutput.length > 0)
+      if (this.reRun)
       {
-        blockInput = this.blockOutput[this.blockOutput.length - 1]
-        i = this.blockOutput.length
+        this.blockOutput.splice(0, this.blockOutput.length)
+        this.blockStatus.splice(0, this.blockStatus.length)
+      }
+      else if (this.blockStatus.length > 0)
+      {
+        i = this.blockStatus.filter(x => x == 'success').length
+
+        if (i > 0)
+          blockInput = this.blockOutput[i - 1]
+
+        this.blockOutput.splice(i, this.blockOutput.length - i)
+        this.blockStatus.splice(i, this.blockStatus.length - i)
       }
 
       for (; i < this.chosenBlocks.length; i++)
@@ -132,7 +163,6 @@ export default {
             bucket = [ ]
           }
 
-          console.log(output)
           this.blockStatus.pop()
           this.blockStatus.push('success')
           this.blockOutput.push(output)
@@ -147,7 +177,6 @@ export default {
             this.blockStatus.push('success')
             this.blockOutput.push(result.data)
             blockInput = result.data
-            console.log(result.data)
           }
           catch (err) 
           {
@@ -181,7 +210,11 @@ export default {
 
     addBlock ( sender ) {
       if (sender != null)
+      {
         this.chosenBlocks.push( sender )
+        this.blockParams.push({})
+      }
+      this.appendQueryToRoute()
     },
 
     removeBlock ( index ) {
@@ -190,21 +223,36 @@ export default {
 
       this.blockParams.splice(index, 1)
       this.chosenBlocks.splice(index, 1)
+      
+      this.appendQueryToRoute()
     },
 
     updateParam ( payload ) {
       this.blockOutput.splice(payload.index, this.blockOutput.length - payload.index)
       this.blockStatus.splice(payload.index, this.blockStatus.length - payload.index)
 
-      this.blockParams[payload.index] = payload.params
+      this.blockParams[payload.index] = Object.assign({}, ...
+        Object.entries(payload.params).filter(([k,v]) => {
+          if (v.constructor === Array)
+            return v.length > 0
+
+          if (typeof v == 'string')
+            return v.length > 0
+
+          if (typeof v == 'boolean')
+            return v
+        }).map(([k,v]) => ({[k]:v}))
+      )
+      
+      this.appendQueryToRoute()
     },
 
-    loadBlocks ( ) {
+    async loadBlocks ( ) {
       let lambdas = this.$store.state.blocks
 
       for(let i = 0; i < lambdas.length; i++)
       {
-        Axios({
+        await Axios({
           method: 'GET',
           url: `.netlify/functions/${lambdas[i]}`,
           baseURL: location.protocol + '//' + location.host,
@@ -217,18 +265,79 @@ export default {
           .catch( err => console.log(err) )
       }
       
+      this.blocks.sort((x, y) => (x.name > y.name) ? 1 : -1)
       console.log( 'loaded blocks' )
-    }
+    },
+
+    fetchBlocksFromRoute( ) {
+      if ( this.$route.query.blocks ) {
+        let blocks = this.$route.query.blocks.split( ',' )
+        blocks.forEach(block => {
+          let match = this.blocks.filter(x => x.function == block)[0]
+          if (match != null)
+            this.chosenBlocks.push( match )
+        })
+      }
+    },
+
+    fetchParamsFromRoute( ) {
+      for (let i = 0; i < this.chosenBlocks.length; i++)
+      {
+        if (this.$route.query['params_' + i.toString()])
+          this.blockParams.push(Object.assign({}, ...
+            Object.entries(JSON.parse(this.$route.query['params_' + i.toString()])).filter(([k,v]) => {
+              if (v.constructor === Array)
+                return v.length > 0
+
+              if (typeof v == 'string')
+                return v.length > 0
+
+              if (typeof v == 'boolean')
+                return v
+            }).map(([k,v]) => ({[k]:v}))
+          ))
+        else
+          this.blockParams.push({})
+      }
+    },
+
+    appendQueryToRoute( ) {
+      if (this.isLoading) return
+
+      let query = { }
+
+      let blocks = this.chosenBlocks.map(x => x.function).join( ',' )
+      if ( blocks !== '' )
+        query['blocks'] = blocks
+      
+      for (let i = 0; i < this.blockParams.length; i++)
+      {
+        if (this.blockParams.length > i && Object.keys(this.blockParams[i]).length > 0)
+        {
+          let param = JSON.stringify(this.blockParams[i])
+          query['params_' + i.toString()] = param
+        }
+      }
+
+      if ( Object.keys(query).length > 0 )
+        this.$router.replace( { name: 'processor', query: query } )
+      else this.$router.replace( { name: 'processor' } )
+    },
   },
 
-  mounted( ) {
+  async mounted( ) {
+    this.isLoading = true;
+
+    await this.loadBlocks()
+
+    this.fetchBlocksFromRoute()
+    this.fetchParamsFromRoute()
+
+    this.isLoading = false;
+
+    this.appendQueryToRoute()
+
     console.log( 'mounted' )
-
-    if ( this.$route.params.streamIds ) {
-      this.streamIds = this.$route.params.streamIds.split( ',' )
-    }
-
-    this.loadBlocks()
   }
 }
 </script>

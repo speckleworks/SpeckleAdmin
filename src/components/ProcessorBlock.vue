@@ -1,6 +1,9 @@
 <template>
-  <v-card>
+  <v-card ma-0 pa-0 flat>
     <v-card-title>
+      <v-icon class="mr-2">
+        {{block.icon ? block.icon : 'code'}}
+      </v-icon>
       <span class='title font-weight-light'>
         {{ block.name }}
       </span>
@@ -16,7 +19,7 @@
           </template>
           <v-card>
             <v-card-title>
-              <span class='title font-weight-light'>
+              <span class='font-weight-light'>
                 {{status == "error" ? "Error" : "Response"}}
               </span>
             </v-card-title>
@@ -31,7 +34,7 @@
         </v-btn>
       </span>
     </v-card-title>
-    <v-card-text>
+    <v-card-text v-if="this.block.parameters.length > 0">
       <v-layout row wrap v-if="this.block.parameters.length > 0">
         <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>
           <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
@@ -67,6 +70,7 @@ export default {
     block: Object,
     output: null,
     status: '',
+    params: { },
   },
   computed: {
     popUpIcon( ) {
@@ -122,7 +126,6 @@ export default {
     }
   },
   created () {
-    this.params = { }
   }
 }
 </script>
