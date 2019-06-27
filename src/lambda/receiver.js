@@ -12,7 +12,11 @@ exports.handler = async (event, context, callback) => {
           {
             name: "streamIds",
             type: "array",
-          }, 
+          },
+          {
+            name: "fields",
+            type: "array",
+          }
         ],
       }),
     })
@@ -60,14 +64,14 @@ exports.handler = async (event, context, callback) => {
   for ( let i = 0; i < objectIds.length; i++ ) {
     bucket.push( objectIds[ i ] )
     if ( i % maxReq === 0 && i !== 0 ) {
-      let objects = await getObjects( baseUrl, bucket )
+      let objects = await getObjects( baseUrl, bucket, parameters.fields )
       streamObjects.push(...objects)
       bucket = [ ]
     }
   }
 
   if ( bucket.length !== 0 ) {
-    let objects = await getObjects( baseUrl, bucket )
+    let objects = await getObjects( baseUrl, bucket, parameters.fields )
     streamObjects.push(...objects)
     bucket = [ ]
   }
@@ -96,13 +100,16 @@ function getStreamObjectIds( baseUrl, streamId )
   })
 }
 
-function getObjects( baseUrl, objectIds )
+function getObjects( baseUrl, objectIds, fields )
 {
+  var url = `objects/getbulk`//?omit=base64,rawData,canRead,canWrite,children,anonymousComments,name`
+  if (fields.length > 0)
+    url += `?fields=` + fields.join( ',' )
   return new Promise( (resolve, reject) => {
     Axios({
       method: 'POST',
       baseURL: baseUrl,
-      url: `objects/getbulk?omit=base64,rawData,canRead,canWrite,children,anonymousComments,name`,
+      url: url,
       data: objectIds,
     })
     .then( res => resolve( res.data.resources ) )
