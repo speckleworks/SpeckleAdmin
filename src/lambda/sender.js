@@ -2,7 +2,7 @@ import Axios from 'axios'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
-    callback(null, {
+    return {
       statusCode: 200,
       body: JSON.stringify({
         name: "Speckle Stream Sender",
@@ -15,16 +15,14 @@ exports.handler = async (event, context, callback) => {
           },
         ],
       }),
-    })
-    return;
+    }
   }
 
   if (event.httpMethod !== 'POST' || !event.body) {
-    callback(null, {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   const {
@@ -34,12 +32,11 @@ exports.handler = async (event, context, callback) => {
     parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !parameters ) {
-    callback(null, {
+  if (!baseUrl || !token || !input ) {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   // Try to send stream objects
@@ -48,10 +45,10 @@ exports.handler = async (event, context, callback) => {
   var stream = {name: parameters.streamName, objects: input};
   let result = await createStream(baseUrl, stream);
 
-  callback(null, {
+  return {
     statusCode: 200,
     body: JSON.stringify(result.streamId)
-  })
+  }
 }
 
 function createStream( baseUrl, stream ) {

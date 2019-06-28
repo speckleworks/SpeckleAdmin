@@ -238,14 +238,10 @@ export default {
 
       this.blockParams[payload.index] = Object.assign({}, ...
         Object.entries(payload.params).filter(([k,v]) => {
-          if (v.constructor === Array)
-            return v.length > 0
-
-          if (typeof v == 'string')
-            return v.length > 0
-
           if (typeof v == 'boolean')
             return v
+          
+          return Object.keys(v).length > 0
         }).map(([k,v]) => ({[k]:v}))
       )
       
@@ -276,7 +272,7 @@ export default {
 
     fetchBlocksFromRoute( ) {
       if ( this.$route.query.blocks ) {
-        let blocks = this.$route.query.blocks.split( ',' )
+        let blocks = atob(this.$route.query.blocks).split( ',' )
         blocks.forEach(block => {
           let match = this.blocks.filter(x => x.function == block)[0]
           if (match != null)
@@ -290,15 +286,11 @@ export default {
       {
         if (this.$route.query['params_' + i.toString()])
           this.blockParams.push(Object.assign({}, ...
-            Object.entries(JSON.parse(this.$route.query['params_' + i.toString()])).filter(([k,v]) => {
-              if (v.constructor === Array)
-                return v.length > 0
-
-              if (typeof v == 'string')
-                return v.length > 0
-
+            Object.entries(JSON.parse(atob(this.$route.query['params_' + i.toString()]))).filter(([k,v]) => {
               if (typeof v == 'boolean')
                 return v
+              
+              return Object.keys(v).length > 0
             }).map(([k,v]) => ({[k]:v}))
           ))
         else
@@ -313,14 +305,14 @@ export default {
 
       let blocks = this.chosenBlocks.map(x => x.function).join( ',' )
       if ( blocks !== '' )
-        query['blocks'] = blocks
+        query['blocks'] = btoa(blocks)
       
       for (let i = 0; i < this.blockParams.length; i++)
       {
         if (this.blockParams.length > i && Object.keys(this.blockParams[i]).length > 0)
         {
           let param = JSON.stringify(this.blockParams[i])
-          query['params_' + i.toString()] = param
+          query['params_' + i.toString()] = btoa(param)
         }
       }
 

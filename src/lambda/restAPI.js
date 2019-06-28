@@ -5,7 +5,7 @@ import md5 from 'md5'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
-    callback(null, {
+    return {
       statusCode: 200,
       body: JSON.stringify({
         name: "REST API Result Embedder",
@@ -17,33 +17,25 @@ exports.handler = async (event, context, callback) => {
             type: "string",
           },
           {
-            name: "sourceProperty",
-            type: "array",
+            name: "inputMap",
+            type: "objectarray",
+            headers: ["source", "target"]
           },
           {
-            name: "targetProperty",
-            type: "array",
-          },
-          {
-            name: "sourceResponse",
-            type: "array",
-          },
-          {
-            name: "targetResponse",
-            type: "array",
-          },
+            name: "resultMap",
+            type: "objectarray",
+            headers: ["source", "target"]
+          }
         ],
       }),
-    })
-    return;
+    }
   }
 
   if (event.httpMethod !== 'POST' || !event.body) {
-    callback(null, {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   const {
@@ -52,13 +44,12 @@ exports.handler = async (event, context, callback) => {
     input,
     parameters,
   } = JSON.parse(event.body)
-  console.log(parameters)
-  if (!baseUrl || !token || !parameters ) {
-    callback(null, {
+  
+  if (!baseUrl || !token || !input || !parameters ) {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   // Try to send stream objects
@@ -76,22 +67,19 @@ exports.handler = async (event, context, callback) => {
     var skip = false
     var tempDict = { }
 
-    for (let i = 0; i < parameters.sourceProperty.length; i++)
+    for (let i = 0; i < parameters.inputMap.length; i++)
     {
-      tempDict[parameters.targetProperty[i]] = get(obj, parameters.sourceProperty[i])
-      if (tempDict[parameters.targetProperty[i]] == null)
+      tempDict[parameters.inputMap[i].target] = get(obj, parameters.inputMap[i].source)
+      if (tempDict[parameters.inputMap[i].target] == null)
       {
+        invalidObjects.push(obj)
         skip = true
         break
       }
     }
 
-    if (skip)
-    {
-      invalidObjects.push(obj)
-      continue
-    }
-    
+    if (skip) continue
+
     for (let k in tempDict) {
       var arr = get(restInput, 'data.' + k)
       if (arr == null)
@@ -110,11 +98,10 @@ exports.handler = async (event, context, callback) => {
 
   if (Object.keys(restInput.data).length == 0)
   {
-    callback(null, {
+    return{
       statusCode: 200,
       body: JSON.stringify(input)
-    })
-    return
+    }
   }
   
   let result = await callAPI(restInput)
@@ -123,12 +110,12 @@ exports.handler = async (event, context, callback) => {
     var objResult = result.data.splice(0,1)[0]
     var outputObj = JSON.parse(JSON.stringify(obj))
 
-    for (let i = 0; i < parameters.sourceResponse.length; i++)
+    for (let i = 0; i < parameters.resultMap.length; i++)
     {
       outputObj = set(
         outputObj,
-        parameters.targetResponse[i],
-        get(objResult, parameters.sourceResponse[i])
+        parameters.resultMap[i].target,
+        get(objResult, parameters.resultMap[i].source)
       )
     }
 
@@ -144,10 +131,10 @@ exports.handler = async (event, context, callback) => {
     output.push(outputObj)
   }
 
-  callback(null, {
+  return {
     statusCode: 200,
     body: JSON.stringify(output)
-  })
+  }
 }
 
 function callAPI ( payload ) {

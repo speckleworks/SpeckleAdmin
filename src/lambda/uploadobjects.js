@@ -2,7 +2,7 @@ import Axios from 'axios'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
-    callback(null, {
+    return {
       statusCode: 200,
       body: JSON.stringify({
         name: "Upload Speckle Objects",
@@ -10,16 +10,14 @@ exports.handler = async (event, context, callback) => {
         allowBucketing: true,
         parameters : [ ],
       }),
-    })
-    return;
+    }
   }
 
   if (event.httpMethod !== 'POST' || !event.body) {
-    callback(null, {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   const {
@@ -29,12 +27,11 @@ exports.handler = async (event, context, callback) => {
     parameters,
   } = JSON.parse(event.body)
 
-  if (!baseUrl || !token || !parameters ) {
-    callback(null, {
+  if (!baseUrl || !token || !input ) {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   // Try to send stream objects
@@ -58,10 +55,10 @@ exports.handler = async (event, context, callback) => {
     objectIds.push(...res)
   }
 
-  callback(null, {
+  return {
     statusCode: 200,
     body: JSON.stringify(objectIds)
-  })
+  }
 }
 
 function createObjects( baseUrl, objects ) {

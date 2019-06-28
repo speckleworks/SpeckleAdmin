@@ -2,7 +2,7 @@ import get from 'lodash.get'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
-    callback(null, {
+    return {
       statusCode: 200,
       body: JSON.stringify({
         name: "Filter",
@@ -20,19 +20,22 @@ exports.handler = async (event, context, callback) => {
           {
             name: "exactMatch",
             type: "boolean",
+          },
+          {
+            name: "queries",
+            type: "objectarray",
+            headers: ["path", "criteria"]
           }
         ],
       }),
-    })
-    return;
+    }
   }
 
   if (event.httpMethod !== 'POST' || !event.body) {
-    callback(null, {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
 
   const {
@@ -42,13 +45,14 @@ exports.handler = async (event, context, callback) => {
     parameters,
   } = JSON.parse(event.body)
   
-  if (!baseUrl || !token || !parameters ) {
-    callback(null, {
+  if (!baseUrl || !token || !input ) {
+    return {
       statusCode: 400,
       body: JSON.stringify({ status: 'Bad Request' }),
-    });
-    return;
+    }
   }
+
+  console.log(parameters)
 
   // Try to receive stream objects
   var returnObjects = []
@@ -63,10 +67,10 @@ exports.handler = async (event, context, callback) => {
       return JSON.stringify(getProperty(o, parameters.path)).toLowerCase().includes(parameters.criteria.toLowerCase())
   })
 
-  callback(null, {
+  return {
     statusCode: 200,
     body: JSON.stringify(returnObjects)
-  })
+  }
 }
 
 function getProperty ( source, sourcePath ) {
