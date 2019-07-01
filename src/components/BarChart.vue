@@ -1,13 +1,8 @@
 <template>
-  <div id="container" class="svg-container" align="center">
-    <h2>client graph</h2>
-    <svg :width="w" :height="h">
-      <g></g>
-    </svg>
-  </div>
+  <div id="container"></div>
 </template>
 
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
 
 <script>
 import Vue from "vue";
@@ -20,95 +15,231 @@ export default {
   props: {
     clientdata: Array
   },
-
+  data: () => ({}),
   mounted() {},
-  updated() {},
-  data: () => ({
-    w: 800,
-    h: 500,
-    menuStream: [
-      {
-        title: "View Stream",
-        action: function(d, i) {
-          var data = d3.select(d).datum();
-          console.log(data);
-          var url = "https://hestia.speckle.works/#/view/" + data.streamId;
-          openInNewTab(url);
-        },
-        disabled: false // optional, defaults to false
-      },
-      {
-        title: "View Stream Data",
-        action: function(d, i) {
-          var data = d3.select(d).datum();
-          var url = "https://hestia.speckle.works/api/streams/" + data.streamId;
-          openInNewTab(url);
-        }
-      },
-      {
-        title: "View Connected Clients",
-        action: function(d, i) {
-          var data = d3.select(d).datum();
-          var url =
-            "https://hestia.speckle.works/api/streams/" +
-            data.streamId +
-            "/clients";
-          openInNewTab(url);
-        }
-      }
-    ],
+  updated() {
+    this.$asyncComputed.drawGraph.update();
+  },
 
-    menuClient: [
-      {
-        title: "Client Info",
-        action: function(d, i) {
-          var data = d3.select(d).datum();
-          window.alert(
-            d3.select(d).datum().documentType +
-              ": " +
-              d3.select(d).datum().documentName +
-              "\n" +
-              "Created at" +
-              ": " +
-              d3.select(d).datum().createdAt +
-              "\n" +
-              "Updated at" +
-              ": " +
-              d3.select(d).datum().updatedAt +
-              "\n" +
-              "Owner is" +
-              ": " +
-              d3.select(d).datum().owner
-          );
-        }
-      }
-    ]
-
-    // colour: d3.scale.linear()
-    //   .domain([0, this.clientdata[0].length-1])
-    //   .interpolate(d3.interpolateHcl)
-    //   .range([d3.rgb('white'), d3.rgb('blue')])
-  }),
   methods: {
-    openInNewTab(url) {
-      var win = window.open(url, "_blank");
-      win.focus();
-    },
-    groupBy(arr, property) {
-      return arr.reduce(function(memo, x) {
-        if (!memo[x[property]]) {
-          memo[x[property]] = [];
+    contextMenu(type, menu, openCallback) {
+      // create the div element that will hold the context menu
+      d3.selectAll(".d3-context-menu")
+        .data([1])
+        .enter()
+        .append("div")
+        .attr("class", "d3-context-menu");
+
+      // close menu
+      d3.select(".application--wrap").on("click.d3-context-menu", function() {
+        d3.select(".d3-context-menu").style("display", "none");
+      });
+
+      // this gets executed when a contextmenu event occurs
+      return function(data, index) {
+        var elm = this;
+
+        d3.selectAll(".d3-context-menu").html("");
+        var list = d3.selectAll(".d3-context-menu").append("ul");
+        list
+          .selectAll("li")
+          .data(menu)
+          .enter()
+          .append("li")
+          .attr("class", type)
+          .html(function(d) {
+            return d.title;
+          })
+          .on("click", function(d, i) {
+            d.action(elm, data, index);
+            d3.select(".d3-context-menu").style("display", "none");
+          });
+
+        // the openCallback allows an action to fire before the menu is displayed
+        // an example usage would be closing a tooltip
+        if (openCallback) openCallback(data, index);
+
+        // display context menu.
+        d3.select(".d3-context-menu")
+          .style("left", d3.event.pageX - 2 + "px")
+          .style("top", d3.event.pageY - 2 + "px")
+          .style("display", "block");
+
+        d3.event.preventDefault();
+      };
+    }
+  },
+
+  computed: {},
+
+  asyncComputed: {
+    async drawGraph() {
+      //let result = await this.init( )
+      var _nodes = this.clientdata[0];
+      var links = this.clientdata[1];
+
+      // Sorts all nodes by creation timestamps
+      _nodes.sort(function(a, b) {
+        return a.createdAt < b.createdAt
+          ? -1
+          : a.createdAt > b.createdAt
+          ? 1
+          : 0;
+      });
+
+      console.log(_nodes);
+      console.log(links);
+
+      var _links = [];
+
+      for (let i = 0; i < links.length; i++) {
+        if (links[i].action === "sending") {
+          let source = _nodes
+            .map(function(e) {
+              if (e.type === "Client") {
+                return e._id;
+              }
+            })
+            .indexOf(links[i].source);
+          let target = _nodes
+            .map(function(e) {
+              return e._id;
+            })
+            .indexOf(links[i].target);
+          _links.push({ source, target, type: `sending`, display: true });
         }
-        memo[x[property]].push(x);
-        return memo;
-      }, {});
-    },
-    graph() {
-      force: d3.layout
+        if (links[i].action === "receiving") {
+          let source = _nodes
+            .map(function(e) {
+              return e._id;
+            })
+            .indexOf(links[i].source);
+          let target = _nodes
+            .map(function(e) {
+              if (e.type === "Client") {
+                return e._id;
+              }
+            })
+            .indexOf(links[i].target);
+          _links.push({ source, target, type: `receiving`, display: true });
+        }
+      }
+
+      console.log(Array.from(new Set(_links)));
+
+      var w = 800,
+        h = 500;
+
+      function openInNewTab(url) {
+        var win = window.open(url, "_blank");
+        win.focus();
+      }
+
+      var menuStream = [
+        {
+          title: "View Stream",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            console.log(data);
+            var url = "https://hestia.speckle.works/#/view/" + data.streamId;
+            openInNewTab(url);
+          },
+          disabled: false // optional, defaults to false
+        },
+        {
+          title: "View Stream Data",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            var url =
+              "https://hestia.speckle.works/api/streams/" + data.streamId;
+            openInNewTab(url);
+          }
+        },
+        {
+          title: "View Connected Clients",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            var url =
+              "https://hestia.speckle.works/api/streams/" +
+              data.streamId +
+              "/clients";
+            openInNewTab(url);
+          }
+        }
+      ];
+
+      var menuClient = [
+        {
+          title: "Client Info",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            window.alert(
+              d3.select(d).datum().documentType +
+                ": " +
+                d3.select(d).datum().documentName +
+                "\n" +
+                "Created at" +
+                ": " +
+                d3.select(d).datum().createdAt +
+                "\n" +
+                "Updated at" +
+                ": " +
+                d3.select(d).datum().updatedAt +
+                "\n" +
+                "Owner is" +
+                ": " +
+                d3.select(d).datum().owner
+            );
+          }
+        }
+      ];
+
+      function groupBy(arr, property) {
+        return arr.reduce(function(memo, x) {
+          if (!memo[x[property]]) {
+            memo[x[property]] = [];
+          }
+          memo[x[property]].push(x);
+          return memo;
+        }, {});
+      }
+
+      let clientNodes = _nodes.filter(data => data.type == "Client");
+      var parentGroups = groupBy(clientNodes, "owner");
+      for (var property in parentGroups) {
+        var parGroup = parentGroups[property];
+        for (let i = 0; i < parGroup.length - 1; i++) {
+          for (let j = i + 1; j < parGroup.length; j++) {
+            _links.push({
+              source: parGroup[i],
+              target: parGroup[j],
+              type: "ownerForceGroup",
+              display: false
+            });
+          }
+        }
+
+        var childGroups = groupBy(parGroup, "documentGuid");
+        for (var property in childGroups) {
+          var childGroup = childGroups[property];
+          for (let i = 0; i < childGroup.length - 1; i++) {
+            for (let j = i + 1; j < childGroup.length; j++) {
+              _links.push({
+                source: childGroup[i],
+                target: childGroup[j],
+                type: "documentGuidForceGroup",
+                display: false
+              });
+            }
+          }
+        }
+      }
+
+      var force = d3.layout
         .force()
-        .nodes(d3.values(this.clientdata[0]))
-        .links(this.clientdata[1])
-        .size([this.w, this.h])
+        .nodes(d3.values(_nodes))
+        .links(_links)
+        .size([w, h])
         .linkDistance(d => {
           if (d.type == "ownerForceGroup") {
             return 200;
@@ -127,18 +258,345 @@ export default {
             return -400;
           }
         })
-        //.on("tick", tick)
+        .on("tick", tick)
         .start();
+
+      // var colour = d3.scale.ordinal().range(['#edfc1b', '#0b0074']);
+      // console.log(colour);
+      // var timeStamps = force.nodes().map(data => data.updatedAt);
+      // colour.domain(timeStamps);
+      // console.log(colour.domain);
+      // var arrayDates = force.nodes().map(data => data.updatedAt)
+      // var min = arrayDates[0];
+      // var max = arrayDates[arrayDates.length - 1];
+      console.log(_nodes.length);
+      var colour = d3.scale
+        .linear()
+        .domain([0, _nodes.length - 1])
+        .interpolate(d3.interpolateHcl)
+        .range([d3.rgb("white"), d3.rgb("blue")]);
+
+      // Define the div for the tooltip
+      var divCircle = d3
+        .select(".application--wrap")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+      var divOwner = d3
+        .select(".application--wrap")
+        .append("div")
+        .attr("class", "tooltipOwner")
+        .style("opacity", 0);
+
+      var divDoc = d3
+        .select(".application--wrap")
+        .append("div")
+        .attr("class", "tooltipDoc")
+        .style("opacity", 0);
+
+      var svg = d3
+        .select("#clientgraph")
+        .append("svg:svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      for (let i = 0; i < Object.keys(parentGroups).length; i++) {
+        svg
+          .append("path")
+          .attr("class", "subhullOwner")
+          .on("mouseover", function(d) {
+            divOwner.style("opacity", 0.8);
+            divOwner
+              .html(`Owner: ${d.values[0].owner}`)
+
+              .style("left", d3.event.pageX + "px")
+              .style("top", d3.event.pageY - 28 + "px");
+          })
+          .on("mouseout", function(d) {
+            divOwner.style("opacity", 0);
+          });
+      }
+
+      var childGroups = groupBy(clientNodes, "documentGuid");
+      for (let i = 0; i < Object.keys(childGroups).length; i++) {
+        svg
+          .append("path")
+          .attr("class", "subhullDoc")
+          .on("mouseover", function(d) {
+            divDoc.style("opacity", 0.8);
+            divDoc
+              .html(
+                `DocumentGuid: ${d.values[0].documentGuid}<br/>
+              DocumentType: ${d.values[0].documentType}<br/>
+              DocumentName: ${d.values[0].documentName}`
+              )
+
+              .style("left", d3.event.pageX + "px")
+              .style("top", d3.event.pageY - 28 + "px");
+          })
+          .on("mouseout", function(d) {
+            divDoc.style("opacity", 0);
+          });
+      }
+      //
+
+      var senders = force.nodes().filter(data => data.type == "Client");
+      console.log(senders);
+      var groupOwners = d3
+        .nest()
+        .key(function(d) {
+          return d.owner;
+        })
+        .entries(force.nodes().filter(data => data.type == "Client"));
+
+      var groupDocs = d3
+        .nest()
+        .key(function(d) {
+          return d.documentGuid;
+        })
+        .entries(force.nodes().filter(data => data.type == "Client"));
+
+      var groupPath = function(d) {
+        return (
+          "M" +
+          d3.geom
+            .hull(
+              d.values.map(function(i) {
+                return [i.x, i.y];
+              })
+            )
+            .join("L") +
+          "Z"
+        );
+      };
+      //
+
+      svg
+        .append("svg:defs")
+        .selectAll("marker")
+        .data(force.links().filter(data => data.display))
+        //.data(['sending', 'receiving'])
+        .enter()
+        .append("svg:marker")
+        .attr("id", data => data.type)
+        .attr("viewBox", "0 -5 10 10")
+
+        // handles the size difference between streams and client
+        .attr("refX", data => {
+          //console.log(data);
+          if (data.type === "sending") {
+            return 21;
+          } else if (data.type === "receiving") {
+            //console.log(data);
+            return 15;
+          }
+        })
+
+        .attr("refY", 0)
+        .attr("markerWidth", 7)
+
+        .attr("markerHeight", 12)
+        .attr("orient", "auto")
+        .attr("fill-opacity", 1)
+        //.attr("fill", data => colour(data.target.index))
+        .append("svg:path")
+        .attr("d", "M0,-5L10,0L0,5");
+
+      var path = svg
+        .append("svg:g")
+        .selectAll("path")
+        .data(force.links().filter(data => data.display))
+        .enter()
+        .append("svg:path")
+
+        .attr("class", function(d) {
+          return "link " + d.type;
+        })
+        .attr("marker-end", function(d) {
+          return "url(#" + d.type + ")";
+        });
+
+      //
+      //
+
+      var circleSender = svg
+        .append("svg:g")
+        .selectAll("circle")
+        .data(force.nodes().filter(data => data.role == "Sender"))
+
+        .enter()
+        .append("svg:circle")
+        .attr("class", "sender")
+        .attr("class", "node")
+        .attr("r", 6)
+
+        .call(force.drag)
+        // .on("mouseover", function(d) {
+
+        //   divCircle.
+        //       style("opacity", .8);
+        //       divCircle.html(`Owner: ${d.owner}<br/>
+        //       ${d.documentType}: ${d.documentName}<br/>
+        //       Created at: ${d.createdAt}<br/>
+        //       Updated at: ${d.updatedAt}`)
+
+        //       .style("left", (d3.event.pageX) + "px")
+        //       .style("top", (d3.event.pageY - 28) + "px");
+        //   })
+        // .on("mouseout", function(d) {
+        //   divCircle.style("opacity", 0);
+        // })
+        //
+        .on("contextmenu", this.contextMenu("client", menuClient));
+
+      //console.log(colour);
+      //console.log(timeStamps);
+
+      var circleReceiver = svg
+        .append("svg:g")
+        .selectAll("circle")
+        .data(force.nodes().filter(data => data.role == "Receiver"))
+
+        .enter()
+        .append("svg:circle")
+        .attr("class", "receiver")
+        .attr("class", "node")
+        .attr("r", 6)
+        .call(force.drag)
+        // .on("mouseover", function(d) {
+
+        //   divCircle.
+        //       style("opacity", .8);
+        //       divCircle.html(`Owner: ${d.owner}<br/>
+        //       ${d.documentType}: ${d.documentName}<br/>
+        //       Created at: ${d.createdAt}<br/>
+        //       Updated at: ${d.updatedAt}`)
+
+        //       .style("left", (d3.event.pageX) + "px")
+        //       .style("top", (d3.event.pageY - 28) + "px");
+        //   })
+        // .on("mouseout", function(d) {
+        //   divCircle.style("opacity", 0);
+        // })
+        //
+        .on("contextmenu", this.contextMenu("client", menuClient));
+
+      const rectWidth = 24;
+      const rectHeight = 24;
+
+      var rect = svg
+        .append("svg:g")
+        .selectAll("rect")
+        .data(force.nodes().filter(d => d.type == "Stream"))
+        .enter()
+        .append("svg:rect")
+        .attr("class", "node")
+        .attr("x", -rectWidth / 2)
+        .attr("y", -rectHeight / 2)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .call(force.drag)
+        .on("contextmenu", this.contextMenu("stream", menuStream));
+
+      //text content.
+      var text = svg
+        .append("svg:g")
+        .selectAll("g")
+        .data(force.nodes())
+        .enter()
+        .append("svg:g");
+
+      text
+        .append("svg:text")
+        .attr("x", 8)
+        .attr("y", ".31em")
+        .attr("class", "shadow")
+        .text(function(d) {
+          return d.name;
+        });
+
+      text
+        .append("svg:text")
+        .attr("x", 8)
+        .attr("y", ".31em")
+        .text(function(d) {
+          return d.name;
+        });
+
+      //
+      function tick() {
+        svg
+          .selectAll(".node")
+          .attr("stroke", "black")
+          .attr("fill", data =>
+            //console.log(colour(data.index))
+            colour(data.index)
+          )
+          .attr("stroke-width", 0);
+
+        svg
+          .selectAll(".subhullOwner")
+          .data(groupOwners)
+          .attr("d", groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", groupPath);
+
+        svg
+          .selectAll(".subhullDoc")
+          .data(groupDocs)
+          .attr("d", groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", groupPath);
+
+        path
+          .attr("d", function(d) {
+            var dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
+            //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            return (
+              "M" +
+              d.source.x +
+              "," +
+              d.source.y +
+              "L" +
+              d.target.x +
+              "," +
+              d.target.y
+            );
+          })
+          .attr("stroke", data => colour(data.source.index));
+        //
+        // svg.selectAll('marker')
+        // .attr('fill', data =>
+        //   colour(data.target.index)
+        // );
+
+        circleSender.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+        circleReceiver.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+        rect.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+
+        text.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+      }
     }
-  },
-
-  computed: {},
-
-  asyncComputed: {}
+  }
 };
 </script>
 
-<style scoped>
+<style>
 .bar-positive {
   fill: steelblue;
   transition: r 0.2s ease-in-out;
@@ -151,5 +609,161 @@ export default {
   padding-bottom: 1%;
   vertical-align: top;
   overflow: hidden;
+}
+
+path.link {
+  fill: none;
+
+  stroke-width: 1.5px;
+}
+
+marker#licensing {
+  fill: green;
+}
+
+path.link.licensing {
+  stroke: green;
+}
+
+path.link.resolved {
+  stroke-dasharray: 0, 2 1;
+}
+
+.sender {
+  stroke: #003380;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+
+.receiver {
+  fill: #94e1ff;
+  stroke: #003380;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+
+rect {
+  cursor: pointer;
+  transform: "translate(50,50)";
+}
+
+text {
+  font: 15px arial;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+text.shadow {
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-opacity: 0.8;
+}
+
+.d3-context-menu {
+  position: absolute;
+  display: none;
+  background-color: rgb(240, 240, 240);
+  border-radius: 8px;
+  box-shadow: rgb(73, 73, 73) 3px 3px 7px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  min-width: 150px;
+  border: 0px solid #d4d4d4;
+  border: 0px solid #ffffff00;
+  z-index: 1200;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.d3-context-menu ul {
+  list-style-type: none;
+  margin: 4px 0px;
+  padding: 0px;
+  cursor: pointer;
+}
+
+.d3-context-menu ul li {
+  padding: 4px 16px;
+}
+
+.d3-context-menu ul li.stream:hover {
+  background-color: hotpink;
+  color: #fefefe;
+  transition: 700ms;
+}
+
+.d3-context-menu ul li.client:hover {
+  background-color: #0099ff;
+  color: #fefefe;
+  transition: 700ms;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 250px;
+  height: 60px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: #94e1ff;
+  border: 2px;
+  border-color: black;
+  border-width: 2px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+div.tooltipOwner {
+  position: absolute;
+  text-align: center;
+  width: 250px;
+  height: 15px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: #50ccfd;
+  border: 0px;
+
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+div.tooltipDoc {
+  position: absolute;
+  text-align: center;
+  width: 350px;
+  height: 45px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: hotpink;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.hull {
+  fill: steelblue;
+  fill-opacity: 1;
+  stroke: steelblue;
+  stroke-width: 22px;
+  stroke-opacity: 1;
+  stroke-linejoin: round;
+}
+
+.subhullOwner {
+  fill: rgb(200, 220, 236);
+  fill-opacity: 0.3;
+  stroke: rgb(126, 191, 243);
+  stroke-width: 28px;
+  stroke-opacity: 0.3;
+  stroke-linejoin: round;
+}
+
+.subhullDoc {
+  fill: hotpink;
+  fill-opacity: 0.3;
+  stroke: hotpink;
+  stroke-width: 28px;
+  stroke-opacity: 0.3;
+  stroke-linejoin: round;
 }
 </style>

@@ -18,7 +18,7 @@
     </v-card-text>
     <v-divider></v-divider>
     <div id="clientgraph">
-      <BarChart title="Bar Chart" xKey="name" yKey="amount" :clientdata="result"/>
+      <BarChart v-if="result" title="Bar Chart" xKey="name" yKey="amount" :clientdata="result"/>
     </div>
   </v-card>
 </template>
@@ -41,7 +41,9 @@ export default {
   methods: {
     refresh() {
       this.$asyncComputed.myResolvedValue.update();
-    }
+    },
+
+    
   },
 
   asyncComputed: {
@@ -160,52 +162,52 @@ export default {
       }
       console.log(nodes);
       //
-      nodes.sort(function(a, b) {
-        return a.createdAt < b.createdAt
-          ? -1
-          : a.createdAt > b.createdAt
-          ? 1
-          : 0;
-      });
+    //   nodes.sort(function(a, b) {
+    //     return a.createdAt < b.createdAt
+    //       ? -1
+    //       : a.createdAt > b.createdAt
+    //       ? 1
+    //       : 0;
+    //   });
 
-      var placeholder_0 = nodes;
-      var placeholder_1 = streamLinks;
-      var links = [];
-      for (let i = 0; i < placeholder_1.length; i++) {
-        if (placeholder_1[i].action === "sending") {
-          let source = placeholder_0
-            .map(function(e) {
-              if (e.type === "Client") {
-                return e._id;
-              }
-            })
-            .indexOf(placeholder_1[i].source);
-          let target = placeholder_0
-            .map(function(e) {
-              return e._id;
-            })
-            .indexOf(placeholder_1[i].target);
-          links.push({ source, target, type: `sending`, display: true });
-        }
-        if (placeholder_1[i].action === "receiving") {
-          let source = placeholder_0
-            .map(function(e) {
-              return e._id;
-            })
-            .indexOf(placeholder_1[i].source);
-          let target = placeholder_0
-            .map(function(e) {
-              if (e.type === "Client") {
-                return e._id;
-              }
-            })
-            .indexOf(placeholder_1[i].target);
-          links.push({ source, target, type: `receiving`, display: true });
-        }
-      }
-      this.result = [nodes, links];
+    //   var placeholder_0 = nodes;
+    //   var placeholder_1 = streamLinks;
+    //   var links = [];
+    //   for (let i = 0; i < placeholder_1.length; i++) {
+    //     if (placeholder_1[i].action === "sending") {
+    //       let source = placeholder_0
+    //         .map(function(e) {
+    //           if (e.type === "Client") {
+    //             return e._id;
+    //           }
+    //         })
+    //         .indexOf(placeholder_1[i].source);
+    //       let target = placeholder_0
+    //         .map(function(e) {
+    //           return e._id;
+    //         })
+    //         .indexOf(placeholder_1[i].target);
+    //       links.push({ source, target, type: `sending`, display: true });
+    //     }
+    //     if (placeholder_1[i].action === "receiving") {
+    //       let source = placeholder_0
+    //         .map(function(e) {
+    //           return e._id;
+    //         })
+    //         .indexOf(placeholder_1[i].source);
+    //       let target = placeholder_0
+    //         .map(function(e) {
+    //           if (e.type === "Client") {
+    //             return e._id;
+    //           }
+    //         })
+    //         .indexOf(placeholder_1[i].target);
+    //       links.push({ source, target, type: `receiving`, display: true });
+    //     }
+    //   }
+      this.result = [nodes, streamLinks];
 
-      return [nodes, links];
+      return [nodes, streamLinks];
     }
   }
 };
@@ -218,4 +220,6 @@ export default {
   text-align: center;
   margin-top: 30px;
 }
+
+
 </style>
