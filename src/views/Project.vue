@@ -12,6 +12,7 @@
       <v-flex xs12>
         <detail-description :resource='project'></detail-description>
       </v-flex>
+
       <v-flex xs12 sm12 lg6>
         <v-card class='elevation-0'>
           <v-card-title class='title font-weight-light'>
@@ -35,6 +36,9 @@
           </v-card-text>
         </v-card>
       </v-flex>
+      <v-flex xs12>
+        <client-graph :project='project'></client-graph>
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -47,6 +51,7 @@ import PermissionTable from '../components/PermissionTableProject.vue'
 import DetailDescription from '../components/DetailDescription.vue'
 import ProjectDetailStreams from '../components/ProjectDetailStreams.vue'
 import ProjectDetailTitle from '../components/ProjectDetailTitle.vue'
+import ClientGraph from '../components/ClientGraph.vue'
 
 export default {
   name: 'ProjectDetailView',
@@ -55,7 +60,8 @@ export default {
     PermissionTable,
     DetailDescription,
     ProjectDetailStreams,
-    ProjectDetailTitle
+    ProjectDetailTitle,
+    ClientGraph
   },
   props: {},
   computed: {

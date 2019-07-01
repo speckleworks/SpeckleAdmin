@@ -7,6 +7,11 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "d3": "^3.5.17",
+    "d3-array": "^2.2.0",
+    "d3-scale": "^3.0.0",
+    "d3-selection": "^1.4.0",
+    "d3-transition": "^1.2.0",
     "register-service-worker": "^1.5.2",
     "vue": "^2.6.10",
     "vue-router": "^3.0.1",
@@ -17,7 +22,7 @@
     "@vue/cli-plugin-babel": "^3.6.0",
     "@vue/cli-plugin-pwa": "^3.6.0",
     "@vue/cli-service": "^3.2.0",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "color-hash": "^1.0.3",
     "event-emitter-es6": "^1.1.5",
     "flat": "^4.1.0",
@@ -34,6 +39,7 @@
     "three": "^0.103.0",
     "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",
+    "vue-async-computed": "^3.7.0",
     "vue-json-pretty": "^1.6.0",
     "vue-slider-component": "^2.8.3",
     "vue-template-compiler": "^2.6.10",
