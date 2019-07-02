@@ -16,8 +16,8 @@ export default {
   },
 
   data: () => ({
-      svgWidth: 1000,
-      svgHeight: 600,
+      svgWidth: document.getElementById("container").offsetWidth,
+      svgHeight: document.getElementById("container").offsetHeight,
       // h: 500,
 
       menuStream: [
@@ -144,7 +144,9 @@ export default {
           this.$data.svgWidth = document.getElementById("container").offsetWidth;
           this.$data.svgHeight = document.getElementById("container").offsetHeight;
           console.log(this.$data.svgWidth)
+
           this.$asyncComputed.drawGraph.update()
+          
           //console.log(this.data.svgHeight)
           //this.AnimateLoad();
         }, 300);
@@ -153,10 +155,13 @@ export default {
 
   },
   mounted() {
+    
     this.AddResizeListener();
   },
   updated() {
+
     this.$asyncComputed.drawGraph.update();
+
   },
 
   computed: {
@@ -561,6 +566,7 @@ export default {
           .enter()
           .insert("path")
           .attr("d", groupPath);
+
 
         path
           .attr("d", function(d) {
