@@ -24,7 +24,7 @@
 </template>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
-import BarChart from "./BarChart.vue";
+import BarChart from "./ForceDirectedLayout.vue";
 import axios from "axios";
 import Vue from "vue";
 import AsyncComputed from "vue-async-computed";

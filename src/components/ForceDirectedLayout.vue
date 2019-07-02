@@ -1,8 +1,5 @@
 <template>
-  <div id="container"></div>
 </template>
-
-
 
 <script>
 import Vue from "vue";
@@ -11,15 +8,69 @@ import AsyncComputed from "vue-async-computed";
 Vue.use(AsyncComputed);
 
 export default {
-  name: "BarChart",
+  name: "ForceDirectedLayout",
   props: {
     clientdata: Array
   },
-  data: () => ({}),
-  mounted() {},
-  updated() {
-    this.$asyncComputed.drawGraph.update();
-  },
+  data: () => ({
+      menuStream: [
+        {
+          title: "View Stream",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            console.log(data);
+            var url = "https://hestia.speckle.works/#/view/" + data.streamId;
+            window.open(url, "_blank").focus()
+          },
+          disabled: false // optional, defaults to false
+        },
+        {
+          title: "View Stream Data",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            var url =
+              "https://hestia.speckle.works/api/streams/" + data.streamId;
+            window.open(url, "_blank").focus()
+          }
+        },
+        {
+          title: "View Connected Clients",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            var url =
+              "https://hestia.speckle.works/api/streams/" +
+              data.streamId +
+              "/clients";
+            window.open(url, "_blank").focus()
+          }
+        }
+      ],
+      menuClient: [
+        {
+          title: "Client Info",
+          action: function(d, i) {
+            var data = d3.select(d).datum();
+            window.alert(
+              d3.select(d).datum().documentType +
+                ": " +
+                d3.select(d).datum().documentName +
+                "\n" +
+                "Created at" +
+                ": " +
+                d3.select(d).datum().createdAt +
+                "\n" +
+                "Updated at" +
+                ": " +
+                d3.select(d).datum().updatedAt +
+                "\n" +
+                "Owner is" +
+                ": " +
+                d3.select(d).datum().owner
+            );
+          }
+        }
+      ]
+  }),
 
   methods: {
     contextMenu(type, menu, openCallback) {
@@ -67,10 +118,29 @@ export default {
 
         d3.event.preventDefault();
       };
-    }
+    },
+    groupBy(arr, property) {
+        return arr.reduce(function(memo, x) {
+          if (!memo[x[property]]) {
+            memo[x[property]] = [];
+          }
+          memo[x[property]].push(x);
+          return memo;
+        }, {});
+    },
+
+  },
+  mounted() {},
+  updated() {
+    this.$asyncComputed.drawGraph.update();
   },
 
-  computed: {},
+  computed: {
+
+
+
+      
+  },
 
   asyncComputed: {
     async drawGraph() {
@@ -127,85 +197,17 @@ export default {
 
       console.log(Array.from(new Set(_links)));
 
-      var w = 800,
+      var w = 1000,
         h = 500;
 
-      function openInNewTab(url) {
-        var win = window.open(url, "_blank");
-        win.focus();
-      }
 
-      var menuStream = [
-        {
-          title: "View Stream",
-          action: function(d, i) {
-            var data = d3.select(d).datum();
-            console.log(data);
-            var url = "https://hestia.speckle.works/#/view/" + data.streamId;
-            openInNewTab(url);
-          },
-          disabled: false // optional, defaults to false
-        },
-        {
-          title: "View Stream Data",
-          action: function(d, i) {
-            var data = d3.select(d).datum();
-            var url =
-              "https://hestia.speckle.works/api/streams/" + data.streamId;
-            openInNewTab(url);
-          }
-        },
-        {
-          title: "View Connected Clients",
-          action: function(d, i) {
-            var data = d3.select(d).datum();
-            var url =
-              "https://hestia.speckle.works/api/streams/" +
-              data.streamId +
-              "/clients";
-            openInNewTab(url);
-          }
-        }
-      ];
 
-      var menuClient = [
-        {
-          title: "Client Info",
-          action: function(d, i) {
-            var data = d3.select(d).datum();
-            window.alert(
-              d3.select(d).datum().documentType +
-                ": " +
-                d3.select(d).datum().documentName +
-                "\n" +
-                "Created at" +
-                ": " +
-                d3.select(d).datum().createdAt +
-                "\n" +
-                "Updated at" +
-                ": " +
-                d3.select(d).datum().updatedAt +
-                "\n" +
-                "Owner is" +
-                ": " +
-                d3.select(d).datum().owner
-            );
-          }
-        }
-      ];
 
-      function groupBy(arr, property) {
-        return arr.reduce(function(memo, x) {
-          if (!memo[x[property]]) {
-            memo[x[property]] = [];
-          }
-          memo[x[property]].push(x);
-          return memo;
-        }, {});
-      }
+
+
 
       let clientNodes = _nodes.filter(data => data.type == "Client");
-      var parentGroups = groupBy(clientNodes, "owner");
+      var parentGroups = this.groupBy(clientNodes, "owner");
       for (var property in parentGroups) {
         var parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
@@ -219,7 +221,7 @@ export default {
           }
         }
 
-        var childGroups = groupBy(parGroup, "documentGuid");
+        var childGroups = this.groupBy(parGroup, "documentGuid");
         for (var property in childGroups) {
           var childGroup = childGroups[property];
           for (let i = 0; i < childGroup.length - 1; i++) {
@@ -318,7 +320,7 @@ export default {
           });
       }
 
-      var childGroups = groupBy(clientNodes, "documentGuid");
+      var childGroups = this.groupBy(clientNodes, "documentGuid");
       for (let i = 0; i < Object.keys(childGroups).length; i++) {
         svg
           .append("path")
@@ -448,7 +450,7 @@ export default {
         //   divCircle.style("opacity", 0);
         // })
         //
-        .on("contextmenu", this.contextMenu("client", menuClient));
+        .on("contextmenu", this.contextMenu("client", this.menuClient));
 
       //console.log(colour);
       //console.log(timeStamps);
@@ -480,7 +482,7 @@ export default {
         //   divCircle.style("opacity", 0);
         // })
         //
-        .on("contextmenu", this.contextMenu("client", menuClient));
+        .on("contextmenu", this.contextMenu("client", this.menuClient));
 
       const rectWidth = 24;
       const rectHeight = 24;
@@ -499,7 +501,7 @@ export default {
         .attr("rx", 3)
         .attr("ry", 3)
         .call(force.drag)
-        .on("contextmenu", this.contextMenu("stream", menuStream));
+        .on("contextmenu", this.contextMenu("stream", this.menuStream));
 
       //text content.
       var text = svg
@@ -613,7 +615,6 @@ export default {
 
 path.link {
   fill: none;
-
   stroke-width: 1.5px;
 }
 
@@ -722,7 +723,6 @@ div.tooltipOwner {
   font: 12px sans-serif;
   background: #50ccfd;
   border: 0px;
-
   border-radius: 8px;
   pointer-events: none;
 }
