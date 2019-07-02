@@ -1,4 +1,5 @@
 <template>
+  
 </template>
 
 <script>
@@ -9,10 +10,16 @@ Vue.use(AsyncComputed);
 
 export default {
   name: "ForceDirectedLayout",
+
   props: {
     clientdata: Array
   },
+
   data: () => ({
+      svgWidth: 1000,
+      svgHeight: 600,
+      // h: 500,
+
       menuStream: [
         {
           title: "View Stream",
@@ -128,18 +135,31 @@ export default {
           return memo;
         }, {});
     },
+    AddResizeListener() {
+      // redraw the chart 300ms after the window has been resized
+      window.addEventListener("resize", () => {
+        //this.$data.redrawToggle = false;
+        setTimeout(() => {
+          //this.$data.redrawToggle = true;
+          this.$data.svgWidth = document.getElementById("container").offsetWidth;
+          this.$data.svgHeight = document.getElementById("container").offsetHeight;
+          console.log(this.$data.svgWidth)
+          this.$asyncComputed.drawGraph.update()
+          //console.log(this.data.svgHeight)
+          //this.AnimateLoad();
+        }, 300);
+      });
+    }
 
   },
-  mounted() {},
+  mounted() {
+    this.AddResizeListener();
+  },
   updated() {
     this.$asyncComputed.drawGraph.update();
   },
 
   computed: {
-
-
-
-      
   },
 
   asyncComputed: {
@@ -197,15 +217,6 @@ export default {
 
       console.log(Array.from(new Set(_links)));
 
-      var w = 1000,
-        h = 500;
-
-
-
-
-
-
-
       let clientNodes = _nodes.filter(data => data.type == "Client");
       var parentGroups = this.groupBy(clientNodes, "owner");
       for (var property in parentGroups) {
@@ -237,11 +248,18 @@ export default {
         }
       }
 
+      var svg = d3
+        .select("#graphLayout")
+        //.append("svg:svg")
+        // .attr("width", this.xKey)
+        //.attr("height", 1000)
+        //.attr("width", 1000);
+
       var force = d3.layout
         .force()
         .nodes(d3.values(_nodes))
         .links(_links)
-        .size([w, h])
+        .size([this.$data.svgWidth, this.$data.svgHeight])
         .linkDistance(d => {
           if (d.type == "ownerForceGroup") {
             return 200;
@@ -263,15 +281,6 @@ export default {
         .on("tick", tick)
         .start();
 
-      // var colour = d3.scale.ordinal().range(['#edfc1b', '#0b0074']);
-      // console.log(colour);
-      // var timeStamps = force.nodes().map(data => data.updatedAt);
-      // colour.domain(timeStamps);
-      // console.log(colour.domain);
-      // var arrayDates = force.nodes().map(data => data.updatedAt)
-      // var min = arrayDates[0];
-      // var max = arrayDates[arrayDates.length - 1];
-      console.log(_nodes.length);
       var colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
@@ -283,12 +292,14 @@ export default {
         .select(".application--wrap")
         .append("div")
         .attr("class", "tooltip")
+        
         .style("opacity", 0);
 
       var divOwner = d3
         .select(".application--wrap")
         .append("div")
         .attr("class", "tooltipOwner")
+        
         .style("opacity", 0);
 
       var divDoc = d3
@@ -297,11 +308,8 @@ export default {
         .attr("class", "tooltipDoc")
         .style("opacity", 0);
 
-      var svg = d3
-        .select("#clientgraph")
-        .append("svg:svg")
-        .attr("width", w)
-        .attr("height", h);
+
+
 
       for (let i = 0; i < Object.keys(parentGroups).length; i++) {
         svg
@@ -411,7 +419,6 @@ export default {
         .data(force.links().filter(data => data.display))
         .enter()
         .append("svg:path")
-
         .attr("class", function(d) {
           return "link " + d.type;
         })
@@ -725,6 +732,7 @@ div.tooltipOwner {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+
 }
 
 div.tooltipDoc {
@@ -738,6 +746,7 @@ div.tooltipDoc {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+
 }
 
 .hull {

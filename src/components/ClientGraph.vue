@@ -18,13 +18,21 @@
     </v-card-text>
     <v-divider></v-divider>
     <div id="clientgraph">
-      <BarChart v-if="result" title="Bar Chart" xKey="name" yKey="amount" :clientdata="result"/>
+      <div id="container" class="svg-container" align="center">
+        <svg width="100%" height="600" id="graphLayout">
+          <!-- <g id="pathLink"></g>
+          <g id="circleSender"></g>
+          <g id="circleReceiver"></g>
+          <g id="rectStream"></g> -->
+          <ForceDirectedLayout v-if="result" :clientdata="result"/>
+        </svg>
+      </div>
     </div>
   </v-card>
 </template>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
-import BarChart from "./ForceDirectedLayout.vue";
+import ForceDirectedLayout from "./ForceDirectedLayout.vue";
 import axios from "axios";
 import Vue from "vue";
 import AsyncComputed from "vue-async-computed";
@@ -33,10 +41,13 @@ Vue.use(AsyncComputed);
 export default {
   name: "ClientGraph",
   components: {
-    BarChart
+    ForceDirectedLayout
+  },
+  props: {
+    project: Object
   },
   data: () => ({
-    result: null
+    result: null,
   }),
   methods: {
     refresh() {
@@ -69,7 +80,8 @@ export default {
       try {
         resProject = await axios.get(
           "https://hestia.speckle.works/api/projects/" +
-            "5cc0417355797f03a2a79605"
+            this.project._id
+            //"5cc0417355797f03a2a79605"
         );
       } catch (err) {
         console.log(err); // from creation
