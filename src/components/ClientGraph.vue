@@ -24,8 +24,8 @@
               <g id="circleSender"></g>
               <g id="circleReceiver"></g>
               <g id="rectStream"></g> -->
-
-             <ForceDirectedLayout v-if="result" :clientdata="result" :dummydata="dummydata"/>
+             <svg v-if="!redrawToggle"  width="100%" height="600"></svg>
+             <ForceDirectedLayout v-if="result && redrawToggle" :clientdata="result" :dummydata="redrawToggle"/>
           
           
     </div>
@@ -48,6 +48,7 @@ export default {
     project: Object
   },
   data: () => ({
+    redrawToggle: true,
     result: null,
     dummydata: false,
   }),
@@ -55,11 +56,28 @@ export default {
     refresh() {
       this.dummydata = !this.dummydata
       this.$asyncComputed.myResolvedValue.update();
+      console.log(this.$data.redrawToggle)
+      this.$data.redrawToggle = false;
+            setTimeout(() => {
+              this.$data.redrawToggle = true;
+              //console.log('hehehehehehhe')
+            },500);
     },
-
+    AddResizeListener() {
+          // redraw the chart 300ms after the window has been resized
+          window.addEventListener("resize", () => {
+            this.$data.redrawToggle = false;
+            setTimeout(() => {
+              this.$data.redrawToggle = true;
+              //console.log('hehehehehehhe')
+            },3000);
+          });
+      }
     
   },
-
+  mounted(){
+    this.AddResizeListener();
+  },
   asyncComputed: {
     async myResolvedValue() {
       watch: ["fresh"];

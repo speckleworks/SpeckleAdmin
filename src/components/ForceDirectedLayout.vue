@@ -1,6 +1,6 @@
 <template>
   <div id="clientGraph">
-    <svg v-if="redrawToggle === true" width="100%" height="600" id="graphLayout">
+    <svg  width="100%" height="600" id="graphLayout">
       <g id="hullDoc"></g>
       <g id="hullOwner"></g>
       <g id="pathLink"></g>
@@ -9,9 +9,6 @@
       <g id="circleReceiver"></g>
       <g id="rectStream"></g>
       <g id="text"></g>
-
-    </svg>
-    <!-- <svg v-if="redrawToggle === false" width="100%" height="600"> -->
     </svg>
   </div>
 </template>
@@ -31,7 +28,6 @@ export default {
   },
 
   data: () => ({
-      redrawToggle: true,
       svgWidth: document.getElementById("appClientGraph").offsetWidth,
       svgHeight: 600,
       menuStream: [
@@ -148,23 +144,6 @@ export default {
           memo[x[property]].push(x);
           return memo;
         }, {});
-    },
-    AddResizeListener() {
-      // redraw the chart 300ms after the window has been resized
-      window.addEventListener("resize", () => {
-        this.$data.redrawToggle = false;
-        setTimeout(() => {
-          this.$data.redrawToggle = true;
-          this.$data.svgWidth = document.getElementById("clientGraph").offsetWidth;
-          this.$data.svgHeight = document.getElementById("clientGraph").offsetHeight;
-          console.log(this.$data.svgWidth)
-
-          this.drawGraph()
-          
-          //console.log(this.data.svgHeight)
-          //this.AnimateLoad();
-        },3000);
-      });
     },
     drawGraph() {
       //let result = await this.init( )
@@ -295,12 +274,6 @@ export default {
       var divDoc = d3
         .select(".tooltipDoc")
         .style("opacity", 0);
-
-
-
-
-    
-
 
       svg
         .select("#hullOwner")
@@ -559,11 +532,9 @@ export default {
           .selectAll(".node")
           .attr("stroke", "black")
           .attr("fill", data =>
-            //console.log(colour(data.index))
             colour(data.index)
           )
           .attr("stroke-width", 0);
-
         svg
           .select("#hullOwner")
           .selectAll(".subhullOwner")
@@ -572,7 +543,6 @@ export default {
           .enter()
           .insert("path")
           .attr("d", groupPath);
-
         svg
           .select("#hullDoc")
           .selectAll(".subhullDoc")
@@ -581,8 +551,6 @@ export default {
           .enter()
           .insert("path")
           .attr("d", groupPath);
-
-
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
@@ -606,7 +574,6 @@ export default {
         // .attr('fill', data =>
         //   colour(data.target.index)
         // );
-
         circleSender.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
@@ -622,23 +589,21 @@ export default {
         });
       }
     }
-
   },
   mounted() {
     console.log(this.dummydata)
     this.svgWidth = document.getElementById("clientGraph").offsetWidth,
     this.svgHeight = document.getElementById("clientGraph").offsetHeight,
     this.drawGraph();
-
-    this.AddResizeListener();
+    //this.AddResizeListener();
   },
   created() {
-    this.drawGraph()
+    //this.drawGraph()
     //this.$asyncComputed.drawGraph.update();
 
   },
   updated(){
-    console.log(this.dummydata)
+    
   },
   
   computed: {
