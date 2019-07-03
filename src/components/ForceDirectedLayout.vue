@@ -1,5 +1,19 @@
 <template>
-  
+  <div id="clientGraph">
+    <svg v-if="redrawToggle === true" width="100%" height="600" id="graphLayout">
+      <g id="hullDoc"></g>
+      <g id="hullOwner"></g>
+      <g id="pathLink"></g>
+      <g id="marker"></g>
+      <g id="circleSender"></g>
+      <g id="circleReceiver"></g>
+      <g id="rectStream"></g>
+      <g id="text"></g>
+
+    </svg>
+    <!-- <svg v-if="redrawToggle === false" width="100%" height="600"> -->
+    </svg>
+  </div>
 </template>
 
 <script>
@@ -12,14 +26,14 @@ export default {
   name: "ForceDirectedLayout",
 
   props: {
-    clientdata: Array
+    clientdata: Array,
+    dummydata: Boolean
   },
 
   data: () => ({
-      svgWidth: document.getElementById("container").offsetWidth,
-      svgHeight: document.getElementById("container").offsetHeight,
-      // h: 500,
-
+      redrawToggle: true,
+      svgWidth: document.getElementById("appClientGraph").offsetWidth,
+      svgHeight: 600,
       menuStream: [
         {
           title: "View Stream",
@@ -138,37 +152,21 @@ export default {
     AddResizeListener() {
       // redraw the chart 300ms after the window has been resized
       window.addEventListener("resize", () => {
-        //this.$data.redrawToggle = false;
+        this.$data.redrawToggle = false;
         setTimeout(() => {
-          //this.$data.redrawToggle = true;
-          this.$data.svgWidth = document.getElementById("container").offsetWidth;
-          this.$data.svgHeight = document.getElementById("container").offsetHeight;
+          this.$data.redrawToggle = true;
+          this.$data.svgWidth = document.getElementById("clientGraph").offsetWidth;
+          this.$data.svgHeight = document.getElementById("clientGraph").offsetHeight;
           console.log(this.$data.svgWidth)
 
-          this.$asyncComputed.drawGraph.update()
+          this.drawGraph()
           
           //console.log(this.data.svgHeight)
           //this.AnimateLoad();
-        }, 300);
+        },3000);
       });
-    }
-
-  },
-  mounted() {
-    
-    this.AddResizeListener();
-  },
-  updated() {
-
-    this.$asyncComputed.drawGraph.update();
-
-  },
-
-  computed: {
-  },
-
-  asyncComputed: {
-    async drawGraph() {
+    },
+    drawGraph() {
       //let result = await this.init( )
       var _nodes = this.clientdata[0];
       var links = this.clientdata[1];
@@ -253,12 +251,7 @@ export default {
         }
       }
 
-      var svg = d3
-        .select("#graphLayout")
-        //.append("svg:svg")
-        // .attr("width", this.xKey)
-        //.attr("height", 1000)
-        //.attr("width", 1000);
+      var svg = d3.select("#graphLayout")
 
       var force = d3.layout
         .force()
@@ -294,70 +287,90 @@ export default {
 
       // Define the div for the tooltip
       var divCircle = d3
-        .select(".application--wrap")
-        .append("div")
-        .attr("class", "tooltip")
-        
+        .select(".tooltip")
         .style("opacity", 0);
-
       var divOwner = d3
-        .select(".application--wrap")
-        .append("div")
-        .attr("class", "tooltipOwner")
-        
+        .select(".tooltipOwner")
         .style("opacity", 0);
-
       var divDoc = d3
-        .select(".application--wrap")
-        .append("div")
-        .attr("class", "tooltipDoc")
+        .select(".tooltipDoc")
         .style("opacity", 0);
 
 
 
 
-      for (let i = 0; i < Object.keys(parentGroups).length; i++) {
-        svg
-          .append("path")
-          .attr("class", "subhullOwner")
-          .on("mouseover", function(d) {
-            divOwner.style("opacity", 0.8);
-            divOwner
-              .html(`Owner: ${d.values[0].owner}`)
+    
 
-              .style("left", d3.event.pageX + "px")
-              .style("top", d3.event.pageY - 28 + "px");
-          })
-          .on("mouseout", function(d) {
-            divOwner.style("opacity", 0);
-          });
-      }
+
+      svg
+        .select("#hullOwner")
+        .selectAll("path")
+        .data(Object.keys(parentGroups))
+        .enter()
+        .append("path")
+        .attr("class", "subhullOwner")
+        .on("mouseover", function(d) {
+
+          divOwner.style("opacity", 0.8);
+          divOwner
+            .html(`Owner: ${d.values[0].owner}`)
+
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY - 28 + "px");
+        })
+        .on("mouseout", function(d) {
+          divOwner.style("opacity", 0);
+        });
+      
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
-      for (let i = 0; i < Object.keys(childGroups).length; i++) {
-        svg
-          .append("path")
-          .attr("class", "subhullDoc")
-          .on("mouseover", function(d) {
-            divDoc.style("opacity", 0.8);
-            divDoc
-              .html(
-                `DocumentGuid: ${d.values[0].documentGuid}<br/>
-              DocumentType: ${d.values[0].documentType}<br/>
-              DocumentName: ${d.values[0].documentName}`
-              )
+      // for (let i = 0; i < Object.keys(childGroups).length; i++) {
+      //   svg
+      //     .select("#hull")
+          
+      //     .append("path")
+      //     .attr("class", "subhullDoc")
+      //     .on("mouseover", function(d) {
+      //       divDoc.style("opacity", 0.8);
+      //       divDoc
+      //         .html(
+      //           `DocumentGuid: ${d.values[0].documentGuid}<br/>
+      //         DocumentType: ${d.values[0].documentType}<br/>
+      //         DocumentName: ${d.values[0].documentName}`
+      //         )
 
-              .style("left", d3.event.pageX + "px")
-              .style("top", d3.event.pageY - 28 + "px");
-          })
-          .on("mouseout", function(d) {
-            divDoc.style("opacity", 0);
-          });
-      }
+      //         .style("left", d3.event.pageX + "px")
+      //         .style("top", d3.event.pageY - 28 + "px");
+      //     })
+      //     .on("mouseout", function(d) {
+      //       divDoc.style("opacity", 0);
+      //     });
+      // }
       //
 
-      var senders = force.nodes().filter(data => data.type == "Client");
-      console.log(senders);
+      svg
+        .select("#hullDoc")
+        .selectAll("path")
+        .data(Object.keys(childGroups))
+        .enter()
+        .append("path")
+        .attr("class", "subhullDoc")
+        .on("mouseover", function(d) {
+          divDoc.style("opacity", 0.8);
+          divDoc
+            .html(
+              `DocumentGuid: ${d.values[0].documentGuid}<br/>
+            DocumentType: ${d.values[0].documentType}<br/>
+            DocumentName: ${d.values[0].documentName}`
+            )
+
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY - 28 + "px");
+        })
+        .on("mouseout", function(d) {
+          divDoc.style("opacity", 0);
+        });
+
       var groupOwners = d3
         .nest()
         .key(function(d) {
@@ -388,7 +401,7 @@ export default {
       //
 
       svg
-        .append("svg:defs")
+        .select("#marker")
         .selectAll("marker")
         .data(force.links().filter(data => data.display))
         //.data(['sending', 'receiving'])
@@ -419,7 +432,7 @@ export default {
         .attr("d", "M0,-5L10,0L0,5");
 
       var path = svg
-        .append("svg:g")
+        .select("#pathLink")
         .selectAll("path")
         .data(force.links().filter(data => data.display))
         .enter()
@@ -435,7 +448,7 @@ export default {
       //
 
       var circleSender = svg
-        .append("svg:g")
+        .select("#circleSender")
         .selectAll("circle")
         .data(force.nodes().filter(data => data.role == "Sender"))
 
@@ -468,7 +481,7 @@ export default {
       //console.log(timeStamps);
 
       var circleReceiver = svg
-        .append("svg:g")
+        .select("#circleReceiver")
         .selectAll("circle")
         .data(force.nodes().filter(data => data.role == "Receiver"))
 
@@ -500,7 +513,7 @@ export default {
       const rectHeight = 24;
 
       var rect = svg
-        .append("svg:g")
+        .select("#rectStream")
         .selectAll("rect")
         .data(force.nodes().filter(d => d.type == "Stream"))
         .enter()
@@ -517,7 +530,7 @@ export default {
 
       //text content.
       var text = svg
-        .append("svg:g")
+        .select("#text")
         .selectAll("g")
         .data(force.nodes())
         .enter()
@@ -552,6 +565,7 @@ export default {
           .attr("stroke-width", 0);
 
         svg
+          .select("#hullOwner")
           .selectAll(".subhullOwner")
           .data(groupOwners)
           .attr("d", groupPath)
@@ -560,6 +574,7 @@ export default {
           .attr("d", groupPath);
 
         svg
+          .select("#hullDoc")
           .selectAll(".subhullDoc")
           .data(groupDocs)
           .attr("d", groupPath)
@@ -607,6 +622,30 @@ export default {
         });
       }
     }
+
+  },
+  mounted() {
+    console.log(this.dummydata)
+    this.svgWidth = document.getElementById("clientGraph").offsetWidth,
+    this.svgHeight = document.getElementById("clientGraph").offsetHeight,
+    this.drawGraph();
+
+    this.AddResizeListener();
+  },
+  created() {
+    this.drawGraph()
+    //this.$asyncComputed.drawGraph.update();
+
+  },
+  updated(){
+    console.log(this.dummydata)
+  },
+  
+  computed: {
+  },
+
+  asyncComputed: {
+    
   }
 };
 </script>
@@ -712,7 +751,7 @@ text.shadow {
   transition: 700ms;
 }
 
-div.tooltip {
+.tooltip {
   position: absolute;
   text-align: center;
   width: 250px;
@@ -727,7 +766,7 @@ div.tooltip {
   pointer-events: none;
 }
 
-div.tooltipOwner {
+.tooltipOwner {
   position: absolute;
   text-align: center;
   width: 250px;
@@ -741,7 +780,7 @@ div.tooltipOwner {
 
 }
 
-div.tooltipDoc {
+.tooltipDoc {
   position: absolute;
   text-align: center;
   width: 350px;

@@ -17,16 +17,17 @@
       </v-layout>
     </v-card-text>
     <v-divider></v-divider>
-    <div id="clientgraph">
-      <div id="container" class="svg-container" align="center">
-        <svg width="100%" height="600" id="graphLayout">
-          <!-- <g id="pathLink"></g>
-          <g id="circleSender"></g>
-          <g id="circleReceiver"></g>
-          <g id="rectStream"></g> -->
-          <ForceDirectedLayout v-if="result" :clientdata="result"/>
-        </svg>
-      </div>
+    <div id="appClientGraph">
+          
+          
+              <!-- <g id="pathLink"></g>
+              <g id="circleSender"></g>
+              <g id="circleReceiver"></g>
+              <g id="rectStream"></g> -->
+
+             <ForceDirectedLayout v-if="result" :clientdata="result" :dummydata="dummydata"/>
+          
+          
     </div>
   </v-card>
 </template>
@@ -48,9 +49,11 @@ export default {
   },
   data: () => ({
     result: null,
+    dummydata: false,
   }),
   methods: {
     refresh() {
+      this.dummydata = !this.dummydata
       this.$asyncComputed.myResolvedValue.update();
     },
 
@@ -226,7 +229,7 @@ export default {
 </script>
 
 <style>
-#clientgraph {
+#appClientGraph {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

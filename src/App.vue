@@ -32,6 +32,11 @@
       </keep-alive>
       <!-- </v-container> -->
     </v-content>
+    <!-- telated to the client graph -->
+    <div class="tooltipOwner"></div>
+    <div class="tooltipDoc"></div>
+    <div class="tooltip"></div>
+
   </v-app>
 </template>
 <script>

@@ -38,9 +38,12 @@
       </v-flex>
       <v-flex xs12>
         <client-graph :project='project'></client-graph>
+
       </v-flex>
     </v-layout>
+
   </v-container>
+  
 </template>
 <script>
 import union from 'lodash.union'
