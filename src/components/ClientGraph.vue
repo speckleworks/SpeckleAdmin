@@ -35,9 +35,7 @@
 <script>
 import ForceDirectedLayout from "./ForceDirectedLayout.vue";
 import axios from "axios";
-import Vue from "vue";
-import AsyncComputed from "vue-async-computed";
-Vue.use(AsyncComputed);
+
 //
 export default {
   name: "ClientGraph",
