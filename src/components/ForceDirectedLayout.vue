@@ -229,6 +229,7 @@ export default {
 
       var svg = d3.select("#graphLayout")
 
+
       this.$data.force = d3.layout
         .force()
         .nodes(d3.values(_nodes))
@@ -254,7 +255,8 @@ export default {
         })
         .on("tick", tick)
         .start();
-
+      var drag = this.$data.force.drag()
+          .on("dragstart", dragstart);
       var colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
@@ -427,7 +429,7 @@ export default {
         .attr("class", "sender")
         .attr("class", "node")
         .attr("r", 6)
-
+        .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
 
@@ -458,6 +460,7 @@ export default {
         .attr("class", "receiver")
         .attr("class", "node")
         .attr("r", 6)
+        .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
 
@@ -493,6 +496,7 @@ export default {
         .attr("height", rectHeight)
         .attr("rx", 3)
         .attr("ry", 3)
+        .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
 
@@ -522,6 +526,15 @@ export default {
         });
 
       //
+
+      function dblclick(d) {
+        d3.select(this).classed("fixed", d.fixed = false);
+      }
+
+      function dragstart(d) {
+        d3.select(this).classed("fixed", d.fixed = true);
+      }
+
       function tick() {
         svg
           .selectAll(".node")
@@ -583,17 +596,21 @@ export default {
           return "translate(" + d.x + "," + d.y + ")";
         });
       }
-    }
+    },
+
   },
   mounted() {
-    this.svgWidth = document.getElementById("clientGraph").offsetWidth
-    this.drawGraph();
+    this.svgWidth = document.getElementById("clientGraph").offsetWidth,
+    
+    setTimeout(() => {
+        this.drawGraph();
+    },500);
   },
   created(){
     
   },
   updated(){ 
-    console.log('lol')
+
   },
   computed:{
   },

@@ -5,9 +5,16 @@
       <span class="title font-weight-light">Projects Graph</span>
       <v-spacer></v-spacer>
       <span right>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon @click="saveAsPNG()" v-on="on"><v-icon>save</v-icon></v-btn>
+          </template>
+          <span>Save Graph as PNG</span>
+        </v-tooltip>
         <v-btn icon @click="refresh()">
           <v-icon>refresh</v-icon>
         </v-btn>
+
       </span>
     </v-toolbar>
     <v-divider></v-divider>
@@ -23,12 +30,17 @@
     </div>
   </v-card>
 </template>
+
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+
 <script>
 import ForceDirectedLayout from "./ForceDirectedLayout.vue";
+
 import axios from "axios";
 import Vue from 'vue';
 import AsyncComputed from 'vue-async-computed'
+import svgtopng from 'save-svg-as-png'
 Vue.use(AsyncComputed);
 export default {
   name: "ClientGraph",
@@ -44,6 +56,14 @@ export default {
     svgHeight: 600
   }),
   methods: {
+
+
+    
+    saveAsPNG() {
+      console.log('lol')
+      //saveSvgAsPng.saveSvgAsPng(d3.select('#graphLayout').contentDocument, "diagram.png");
+      svgtopng.saveSvgAsPng(document.getElementById("graphLayout"), "diagram.png", {scale: 3});
+    },
     refresh() {
       this.$asyncComputed.myResolvedValue.update();
       this.$data.redrawToggle = false;
@@ -52,20 +72,14 @@ export default {
       },500);
     },
     AddResizeListener() {
-          //redraw the chart 300ms after the window has been resized
-          // window.addEventListener("resize", () => {
-          //   this.$data.redrawToggle = false;
-          //   setTimeout(() => {
-          //     this.$data.redrawToggle = true;
-          //   },1500);
-          // });
-
         var doit;
         window.addEventListener("resize", () => {
           this.$data.redrawToggle = false;
           clearTimeout(doit);
-          console.log(doit)
-          doit = setTimeout(() => {this.refresh()}, 500);
+          doit = setTimeout(() => {
+            this.$data.redrawToggle = true
+            //this.$asyncComputed.myResolvedValue.update()
+            }, 500);
         });
       },
   },
