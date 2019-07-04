@@ -5,29 +5,72 @@
       <span class="title font-weight-light">Projects Graph</span>
       <v-spacer></v-spacer>
       <span right>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn icon @click="saveAsPNG()" v-on="on"><v-icon>save</v-icon></v-btn>
-          </template>
-          <span>Save Graph as PNG</span>
-        </v-tooltip>
-        <v-btn icon @click="refresh()">
-          <v-icon>refresh</v-icon>
-        </v-btn>
+
 
       </span>
     </v-toolbar>
     <v-divider></v-divider>
     <v-card-text>
-      <v-layout>
-        <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex>
-        <v-checkbox v-model="showDocGroups" :label="`showDocGroups`"></v-checkbox>
-      </v-layout>
+      
+        <v-toolbar>
+
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon @click="saveAsPNG()" v-on="on"><v-icon>save_alt</v-icon></v-btn>
+          </template>
+          <span>Save as PNG</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon @click="refresh()" v-on="on"><v-icon>refresh</v-icon></v-btn>
+          </template>
+          <span>Refresh</span>
+        </v-tooltip>
+
+        
+    <v-divider
+      class="mr-2"
+      vertical
+    ></v-divider>
+
+        <v-btn-toggle
+      v-model="toggle_multiple"
+      class="transparent"
+      multiple
+    >
+      <v-btn :value="1" flat>
+        Documents
+      </v-btn>
+
+      <v-btn :value="2" flat>
+        Users
+      </v-btn>
+
+    </v-btn-toggle>
+
+        <v-divider
+      class="ml-2"
+      vertical
+    ></v-divider>
+
+           <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon v-on="on"><v-icon>gps_fixed</v-icon></v-btn>
+          </template>
+          <span>Enable drag</span>
+        </v-tooltip>
+        </v-toolbar>
+        
+        <!-- <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex> -->
+        
+      
     </v-card-text>
     <v-divider></v-divider>
     <div id="appClientGraph">
              <svg v-if="!redrawToggle || !result"  width="100%" :height="svgHeight"></svg>
-             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :showDocGroups="showDocGroups" :clientdata="result"/>
+             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :showDocGroups="toggle_multiple" :clientdata="result"/>
     </div>
   </v-card>
 </template>
@@ -52,11 +95,14 @@ export default {
     project: Object
   },
   data: () => ({
+    toggle_multiple: [1, 2],
     showDocGroups: true,
     redrawToggle: true,
     result: null,
-    svgHeight: 600
+    svgHeight: 600,
+
   }),
+
   methods: {
 
 
