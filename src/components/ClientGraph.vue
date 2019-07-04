@@ -18,16 +18,8 @@
     </v-card-text>
     <v-divider></v-divider>
     <div id="appClientGraph">
-          
-          
-              <!-- <g id="pathLink"></g>
-              <g id="circleSender"></g>
-              <g id="circleReceiver"></g>
-              <g id="rectStream"></g> -->
-             <svg v-if="!redrawToggle"  width="100%" height="600"></svg>
-             <ForceDirectedLayout v-if="result && redrawToggle" :clientdata="result" :dummydata="redrawToggle"/>
-          
-          
+             <svg v-if="!redrawToggle || !result"  width="100%" :height="svgHeight"></svg>
+             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :clientdata="result"/>
     </div>
   </v-card>
 </template>
@@ -35,8 +27,9 @@
 <script>
 import ForceDirectedLayout from "./ForceDirectedLayout.vue";
 import axios from "axios";
-
-//
+import Vue from 'vue';
+import AsyncComputed from 'vue-async-computed'
+Vue.use(AsyncComputed);
 export default {
   name: "ClientGraph",
   components: {
@@ -48,30 +41,33 @@ export default {
   data: () => ({
     redrawToggle: true,
     result: null,
-    dummydata: false,
+    svgHeight: 600
   }),
   methods: {
     refresh() {
-      this.dummydata = !this.dummydata
       this.$asyncComputed.myResolvedValue.update();
-      console.log(this.$data.redrawToggle)
       this.$data.redrawToggle = false;
-            setTimeout(() => {
-              this.$data.redrawToggle = true;
-              //console.log('hehehehehehhe')
-            },500);
+      setTimeout(() => {
+        this.$data.redrawToggle = true;
+      },500);
     },
     AddResizeListener() {
-          // redraw the chart 300ms after the window has been resized
-          window.addEventListener("resize", () => {
-            this.$data.redrawToggle = false;
-            setTimeout(() => {
-              this.$data.redrawToggle = true;
-              //console.log('hehehehehehhe')
-            },3000);
-          });
-      }
-    
+          //redraw the chart 300ms after the window has been resized
+          // window.addEventListener("resize", () => {
+          //   this.$data.redrawToggle = false;
+          //   setTimeout(() => {
+          //     this.$data.redrawToggle = true;
+          //   },1500);
+          // });
+
+        var doit;
+        window.addEventListener("resize", () => {
+          this.$data.redrawToggle = false;
+          clearTimeout(doit);
+          console.log(doit)
+          doit = setTimeout(() => {this.refresh()}, 500);
+        });
+      },
   },
   mounted(){
     this.AddResizeListener();
@@ -98,9 +94,7 @@ export default {
       let resProject;
       try {
         resProject = await axios.get(
-          "https://hestia.speckle.works/api/projects/" +
-            this.project._id
-            //"5cc0417355797f03a2a79605"
+          `https://hestia.speckle.works/api/projects/${this.project._id}`
         );
       } catch (err) {
         console.log(err); // from creation
@@ -117,7 +111,7 @@ export default {
 
         try {
           resStream = await axios.get(
-            "https://hestia.speckle.works/api/streams/" + streamShortID
+            `https://hestia.speckle.works/api/streams/${streamShortID}`
           );
 
           stream_id = resStream.data.resource._id;

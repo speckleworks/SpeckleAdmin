@@ -1,6 +1,6 @@
 <template>
   <div id="clientGraph">
-    <svg  width="100%" height="600" id="graphLayout">
+    <svg  width="100%" :height="svgHeight" id="graphLayout">
       <g id="hullDoc"></g>
       <g id="hullOwner"></g>
       <g id="pathLink"></g>
@@ -13,23 +13,20 @@
   </div>
 </template>
 
-<script>
-import Vue from "vue";
-import * as d3 from "d3";
-import AsyncComputed from "vue-async-computed";
-Vue.use(AsyncComputed);
 
+<script>
+import * as d3 from "d3";
 export default {
   name: "ForceDirectedLayout",
 
   props: {
     clientdata: Array,
-    dummydata: Boolean
+    svgHeight: Number,
   },
 
   data: () => ({
+      force: null,
       svgWidth: document.getElementById("appClientGraph").offsetWidth,
-      svgHeight: 600,
       menuStream: [
         {
           title: "View Stream",
@@ -232,11 +229,11 @@ export default {
 
       var svg = d3.select("#graphLayout")
 
-      var force = d3.layout
+      this.$data.force = d3.layout
         .force()
         .nodes(d3.values(_nodes))
         .links(_links)
-        .size([this.$data.svgWidth, this.$data.svgHeight])
+        .size([this.$data.svgWidth, this.$props.svgHeight])
         .linkDistance(d => {
           if (d.type == "ownerForceGroup") {
             return 200;
@@ -349,14 +346,14 @@ export default {
         .key(function(d) {
           return d.owner;
         })
-        .entries(force.nodes().filter(data => data.type == "Client"));
+        .entries(this.$data.force.nodes().filter(data => data.type == "Client"));
 
       var groupDocs = d3
         .nest()
         .key(function(d) {
           return d.documentGuid;
         })
-        .entries(force.nodes().filter(data => data.type == "Client"));
+        .entries(this.$data.force.nodes().filter(data => data.type == "Client"));
 
       var groupPath = function(d) {
         return (
@@ -376,7 +373,7 @@ export default {
       svg
         .select("#marker")
         .selectAll("marker")
-        .data(force.links().filter(data => data.display))
+        .data(this.$data.force.links().filter(data => data.display))
         //.data(['sending', 'receiving'])
         .enter()
         .append("svg:marker")
@@ -407,7 +404,7 @@ export default {
       var path = svg
         .select("#pathLink")
         .selectAll("path")
-        .data(force.links().filter(data => data.display))
+        .data(this.$data.force.links().filter(data => data.display))
         .enter()
         .append("svg:path")
         .attr("class", function(d) {
@@ -423,7 +420,7 @@ export default {
       var circleSender = svg
         .select("#circleSender")
         .selectAll("circle")
-        .data(force.nodes().filter(data => data.role == "Sender"))
+        .data(this.$data.force.nodes().filter(data => data.role == "Sender"))
 
         .enter()
         .append("svg:circle")
@@ -431,7 +428,7 @@ export default {
         .attr("class", "node")
         .attr("r", 6)
 
-        .call(force.drag)
+        .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
 
         //   divCircle.
@@ -450,20 +447,18 @@ export default {
         //
         .on("contextmenu", this.contextMenu("client", this.menuClient));
 
-      //console.log(colour);
-      //console.log(timeStamps);
 
       var circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
-        .data(force.nodes().filter(data => data.role == "Receiver"))
+        .data(this.$data.force.nodes().filter(data => data.role == "Receiver"))
 
         .enter()
         .append("svg:circle")
         .attr("class", "receiver")
         .attr("class", "node")
         .attr("r", 6)
-        .call(force.drag)
+        .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
 
         //   divCircle.
@@ -488,7 +483,7 @@ export default {
       var rect = svg
         .select("#rectStream")
         .selectAll("rect")
-        .data(force.nodes().filter(d => d.type == "Stream"))
+        .data(this.$data.force.nodes().filter(d => d.type == "Stream"))
         .enter()
         .append("svg:rect")
         .attr("class", "node")
@@ -498,14 +493,14 @@ export default {
         .attr("height", rectHeight)
         .attr("rx", 3)
         .attr("ry", 3)
-        .call(force.drag)
+        .call(this.$data.force.drag)
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
 
       //text content.
       var text = svg
         .select("#text")
         .selectAll("g")
-        .data(force.nodes())
+        .data(this.$data.force.nodes())
         .enter()
         .append("svg:g");
 
@@ -591,27 +586,18 @@ export default {
     }
   },
   mounted() {
-    console.log(this.dummydata)
-    this.svgWidth = document.getElementById("clientGraph").offsetWidth,
-    this.svgHeight = document.getElementById("clientGraph").offsetHeight,
+    this.svgWidth = document.getElementById("clientGraph").offsetWidth
     this.drawGraph();
-    //this.AddResizeListener();
   },
-  created() {
-    //this.drawGraph()
-    //this.$asyncComputed.drawGraph.update();
-
-  },
-  updated(){
+  created(){
     
   },
-  
-  computed: {
+  updated(){ 
+    console.log('lol')
+  },
+  computed:{
   },
 
-  asyncComputed: {
-    
-  }
 };
 </script>
 
