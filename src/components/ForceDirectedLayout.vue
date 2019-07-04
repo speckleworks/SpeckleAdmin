@@ -1,7 +1,7 @@
 <template>
   <div id="clientGraph">
     <svg  width="100%" :height="svgHeight" id="graphLayout">
-      <g id="hullDoc"></g>
+      <g v-show="showDocGroups" id="hullDoc"></g>
       <g id="hullOwner"></g>
       <g id="pathLink"></g>
       <g id="marker"></g>
@@ -22,6 +22,7 @@ export default {
   props: {
     clientdata: Array,
     svgHeight: Number,
+    showDocGroups: Boolean,
   },
 
   data: () => ({

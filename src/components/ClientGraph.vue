@@ -21,12 +21,13 @@
     <v-card-text>
       <v-layout>
         <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex>
+        <v-checkbox v-model="showDocGroups" :label="`showDocGroups`"></v-checkbox>
       </v-layout>
     </v-card-text>
     <v-divider></v-divider>
     <div id="appClientGraph">
              <svg v-if="!redrawToggle || !result"  width="100%" :height="svgHeight"></svg>
-             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :clientdata="result"/>
+             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :showDocGroups="showDocGroups" :clientdata="result"/>
     </div>
   </v-card>
 </template>
@@ -51,6 +52,7 @@ export default {
     project: Object
   },
   data: () => ({
+    showDocGroups: true,
     redrawToggle: true,
     result: null,
     svgHeight: 600
@@ -78,7 +80,7 @@ export default {
           clearTimeout(doit);
           doit = setTimeout(() => {
             this.$data.redrawToggle = true
-            //this.$asyncComputed.myResolvedValue.update()
+            this.$asyncComputed.myResolvedValue.update()
             }, 500);
         });
       },
