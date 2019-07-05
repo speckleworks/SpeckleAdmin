@@ -4,73 +4,93 @@
       <v-icon left small>share</v-icon>
       <span class="title font-weight-light">Projects Graph</span>
       <v-spacer></v-spacer>
-      <span right>
-
-
-      </span>
+      <span right></span>
     </v-toolbar>
     <v-divider></v-divider>
     <v-card-text>
-      
-        <v-toolbar>
-
-
+      <!-- https://vuetifyjs.com/en/components/button-groups -->
+      <v-toolbar>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon @click="saveAsPNG()" v-on="on"><v-icon>save_alt</v-icon></v-btn>
+            <v-btn icon @click="refresh()" v-on="on">
+              <v-icon>refresh</v-icon>
+            </v-btn>
+          </template>
+          <span>Refresh</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon @click="saveAsPNG()" v-on="on">
+              <v-icon>save_alt</v-icon>
+            </v-btn>
           </template>
           <span>Save as PNG</span>
         </v-tooltip>
 
+        <v-divider class="mr-3" vertical></v-divider>
+
+        <v-btn-toggle v-model="toggle_multiple" class="transparent" multiple>
+          <v-btn color="pink lighten-2" :value="1" flat>Documents</v-btn>
+
+          <v-btn color="blue lighten-2" :value="2" flat>Users</v-btn>
+
+          <!-- <v-btn color ="blue lighten-2" :value="2" flat>
+        Users
+          </v-btn>-->
+        </v-btn-toggle>
+
+        <v-divider class="ml-3" vertical></v-divider>
+
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon @click="refresh()" v-on="on"><v-icon>refresh</v-icon></v-btn>
-          </template>
-          <span>Refresh</span>
-        </v-tooltip>
-
-        
-    <v-divider
-      class="mr-2"
-      vertical
-    ></v-divider>
-
-        <v-btn-toggle
-      v-model="toggle_multiple"
-      class="transparent"
-      multiple
-    >
-      <v-btn :value="1" flat>
-        Documents
-      </v-btn>
-
-      <v-btn :value="2" flat>
-        Users
-      </v-btn>
-
-    </v-btn-toggle>
-
-        <v-divider
-      class="ml-2"
-      vertical
-    ></v-divider>
-
-           <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on"><v-icon>gps_fixed</v-icon></v-btn>
+            <v-btn icon v-on="on">
+              <v-icon>gps_fixed</v-icon>
+            </v-btn>
           </template>
           <span>Enable drag</span>
         </v-tooltip>
-        </v-toolbar>
-        
-        <!-- <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex> -->
-        
-      
+      </v-toolbar>
+
+      <!-- <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex> -->
+    </v-card-text>
+    <v-card-text>
+      <v-layout>
+        <v-flex align-self-center shrink style="width: 250px">
+
+          <!-- <v-card-text  v-if="result">{{test()[0]}}</v-card-text> -->
+          <v-chip label  v-if="result">{{getMin()}}</v-chip>
+        </v-flex >
+
+        <v-flex v-if="result" class="px-3">
+          <v-range-slider
+            
+            v-model="value3"
+            :max="result[0].length-1"
+            :min="0"
+            :step="1"
+            
+            
+          ></v-range-slider>
+        </v-flex>
+
+        <v-flex align-self-center shrink style="width: 250px">
+          <!-- <v-card-text v-if="result">{{test()[1]}}</v-card-text> -->
+          <v-chip label  v-if="result">{{getMax()}}</v-chip>
+          
+        </v-flex>
+      </v-layout>
     </v-card-text>
     <v-divider></v-divider>
     <div id="appClientGraph">
-             <svg v-if="!redrawToggle || !result"  width="100%" :height="svgHeight"></svg>
-             <ForceDirectedLayout v-if="result && redrawToggle" :svgHeight="svgHeight" :showDocGroups="toggle_multiple" :clientdata="result"/>
+      <svg v-if="!redrawToggle || !result" width="100%" :height="svgHeight" />
+      <ForceDirectedLayout
+        v-if="result && redrawToggle"
+        :svgHeight="svgHeight"
+        :showDocGroups="toggle_multiple"
+        :clientdata="result"
+        :clientdatafilter="value3"
+        
+      />
     </div>
   </v-card>
 </template>
@@ -82,9 +102,9 @@
 import ForceDirectedLayout from "./ForceDirectedLayout.vue";
 
 import axios from "axios";
-import Vue from 'vue';
-import AsyncComputed from 'vue-async-computed'
-import svgtopng from 'save-svg-as-png'
+import Vue from "vue";
+import AsyncComputed from "vue-async-computed";
+import svgtopng from "save-svg-as-png";
 Vue.use(AsyncComputed);
 export default {
   name: "ClientGraph",
@@ -95,44 +115,72 @@ export default {
     project: Object
   },
   data: () => ({
+
+    
     toggle_multiple: [1, 2],
     showDocGroups: true,
     redrawToggle: true,
     result: null,
+    value3: null,
+    sortedNodesByCreationDate: null,
+    //filteredNodesByCreationDate: null,
     svgHeight: 600,
-
+    filteredResult: null
   }),
+  computed: {
 
+  },
   methods: {
 
+    getMin(){
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
+      return createdAts[this.value3[0]]
+    },
+    getMax(){
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
+      return createdAts[this.value3[1]]
+    },
+ 
+    mounted(){
+      
+      
 
-    
+      
+    },
+    updated(){
+      console.log(this.filteredResult)
+    },
     saveAsPNG() {
-      console.log('lol')
+
       //saveSvgAsPng.saveSvgAsPng(d3.select('#graphLayout').contentDocument, "diagram.png");
-      svgtopng.saveSvgAsPng(document.getElementById("graphLayout"), "diagram.png", {scale: 3});
+      svgtopng.saveSvgAsPng(
+        document.getElementById("graphLayout"),
+        "diagram.png",
+        { scale: 3 }
+      );
     },
     refresh() {
       this.$asyncComputed.myResolvedValue.update();
       this.$data.redrawToggle = false;
       setTimeout(() => {
         this.$data.redrawToggle = true;
-      },500);
+      }, 500);
     },
     AddResizeListener() {
-        var doit;
-        window.addEventListener("resize", () => {
-          this.$data.redrawToggle = false;
-          clearTimeout(doit);
-          doit = setTimeout(() => {
-            this.$data.redrawToggle = true
-            this.$asyncComputed.myResolvedValue.update()
-            }, 500);
-        });
-      },
+      var doit;
+      window.addEventListener("resize", () => {
+        this.$data.redrawToggle = false;
+        clearTimeout(doit);
+        doit = setTimeout(() => {
+          this.$data.redrawToggle = true;
+          this.$asyncComputed.myResolvedValue.update();
+        }, 500);
+      });
+    }
   },
-  mounted(){
+  updated() {
     this.AddResizeListener();
+
   },
   asyncComputed: {
     async myResolvedValue() {
@@ -249,51 +297,60 @@ export default {
       }
       console.log(nodes);
       //
-    //   nodes.sort(function(a, b) {
-    //     return a.createdAt < b.createdAt
-    //       ? -1
-    //       : a.createdAt > b.createdAt
-    //       ? 1
-    //       : 0;
-    //   });
+      //   nodes.sort(function(a, b) {
+      //     return a.createdAt < b.createdAt
+      //       ? -1
+      //       : a.createdAt > b.createdAt
+      //       ? 1
+      //       : 0;
+      //   });
 
-    //   var placeholder_0 = nodes;
-    //   var placeholder_1 = streamLinks;
-    //   var links = [];
-    //   for (let i = 0; i < placeholder_1.length; i++) {
-    //     if (placeholder_1[i].action === "sending") {
-    //       let source = placeholder_0
-    //         .map(function(e) {
-    //           if (e.type === "Client") {
-    //             return e._id;
-    //           }
-    //         })
-    //         .indexOf(placeholder_1[i].source);
-    //       let target = placeholder_0
-    //         .map(function(e) {
-    //           return e._id;
-    //         })
-    //         .indexOf(placeholder_1[i].target);
-    //       links.push({ source, target, type: `sending`, display: true });
-    //     }
-    //     if (placeholder_1[i].action === "receiving") {
-    //       let source = placeholder_0
-    //         .map(function(e) {
-    //           return e._id;
-    //         })
-    //         .indexOf(placeholder_1[i].source);
-    //       let target = placeholder_0
-    //         .map(function(e) {
-    //           if (e.type === "Client") {
-    //             return e._id;
-    //           }
-    //         })
-    //         .indexOf(placeholder_1[i].target);
-    //       links.push({ source, target, type: `receiving`, display: true });
-    //     }
-    //   }
+      //   var placeholder_0 = nodes;
+      //   var placeholder_1 = streamLinks;
+      //   var links = [];
+      //   for (let i = 0; i < placeholder_1.length; i++) {
+      //     if (placeholder_1[i].action === "sending") {
+      //       let source = placeholder_0
+      //         .map(function(e) {
+      //           if (e.type === "Client") {
+      //             return e._id;
+      //           }
+      //         })
+      //         .indexOf(placeholder_1[i].source);
+      //       let target = placeholder_0
+      //         .map(function(e) {
+      //           return e._id;
+      //         })
+      //         .indexOf(placeholder_1[i].target);
+      //       links.push({ source, target, type: `sending`, display: true });
+      //     }
+      //     if (placeholder_1[i].action === "receiving") {
+      //       let source = placeholder_0
+      //         .map(function(e) {
+      //           return e._id;
+      //         })
+      //         .indexOf(placeholder_1[i].source);
+      //       let target = placeholder_0
+      //         .map(function(e) {
+      //           if (e.type === "Client") {
+      //             return e._id;
+      //           }
+      //         })
+      //         .indexOf(placeholder_1[i].target);
+      //       links.push({ source, target, type: `receiving`, display: true });
+      //     }
+      //   }
+      this.sortedNodesByCreationDate = nodes
+      this.sortedNodesByCreationDate.sort(function(a, b) {
+        return a.createdAt < b.createdAt
+          ? -1
+          : a.createdAt > b.createdAt
+          ? 1
+          : 0;
+      })
+
       this.result = [nodes, streamLinks];
-
+      this.value3 = [0,this.result[0].length-1]
       return [nodes, streamLinks];
     }
   }
@@ -307,6 +364,4 @@ export default {
   text-align: center;
   margin-top: 30px;
 }
-
-
 </style>
