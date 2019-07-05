@@ -1,6 +1,5 @@
 <template>
   <div id="clientGraph">
-    <h2>{{clientdatafilter}}</h2>
     <svg  width="100%" :height="svgHeight" id="graphLayout">
       <g v-show="showDocGroups.includes(1)" id="hullDoc"></g>
       <g v-show="showDocGroups.includes(2)" id="hullOwner"></g>
@@ -25,6 +24,12 @@ export default {
     svgHeight: Number,
     showDocGroups: Array,
     clientdatafilter: Array,
+  },
+
+  watch: {
+    clientdatafilter: function (){
+      console.log('ooups')
+    }
   },
 
   data: () => ({
@@ -147,12 +152,13 @@ export default {
     },
 
 
-
-    drawGraph(clientdatafilter) {
-      console.log(clientdatafilter)
+    
+    drawGraph() {
+      console.log(this.clientdatafilter)
+      console.log(this.clientdata)
       //let result = await this.init( )
-      var _nodes = this.clientdata[0];
-      var links = this.clientdata[1];
+      var _nodes = this.clientdatafilter[0];
+      var links = this.clientdatafilter[1];
 
       // Sorts all nodes by creation timestamps
       _nodes.sort(function(a, b) {
@@ -609,15 +615,15 @@ export default {
   mounted() {
     this.svgWidth = document.getElementById("clientGraph").offsetWidth,
     
-    setTimeout(() => {
-        this.drawGraph(this.$data.clientdatafilter);
-    },500);
+  
+        this.drawGraph();
+  
   },
   created(){
     
   },
   updated(){ 
-    console.log('lol')
+
   },
   computed:{
   },

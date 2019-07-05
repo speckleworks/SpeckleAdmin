@@ -88,7 +88,7 @@
         :svgHeight="svgHeight"
         :showDocGroups="toggle_multiple"
         :clientdata="result"
-        :clientdatafilter="value3"
+        :clientdatafilter="filteredResult"
         
       />
     </div>
@@ -130,6 +130,43 @@ export default {
   computed: {
 
   },
+  watch: {
+    value3: function (){
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
+      let filteredNodesByCreationDate = this.result[0].filter((d) => { 
+        return d.createdAt >= createdAts[this.value3[0]] && 
+          d.createdAt <= createdAts[this.value3[1]];
+      });
+      let filteredLinksByCreationDate= this.result[1].filter((d) => { 
+        return d
+      });
+
+
+      let tempp = []
+
+      var collectedIDs = []
+      for (var j = 0; j < filteredNodesByCreationDate.length; j++) {
+        collectedIDs.push(filteredNodesByCreationDate[j]._id)
+      }
+
+      for (var i = 0; i < this.result[1].length; i++) {
+          if(collectedIDs.includes(this.result[1][i].source) && collectedIDs.includes(this.result[1][i].target)){
+            tempp.push(this.result[1][i])
+          }else{
+          }
+      }
+      
+      let array = Array.from(new Set(tempp));
+
+
+      this.filteredResult = [filteredNodesByCreationDate, array]
+      //console.log(this.filteredResult)
+      this.$data.redrawToggle = false;
+      setTimeout(() => {
+        this.$data.redrawToggle = true;
+      });
+    }
+  },
   methods: {
 
     getMin(){
@@ -148,7 +185,7 @@ export default {
       
     },
     updated(){
-      console.log(this.filteredResult)
+      
     },
     saveAsPNG() {
 
@@ -351,6 +388,7 @@ export default {
 
       this.result = [nodes, streamLinks];
       this.value3 = [0,this.result[0].length-1]
+      //this.value3 = [0,6]
       return [nodes, streamLinks];
     }
   }
