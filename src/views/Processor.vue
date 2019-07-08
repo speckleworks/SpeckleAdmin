@@ -3,13 +3,45 @@
     <div style='position: absolute; top:0; left: 0; width: 100%;'>
       <v-progress-linear :indeterminate="true" v-show='isLoading' height='2' class='ma-0'></v-progress-linear>
     </div>
-    <v-layout row wrap>
-      <v-flex xs12 pt-5 pb-0 class='headline font-weight-light'>
-        Processor allows you to run scripts on streams.
-      </v-flex>
+    <v-card xs12 sm12 md12 class="my-5" v-if="!isLoading">
+      <v-card-title>
+        <v-flex xs12 sm12 md12>
+          <v-text-field v-model="name" @change='updateBlock' class="title font-light-weight mt-4">
+          </v-text-field>
+        </v-flex>
+      </v-card-title>
+      <v-card-text>
+        <v-flex xs12 sm12 md12>
+          <v-textarea v-model="description" @change='updateBlock' class="font-light-weight">
+          </v-textarea>
+        </v-flex>
+      </v-card-text>
+      <v-card-actions>
+        <v-dialog
+          max-width="500">
+          <template v-slot:activator="{ on }">
+            <v-btn round small depressed v-on="on">
+              <v-icon>share</v-icon>
+              <span class="mx-2">share</span>
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class='font-weight-light title'>
+                Share link
+              </span>
+            </v-card-title>
+            <v-card-text>
+              <v-text-field :readonly="true" v-model="shareLink"></v-text-field>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+      </v-card-actions>
+    </v-card>
+    <v-layout row wrap v-if="!isLoading">
       <v-flex>
         <v-card>
-          <template v-if="!isLoading">
+          <template>
             <v-flex xs12 ma-0 pa-0 v-for='(block, index) in chosenBlocks' :key='index'>
               <processor-block
                 :index='index'
@@ -58,6 +90,41 @@ export default {
     ProcessorBlock,
   },
   computed: {
+    name: {
+      get: function() {
+        return this.processor.name ? this.processor.name : ""
+      },
+      set: function(val) {
+        this.processor.name = val
+      }
+    },
+    description: {
+      get: function() {
+        return this.processor.description ? this.processor.description : ""
+      },
+      set: function(val) {
+        this.processor.description = val
+      }
+    },
+    chosenBlocks: {
+      get: function() {
+        return this.processor.blocks ? this.processor.blocks : []
+      },
+      set: function(val) {
+        this.processor.blocks = val
+      }
+    },
+    blockParams: {
+      get: function() {
+        return this.processor.params ? this.processor.params : []
+      },
+      set: function(val) {
+        this.processor.params = val
+      }
+    },
+    shareLink: function() {
+      return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(this.processor))
+    },
     reRun: function () {
       if (this.blockStatus.length > 0 && this.blockStatus.length == this.chosenBlocks.length)
         return this.blockStatus[this.blockStatus.length - 1] == 'success'
@@ -69,13 +136,14 @@ export default {
     return {
       initInput: "",
       isLoading: false,
+      
+      id: "",
+      processor: Object,
 
       blocks: [ ],
 
-      chosenBlocks: [ ],
       blockStatus: [ ],
       blockOutput: [ ],
-      blockParams: [ ],
       
       toRequest: [ ],
       requestBuckets: [ ],
@@ -219,7 +287,7 @@ export default {
         this.chosenBlocks.push( sender )
         this.blockParams.push({})
       }
-      this.appendQueryToRoute()
+      this.updateBlock ( );
     },
 
     removeBlock ( index ) {
@@ -228,8 +296,7 @@ export default {
 
       this.blockParams.splice(index, 1)
       this.chosenBlocks.splice(index, 1)
-      
-      this.appendQueryToRoute()
+      this.updateBlock ( );
     },
 
     updateParam ( payload ) {
@@ -244,13 +311,25 @@ export default {
           return Object.keys(v).length > 0
         }).map(([k,v]) => ({[k]:v}))
       )
-      
-      this.appendQueryToRoute()
+      this.updateBlock ( );
+    },
+
+    updateBlock ( ) {
+      this.$store.dispatch('updateProcessor',
+        {
+          _id: this.id,
+          name: this.name,
+          description: this.description,
+          blocks: this.chosenBlocks,
+          params: this.blockParams,
+        }
+      )
     },
 
     async loadBlocks ( ) {
       let lambdas = this.$store.state.blocks
 
+      this.blocks.splice(0, this.blocks.length)
       for(let i = 0; i < lambdas.length; i++)
       {
         await Axios({
@@ -269,73 +348,35 @@ export default {
       this.blocks.sort((x, y) => (x.name > y.name) ? 1 : -1)
       console.log( 'loaded blocks' )
     },
-
-    fetchBlocksFromRoute( ) {
-      if ( this.$route.query.blocks ) {
-        let blocks = atob(this.$route.query.blocks).split( ',' )
-        blocks.forEach(block => {
-          let match = this.blocks.filter(x => x.function == block)[0]
-          if (match != null)
-            this.chosenBlocks.push( match )
-        })
-      }
-    },
-
-    fetchParamsFromRoute( ) {
-      for (let i = 0; i < this.chosenBlocks.length; i++)
-      {
-        if (this.$route.query['params_' + i.toString()])
-          this.blockParams.push(Object.assign({}, ...
-            Object.entries(JSON.parse(atob(this.$route.query['params_' + i.toString()]))).filter(([k,v]) => {
-              if (typeof v == 'boolean')
-                return v
-              
-              return Object.keys(v).length > 0
-            }).map(([k,v]) => ({[k]:v}))
-          ))
-        else
-          this.blockParams.push({})
-      }
-    },
-
-    appendQueryToRoute( ) {
-      if (this.isLoading) return
-
-      let query = { }
-
-      let blocks = this.chosenBlocks.map(x => x.function).join( ',' )
-      if ( blocks !== '' )
-        query['blocks'] = btoa(blocks)
-      
-      for (let i = 0; i < this.blockParams.length; i++)
-      {
-        if (this.blockParams.length > i && Object.keys(this.blockParams[i]).length > 0)
-        {
-          let param = JSON.stringify(this.blockParams[i])
-          query['params_' + i.toString()] = btoa(param)
-        }
-      }
-
-      if ( Object.keys(query).length > 0 )
-        this.$router.replace( { name: 'processor', query: query } )
-      else this.$router.replace( { name: 'processor' } )
-    },
   },
-
-  async mounted( ) {
+  async activated( ) {
     this.isLoading = true;
 
     await this.loadBlocks()
 
-    this.fetchBlocksFromRoute()
-    this.fetchParamsFromRoute()
+    this.id = this.$route.params.processorId
+
+    if (this.id == 'import')
+    {
+      this.processor = await this.$store.dispatch('createProcessor', JSON.parse(atob(this.$route.query.processor)) )
+      this.id = this.processor._id
+      this.$router.replace( `${this.id}` )
+    }
+    else
+    {
+      this.processor = await this.$store.dispatch('getProcessor', { _id: this.id })
+    }
+
+    console.log( 'activated' )
 
     this.isLoading = false;
-
-    this.appendQueryToRoute()
-
-    console.log( 'mounted' )
-  }
+  },
+  deactivated( ) {
+    this.blockStatus.splice(0, this.blockStatus.length) 
+    this.blockOutput.splice(0, this.blockOutput.length) 
+    
+    console.log( 'de-activated' )
+  },
 }
 </script>
 <style scoped lang='scss'>
