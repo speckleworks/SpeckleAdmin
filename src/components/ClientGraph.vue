@@ -52,33 +52,13 @@
       </v-toolbar>
 
       <!-- <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex> -->
-    </v-card-text>
-    <v-card-text>
-      <v-layout>
-        <v-flex align-self-center shrink style="width: 250px">
 
-          <!-- <v-card-text  v-if="result">{{test()[0]}}</v-card-text> -->
-          <v-chip label  v-if="result">{{getMin()}}</v-chip>
-        </v-flex >
 
-        <v-flex v-if="result" class="px-3">
-          <v-range-slider
-            
-            v-model="value3"
-            :max="result[0].length-1"
-            :min="0"
-            :step="1"
-            
-            
-          ></v-range-slider>
-        </v-flex>
 
-        <v-flex align-self-center shrink style="width: 250px">
-          <!-- <v-card-text v-if="result">{{test()[1]}}</v-card-text> -->
-          <v-chip label  v-if="result">{{getMax()}}</v-chip>
-          
-        </v-flex>
-      </v-layout>
+       <v-flex xs12 class='pa-5'>
+    <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='dates.length>0'></vue-slider>
+    </v-flex>
+
     </v-card-text>
     <v-divider></v-divider>
     <div id="appClientGraph">
@@ -90,6 +70,7 @@
         :clientdata="result"
         :clientdatafilter="filteredResult"
         :timeFilter="filteredTime"
+        :dateFilter="dateMinMax"
 
         
       />
@@ -101,60 +82,63 @@
 
 
 <script>
-import ForceDirectedLayout from "./ForceDirectedLayout.vue";
 
+import ForceDirectedLayout from "./ForceDirectedLayout.vue";
+import VueSlider from 'vue-slider-component'
 import axios from "axios";
 import Vue from "vue";
 import AsyncComputed from "vue-async-computed";
 import svgtopng from "save-svg-as-png";
+
 Vue.use(AsyncComputed);
 export default {
   name: "ClientGraph",
   components: {
-    ForceDirectedLayout
+    ForceDirectedLayout,
+    VueSlider
+ 
   },
   props: {
     project: Object
   },
   data: () => ({
-
-    
+    dates: [ ],
+    sliderValue: [ ],
+    lowerIndex: 0,
+    upperIndex: 0,
     toggle_multiple: [1, 2],
     showDocGroups: true,
     redrawToggle: true,
     result: null,
-    value3: null,
+
     sortedNodesByCreationDate: null,
-    //filteredNodesByCreationDate: null,
     svgHeight: 600,
     filteredResult: null,
-    filteredTime: null
+    filteredTime: null,
+    dateMinMax: [ ]
   }),
   computed: {
 
   },
   watch: {
-    value3: function (){
-      // this.timerange =  value3
-      //console.log(this.value3)
-      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
 
 
+    sliderValue: function() {
+      console.log(this.sliderValue.map( d => ( new Date( d ) ).toISOString()))
+
+      this.filteredTime = this.sliderValue.map( d => ( new Date( d ) ).toISOString())
 
 
-
-
-      this.filteredTime = [createdAts[this.value3[0]], createdAts[this.value3[1]]]
-      //this.filteredResult = [filteredNodesByCreationDate, array]
-
-      // this.$data.redrawToggle = false;
-      // setTimeout(() => {
-      //   this.$data.redrawToggle = true;
-      // });
     }
   },
-  methods: {
 
+  methods: {
+    sliderChanged( args ) {
+      console.log( args )
+      let ind = this.$refs.timeSlider.getIndex( )
+      this.lowerIndex = ind[ 0 ]
+      this.upperIndex = ind[ 1 ]
+    },
     getMin(){
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[0]]
@@ -319,50 +303,7 @@ export default {
         }
       }
       console.log(nodes);
-      //
-      //   nodes.sort(function(a, b) {
-      //     return a.createdAt < b.createdAt
-      //       ? -1
-      //       : a.createdAt > b.createdAt
-      //       ? 1
-      //       : 0;
-      //   });
 
-      //   var placeholder_0 = nodes;
-      //   var placeholder_1 = streamLinks;
-      //   var links = [];
-      //   for (let i = 0; i < placeholder_1.length; i++) {
-      //     if (placeholder_1[i].action === "sending") {
-      //       let source = placeholder_0
-      //         .map(function(e) {
-      //           if (e.type === "Client") {
-      //             return e._id;
-      //           }
-      //         })
-      //         .indexOf(placeholder_1[i].source);
-      //       let target = placeholder_0
-      //         .map(function(e) {
-      //           return e._id;
-      //         })
-      //         .indexOf(placeholder_1[i].target);
-      //       links.push({ source, target, type: `sending`, display: true });
-      //     }
-      //     if (placeholder_1[i].action === "receiving") {
-      //       let source = placeholder_0
-      //         .map(function(e) {
-      //           return e._id;
-      //         })
-      //         .indexOf(placeholder_1[i].source);
-      //       let target = placeholder_0
-      //         .map(function(e) {
-      //           if (e.type === "Client") {
-      //             return e._id;
-      //           }
-      //         })
-      //         .indexOf(placeholder_1[i].target);
-      //       links.push({ source, target, type: `receiving`, display: true });
-      //     }
-      //   }
       this.sortedNodesByCreationDate = nodes
       this.sortedNodesByCreationDate.sort(function(a, b) {
         return a.createdAt < b.createdAt
@@ -372,20 +313,38 @@ export default {
           : 0;
       })
 
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt)
+
+
+
       this.result = [nodes, streamLinks];
-      this.value3 = [0,this.result[0].length-1]
-      //this.value3 = [0,6]
+      //this.value3 = [0,this.result[0].length-1]
+      this.dates = createdAts;
+      //console.log(createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en', { minimumFractionDigits: 10 } ) ))
+      //this.dates = createdAts;
+      this.sliderValue = [this.dates[0], this.dates[ this.dates.length - 1 ] ]
+      this.lowerIndex = 0
+      this.upperIndex = this.dates.length - 1
       return [nodes, streamLinks];
+      
     }
   }
 };
 </script>
 
-<style>
+<style lang='scss'>
 #appClientGraph {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   margin-top: 30px;
+}
+.vue-slider-piecewise {
+  z-index: 100 !important;
+  pointer-events: none;
+}
+
+.vue-slider-piecewise-item {
+  z-index: 100 !important;
 }
 </style>

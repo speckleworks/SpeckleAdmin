@@ -42,7 +42,7 @@
     "uuid": "^3.3.2",
     "vue-async-computed": "^3.7.0",
     "vue-json-pretty": "^1.6.0",
-    "vue-slider-component": "^2.8.3",
+    "vue-slider-component": "^2.8.16",
     "vue-template-compiler": "^2.6.10",
     "vue-timeago": "^5.0.0",
     "vue-tweet-embed": "^2.2.1",

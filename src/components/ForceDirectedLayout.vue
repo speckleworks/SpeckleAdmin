@@ -13,6 +13,7 @@
   </div>
 </template>
 
+<script src="./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js"></script>
 
 <script>
 import * as d3 from "d3";
@@ -25,6 +26,7 @@ export default {
     showDocGroups: Array,
     clientdatafilter: Array,
     timeFilter: Array,
+    dateFilter: Array,
  
   },
 
@@ -34,6 +36,9 @@ export default {
       console.log('ooups')
       console.log(this.timeFilter)
     },
+    dateFilter: function(){ 
+      console.log('lol')
+    },
     timeFilter: function (){
 
       this.checkTimeStampsAtNodes("#circleSender")
@@ -42,9 +47,9 @@ export default {
       this.checkTimeStampsAtNodes("#text")
       this.checkTimeStampsAtLinks("#pathLink")
 
-      var myHull = document.querySelector("#hullDoc")
-      myHull.style.display = "none"
-      myHull.innerHTML = "";
+      // var myHull = document.querySelector("#hullDoc")
+      // myHull.style.display = "none"
+      // myHull.innerHTML = "";
       
 
     },
