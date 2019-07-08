@@ -193,16 +193,16 @@ export default {
         o.streams = [ this.requestBuckets[ 0 ].streamId ]
 
         if ( layer && layer.properties ) {
-          o.color = { hex: '#B3B3B3', a: 0.65 }
+          o.color = { hex: '#909090', a: 0.65 }
           o.properties.layer_guid = layer.guid ? layer.guid : 'no layer guid'
           o.properties.layer_name = layer.name
         } else if ( layer ) {
           o.properties.layer_guid = layer.guid
           o.properties.layer_name = layer.name
-          o.color = { hex: '#B3B3B3', a: 0.65 }
+          o.color = { hex: '#909090', a: 0.65 }
         } else {
           o.properties.layer_name = 'no layer'
-          o.color = { hex: '#B3B3B3', a: 0.65 }
+          o.color = { hex: '#909090', a: 0.65 }
         }
 
       } )
