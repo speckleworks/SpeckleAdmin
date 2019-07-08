@@ -24,15 +24,35 @@ export default {
     svgHeight: Number,
     showDocGroups: Array,
     clientdatafilter: Array,
+    timeFilter: Array,
+ 
   },
 
   watch: {
+
     clientdatafilter: function (){
       console.log('ooups')
-    }
+      console.log(this.timeFilter)
+    },
+    timeFilter: function (){
+
+      this.checkTimeStampsAtNodes("#circleSender")
+      this.checkTimeStampsAtNodes("#circleReceiver")
+      this.checkTimeStampsAtNodes("#rectStream")
+      this.checkTimeStampsAtNodes("#text")
+      this.checkTimeStampsAtLinks("#pathLink")
+
+      var myHull = document.querySelector("#hullDoc")
+      myHull.style.display = "none"
+      myHull.innerHTML = "";
+      
+
+    },
+
   },
 
   data: () => ({
+      
       force: null,
       svgWidth: document.getElementById("appClientGraph").offsetWidth,
       menuStream: [
@@ -95,6 +115,30 @@ export default {
   }),
 
   methods: {
+
+    checkTimeStampsAtLinks(id){
+      var context = this
+      Array.from(document.querySelector(id).children).forEach(function(node) {
+          if((node.getAttribute("source_timestamp") >= context.timeFilter[0] && node.getAttribute("source_timestamp") <= context.timeFilter[1]) &&
+          (node.getAttribute("target_timestamp") >= context.timeFilter[0] && node.getAttribute("target_timestamp") <= context.timeFilter[1])
+          ){
+              node.style.display = "block"
+          }else{
+              node.style.display = "none"
+          }
+      });
+    },
+    checkTimeStampsAtNodes(id){
+      var context = this
+      Array.from(document.querySelector(id).children).forEach(function(node) {
+          if(node.getAttribute("timestamp") >= context.timeFilter[0] && node.getAttribute("timestamp") <= context.timeFilter[1]){
+              node.style.display = "block"
+          }else{
+              node.style.display = "none"
+          }
+      });
+
+    },
     contextMenu(type, menu, openCallback) {
       // create the div element that will hold the context menu
       d3.selectAll(".d3-context-menu")
@@ -154,11 +198,9 @@ export default {
 
     
     drawGraph() {
-      console.log(this.clientdatafilter)
-      console.log(this.clientdata)
-      //let result = await this.init( )
-      var _nodes = this.clientdatafilter[0];
-      var links = this.clientdatafilter[1];
+
+      var _nodes = this.clientdata[0];
+      var links = this.clientdata[1];
 
       // Sorts all nodes by creation timestamps
       _nodes.sort(function(a, b) {
@@ -211,6 +253,7 @@ export default {
 
       let clientNodes = _nodes.filter(data => data.type == "Client");
       var parentGroups = this.groupBy(clientNodes, "owner");
+      console.log(parentGroups)
       for (var property in parentGroups) {
         var parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
@@ -340,6 +383,7 @@ export default {
         .enter()
         .append("path")
         .attr("class", "subhullDoc")
+
         .on("mouseover", function(d) {
           divDoc.style("opacity", 0.8);
           divDoc
@@ -392,6 +436,8 @@ export default {
         //.data(['sending', 'receiving'])
         .enter()
         .append("svg:marker")
+                .attr("source_timestamp", data => data.source.createdAt)
+        .attr("target_timestamp", data => data.target.createdAt)
         .attr("id", data => data.type)
         .attr("viewBox", "0 -5 10 10")
 
@@ -408,12 +454,12 @@ export default {
 
         .attr("refY", 0)
         .attr("markerWidth", 7)
-
         .attr("markerHeight", 12)
         .attr("orient", "auto")
         .attr("fill-opacity", 1)
         //.attr("fill", data => colour(data.target.index))
         .append("svg:path")
+
         .attr("d", "M0,-5L10,0L0,5");
 
       var path = svg
@@ -422,9 +468,13 @@ export default {
         .data(this.$data.force.links().filter(data => data.display))
         .enter()
         .append("svg:path")
+
+        .attr("source_timestamp", data => data.source.createdAt)
+        .attr("target_timestamp", data => data.target.createdAt)
         .attr("class", function(d) {
           return "link " + d.type;
         })
+        
         .attr("marker-end", function(d) {
           return "url(#" + d.type + ")";
         });
@@ -442,6 +492,7 @@ export default {
         .attr("class", "sender")
         .attr("class", "node")
         .attr("r", 6)
+        .attr("timestamp", function(d) {return d.createdAt})
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
@@ -473,6 +524,7 @@ export default {
         .attr("class", "receiver")
         .attr("class", "node")
         .attr("r", 6)
+        .attr("timestamp", function(d) {return d.createdAt})
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
@@ -509,6 +561,7 @@ export default {
         .attr("height", rectHeight)
         .attr("rx", 3)
         .attr("ry", 3)
+        .attr("timestamp", function(d) {return d.createdAt})
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
@@ -519,13 +572,15 @@ export default {
         .selectAll("g")
         .data(this.$data.force.nodes())
         .enter()
-        .append("svg:g");
+        .append("svg:g")
+        .attr("timestamp", function(d) {return d.createdAt});
 
       text
         .append("svg:text")
         .attr("x", 8)
         .attr("y", ".31em")
         .attr("class", "shadow")
+        
         .text(function(d) {
           return d.name;
         });
@@ -534,6 +589,7 @@ export default {
         .append("svg:text")
         .attr("x", 8)
         .attr("y", ".31em")
+        
         .text(function(d) {
           return d.name;
         });
@@ -679,6 +735,7 @@ path.link.resolved {
 rect {
   cursor: pointer;
   transform: "translate(50,50)";
+  
 }
 
 text {
@@ -745,6 +802,7 @@ text.shadow {
   border-width: 2px;
   border-radius: 8px;
   pointer-events: none;
+  
 }
 
 .tooltipOwner {

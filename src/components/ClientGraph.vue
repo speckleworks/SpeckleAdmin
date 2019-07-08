@@ -89,6 +89,8 @@
         :showDocGroups="toggle_multiple"
         :clientdata="result"
         :clientdatafilter="filteredResult"
+        :timeFilter="filteredTime"
+
         
       />
     </div>
@@ -125,46 +127,30 @@ export default {
     sortedNodesByCreationDate: null,
     //filteredNodesByCreationDate: null,
     svgHeight: 600,
-    filteredResult: null
+    filteredResult: null,
+    filteredTime: null
   }),
   computed: {
 
   },
   watch: {
     value3: function (){
+      // this.timerange =  value3
+      //console.log(this.value3)
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
-      let filteredNodesByCreationDate = this.result[0].filter((d) => { 
-        return d.createdAt >= createdAts[this.value3[0]] && 
-          d.createdAt <= createdAts[this.value3[1]];
-      });
-      let filteredLinksByCreationDate= this.result[1].filter((d) => { 
-        return d
-      });
 
 
-      let tempp = []
-
-      var collectedIDs = []
-      for (var j = 0; j < filteredNodesByCreationDate.length; j++) {
-        collectedIDs.push(filteredNodesByCreationDate[j]._id)
-      }
-
-      for (var i = 0; i < this.result[1].length; i++) {
-          if(collectedIDs.includes(this.result[1][i].source) && collectedIDs.includes(this.result[1][i].target)){
-            tempp.push(this.result[1][i])
-          }else{
-          }
-      }
-      
-      let array = Array.from(new Set(tempp));
 
 
-      this.filteredResult = [filteredNodesByCreationDate, array]
-      //console.log(this.filteredResult)
-      this.$data.redrawToggle = false;
-      setTimeout(() => {
-        this.$data.redrawToggle = true;
-      });
+
+
+      this.filteredTime = [createdAts[this.value3[0]], createdAts[this.value3[1]]]
+      //this.filteredResult = [filteredNodesByCreationDate, array]
+
+      // this.$data.redrawToggle = false;
+      // setTimeout(() => {
+      //   this.$data.redrawToggle = true;
+      // });
     }
   },
   methods: {
