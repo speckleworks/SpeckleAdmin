@@ -63,7 +63,7 @@ class MaterialManager {
       color: new THREE.Color( color.hex ),
       linewidth: 1,
       opacity: color.a,
-      vertexColors: THREE.VertexColors
+      transparent: true
     } )
   }
 

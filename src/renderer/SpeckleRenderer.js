@@ -300,7 +300,10 @@ export default class SpeckleRenderer extends EE {
           // if there was a pre-exsiting hovered object
           // unhover it first
           if ( this.hoveredObject ) {
-            this.hoveredObject.userData.selected ? this.hoveredObject.material.color.copy( this.selectColor ) : this.hoveredObject.material.color.copy( this.hoveredObject.material.__preHoverColor )
+            this.hoveredObject.userData.selected ?
+            this.hoveredObject.material.color.copy( this.selectColor ) :
+            this.hoveredObject.material.color.copy( this.hoveredObject.material.__preHoverColor )
+
             this.hoveredObject.userData.hovered = false
           }
           this.hoveredObject = intersects[ 0 ].object
