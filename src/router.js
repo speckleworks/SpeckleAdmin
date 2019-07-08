@@ -91,6 +91,25 @@ let myRouter = new Router( {
       name: 'feedback',
       component: ( ) => import( './views/Feedback.vue' ),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: ( ) => import( './views/Admin.vue' ),
+      meta: { requiresAuth: true },
+      children: [ {
+        name: 'admin users',
+        path: 'users',
+        component: ( ) => import( './views/AdminUsers.vue' )
+      }, {
+        name: 'admin streams',
+        path: 'streams',
+        component: ( ) => import( './views/AdminStreams.vue' )
+      }, {
+        name: 'admin projects',
+        path: 'projects',
+        component: ( ) => import( './views/AdminProjects.vue' )
+      } ]
     }
   ],
   // scrollBehavior( to, from, savedPosition ) {

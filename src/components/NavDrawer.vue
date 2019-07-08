@@ -37,7 +37,7 @@
           <v-list-tile-sub-title class='font-weight-light caption'>The good old recycle bin.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile v-if='$store.state.user.role==="admin"'>
+      <v-list-tile v-if='$store.state.user.role==="admin"' to='/admin'>
         <v-list-tile-action>
           <v-icon>settings</v-icon>
         </v-list-tile-action>
