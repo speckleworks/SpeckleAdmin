@@ -6,6 +6,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Upload Speckle Objects",
+        description: "Uploads and updates the Speckle objects in the server.",
         icon: "send",
         allowBucketing: true,
         parameters : [ ],
@@ -66,7 +67,7 @@ function createObjects( baseUrl, objects ) {
     Axios({
       method: 'POST',
       baseURL: baseUrl,
-      url: `objects`,
+      url: `objects/derive`,
       data: objects,
     })
       .then( res => resolve( res.data.resources ) )

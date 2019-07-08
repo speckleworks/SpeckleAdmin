@@ -4,17 +4,35 @@
       <v-icon class="mr-2">
         {{block.icon ? block.icon : 'code'}}
       </v-icon>
-      <span class='title font-weight-light'>
+      <span class='title font-weight-light mr-2'>
         {{ block.name }}
       </span>
+      <v-dialog
+        max-width="500">
+        <template v-slot:activator="{ on }">
+          <v-btn round small depressed v-on="on">
+            <!-- <v-icon>help_outline</v-icon> -->
+            <span>help</span>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class='font-weight-light'>Description</span>
+          </v-card-title>
+          <v-card-text>
+            {{ block.description }}
+          </v-card-text>
+        </v-card>
+      </v-dialog>
       <v-spacer></v-spacer>
       <span>
         <v-dialog
           v-if="output != null"
           max-width="500">
           <template v-slot:activator="{ on }">
-            <v-btn fab small dark depressed v-on="on" :color="status == 'success' ? 'green' : 'red'">
-              <v-icon>{{status == "success" ? "check" : "warning"}}</v-icon>
+            <v-btn round small dark depressed v-on="on" :color="status == 'success' ? 'green' : 'red'">
+              <v-icon>{{status == "success" ? "check" : "stop"}}</v-icon>
+              <span class="mx-2">view output</span>
             </v-btn>
           </template>
           <v-card>
@@ -34,13 +52,14 @@
         </v-btn>
       </span>
     </v-card-title>
+    <v-divider class='mx-0 my-0'></v-divider>
     <v-card-text v-if="this.block.parameters.length > 0">
       <v-layout row wrap v-if="this.block.parameters.length > 0">
         <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>
           <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
           </v-combobox>
         </v-flex>
-        <v-flex xs12 sm6 md3  v-for='param in stringParams' :key='param.name'>
+        <v-flex xs12 sm6 md3 v-for='param in stringParams' :key='param.name'>
           <v-text-field :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
           </v-text-field>
         </v-flex>
@@ -50,7 +69,7 @@
         </v-flex>
         <v-flex xs12 sm12 md12 v-for='param in objectarrayParams' :key='param.name'>
           <v-toolbar>
-          <v-toolbar-title>{{param.name}}</v-toolbar-title>
+          <v-toolbar-title class='font-weight-light'>{{param.name}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-dialog :persistent='true' v-model="displayDialog[param.name]" max-width='300'>
             <template v-slot:activator="{ on }">

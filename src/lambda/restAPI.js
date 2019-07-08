@@ -1,7 +1,6 @@
 import Axios from 'axios'
 import get from 'lodash.get'
 import set from 'lodash.set'
-import md5 from 'md5'
 
 exports.handler = async (event, context, callback) => {
   if (event.httpMethod == 'GET') {
@@ -9,6 +8,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "REST API Result Embedder",
+        description: "Embeds the results of a REST API call into each object. Assumes that the REST API accepts batch (array) inputs.",
         icon: "swap_horiz",
         allowBucketing: true,
         parameters : [
@@ -119,8 +119,7 @@ exports.handler = async (event, context, callback) => {
       )
     }
 
-    delete outputObj._id
-    outputObj.hash = md5(JSON.stringify(outputObj))
+    delete outputObj.hash
 
     output.push(outputObj)
   }

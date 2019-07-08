@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build && netlify-lambda build ./src/lambda",
-    "serve-lambda": "netlify-lambda serve ./src/lambda",
-    "dev-all": "vue-cli-service serve & netlify-lambda serve ./src/lambda"
+    "build": "vue-cli-service build && netlify-lambda build ./src/lambda -t 120",
+    "serve-lambda": "netlify-lambda serve ./src/lambda -t 120",
+    "dev-all": "vue-cli-service serve & netlify-lambda serve ./src/lambda -t 120"
   },
   "dependencies": {
     "lodash.set": "^4.3.2",

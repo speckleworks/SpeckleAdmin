@@ -6,6 +6,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Filter",
+        description: "Filters an array of objects by performing a string comparison of the paths against the criteria.",
         icon: "filter_list",
         allowBucketing: true,
         parameters : [

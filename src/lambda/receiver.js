@@ -6,6 +6,7 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Speckle Stream Receiver",
+        description: "Gets objects from the specified streams using the queries given. It is heavily recommended that you extract only the necessary fields. If no fields are specified, all fields will be obtained.",
         icon: "cloud_download",
         allowBucketing: false,
         parameters : [
@@ -18,7 +19,7 @@ exports.handler = async (event, context, callback) => {
             type: "array",
           },
           {
-            name: "filters",
+            name: "queries",
             type: "objectarray",
             headers: ["path", "criteria"]
           }
@@ -65,14 +66,14 @@ exports.handler = async (event, context, callback) => {
   for ( let i = 0; i < objectIds.length; i++ ) {
     bucket.push( objectIds[ i ] )
     if ( i % maxReq === 0 && i !== 0 ) {
-      let objects = await getObjects( baseUrl, bucket, parameters.fields, parameters.filters )
+      let objects = await getObjects( baseUrl, bucket, parameters.fields, parameters.queries )
       streamObjects.push(...objects)
       bucket = [ ]
     }
   }
 
   if ( bucket.length !== 0 ) {
-    let objects = await getObjects( baseUrl, bucket, parameters.fields, parameters.filters )
+    let objects = await getObjects( baseUrl, bucket, parameters.fields, parameters.queries )
     streamObjects.push(...objects)
     bucket = [ ]
   }
@@ -101,14 +102,14 @@ function getStreamObjectIds( baseUrl, streamId )
   })
 }
 
-function getObjects( baseUrl, objectIds, fields, filters )
+function getObjects( baseUrl, objectIds, fields, queries )
 {
   var url = `objects/getbulk`//?base64,rawData,canRead,canWrite,children,anonymousComments,name`
 
   var query = { }
 
-  if (filters != null && filters.length > 0)
-    filters.forEach(q => {
+  if (queries != null && queries.length > 0)
+    queries.forEach(q => {
       if (query.hasOwnProperty(q.path))
         query[q.path] += ',' + q.criteria
       else
