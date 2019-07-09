@@ -160,7 +160,20 @@ export default {
       return this.block.parameters.filter(p => p.type == 'objectarray')
     },
     responseObject() {
-      return this.removeArraysRecursive( this.output )
+      if (Object.keys(this.output).length < 3)
+        return this.removeArraysRecursive( this.output )
+      else
+      {
+        let bar = {}
+        for ( let key in this.output ) {
+          bar[key] = this.output[key]
+
+          if (Object.keys(bar).length >= 3)
+            break
+        }
+        bar['_hidden'] = `... (${this.output.length - 3} more objects)`
+        return this.removeArraysRecursive( bar )
+      }
     }
   },
   data( ) {

@@ -70,7 +70,7 @@
           <v-flex xs12>
             <v-select
               return-object
-              :items="lambdas"
+              :items="$store.state.lambdas"
               v-on:input="addBlock"
               label="Add new block">
               <template slot="selection">
@@ -109,9 +109,6 @@ export default {
     DetailDescription,
   },
   computed: {
-    lambdas: function() {
-      return this.$store.state.lambdas
-    },
     shareLink: function() {
       let copy = Object.assign({}, this.processor)
 
