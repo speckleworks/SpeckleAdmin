@@ -801,25 +801,27 @@ export default new Vuex.Store( {
     } ),
 
     // processors
-    loadLambdas: ( context ) => new Promise( async ( resolve, reject ) => {
-      for(let i = 0; i < context.state.blocks.length; i++)
-      {
-        await Axios({
-          method: 'GET',
-          url: `.netlify/functions/${context.state.blocks[i]}`,
-          baseURL: location.protocol + '//' + location.host,
-        })
-          .then( res => {
-            var data = res.data
-            data.function = context.state.blocks[i]
-            context.state.lambdas.push(data)
-          } ) 
-          .catch( err => { return reject( err ) } )
-      }
-      
-      context.state.lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
-      return resolve ( )
-    }),
+    loadLambdas ( context ) {
+      return new Promise( async ( resolve, reject ) => {
+        for(let i = 0; i < context.state.blocks.length; i++)
+        {
+          await Axios({
+            method: 'GET',
+            url: `.netlify/functions/${context.state.blocks[i]}`,
+            baseURL: location.protocol + '//' + location.host,
+          })
+            .then( res => {
+              var data = res.data
+              data.function = context.state.blocks[i]
+              context.state.lambdas.push(data)
+            } ) 
+            .catch( err => { return reject( err ) } )
+        }
+        
+        context.state.lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
+        return resolve ( )
+      }) 
+    },
     getProcessor( context, props ) {
       var processor = JSON.parse(window.localStorage.getItem("processor_" + props._id))
 
