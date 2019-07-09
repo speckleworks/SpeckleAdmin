@@ -1,54 +1,68 @@
 <template>
   <v-container grid-list-xl>
     <div style='position: absolute; top:0; left: 0; width: 100%;'>
-      <v-progress-linear :indeterminate="true" v-show='isLoading' height='2' class='ma-0'></v-progress-linear>
+      <v-progress-linear :indeterminate="true" v-show='!processor' height='2' class='ma-0'></v-progress-linear>
     </div>
-    <v-card xs12 sm12 md12 class="my-5" v-if="!isLoading">
-      <v-card-title>
-        <v-flex xs12 sm12 md12>
-          <v-text-field v-model="name" @change='updateBlock' class="title font-light-weight mt-4">
-          </v-text-field>
-        </v-flex>
-      </v-card-title>
-      <v-card-text>
-        <v-flex xs12 sm12 md12>
-          <v-textarea v-model="description" @change='updateBlock' class="font-light-weight">
-          </v-textarea>
-        </v-flex>
-      </v-card-text>
-      <v-card-actions>
-        <v-dialog
-          max-width="500">
-          <template v-slot:activator="{ on }">
-            <v-btn round small depressed v-on="on">
-              <v-icon>share</v-icon>
-              <span class="mx-2">share</span>
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class='font-weight-light title'>
-                Share link
-              </span>
-            </v-card-title>
-            <v-card-text>
-              <v-text-field :readonly="true" v-model="shareLink"></v-text-field>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
-    </v-card>
-    <v-layout row wrap v-if="!isLoading">
+    <v-layout row wrap v-if="processor">
+      <v-flex xs12>
+        <v-card class="pa-3">
+          <v-layout row wrap>
+            <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
+              <editable-span :text='processor.name' @update='updateName'></editable-span>
+            </v-flex>
+            <v-flex xs12 class='ma-0 py-0 mb-2'>
+              <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' v-model="processor.tags" :items='processor.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+                <template v-slot:no-data>processor has no tags.</template>
+              </v-combobox>
+            </v-flex>
+          </v-layout>
+          <v-card-actions>
+            <v-dialog
+              max-width="500">
+              <template v-slot:activator="{ on }">
+                <v-btn round small depressed v-on="on">
+                  <v-icon>share</v-icon>
+                  <span class="mx-2">share</span>
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title>
+                  <span class='font-weight-light'>
+                    Share link
+                  </span>
+                </v-card-title>
+                <v-card-text>
+                  <v-text-field :readonly="true" v-model="shareLink" class='font-weight-light'></v-text-field>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+      <v-flex xs12>
+        <v-card class="my-4">
+          <detail-description :resource='processor'></detail-description>
+        </v-card>
+      </v-flex>
       <v-flex>
         <v-card>
+          <v-flex class="pa-4">
+            <v-icon class="mr-2">
+              code
+            </v-icon>
+            <span class='title font-weight-light mr-2'>
+              Processor
+            </span>
+          </v-flex>
+          <v-divider></v-divider>
           <template>
-            <v-flex xs12 ma-0 pa-0 v-for='(block, index) in chosenBlocks' :key='index'>
+            <v-flex xs12 ma-0 pa-0 v-for='(block, index) in processor.blocks' :key='index'>
               <processor-block
                 :index='index'
                 :block='block'
                 :output='blockOutput[index]'
                 :status='blockStatus[index]'
-                :params='blockParams[index]'
+                :params='processor.params[index]'
                 v-on:remove-block="removeBlock"
                 v-on:update-param="updateParam"/>
             </v-flex>
@@ -56,17 +70,17 @@
           <v-flex xs12>
             <v-select
               return-object
-              :items="blocks"
+              :items="lambdas"
               v-on:input="addBlock"
               label="Add new block">
               <template slot="selection">
                 {{null}}
               </template>
-              <template slot="item" slot-scope="blocks">
+              <template slot="item" slot-scope="lambdas">
                 <v-icon class="mr-2">
-                  {{blocks.item.icon ? blocks.item.icon : 'code'}}
+                  {{lambdas.item.icon ? lambdas.item.icon : 'code'}}
                 </v-icon>
-                {{blocks.item.name}}
+                {{lambdas.item.name}}
               </template>
             </v-select>
           </v-flex>
@@ -81,52 +95,38 @@
   </v-container>
 </template>
 <script>
+
+import debounce from 'lodash.debounce'
 import ProcessorBlock from '../components/ProcessorBlock.vue'
+import DetailDescription from '../components/DetailDescription.vue'
+
 import Axios from 'axios'
 
 export default {
   name: 'ProcessorView',
   components: {
     ProcessorBlock,
+    DetailDescription,
   },
   computed: {
-    name: {
-      get: function() {
-        return this.processor.name ? this.processor.name : ""
-      },
-      set: function(val) {
-        this.processor.name = val
-      }
-    },
-    description: {
-      get: function() {
-        return this.processor.description ? this.processor.description : ""
-      },
-      set: function(val) {
-        this.processor.description = val
-      }
-    },
-    chosenBlocks: {
-      get: function() {
-        return this.processor.blocks ? this.processor.blocks : []
-      },
-      set: function(val) {
-        this.processor.blocks = val
-      }
-    },
-    blockParams: {
-      get: function() {
-        return this.processor.params ? this.processor.params : []
-      },
-      set: function(val) {
-        this.processor.params = val
-      }
+    lambdas: function() {
+      return this.$store.state.lambdas
     },
     shareLink: function() {
-      return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(this.processor))
+      let copy = Object.assign({}, this.processor)
+
+      delete copy._id
+      delete copy.owner
+      delete copy.private
+      delete copy.canRead
+      delete copy.canWrite
+      delete copy.anonymousComments
+      delete copy.comments
+
+      return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(copy))
     },
     reRun: function () {
-      if (this.blockStatus.length > 0 && this.blockStatus.length == this.chosenBlocks.length)
+      if (this.blockStatus.length > 0 && this.blockStatus.length == this.processor.blocks.length)
         return this.blockStatus[this.blockStatus.length - 1] == 'success'
 
       return false
@@ -135,12 +135,9 @@ export default {
   data( ) {
     return {
       initInput: "",
-      isLoading: false,
-      
-      id: "",
-      processor: Object,
 
-      blocks: [ ],
+      id: "",
+      processor: null,
 
       blockStatus: [ ],
       blockOutput: [ ],
@@ -176,13 +173,13 @@ export default {
         this.blockStatus.splice(i, this.blockStatus.length - i)
       }
 
-      for (; i < this.chosenBlocks.length; i++)
+      for (; i < this.processor.blocks.length; i++)
       {
         this.blockStatus.push('running')
 
-        var params = this.blockParams[i] ? this.blockParams[i] : new Object
+        var params = this.processor.params[i] ? this.processor.params[i] : new Object
         
-        if (this.chosenBlocks[i].allowBucketing && blockInput.constructor === Array)
+        if (this.processor.blocks[i].allowBucketing && blockInput.constructor === Array)
         {
           // Try to chunk the payload if it is an array
           var bucket = [ ],
@@ -197,7 +194,7 @@ export default {
             if ( j % maxReq === 0 && j !== 0 ) {
               try
               {
-                let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
+                let result = await this.callLambda( this.processor.blocks[i].function, bucket, params )
                 if (result.data.constructor === Array)
                   output.push(...result.data)
                 else
@@ -218,7 +215,7 @@ export default {
           if ( bucket.length > 0 ) {
             try
             {
-              let result = await this.callLambda( this.chosenBlocks[i].function, bucket, params )
+              let result = await this.callLambda( this.processor.blocks[i].function, bucket, params )
 
               if (result.data.constructor === Array)
                 output.push(...result.data)
@@ -245,7 +242,7 @@ export default {
         {
           try
           {
-            let result = await this.callLambda( this.chosenBlocks[i].function, blockInput, params )
+            let result = await this.callLambda( this.processor.blocks[i].function, blockInput, params )
             this.blockStatus.pop()
             this.blockStatus.push('success')
             this.blockOutput.push(result.data)
@@ -284,8 +281,8 @@ export default {
     addBlock ( sender ) {
       if (sender != null)
       {
-        this.chosenBlocks.push( sender )
-        this.blockParams.push({})
+        this.processor.blocks.push( sender )
+        this.processor.params.push({})
       }
       this.updateBlock ( );
     },
@@ -294,8 +291,8 @@ export default {
       this.blockOutput.splice(index, this.blockOutput.length - index)
       this.blockStatus.splice(index, this.blockStatus.length - index)
 
-      this.blockParams.splice(index, 1)
-      this.chosenBlocks.splice(index, 1)
+      this.processor.params.splice(index, 1)
+      this.processor.blocks.splice(index, 1)
       this.updateBlock ( );
     },
 
@@ -303,7 +300,7 @@ export default {
       this.blockOutput.splice(payload.index, this.blockOutput.length - payload.index)
       this.blockStatus.splice(payload.index, this.blockStatus.length - payload.index)
 
-      this.blockParams[payload.index] = Object.assign({}, ...
+      this.processor.params[payload.index] = Object.assign({}, ...
         Object.entries(payload.params).filter(([k,v]) => {
           if (typeof v == 'boolean')
             return v
@@ -314,64 +311,71 @@ export default {
       this.updateBlock ( );
     },
 
+    updateName( args ) {
+      this.$store.dispatch( 'updateProcessor', { _id: this.id, name: args.text } )
+    },
+
+    updateTags: debounce( function( e ) {
+      this.$store.dispatch( 'updateProcessor', { _id: this.id, tags: this.processor.tags } )
+    }, 1000 ),
+
     updateBlock ( ) {
       this.$store.dispatch('updateProcessor',
         {
           _id: this.id,
-          name: this.name,
-          description: this.description,
-          blocks: this.chosenBlocks,
-          params: this.blockParams,
+          blocks: this.processor.blocks,
+          params: this.processor.params,
         }
       )
     },
-
-    async loadBlocks ( ) {
-      let lambdas = this.$store.state.blocks
-
-      this.blocks.splice(0, this.blocks.length)
-      for(let i = 0; i < lambdas.length; i++)
-      {
-        await Axios({
-          method: 'GET',
-          url: `.netlify/functions/${lambdas[i]}`,
-          baseURL: location.protocol + '//' + location.host,
-        })
-          .then( res => {
-            var data = res.data
-            data.function = lambdas[i]
-            this.blocks.push(data)
-          } ) 
-          .catch( err => console.log(err) )
-      }
-      
-      this.blocks.sort((x, y) => (x.name > y.name) ? 1 : -1)
-      console.log( 'loaded blocks' )
-    },
   },
-  async activated( ) {
-    this.isLoading = true;
-
-    await this.loadBlocks()
-
+  activated( ) {
     this.id = this.$route.params.processorId
 
     if (this.id == 'import')
     {
-      this.processor = await this.$store.dispatch('createProcessor', JSON.parse(atob(this.$route.query.processor)) )
-      this.id = this.processor._id
-      this.$router.replace( `${this.id}` )
+      var parsed = null
+      try
+      {
+        parsed = JSON.parse(atob(this.$route.query.processor))
+      }
+      catch
+      {
+        console.log( 'failed to import' )
+        this.$router.push( `/processors/` )
+      }
+
+      if (parsed)
+        this.$store.dispatch( 'createProcessor', parsed )
+          .then( res => {
+            this.processor = res
+            this.id = this.processor._id
+            this.$router.replace( `${this.id}` )
+
+            console.log( 'activated' )
+            this.isLoading = false
+          })
+          .catch( err => {
+            console.log( 'failed to import' )
+            this.$router.push( `/processors/` )
+          })
     }
     else
     {
-      this.processor = await this.$store.dispatch('getProcessor', { _id: this.id })
+      this.$store.dispatch('getProcessor', { _id: this.id })
+        .then( res => {
+          if (res == null)
+            this.$router.push( `/processors/` )
+          
+          this.processor = res
+
+          console.log( 'activated' )
+        })
     }
-
-    console.log( 'activated' )
-
-    this.isLoading = false;
   },
   deactivated( ) {
+    this.processor = null
+
     this.blockStatus.splice(0, this.blockStatus.length) 
     this.blockOutput.splice(0, this.blockOutput.length) 
     

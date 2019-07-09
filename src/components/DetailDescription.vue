@@ -2,7 +2,7 @@
   <v-card v-if='resource' class='elevation-0'>
     <v-toolbar class='elevation-0 transparent'>
       <v-icon left small>book</v-icon>
-      <span class='title font-weight-light'>{{isStream ? "Stream" : "Project"}} Description</span>
+      <span class='title font-weight-light'>{{title}} Description</span>
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn flat color='primary' v-if='editDescription===false && canEdit' @click.native='editDescription=true'>Edit</v-btn>
@@ -45,6 +45,11 @@ export default {
     resource: Object,
   },
   computed: {
+    title ( ) {
+      if ( this.isStream ) return "Stream"
+      else if ( this.isProcessor ) return "Processor"
+      else return "Project"
+    },
     compiledDescription( ) {
       return marked( this.resource.description, { sanitize: true } )
     },
@@ -56,6 +61,9 @@ export default {
     },
     isStream( ) {
       return this.resource.hasOwnProperty( 'streamId' )
+    },
+    isProcessor( ) {
+      return this.resource.hasOwnProperty( 'blocks' )
     }
   },
   data( ) {
@@ -68,6 +76,8 @@ export default {
       this.editDescription = false
       if ( this.isStream )
         this.$store.dispatch( 'updateStream', { streamId: this.resource.streamId, description: this.resource.description } )
+      else if ( this.isProcessor )
+        this.$store.dispatch( 'updateProcessor', { _id: this.resource._id, description: this.resource.description } )
       else
         this.$store.dispatch( 'updateProject', { _id: this.resource._id, description: this.resource.description } )
     },

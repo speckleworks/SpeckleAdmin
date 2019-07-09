@@ -1,6 +1,6 @@
 <template>
   <v-container grid-list-xl>
-    <!-- Toolbar for project selection/bulk operations -->
+    <!-- Toolbar for processor selection/bulk operations -->
     <v-toolbar fixed v-if='selectedProcessors.length > 0' style='z-index:100'>
       <v-toolbar-items>
         <v-btn icon color='primary' class='md-raised md-dense md-primary' @click.native='clearSelection'>
@@ -26,7 +26,7 @@
       <v-flex xs12>
         <v-text-field solo clearable label="Search for a processor" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getProcessors' )"></v-text-field>
         <div v-if='searchfilter && searchfilter!==""'>
-          <p class='title font-weight-light my-3 mx-1'>Found {{filteredProcessors.length}} project{{filteredProcessors.length===1?'':'s'}} matching your search criteria.</p>
+          <p class='title font-weight-light my-3 mx-1'>Found {{filteredProcessors.length}} processor{{filteredProcessors.length===1?'':'s'}} matching your search criteria.</p>
         </div>
       </v-flex>
     </v-layout>
@@ -133,6 +133,7 @@ export default {
       this.selectedProcessors.forEach( processor => {
         this.$store.dispatch( 'deleteProcessor', { _id: processor._id } )
       } )
+      this.selectedProcessors.splice( 0, this.selectedProcessors.length )
       this.clearSelection( )
     },
     clearSelection( ) {

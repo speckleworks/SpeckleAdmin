@@ -1,10 +1,10 @@
 <template>
   <v-card ma-0 pa-0 flat>
     <v-card-title>
-      <v-icon class="mr-2">
+      <v-icon small class="mr-2">
         {{block.icon ? block.icon : 'code'}}
       </v-icon>
-      <span class='title font-weight-light mr-2'>
+      <span class='font-weight-light mr-2'>
         {{ block.name }}
       </span>
       <v-dialog
@@ -52,7 +52,7 @@
         </v-btn>
       </span>
     </v-card-title>
-    <v-divider class='mx-0 my-0'></v-divider>
+    <v-divider class='mx-3 my-0'></v-divider>
     <v-card-text v-if="this.block.parameters.length > 0">
       <v-layout row wrap v-if="this.block.parameters.length > 0">
         <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>

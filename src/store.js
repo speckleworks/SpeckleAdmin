@@ -76,6 +76,7 @@ export default new Vuex.Store( {
     // these are the function names for each block from /src/lambda
     // if you want to add your own lambda, add the function/file name to the list to expose it
     blocks: [ "receiver", "filter", "sender", "restAPI", "uploadobjects", "helloworld" ],
+    lambdas: [ ],
     processors: [ ],
   },
   getters: {
@@ -800,6 +801,25 @@ export default new Vuex.Store( {
     } ),
 
     // processors
+    loadLambdas: ( context ) => new Promise( async ( resolve, reject ) => {
+      for(let i = 0; i < context.state.blocks.length; i++)
+      {
+        await Axios({
+          method: 'GET',
+          url: `.netlify/functions/${context.state.blocks[i]}`,
+          baseURL: location.protocol + '//' + location.host,
+        })
+          .then( res => {
+            var data = res.data
+            data.function = context.state.blocks[i]
+            context.state.lambdas.push(data)
+          } ) 
+          .catch( err => { return reject( err ) } )
+      }
+      
+      context.state.lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
+      return resolve ( )
+    }),
     getProcessor( context, props ) {
       var processor = JSON.parse(window.localStorage.getItem("processor_" + props._id))
 
@@ -829,6 +849,8 @@ export default new Vuex.Store( {
       var id = uuid()
       
       var proc = processor ? processor : { name: 'A new speckle processor' }
+      
+      // Always assign new ID
       proc._id = id
 
       if (!proc.hasOwnProperty('description'))
@@ -836,6 +858,22 @@ export default new Vuex.Store( {
       
       if (!proc.hasOwnProperty('tags'))
         proc.tags = [ ]
+        
+      if (!proc.hasOwnProperty('blocks'))
+        proc.blocks = [ ]
+      
+      if (!proc.hasOwnProperty('params'))
+        proc.params = [ ]
+
+      // Properties added for compatibility with other components
+      // as well as for future storage in server
+      proc.owner = context.state.user._id
+      proc.private = false
+      proc.canRead = [ context.state.user._id ]
+      proc.canWrite = [ context.state.user._id ]
+
+      proc.anonymousComments = false
+      proc.comments = []
 
       window.localStorage.setItem(
         "processor_" + id,
