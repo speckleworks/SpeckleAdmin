@@ -41,23 +41,27 @@ export default {
     },
     timeFilter: function (){
 
-      this.checkTimeStampsAtNodes("#circleSender")
-      this.checkTimeStampsAtNodes("#circleReceiver")
-      this.checkTimeStampsAtNodes("#rectStream")
-      this.checkTimeStampsAtNodes("#text")
-      this.checkTimeStampsAtLinks("#pathLink")
-
+      this.updateDisplayNodes("#circleSender")
+      this.updateDisplayNodes("#circleReceiver")
+      this.updateDisplayNodes("#rectStream")
+      this.updateDisplayNodes("#text")
+      this.updateDisplayLinks("#pathLink")
+      this.updateDisplayHull()
+      //
+      
+      
       // var myHull = document.querySelector("#hullDoc")
       // myHull.style.display = "none"
       // myHull.innerHTML = "";
-      
 
     },
 
   },
 
   data: () => ({
-      
+      redrawHull: false,
+      colour: null,
+      groupPath: null,
       force: null,
       svgWidth: document.getElementById("appClientGraph").offsetWidth,
       menuStream: [
@@ -121,7 +125,7 @@ export default {
 
   methods: {
 
-    checkTimeStampsAtLinks(id){
+    updateDisplayLinks(id){
       var context = this
       Array.from(document.querySelector(id).children).forEach(function(node) {
           if((node.getAttribute("source_timestamp") >= context.timeFilter[0] && node.getAttribute("source_timestamp") <= context.timeFilter[1]) &&
@@ -133,7 +137,7 @@ export default {
           }
       });
     },
-    checkTimeStampsAtNodes(id){
+    updateDisplayNodes(id){
       var context = this
       Array.from(document.querySelector(id).children).forEach(function(node) {
           if(node.getAttribute("timestamp") >= context.timeFilter[0] && node.getAttribute("timestamp") <= context.timeFilter[1]){
@@ -144,6 +148,208 @@ export default {
       });
 
     },
+    updateDisplayHull(){
+
+      this.$data.redrawHull = true
+
+      var context = this
+      var filteredNodes = [ ]
+      var filteredClients = this.clientdata[0].filter(data => data.type == "Client")
+      
+      
+      filteredClients.forEach(function(node){
+        
+        if(node.createdAt >= context.timeFilter[0] && node.createdAt <= context.timeFilter[1]){
+          filteredNodes.push(node)
+        }
+      })
+      //console.log(filteredNodes)
+      var filteredGroups = this.groupBy(filteredNodes, "documentGuid");
+
+      
+      var svg = d3.select("#graphLayout")
+
+      svg
+        .select("#hullDoc")
+        .selectAll("path")
+
+        .data(Object.keys(filteredGroups))
+        .enter()
+        .append("path")
+        .attr("class", "subhullDoc")
+              .on("mouseover", function(d) {
+          divDoc.style("opacity", 0.8);
+          divDoc
+            .html(
+              `DocumentGuid: ${d.values[0].documentGuid}<br/>
+            DocumentType: ${d.values[0].documentType}<br/>
+            DocumentName: ${d.values[0].documentName}`
+            )
+
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY - 28 + "px");
+        })
+        .on("mouseout", function(d) {
+          divDoc.style("opacity", 0);
+        });
+
+        
+
+
+      //var originalGroups =  this.groupBy(this.clientdata[0].filter(data => data.type == "Client"), "documentGuid")
+
+
+      console.log(Object.keys(filteredGroups).length, "number of filtered groups")
+      //console.log(Object.keys(originalGroups).length)
+
+      var myHulls = svg
+          .select("#hullDoc")
+          .selectAll("path")
+      console.log(myHulls[0].length, "number of html elements")
+      //console.log(myHulls.length, "number of html elements")
+
+      if(myHulls[0].length > Object.keys(filteredGroups).length){
+        console.log('fuck')
+        for (var i = 0; i < myHulls[0].length; i++) { 
+          if(i > Object.keys(filteredGroups).length-1){
+            console.log(myHulls[0][i])
+            myHulls[0][i].remove()
+          }
+        }
+      }
+      
+
+      var nestedFilteredGroups = d3
+        .nest()
+        .key(function(d) {
+          return d.documentGuid;
+        })
+        .entries(filteredNodes);
+      // console.log(size)
+      // console.log(nestedFilteredGroups)
+
+      // console.log(nestedFilteredGroups)
+      // for (var i = 0; i < nestedFilteredGroups.length; i++) { 
+      //   console.log(nestedFilteredGroups[i].values.length)
+      //   if(nestedFilteredGroups[i].values.length < 1){
+      //     nestedFilteredGroups[i].push(this.clientdata[0][0])
+      //   }
+      // }
+
+      // console.log(nestedFilteredGroups)
+
+      this.$data.force.on("tick", newTick)
+
+    
+
+
+        svg
+          .select("#hullDoc")
+          .selectAll(".subhullDoc")
+        
+          .data(nestedFilteredGroups)
+          .attr("d", context.$data.groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", context.$data.groupPath);
+    var context = this
+    function newTick() {
+
+      
+      
+        svg
+          .selectAll(".node")
+          .attr("stroke", "black")
+          .attr("fill", data =>
+            context.$data.colour(data.index)
+          )
+          .attr("stroke-width", 0);
+        // svg
+        //   .select("#hullOwner")
+        //   .selectAll(".subhullOwner")
+          
+        //   .data(groupOwners)
+        //   .attr("d", groupPath)
+        //   .enter()
+        //   .insert("path")
+        //   .attr("d", groupPath);
+          
+
+    
+
+        svg
+          .select("#hullDoc")
+          .selectAll(".subhullDoc")
+
+          .data(nestedFilteredGroups)
+          .attr("d", context.$data.groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", context.$data.groupPath);
+
+
+        var path = d3.select('#pathLink').selectAll("path")
+
+        path
+          .attr("d", function(d) {
+            var dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
+            //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            return (
+              "M" +
+              d.source.x +
+              "," +
+              d.source.y +
+              "L" +
+              d.target.x +
+              "," +
+              d.target.y
+            );
+          })
+          .attr("stroke", data => context.$data.colour(data.source.index));
+        
+        // svg.selectAll('marker')
+        // .attr('fill', data =>
+        //   this.$data.colour(data.target.index)
+        // );
+
+        var circleSender = svg
+          .select("#circleSender")
+          .selectAll("circle")
+        circleSender.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+
+        var circleReceiver = svg
+          .select("#circleReceiver")
+          .selectAll("circle")
+        circleReceiver.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+
+        var rect = svg
+          .select("#rectStream")
+          .selectAll("rect")
+        rect.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+        var text = svg
+          .select("#text")
+          .selectAll("g")
+
+        text.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
+    }
+    },
+
+    
+
+
+
+
+
     contextMenu(type, menu, openCallback) {
       // create the div element that will hold the context menu
       d3.selectAll(".d3-context-menu")
@@ -271,7 +477,7 @@ export default {
             });
           }
         }
-
+        
         var childGroups = this.groupBy(parGroup, "documentGuid");
         for (var property in childGroups) {
           var childGroup = childGroups[property];
@@ -318,7 +524,7 @@ export default {
         .start();
       var drag = this.$data.force.drag()
           .on("dragstart", dragstart);
-      var colour = d3.scale
+      this.$data.colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
         .interpolate(d3.interpolateHcl)
@@ -342,6 +548,8 @@ export default {
         .enter()
         .append("path")
         .attr("class", "subhullOwner")
+        
+        .on("dblclick", dblclick)
         .on("mouseover", function(d) {
 
           divOwner.style("opacity", 0.8);
@@ -353,10 +561,12 @@ export default {
         })
         .on("mouseout", function(d) {
           divOwner.style("opacity", 0);
-        });
+        })
+        .call(this.$data.force.drag);
       
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
+      
       // for (let i = 0; i < Object.keys(childGroups).length; i++) {
       //   svg
       //     .select("#hull")
@@ -419,7 +629,7 @@ export default {
         })
         .entries(this.$data.force.nodes().filter(data => data.type == "Client"));
 
-      var groupPath = function(d) {
+      this.$data.groupPath = function(d) {
         return (
           "M" +
           d3.geom
@@ -474,6 +684,8 @@ export default {
         .enter()
         .append("svg:path")
 
+
+      path
         .attr("source_timestamp", data => data.source.createdAt)
         .attr("target_timestamp", data => data.target.createdAt)
         .attr("class", function(d) {
@@ -602,37 +814,44 @@ export default {
       //
 
       function dblclick(d) {
+
         d3.select(this).classed("fixed", d.fixed = false);
       }
 
       function dragstart(d) {
+
         d3.select(this).classed("fixed", d.fixed = true);
       }
+
+      var context = this
 
       function tick() {
         svg
           .selectAll(".node")
           .attr("stroke", "black")
           .attr("fill", data =>
-            colour(data.index)
+            context.$data.colour(data.index)
           )
           .attr("stroke-width", 0);
         svg
           .select("#hullOwner")
           .selectAll(".subhullOwner")
+          
           .data(groupOwners)
-          .attr("d", groupPath)
+          .attr("d", context.$data.groupPath)
           .enter()
           .insert("path")
-          .attr("d", groupPath);
+          .attr("d", context.$data.groupPath);
+        //console.log(groupDocs)
         svg
           .select("#hullDoc")
           .selectAll(".subhullDoc")
           .data(groupDocs)
-          .attr("d", groupPath)
+          .attr("d", context.$data.groupPath)
           .enter()
           .insert("path")
-          .attr("d", groupPath);
+          .attr("d", context.$data.groupPath);
+
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
@@ -650,7 +869,7 @@ export default {
               d.target.y
             );
           })
-          .attr("stroke", data => colour(data.source.index));
+          .attr("stroke", data => context.$data.colour(data.source.index));
         //
         // svg.selectAll('marker')
         // .attr('fill', data =>
@@ -675,10 +894,11 @@ export default {
   },
   mounted() {
     this.svgWidth = document.getElementById("clientGraph").offsetWidth,
-    
-  
+
         this.drawGraph();
-  
+
+
+        
   },
   created(){
     

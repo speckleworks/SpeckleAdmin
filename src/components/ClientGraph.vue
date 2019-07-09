@@ -195,18 +195,18 @@ export default {
       var streamLinks = [];
       var nodes = [];
 
-      let resLogin;
-      try {
-        let resLogin = await axios.post(
-          "https://hestia.speckle.works/api/accounts/login",
-          { email: "p.poinet@ucl.ac.uk", password: "0403924199" }
-        );
-        axios.defaults.headers.common["Authorization"] =
-          resLogin.data.resource.token;
-      } catch (err) {
-        console.log(err); // from creation.
-        return;
-      }
+      // let resLogin;
+      // try {
+      //   let resLogin = await axios.post(
+      //     "https://hestia.speckle.works/api/accounts/login",
+      //     { email: "p.poinet@ucl.ac.uk", password: "0403924199" }
+      //   );
+      //   axios.defaults.headers.common["Authorization"] =
+      //     resLogin.data.resource.token;
+      // } catch (err) {
+      //   console.log(err); // from creation.
+      //   return;
+      // }
 
       let resProject;
       try {
