@@ -1,11 +1,33 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12>
-      <div> a table of userss goes here</div>
+      <v-data-table
+        :items='streams'
+        :headers='headers'
+        :loading='isGettingUsersData'
+        v-model="selected"
+        item-key="name"
+        select-all
+      >
+        <template v-slot:items="props">
+          <tr :active="props.selected" @click="props.selected = !props.selected">
+            <td>
+              <v-checkbox
+                :input-value="props.selected"
+                primary
+                hide-details
+              ></v-checkbox>
+            </td>
+            <td>{{ props.item.email }}</td>
+            <td>{{ props.item.name }}</td>
+            <td >{{ props.item.surname }}</td>
+            <td >{{ props.item.company }}</td>
+            <td>{{ props.item.createdAt }}</td>
+            <td>{{ props.item.logins.length }}</td>
+          </tr>
+        </template>
+      </v-data-table>
     </v-flex>
-    <!-- <v-flex xs12>
-      <v-progress-linear :indeterminate="true" v-if='isGettingStreamData'></v-progress-linear>
-    </v-flex> -->
   </v-layout>
 </template>
 <script>
@@ -15,8 +37,6 @@ import Axios from 'axios'
 import uuid from 'uuid/v4'
 import papa from 'papaparse'
 
-import StreamLayer from '../components/StreamLayer.vue'
-
 export default {
   name: 'AdminUsersView',
   components: {
@@ -24,37 +44,42 @@ export default {
   watch: {
   },
   computed: {
+    streams( ) {
+      return this.usersResource
+    },
   },
   data( ) {
     return {
+      usersResource: [],
+      isGettingUsersData: false,
+      selected: [],
+      headers: [
+        { text: 'Email', value: 'email'},
+        { text: 'Name', value: 'name'},
+        { text: 'Surname', value: 'surname' },
+        { text: 'Organization', value: 'organization'},
+        { text: 'Joined', value: 'name'},
+        { text: 'Logins', value: 'logins.length' },
+      ],
     }
   },
   methods: {
-    fetchData( streamId ) {
-      if(!this.onlineEditable) return
-      console.log( `fetching data for ${streamId}` )
-      this.isGettingStreamData = true
-      Axios.get( `streams/${streamId}?fields=layers` )
+    fetchData() {
+      this.isGettingUsersData = true
+      Axios.get( 'accounts/all' )
         .then( res => {
-          this.layers = res.data.resource.layers
-          console.log( this.layers )
-          return Axios.get( `streams/${streamId}/objects?fields=type,value` )
-        } )
-        .then( res => {
-          this.objects = res.data.resources
-          this.$store.commit( 'ADD_DE_STREAM', { streamId: streamId, layers: this.layers, objects: this.objects } )
-          this.isGettingStreamData = false
-
-          console.log( res )
+          this.usersResource = res.data.resource
+          this.isGettingUsersData = false
         } )
         .catch( err => {
-          this.isGettingStreamData = false
+          this.isGettingUsersData = false
           // TODO: Handle error
           console.error( err )
         } )
     },
   },
   mounted( ) {
+    this.fetchData()
   }
 }
 

@@ -94,12 +94,12 @@ let myRouter = new Router( {
     },
     {
       path: '/admin',
-      name: 'admin',
+      name: '',
       component: ( ) => import( './views/Admin.vue' ),
       meta: { requiresAuth: true },
       children: [ {
         name: 'admin users',
-        path: 'users',
+        path: '',
         component: ( ) => import( './views/AdminUsers.vue' )
       }, {
         name: 'admin streams',

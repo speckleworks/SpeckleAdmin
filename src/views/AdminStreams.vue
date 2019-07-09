@@ -3,22 +3,27 @@
     <v-flex xs12>
       <v-data-table
         :items='streams'
+        :headers='headers'
+        :loading='isGettingStreamData'
+        v-model="selected"
+        item-key="name"
+        select-all
       >
-      <template v-slot:items="props">
-        <tr :active="props.selected" @click="props.selected = !props.selected">
-          <td>
-            <v-checkbox
-              :input-value="props.selected"
-              primary
-              hide-details
-            ></v-checkbox>
-          </td>
-          <td>{{ props.item.name }}</td>
-          <td class="text-xs-right">{{ props.item.streamId }}</td>
-          <td class="text-xs-right">{{ props.item.owner }}</td>
-          <td class="text-xs-right">{{ props.item.private }}</td>
-        </tr>
-      </template>
+        <template v-slot:items="props">
+          <tr :active="props.selected" @click="props.selected = !props.selected">
+            <td>
+              <v-checkbox
+                :input-value="props.selected"
+                primary
+                hide-details
+              ></v-checkbox>
+            </td>
+            <td>{{ props.item.name }}</td>
+            <td >{{ props.item.streamId }}</td>
+            <td >{{ props.item.owner }}</td>
+            <td >{{ props.item.private }}</td>
+          </tr>
+        </template>
       </v-data-table>
     </v-flex>
   </v-layout>
@@ -30,8 +35,6 @@ import Axios from 'axios'
 import uuid from 'uuid/v4'
 import papa from 'papaparse'
 
-import StreamLayer from '../components/StreamLayer.vue'
-
 export default {
   name: 'AdminStreamsView',
   components: {
@@ -39,20 +42,32 @@ export default {
   watch: {
   },
   computed: {
+    streams( ) {
+      return this.streamsResource.filter( stream => stream.parent == null && stream.deleted === false ).sort( ( a, b ) => {
+        return new Date( b.updatedAt ) - new Date( a.updatedAt );
+      } )
+    },
+
   },
   data( ) {
     return {
-      streams: [],
-      isGettingStreamData: false
+      streamsResource: [],
+      isGettingStreamData: false,
+      selected: [],
+      headers: [
+        { text: 'Name', value: 'name'},
+        { text: 'Id', value: 'streamdId' },
+        { text: 'Owner', value: 'owner' },
+        { text: 'Private', value: 'private' },
+      ],
     }
   },
   methods: {
     fetchData() {
-      console.log( 'fetching a list of streams' )
       this.isGettingStreamData = true
       Axios.get( 'streams/all' )
         .then( res => {
-          this.streams = res.data.resources
+          this.streamsResource = res.data.resources
           this.isGettingStreamData = false
         } )
         .catch( err => {
