@@ -61,7 +61,7 @@ exports.handler = async (event, context, callback) => {
   objectIds = [...new Set(objectIds)]
 
   let bucket = [ ],
-    maxReq = 50 // magic number; maximum objects to request in a bucket
+    maxReq = 500 // magic number; maximum objects to request in a bucket
 
   for ( let i = 0; i < objectIds.length; i++ ) {
     bucket.push( objectIds[ i ] )
