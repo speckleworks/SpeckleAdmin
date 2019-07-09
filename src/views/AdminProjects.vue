@@ -19,9 +19,14 @@
               ></v-checkbox>
             </td>
             <td>{{ props.item.name }}</td>
-            <td >{{ props.item.streamId }}</td>
             <td >{{ props.item.owner }}</td>
+            <td >{{ props.item.streams.length }}</td>
             <td >{{ props.item.private }}</td>
+            <td >{{ props.item.permissions.canRead.length + 1 }}</td>
+            <td >{{ props.item.permissions.canWrite.length + 1}}</td>
+            <td>
+              <v-btn small color='primary' :to='"/projects/"+props.item._id'>Details</v-btn>
+            </td>
           </tr>
         </template>
       </v-data-table>
@@ -46,6 +51,7 @@ export default {
         return new Date( b.updatedAt ) - new Date( a.updatedAt );
       } )
     },
+    
 
   },
   data( ) {
@@ -55,9 +61,13 @@ export default {
       selected: [],
       headers: [
         { text: 'Name', value: 'name'},
-        { text: 'Id', value: 'streamdId' },
         { text: 'Owner', value: 'owner' },
+        { text: 'Streams', value: 'streams.length'},
         { text: 'Private', value: 'private' },
+        { text: 'Read Access Users:', value: 'permissions.canRead.length'},
+        { text: 'Write Access Users:', value: 'permissions.canWrite.length'},
+        { text: 'Actions', value: ''}
+
       ],
     }
   },
@@ -75,6 +85,18 @@ export default {
           console.error( err )
         } )
     },
+    ownerName(owner){
+      Axios.get( `accounts/${owner}` )
+        .then( res => {
+          console.log(res.data.resource)
+          return res.data.resource.name + " " + res.data.resource.surname
+        } )
+        .catch( err => {
+          // TODO: Handle error
+          console.error( err )
+          return "Coundn't get name"
+        } )
+    }
   },
   mounted( ) {
     this.fetchData()
