@@ -43,8 +43,9 @@
 
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on">
-              <v-icon>gps_fixed</v-icon>
+            <v-btn icon @click="toggleDrag = !toggleDrag" v-model="toggleDrag">
+              <v-icon   v-if="toggleDrag">gps_fixed</v-icon>
+              <v-icon  v-if="!toggleDrag">gps_not_fixed</v-icon>
             </v-btn>
           </template>
           <span>Enable drag</span>
@@ -56,7 +57,7 @@
 
 
        <v-flex xs12 class='pa-5'>
-    <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='dates.length>0'></vue-slider>
+    <vue-slider ref="timeSlider"  :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='dates.length>0'></vue-slider>
     </v-flex>
 
     </v-card-text>
@@ -71,6 +72,7 @@
         :clientdatafilter="filteredResult"
         :timeFilter="filteredTime"
         :dateFilter="dateMinMax"
+        :toggleDrag="toggleDrag"
 
         
       />
@@ -102,6 +104,7 @@ export default {
     project: Object
   },
   data: () => ({
+    toggleDrag: false,
     dates: [ ],
     sliderValue: [ ],
     lowerIndex: 0,
@@ -124,7 +127,7 @@ export default {
 
 
     sliderValue: function() {
-      console.log(this.sliderValue.map( d => ( new Date( d ) ).toISOString()))
+      //console.log(this.sliderValue.map( d => ( new Date( d ) ).toISOString()))
 
       this.filteredTime = this.sliderValue.map( d => ( new Date( d ) ).toISOString())
 
@@ -133,12 +136,7 @@ export default {
   },
 
   methods: {
-    sliderChanged( args ) {
-      console.log( args )
-      let ind = this.$refs.timeSlider.getIndex( )
-      this.lowerIndex = ind[ 0 ]
-      this.upperIndex = ind[ 1 ]
-    },
+
     getMin(){
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[0]]
@@ -147,19 +145,9 @@ export default {
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[1]]
     },
- 
     mounted(){
-      
-      
-
-      
-    },
-    updated(){
-      
     },
     saveAsPNG() {
-
-      //saveSvgAsPng.saveSvgAsPng(d3.select('#graphLayout').contentDocument, "diagram.png");
       svgtopng.saveSvgAsPng(
         document.getElementById("graphLayout"),
         "diagram.png",
@@ -174,39 +162,27 @@ export default {
       }, 500);
     },
     AddResizeListener() {
-      var doit;
-      window.addEventListener("resize", () => {
-        this.$data.redrawToggle = false;
-        clearTimeout(doit);
-        doit = setTimeout(() => {
-          this.$data.redrawToggle = true;
-          this.$asyncComputed.myResolvedValue.update();
-        }, 500);
-      });
+
+
+          //redraw the chart 300ms after the window has been resized
+          window.addEventListener("resize", () => {
+            this.$data.redrawToggle = false;
+            setTimeout(() => {
+              this.$data.redrawToggle = true;
+            },1500);
+          });
+
+
     }
   },
   updated() {
     this.AddResizeListener();
-
   },
   asyncComputed: {
     async myResolvedValue() {
-      watch: ["fresh"];
+      this.toggleDrag = false
       var streamLinks = [];
       var nodes = [];
-
-      // let resLogin;
-      // try {
-      //   let resLogin = await axios.post(
-      //     "https://hestia.speckle.works/api/accounts/login",
-      //     { email: "p.poinet@ucl.ac.uk", password: "0403924199" }
-      //   );
-      //   axios.defaults.headers.common["Authorization"] =
-      //     resLogin.data.resource.token;
-      // } catch (err) {
-      //   console.log(err); // from creation.
-      //   return;
-      // }
 
       let resProject;
       try {
@@ -214,7 +190,7 @@ export default {
           `https://hestia.speckle.works/api/projects/${this.project._id}`
         );
       } catch (err) {
-        console.log(err); // from creation
+        console.log(err);
         return;
       }
 
@@ -255,9 +231,7 @@ export default {
         let resClient;
         try {
           resClient = await axios.get(
-            "https://hestia.speckle.works/api/streams/" +
-              streamShortID +
-              "/clients"
+            `https://hestia.speckle.works/api/streams/${streamShortID}/clients`
           );
 
           for (var j = 0; j < resClient.data.resources.length; j++) {
@@ -290,6 +264,7 @@ export default {
                 target: client_id,
                 action: "receiving"
               });
+
             } else if (clientRole == "Sender") {
               streamLinks.push({
                 source: client_id,
@@ -323,8 +298,7 @@ export default {
       //console.log(createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en', { minimumFractionDigits: 10 } ) ))
       //this.dates = createdAts;
       this.sliderValue = [this.dates[0], this.dates[ this.dates.length - 1 ] ]
-      this.lowerIndex = 0
-      this.upperIndex = this.dates.length - 1
+
       return [nodes, streamLinks];
       
     }

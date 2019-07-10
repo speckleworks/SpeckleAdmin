@@ -27,11 +27,25 @@ export default {
     clientdatafilter: Array,
     timeFilter: Array,
     dateFilter: Array,
- 
+    toggleDrag: Boolean,
   },
 
   watch: {
-
+    toggleDrag: function(){
+      console.log('lol')
+      console.log(this.clientdata[0])
+      if(this.toggleDrag){
+        d3.selectAll('circle').classed("fixed", (d) => {d.fixed = true});
+        d3.selectAll('rect').classed("fixed", (d) => {d.fixed = true});
+      }else{
+        d3.selectAll('circle').classed("fixed", (d) => {d.fixed = false});
+        d3.selectAll('rect').classed("fixed", (d) => {d.fixed = false});
+      }
+      // Array.from(document.querySelector('#circleSender').children).forEach(function(node) {
+      //     d3.select(node).classed("fixed", d.fixed = true);
+      // });
+      //d3.select(this).classed("fixed", d.fixed = true);
+    },
     clientdatafilter: function (){
       console.log('ooups')
       console.log(this.timeFilter)
@@ -46,7 +60,7 @@ export default {
       this.updateDisplayNodes("#rectStream")
       this.updateDisplayNodes("#text")
       this.updateDisplayLinks("#pathLink")
-      this.updateDisplayHull()
+      //this.updateDisplayHull()
       //
       
       
@@ -59,7 +73,7 @@ export default {
   },
 
   data: () => ({
-      redrawHull: false,
+      filteredNodes: null,
       colour: null,
       groupPath: null,
       force: null,
@@ -131,9 +145,13 @@ export default {
           if((node.getAttribute("source_timestamp") >= context.timeFilter[0] && node.getAttribute("source_timestamp") <= context.timeFilter[1]) &&
           (node.getAttribute("target_timestamp") >= context.timeFilter[0] && node.getAttribute("target_timestamp") <= context.timeFilter[1])
           ){
-              node.style.display = "block"
+              //node.style.display = "block"
+              node.style.opacity = 1
+              
           }else{
-              node.style.display = "none"
+              //node.style.display = "none"
+              node.style.opacity = 0.2
+              
           }
       });
     },
@@ -141,213 +159,16 @@ export default {
       var context = this
       Array.from(document.querySelector(id).children).forEach(function(node) {
           if(node.getAttribute("timestamp") >= context.timeFilter[0] && node.getAttribute("timestamp") <= context.timeFilter[1]){
-              node.style.display = "block"
+              //node.style.display = "block"
+              node.style.opacity = 1
+              
           }else{
-              node.style.display = "none"
+              //node.style.display = "none"
+              node.style.opacity = 0.2
           }
       });
 
     },
-    updateDisplayHull(){
-
-      this.$data.redrawHull = true
-
-      var context = this
-      var filteredNodes = [ ]
-      var filteredClients = this.clientdata[0].filter(data => data.type == "Client")
-      
-      
-      filteredClients.forEach(function(node){
-        
-        if(node.createdAt >= context.timeFilter[0] && node.createdAt <= context.timeFilter[1]){
-          filteredNodes.push(node)
-        }
-      })
-      //console.log(filteredNodes)
-      var filteredGroups = this.groupBy(filteredNodes, "documentGuid");
-
-      
-      var svg = d3.select("#graphLayout")
-
-      svg
-        .select("#hullDoc")
-        .selectAll("path")
-
-        .data(Object.keys(filteredGroups))
-        .enter()
-        .append("path")
-        .attr("class", "subhullDoc")
-              .on("mouseover", function(d) {
-          divDoc.style("opacity", 0.8);
-          divDoc
-            .html(
-              `DocumentGuid: ${d.values[0].documentGuid}<br/>
-            DocumentType: ${d.values[0].documentType}<br/>
-            DocumentName: ${d.values[0].documentName}`
-            )
-
-            .style("left", d3.event.pageX + "px")
-            .style("top", d3.event.pageY - 28 + "px");
-        })
-        .on("mouseout", function(d) {
-          divDoc.style("opacity", 0);
-        });
-
-        
-
-
-      //var originalGroups =  this.groupBy(this.clientdata[0].filter(data => data.type == "Client"), "documentGuid")
-
-
-      console.log(Object.keys(filteredGroups).length, "number of filtered groups")
-      //console.log(Object.keys(originalGroups).length)
-
-      var myHulls = svg
-          .select("#hullDoc")
-          .selectAll("path")
-      console.log(myHulls[0].length, "number of html elements")
-      //console.log(myHulls.length, "number of html elements")
-
-      if(myHulls[0].length > Object.keys(filteredGroups).length){
-        console.log('fuck')
-        for (var i = 0; i < myHulls[0].length; i++) { 
-          if(i > Object.keys(filteredGroups).length-1){
-            console.log(myHulls[0][i])
-            myHulls[0][i].remove()
-          }
-        }
-      }
-      
-
-      var nestedFilteredGroups = d3
-        .nest()
-        .key(function(d) {
-          return d.documentGuid;
-        })
-        .entries(filteredNodes);
-      // console.log(size)
-      // console.log(nestedFilteredGroups)
-
-      // console.log(nestedFilteredGroups)
-      // for (var i = 0; i < nestedFilteredGroups.length; i++) { 
-      //   console.log(nestedFilteredGroups[i].values.length)
-      //   if(nestedFilteredGroups[i].values.length < 1){
-      //     nestedFilteredGroups[i].push(this.clientdata[0][0])
-      //   }
-      // }
-
-      // console.log(nestedFilteredGroups)
-
-      this.$data.force.on("tick", newTick)
-
-    
-
-
-        svg
-          .select("#hullDoc")
-          .selectAll(".subhullDoc")
-        
-          .data(nestedFilteredGroups)
-          .attr("d", context.$data.groupPath)
-          .enter()
-          .insert("path")
-          .attr("d", context.$data.groupPath);
-    var context = this
-    function newTick() {
-
-      
-      
-        svg
-          .selectAll(".node")
-          .attr("stroke", "black")
-          .attr("fill", data =>
-            context.$data.colour(data.index)
-          )
-          .attr("stroke-width", 0);
-        // svg
-        //   .select("#hullOwner")
-        //   .selectAll(".subhullOwner")
-          
-        //   .data(groupOwners)
-        //   .attr("d", groupPath)
-        //   .enter()
-        //   .insert("path")
-        //   .attr("d", groupPath);
-          
-
-    
-
-        svg
-          .select("#hullDoc")
-          .selectAll(".subhullDoc")
-
-          .data(nestedFilteredGroups)
-          .attr("d", context.$data.groupPath)
-          .enter()
-          .insert("path")
-          .attr("d", context.$data.groupPath);
-
-
-        var path = d3.select('#pathLink').selectAll("path")
-
-        path
-          .attr("d", function(d) {
-            var dx = d.target.x - d.source.x,
-              dy = d.target.y - d.source.y,
-              dr = Math.sqrt(dx * dx + dy * dy);
-            //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-            return (
-              "M" +
-              d.source.x +
-              "," +
-              d.source.y +
-              "L" +
-              d.target.x +
-              "," +
-              d.target.y
-            );
-          })
-          .attr("stroke", data => context.$data.colour(data.source.index));
-        
-        // svg.selectAll('marker')
-        // .attr('fill', data =>
-        //   this.$data.colour(data.target.index)
-        // );
-
-        var circleSender = svg
-          .select("#circleSender")
-          .selectAll("circle")
-        circleSender.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
-
-        var circleReceiver = svg
-          .select("#circleReceiver")
-          .selectAll("circle")
-        circleReceiver.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
-
-        var rect = svg
-          .select("#rectStream")
-          .selectAll("rect")
-        rect.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
-        var text = svg
-          .select("#text")
-          .selectAll("g")
-
-        text.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
-    }
-    },
-
-    
-
-
-
 
 
     contextMenu(type, menu, openCallback) {
@@ -410,6 +231,8 @@ export default {
     
     drawGraph() {
 
+
+
       var _nodes = this.clientdata[0];
       var links = this.clientdata[1];
 
@@ -422,8 +245,14 @@ export default {
           : 0;
       });
 
+
+
+      
       console.log(_nodes);
       console.log(links);
+
+
+
 
       var _links = [];
 
@@ -522,8 +351,10 @@ export default {
         })
         .on("tick", tick)
         .start();
-      var drag = this.$data.force.drag()
-          .on("dragstart", dragstart);
+
+      // var drag = this.$data.force.drag()
+      //     .on("dragstart", dragstart);
+          
       this.$data.colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
@@ -541,32 +372,29 @@ export default {
         .select(".tooltipDoc")
         .style("opacity", 0);
 
-      svg
+  
+
+      //
+
+     svg
         .select("#hullOwner")
         .selectAll("path")
         .data(Object.keys(parentGroups))
         .enter()
         .append("path")
         .attr("class", "subhullOwner")
-        
-        .on("dblclick", dblclick)
         .on("mouseover", function(d) {
-
           divOwner.style("opacity", 0.8);
           divOwner
             .html(`Owner: ${d.values[0].owner}`)
-
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 28 + "px");
         })
         .on("mouseout", function(d) {
           divOwner.style("opacity", 0);
-        })
-        .call(this.$data.force.drag);
+        });
       
-
       var childGroups = this.groupBy(clientNodes, "documentGuid");
-      
       // for (let i = 0; i < Object.keys(childGroups).length; i++) {
       //   svg
       //     .select("#hull")
@@ -581,7 +409,6 @@ export default {
       //         DocumentType: ${d.values[0].documentType}<br/>
       //         DocumentName: ${d.values[0].documentName}`
       //         )
-
       //         .style("left", d3.event.pageX + "px")
       //         .style("top", d3.event.pageY - 28 + "px");
       //     })
@@ -590,7 +417,6 @@ export default {
       //     });
       // }
       //
-
       svg
         .select("#hullDoc")
         .selectAll("path")
@@ -598,7 +424,6 @@ export default {
         .enter()
         .append("path")
         .attr("class", "subhullDoc")
-
         .on("mouseover", function(d) {
           divDoc.style("opacity", 0.8);
           divDoc
@@ -607,7 +432,6 @@ export default {
             DocumentType: ${d.values[0].documentType}<br/>
             DocumentName: ${d.values[0].documentName}`
             )
-
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 28 + "px");
         })
@@ -629,7 +453,7 @@ export default {
         })
         .entries(this.$data.force.nodes().filter(data => data.type == "Client"));
 
-      this.$data.groupPath = function(d) {
+      var groupPath = function(d) {
         return (
           "M" +
           d3.geom
@@ -643,7 +467,6 @@ export default {
         );
       };
       //
-
       svg
         .select("#marker")
         .selectAll("marker")
@@ -655,7 +478,6 @@ export default {
         .attr("target_timestamp", data => data.target.createdAt)
         .attr("id", data => data.type)
         .attr("viewBox", "0 -5 10 10")
-
         // handles the size difference between streams and client
         .attr("refX", data => {
           //console.log(data);
@@ -666,26 +488,20 @@ export default {
             return 15;
           }
         })
-
         .attr("refY", 0)
         .attr("markerWidth", 7)
         .attr("markerHeight", 12)
         .attr("orient", "auto")
         .attr("fill-opacity", 1)
-        //.attr("fill", data => colour(data.target.index))
+        //.attr("fill", data => this.colour(data.target.index))
         .append("svg:path")
-
         .attr("d", "M0,-5L10,0L0,5");
-
       var path = svg
         .select("#pathLink")
         .selectAll("path")
         .data(this.$data.force.links().filter(data => data.display))
         .enter()
         .append("svg:path")
-
-
-      path
         .attr("source_timestamp", data => data.source.createdAt)
         .attr("target_timestamp", data => data.target.createdAt)
         .attr("class", function(d) {
@@ -695,15 +511,12 @@ export default {
         .attr("marker-end", function(d) {
           return "url(#" + d.type + ")";
         });
-
       //
       //
-
       var circleSender = svg
         .select("#circleSender")
         .selectAll("circle")
         .data(this.$data.force.nodes().filter(data => data.role == "Sender"))
-
         .enter()
         .append("svg:circle")
         .attr("class", "sender")
@@ -713,14 +526,12 @@ export default {
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
-
         //   divCircle.
         //       style("opacity", .8);
         //       divCircle.html(`Owner: ${d.owner}<br/>
         //       ${d.documentType}: ${d.documentName}<br/>
         //       Created at: ${d.createdAt}<br/>
         //       Updated at: ${d.updatedAt}`)
-
         //       .style("left", (d3.event.pageX) + "px")
         //       .style("top", (d3.event.pageY - 28) + "px");
         //   })
@@ -729,13 +540,10 @@ export default {
         // })
         //
         .on("contextmenu", this.contextMenu("client", this.menuClient));
-
-
       var circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
         .data(this.$data.force.nodes().filter(data => data.role == "Receiver"))
-
         .enter()
         .append("svg:circle")
         .attr("class", "receiver")
@@ -745,14 +553,12 @@ export default {
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         // .on("mouseover", function(d) {
-
         //   divCircle.
         //       style("opacity", .8);
         //       divCircle.html(`Owner: ${d.owner}<br/>
         //       ${d.documentType}: ${d.documentName}<br/>
         //       Created at: ${d.createdAt}<br/>
         //       Updated at: ${d.updatedAt}`)
-
         //       .style("left", (d3.event.pageX) + "px")
         //       .style("top", (d3.event.pageY - 28) + "px");
         //   })
@@ -761,10 +567,8 @@ export default {
         // })
         //
         .on("contextmenu", this.contextMenu("client", this.menuClient));
-
       const rectWidth = 24;
       const rectHeight = 24;
-
       var rect = svg
         .select("#rectStream")
         .selectAll("rect")
@@ -782,7 +586,6 @@ export default {
         .on("dblclick", dblclick)
         .call(this.$data.force.drag)
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
-
       //text content.
       var text = svg
         .select("#text")
@@ -791,7 +594,6 @@ export default {
         .enter()
         .append("svg:g")
         .attr("timestamp", function(d) {return d.createdAt});
-
       text
         .append("svg:text")
         .attr("x", 8)
@@ -801,7 +603,6 @@ export default {
         .text(function(d) {
           return d.name;
         });
-
       text
         .append("svg:text")
         .attr("x", 8)
@@ -810,66 +611,61 @@ export default {
         .text(function(d) {
           return d.name;
         });
-
       //
-
       function dblclick(d) {
-
         d3.select(this).classed("fixed", d.fixed = false);
       }
-
       function dragstart(d) {
-
-        d3.select(this).classed("fixed", d.fixed = true);
+        if(this.toggleDrag){
+          d3.select(this).classed("fixed", d.fixed = true);
+        }else{
+          d3.select(this).classed("fixed", d.fixed = false);
+        }
       }
 
-      var context = this
-
+      var parentContext = this
       function tick() {
         svg
           .selectAll(".node")
           .attr("stroke", "black")
           .attr("fill", data =>
-            context.$data.colour(data.index)
+            parentContext.colour(data.index)
           )
           .attr("stroke-width", 0);
         svg
           .select("#hullOwner")
           .selectAll(".subhullOwner")
-          
           .data(groupOwners)
-          .attr("d", context.$data.groupPath)
+          .attr("d", groupPath)
           .enter()
           .insert("path")
-          .attr("d", context.$data.groupPath);
-        //console.log(groupDocs)
+          .attr("d", groupPath);
         svg
           .select("#hullDoc")
           .selectAll(".subhullDoc")
           .data(groupDocs)
-          .attr("d", context.$data.groupPath)
+          .attr("d", groupPath)
           .enter()
           .insert("path")
-          .attr("d", context.$data.groupPath);
-
+          .attr("d", groupPath);
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
               dy = d.target.y - d.source.y,
               dr = Math.sqrt(dx * dx + dy * dy);
-            //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-            return (
-              "M" +
-              d.source.x +
-              "," +
-              d.source.y +
-              "L" +
-              d.target.x +
-              "," +
-              d.target.y
-            );
+            return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            // return (
+            //   "M" +
+            //   d.source.x +
+            //   "," +
+            //   d.source.y +
+            //   "L" +
+            //   d.target.x +
+            //   "," +
+            //   d.target.y
+            // );
           })
-          .attr("stroke", data => context.$data.colour(data.source.index));
+          .attr("stroke", data => parentContext.colour(data.source.index));
         //
         // svg.selectAll('marker')
         // .attr('fill', data =>
@@ -884,28 +680,24 @@ export default {
         rect.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
-
         text.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
       }
+      console.log('loooooooooooooool')
+            this.updateDisplayNodes("#circleSender")
+      this.updateDisplayNodes("#circleReceiver")
+      this.updateDisplayNodes("#rectStream")
+      this.updateDisplayNodes("#text")
+      this.updateDisplayLinks("#pathLink")
     },
 
   },
   mounted() {
     this.svgWidth = document.getElementById("clientGraph").offsetWidth,
-
-        this.drawGraph();
-
-
-        
+    this.drawGraph();
   },
-  created(){
-    
-  },
-  updated(){ 
 
-  },
   computed:{
   },
 
@@ -927,40 +719,20 @@ export default {
   overflow: hidden;
 }
 
-path.link {
-  fill: none;
-  stroke-width: 1.5px;
-}
 
-marker#licensing {
-  fill: green;
-}
-
-path.link.licensing {
-  stroke: green;
-}
-
-path.link.resolved {
-  stroke-dasharray: 0, 2 1;
-}
-
-.sender {
-  stroke: #003380;
-  stroke-width: 1.5px;
-  cursor: pointer;
-}
-
-.receiver {
-  fill: #94e1ff;
-  stroke: #003380;
-  stroke-width: 1.5px;
-  cursor: pointer;
-}
 
 rect {
   cursor: pointer;
-  transform: "translate(50,50)";
+  stroke: lightgray;
+  stroke-width: 2px;
+
   
+}
+
+circle{
+  cursor: pointer;
+  stroke: lightgray;
+  stroke-width: 2px;
 }
 
 text {
@@ -1068,20 +840,30 @@ text.shadow {
 }
 
 .subhullOwner {
-  fill: rgb(200, 220, 236);
-  fill-opacity: 0.3;
+  fill: rgb(126, 191, 243);
   stroke: rgb(126, 191, 243);
-  stroke-width: 28px;
-  stroke-opacity: 0.3;
+
+
+  stroke-width: 20;
+  opacity: 0.2;
   stroke-linejoin: round;
 }
 
 .subhullDoc {
   fill: hotpink;
-  fill-opacity: 0.3;
   stroke: hotpink;
-  stroke-width: 28px;
-  stroke-opacity: 0.3;
+
+
+
+  stroke-width: 20;
+  opacity: 0.2;
   stroke-linejoin: round;
+
+}
+
+
+path.link {
+  fill: none;
+  stroke-width: 1.5px;
 }
 </style>
