@@ -334,6 +334,13 @@ export default new Vuex.Store( {
     },
 
     // Processors
+    ADD_LAMBDAS( state, lambdas ) {
+      lambdas.forEach( lambda => {
+        if ( state.lambdas.findIndex( p => p.function === lambda.function ) === -1 ) {
+          state.lambdas.push( lambda )
+        }
+      } )
+    },
     ADD_PROCESSORS( state, processors ) {
       processors.forEach( processor => {
         if ( state.processors.findIndex( p => p._id === processor._id ) === -1 ) {
@@ -803,6 +810,8 @@ export default new Vuex.Store( {
     // processors
     loadLambdas ( context ) {
       return new Promise( async ( resolve, reject ) => {
+        let lambdas = []
+
         for(let i = 0; i < context.state.blocks.length; i++)
         {
           await Axios({
@@ -813,12 +822,13 @@ export default new Vuex.Store( {
             .then( res => {
               var data = res.data
               data.function = context.state.blocks[i]
-              context.state.lambdas.push(data)
+              lambdas.push(data)
             } ) 
             .catch( err => { return reject( err ) } )
         }
         
-        context.state.lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
+        lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
+        context.commit( 'ADD_LAMBDAS', lambdas )
         return resolve ( )
       }) 
     },

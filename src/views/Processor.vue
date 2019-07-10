@@ -46,7 +46,7 @@
       </v-flex>
       <v-flex>
         <v-card>
-          <v-flex class="pa-4">
+          <v-flex mb-3 class="pa-4">
             <v-icon class="mr-2">
               code
             </v-icon>
@@ -54,23 +54,40 @@
               Processor
             </span>
           </v-flex>
-          <v-divider></v-divider>
-          <template>
-            <v-flex xs12 ma-0 pa-0 v-for='(block, index) in processor.blocks' :key='index'>
-              <processor-block
-                :index='index'
-                :block='block'
-                :output='blockOutput[index]'
-                :status='blockStatus[index]'
-                :params='processor.params[index]'
-                v-on:remove-block="removeBlock"
-                v-on:update-param="updateParam"/>
+        </v-card>
+        <v-flex xs12 v-for='(block, index) in processor.blocks' :key='index'>
+          <processor-block
+            :index='index'
+            :block='block'
+            :output='blockOutput[index]'
+            :status='blockStatus[index]'
+            :params='processor.params[index]'
+            v-on:remove-block="removeBlock"
+            v-on:update-param="updateParam"
+            v-on:rerun-block="rerunBlock"/>
+        </v-flex>
+        <v-flex xs12 mb-3 pa-0 v-if='processor.blocks.length > 0'>
+          <v-card>
+            <v-flex ma-0 pa-3>
+              <v-icon small class="mr-2">
+                receipt
+              </v-icon>
+              <span class='font-weight-light mr-2'>
+                Output
+              </span>
             </v-flex>
-          </template>
+            <v-divider v-if="successRun"></v-divider>
+            <v-flex v-if="successRun" pa-3>
+              <vue-json-pretty :data='responseObject' :deep='1' highlight-mouseover-node show-length :show-line='false' :show-double-quotes='false'>
+              </vue-json-pretty>
+            </v-flex>
+          </v-card>
+        </v-flex>
+        <v-card>
           <v-flex xs12>
             <v-select
               return-object
-              :items="$store.state.lambdas"
+              :items="lambdas"
               v-on:input="addBlock"
               label="Add new block">
               <template slot="selection">
@@ -89,7 +106,7 @@
     </v-layout>
     <v-btn color="primary" dark fixed large bottom right fab @click="runProcessor">
       <v-icon>
-        {{this.reRun ? "replay" : "play_arrow"}}
+        {{this.successRun ? "replay" : "play_arrow"}}
       </v-icon>
     </v-btn>
   </v-container>
@@ -99,6 +116,7 @@
 import debounce from 'lodash.debounce'
 import ProcessorBlock from '../components/ProcessorBlock.vue'
 import DetailDescription from '../components/DetailDescription.vue'
+import VueJsonPretty from 'vue-json-pretty'
 
 import Axios from 'axios'
 
@@ -107,8 +125,12 @@ export default {
   components: {
     ProcessorBlock,
     DetailDescription,
+    VueJsonPretty,
   },
   computed: {
+    lambdas: function() {
+      return this.$store.state.lambdas
+    },
     shareLink: function() {
       let copy = Object.assign({}, this.processor)
 
@@ -122,16 +144,39 @@ export default {
 
       return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(copy))
     },
-    reRun: function () {
+    successRun: function () {
       if (this.blockStatus.length > 0 && this.blockStatus.length == this.processor.blocks.length)
         return this.blockStatus[this.blockStatus.length - 1] == 'success'
 
       return false
+    },
+    responseObject() {
+      if (!this.successRun)
+        return null
+
+      if (typeof this.blockOutput[this.blockOutput.length - 1] == 'string')
+        return this.blockOutput[this.blockOutput.length - 1]
+      else if (Object.keys(this.blockOutput[this.blockOutput.length - 1]).length < 3)
+        return this.removeArraysRecursive( this.blockOutput[this.blockOutput.length - 1] )
+      else
+      {
+        let bar = {}
+        for ( let key in this.blockOutput[this.blockOutput.length - 1] ) {
+          bar[key] = this.blockOutput[this.blockOutput.length - 1][key]
+
+          if (Object.keys(bar).length >= 3)
+            break
+        }
+        bar['_hidden'] = `... (${this.blockOutput[this.blockOutput.length - 1].length - 3} more objects)`
+        return this.removeArraysRecursive( bar )
+      }
     }
   },
   data( ) {
     return {
       initInput: "",
+
+      isRunning: false,
 
       id: "",
       processor: null,
@@ -151,10 +196,15 @@ export default {
   },
   methods: {
     async runProcessor ( ) {
+      if (this.isRunning)
+        return
+
+      this.isRunning = true
+      
       var blockInput = this.initInput
       var i = 0
 
-      if (this.reRun)
+      if (this.successRun)
       {
         this.blockOutput.splice(0, this.blockOutput.length)
         this.blockStatus.splice(0, this.blockStatus.length)
@@ -202,6 +252,7 @@ export default {
                 this.blockStatus.pop()
                 this.blockStatus.push('error')
                 this.blockOutput.push(err.response.data)
+                this.isRunning = false
                 return
               }
 
@@ -224,6 +275,7 @@ export default {
               this.blockStatus.pop()
               this.blockStatus.push('error')
               this.blockOutput.push(err.response.data)
+              this.isRunning = false
               return
             }
 
@@ -250,9 +302,11 @@ export default {
             this.blockStatus.pop()
             this.blockStatus.push('error')
             this.blockOutput.push(err.response.data)
+            this.isRunning = false
             return
           }
         }
+        this.isRunning = false
       }
     },
 
@@ -265,7 +319,6 @@ export default {
           data: {
             baseUrl: this.$store.state.server,
             token: Axios.defaults.headers.common[ 'Authorization' ],
-            streamIds: this.streamIds,
             input: input,
             parameters: params,
           },
@@ -273,6 +326,16 @@ export default {
           .then( res => resolve(res) )
           .catch ( err => reject(err) )
       })
+    },
+
+    rerunBlock ( index ) {
+      if (this.isRunning)
+        return
+
+      this.blockOutput.splice(index, this.blockOutput.length - index)
+      this.blockStatus.splice(index, this.blockStatus.length - index)
+
+      this.runProcessor()
     },
 
     addBlock ( sender ) {
@@ -324,6 +387,31 @@ export default {
           params: this.processor.params,
         }
       )
+    },
+    
+    removeArraysRecursive( foo ) {
+      let bar = {}
+
+      if (typeof foo == 'string')
+        return foo
+
+      for ( let key in foo ) {
+        if ( !foo.hasOwnProperty( key ) ) continue
+
+        if ( Array.isArray( foo[ key ] ) ) {
+          /*DO FUCKALL */
+          if( foo[key].length < 3 )
+            bar[key] = foo[key]
+          else {
+            bar[key] = [ ...foo[key].slice(0, 3), `... (${foo[key].length - 3} more values)` ]
+          }
+        } else if ( typeof foo[ key ] === 'object' && foo[ key ] !== null ) {
+          bar[ key ] = this.removeArraysRecursive( foo[ key ] )
+        } else {
+          bar[ key ] = foo[ key ]
+        }
+      }
+      return bar
     },
   },
   activated( ) {

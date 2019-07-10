@@ -86,7 +86,7 @@ export default {
   },
   computed: {
     processors( ) {
-      return this.$store.state.processors
+      return this.$store.state.processors.filter( p => p.owner.indexOf(this.$store.state.user._id) !== -1)
     },
     filteredProcessors( ) {
       if ( this.searchfilter && this.searchfilter !== '' )
