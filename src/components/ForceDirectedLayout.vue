@@ -28,9 +28,52 @@ export default {
     timeFilter: Array,
     dateFilter: Array,
     toggleDrag: Boolean,
+    userLinksForce: Number,
+    documentLinksForce: Number,
+    switchForce: Boolean
   },
 
   watch: {
+    switchForce: function(){
+      if(this.switchForce){
+        // docs
+        var filterLinks = this.forceLinks.filter(d => d.type != "documentGuidForceGroup");
+        this.$data.force.links(filterLinks).start()
+      }else{
+        // users
+        var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
+        this.$data.force.links(filterLinks).start()
+      }
+    },
+    userLinksForce: function(){
+
+
+
+      this.$data.force.linkDistance(d => {
+          if (d.type == "ownerForceGroup") {
+            return this.userLinksForce;
+          } else if (d.type == "documentGuidForceGroup") {
+            return this.documentLinksForce;
+          } else {
+            return 116;
+          }
+        }).start();
+        //this.drawGraph()
+    },
+    documentLinksForce: function(){
+      
+
+          this.$data.force.linkDistance(d => {
+          if (d.type == "ownerForceGroup") {
+            return this.userLinksForce;
+          } else if (d.type == "documentGuidForceGroup") {
+            return this.documentLinksForce;
+          } else {
+            return 116;
+          }
+        }).start();
+        //this.drawGraph()
+    },
     toggleDrag: function(){
       console.log('lol')
       console.log(this.clientdata[0])
@@ -73,6 +116,7 @@ export default {
   },
 
   data: () => ({
+      forceLinks: [ ],
       filteredNodes: null,
       colour: null,
       groupPath: null,
@@ -255,7 +299,8 @@ export default {
 
 
       var _links = [];
-
+      var thisContext = this;
+      
       for (let i = 0; i < links.length; i++) {
         if (links[i].action === "sending") {
           let source = _nodes
@@ -270,7 +315,7 @@ export default {
               return e._id;
             })
             .indexOf(links[i].target);
-          _links.push({ source, target, type: `sending`, display: true });
+          thisContext.forceLinks.push({ source, target, type: `sending`, display: true });
         }
         if (links[i].action === "receiving") {
           let source = _nodes
@@ -285,11 +330,11 @@ export default {
               }
             })
             .indexOf(links[i].target);
-          _links.push({ source, target, type: `receiving`, display: true });
+          thisContext.forceLinks.push({ source, target, type: `receiving`, display: true });
         }
       }
 
-      console.log(Array.from(new Set(_links)));
+      console.log(Array.from(new Set(thisContext.forceLinks)));
 
       let clientNodes = _nodes.filter(data => data.type == "Client");
       var parentGroups = this.groupBy(clientNodes, "owner");
@@ -298,7 +343,7 @@ export default {
         var parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
           for (let j = i + 1; j < parGroup.length; j++) {
-            _links.push({
+            thisContext.forceLinks.push({
               source: parGroup[i],
               target: parGroup[j],
               type: "ownerForceGroup",
@@ -307,12 +352,16 @@ export default {
           }
         }
         
-        var childGroups = this.groupBy(parGroup, "documentGuid");
+
+      }
+
+
+      var childGroups = this.groupBy(clientNodes, "documentGuid");
         for (var property in childGroups) {
           var childGroup = childGroups[property];
           for (let i = 0; i < childGroup.length - 1; i++) {
             for (let j = i + 1; j < childGroup.length; j++) {
-              _links.push({
+              thisContext.forceLinks.push({
                 source: childGroup[i],
                 target: childGroup[j],
                 type: "documentGuidForceGroup",
@@ -321,7 +370,6 @@ export default {
             }
           }
         }
-      }
 
       var svg = d3.select("#graphLayout")
 
@@ -329,32 +377,43 @@ export default {
       this.$data.force = d3.layout
         .force()
         .nodes(d3.values(_nodes))
-        .links(_links)
+        .links(thisContext.forceLinks)
         .size([this.$data.svgWidth, this.$props.svgHeight])
         .linkDistance(d => {
           if (d.type == "ownerForceGroup") {
-            return 200;
+            return this.userLinksForce;
           } else if (d.type == "documentGuidForceGroup") {
-            return 20;
+            return this.documentLinksForce;
           } else {
             return 116;
           }
         })
         .charge(d => {
           if (d.type == "ownerForceGroup") {
-            return -200;
+            return 1000;
           } else if (d.type == "documentGuidForceGroup") {
-            return -1;
+            return 1000;
           } else {
-            return -400;
+            return -1000;
           }
         })
         .on("tick", tick)
-        .start();
+        
 
       // var drag = this.$data.force.drag()
       //     .on("dragstart", dragstart);
-          
+       if(this.switchForce){
+        // docs
+        var filterLinks = this.forceLinks.filter(d => d.type != "documentGuidForceGroup");
+        this.$data.force.links(filterLinks).start()
+        
+      }else{
+        // users
+
+
+                var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
+        this.$data.force.links(filterLinks).start()
+      }         
       this.$data.colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
@@ -382,7 +441,9 @@ export default {
         .data(Object.keys(parentGroups))
         .enter()
         .append("path")
+        
         .attr("class", "subhullOwner")
+        
         .on("mouseover", function(d) {
           divOwner.style("opacity", 0.8);
           divOwner
@@ -393,7 +454,10 @@ export default {
         .on("mouseout", function(d) {
           divOwner.style("opacity", 0);
         });
-      
+      svg
+        .select("#hullOwner")
+        .selectAll("path")
+        
       var childGroups = this.groupBy(clientNodes, "documentGuid");
       // for (let i = 0; i < Object.keys(childGroups).length; i++) {
       //   svg
@@ -466,6 +530,8 @@ export default {
           "Z"
         );
       };
+
+      
       //
       svg
         .select("#marker")
