@@ -809,27 +809,33 @@ export default new Vuex.Store( {
 
     // processors
     loadLambdas ( context ) {
-      return new Promise( async ( resolve, reject ) => {
-        let lambdas = []
-
+      return new Promise(( resolve, reject ) => {
+        let promises = []
         for(let i = 0; i < context.state.blocks.length; i++)
         {
-          await Axios({
-            method: 'GET',
-            url: `.netlify/functions/${context.state.blocks[i]}`,
-            baseURL: location.protocol + '//' + location.host,
-          })
-            .then( res => {
-              var data = res.data
-              data.function = context.state.blocks[i]
-              lambdas.push(data)
-            } ) 
-            .catch( err => { return reject( err ) } )
+          promises.push(
+            Axios({
+              method: 'GET',
+              url: `.netlify/functions/${context.state.blocks[i]}`,
+              baseURL: location.protocol + '//' + location.host,
+            })
+          )
         }
-        
-        lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
-        context.commit( 'ADD_LAMBDAS', lambdas )
-        return resolve ( )
+
+        Promise.all(promises)
+          .then( res => {
+            var lambdas = []
+
+            res.forEach( r => {
+              let data = r.data
+              data.function = r.request.responseURL.split('/').slice(-1).pop()
+              lambdas.push(data)
+            })
+            
+            context.commit( 'ADD_LAMBDAS', lambdas )
+            return resolve ( lambdas )
+          } )
+          .cach ( err => {return reject( err )})
       }) 
     },
     getProcessor( context, props ) {

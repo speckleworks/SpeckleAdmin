@@ -65,7 +65,6 @@ export default {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )
       this.$store.dispatch( 'getProjects' )
       this.$store.dispatch( 'getProcessors' )
-      this.$store.dispatch( 'loadLambdas' )
       this.$store.dispatch( 'createClient' )
     }
     if ( localStorage.getItem( 'dark' ) === 'true' ) {
@@ -73,6 +72,7 @@ export default {
       this.$store.commit( 'SET_DARK', true )
     }
 
+    this.$store.dispatch( 'loadLambdas' )
   },
   updated( ) {
     let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]

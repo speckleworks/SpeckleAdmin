@@ -52,39 +52,39 @@
               </v-checkbox>
             </v-flex>
             <v-flex xs12 sm12 md12 v-for='param in objectarrayParams' :key='param.name'>
-              <v-flex>
-                <span class='font-weight-light mr-3'>{{param.name}}</span>
-                <v-dialog :persistent='true' v-model="displayDialog[param.name]" max-width='300'>
-                  <template v-slot:activator="{ on }">
-                    <v-btn round small v-on="on">
-                      <v-icon small>add</v-icon>
-                      <span class="mx-2">new entry</span>
-                    </v-btn>
-                  </template>
-                  <v-card>
-                    <v-card-title class='title font-weight-light'>
-                      {{objectArrayIndex == -1 ? 'New Entry' : 'Modify Entry'}}
-                    </v-card-title>
-                    <v-card-text>
-                      <v-layout row wrap>
-                        <v-flex xs12 sm12 md12 v-for='header in param.headers' :key='param.name + "_" + header'>
-                          <v-text-field :label='header' v-model='objectArrayItem[header]'>
-                          </v-text-field>
-                        </v-flex>
-                      </v-layout>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-btn flat color='primary' @click='addObjectArrayItem(param)'>
-                        {{objectArrayIndex == -1 ? 'Add' : 'Modify'}}
+              <v-card outlined>
+                <v-flex>
+                  <span class='font-weight-light mr-3'>{{param.name}}</span>
+                  <v-dialog :persistent='true' v-model="displayDialog[param.name]" max-width='300'>
+                    <template v-slot:activator="{ on }">
+                      <v-btn round small v-on="on">
+                        <v-icon small>add</v-icon>
+                        <span class="mx-2">new entry</span>
                       </v-btn>
-                      <v-btn flat color='primary' @click='resetObjectArrayDialog(param)'>
-                        Cancel
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-              </v-flex>
-              <v-card class="elevation-1" outlined>
+                    </template>
+                    <v-card>
+                      <v-card-title class='title font-weight-light'>
+                        {{objectArrayIndex == -1 ? 'New Entry' : 'Modify Entry'}}
+                      </v-card-title>
+                      <v-card-text>
+                        <v-layout row wrap>
+                          <v-flex xs12 sm12 md12 v-for='header in param.headers' :key='param.name + "_" + header'>
+                            <v-text-field :label='header' v-model='objectArrayItem[header]'>
+                            </v-text-field>
+                          </v-flex>
+                        </v-layout>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-btn flat color='primary' @click='addObjectArrayItem(param)'>
+                          {{objectArrayIndex == -1 ? 'Add' : 'Modify'}}
+                        </v-btn>
+                        <v-btn flat color='primary' @click='resetObjectArrayDialog(param)'>
+                          Cancel
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                </v-flex>
                 <v-data-table disable-initial-sort hide-actions :headers='tableHeader(param.headers)' :items='params[param.name]'>
                   <template v-slot:items="props">
                     <td v-for='p in Object.entries(props.item)' :key='p[0]'>{{p[1]}}</td>

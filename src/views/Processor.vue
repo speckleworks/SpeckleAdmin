@@ -128,10 +128,10 @@ export default {
     VueJsonPretty,
   },
   computed: {
-    lambdas: function() {
-      return this.$store.state.lambdas
+    lambdas( ) {
+      return this.$store.state.lambdas.sort((x, y) => (x.name > y.name) ? 1 : -1)
     },
-    shareLink: function() {
+    shareLink( ) {
       let copy = Object.assign({}, this.processor)
 
       delete copy._id
@@ -144,7 +144,7 @@ export default {
 
       return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(copy))
     },
-    successRun: function () {
+    successRun( ) {
       if (this.blockStatus.length > 0 && this.blockStatus.length == this.processor.blocks.length)
         return this.blockStatus[this.blockStatus.length - 1] == 'success'
 
