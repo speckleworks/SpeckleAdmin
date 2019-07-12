@@ -66,7 +66,7 @@ export default {
   methods: {
     fetchData() {
       this.isGettingUsersData = true
-      Axios.get( 'accounts/all' )
+      Axios.get( 'accounts/admin' )
         .then( res => {
           this.usersResource = res.data.resource
           this.isGettingUsersData = false

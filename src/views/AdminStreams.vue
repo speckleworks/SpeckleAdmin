@@ -65,7 +65,7 @@ export default {
   methods: {
     fetchData() {
       this.isGettingStreamData = true
-      Axios.get( 'streams/all' )
+      Axios.get( 'streams/admin' )
         .then( res => {
           this.streamsResource = res.data.resources
           this.isGettingStreamData = false

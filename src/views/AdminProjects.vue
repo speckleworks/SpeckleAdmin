@@ -74,7 +74,7 @@ export default {
   methods: {
     fetchData() {
       this.isGettingProjectData = true
-      Axios.get( 'projects/all' )
+      Axios.get( 'projects/admin' )
         .then( res => {
           this.projectsResource = res.data.resources
           this.isGettingProjectData = false
