@@ -30,6 +30,9 @@
             <td>{{ props.item.createdAt }}</td>
             <td>{{ props.item.logins.length }}</td>
             <td>
+              <v-checkbox disabled hide-details class="align-center justify-center" v-model=props.item.archived></v-checkbox>
+            </td>
+            <td>
               <v-btn right icon>
                 <v-icon small @click='editUser(props.item)'>edit</v-icon>
               </v-btn>
@@ -78,6 +81,7 @@ export default {
         { text: 'Company', value: 'company'},
         { text: 'Joined', value: 'name'},
         { text: 'Logins', value: 'logins.length' },
+        { text: 'Archived', value: 'archived' },
         { text: 'Edit', value: '' },
       ],
       showEditDialog: false
@@ -116,6 +120,7 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+
 .detail-card {
   margin-bottom: 20px;
 }

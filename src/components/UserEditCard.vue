@@ -7,9 +7,11 @@
         <v-btn icon @click="closeDialog">
           <v-icon>close</v-icon>
         </v-btn>
+        
       </v-card-title>
       <v-card-title>
         <v-flex xs12>
+          <v-progress-linear indeterminate v-if="showProgress" />
           <v-form>
             <v-layout row wrap>
               <v-flex xs12 md6>
@@ -24,18 +26,22 @@
               <v-flex xs12>
                 <v-text-field v-model="user.company" label="Company" required></v-text-field>
               </v-flex>
-              <v-flex xs12>
+              <v-flex xs12 md6>
                 <v-select v-model="user.role" :items="['user', 'admin']" label="Role" required></v-select>
               </v-flex>
+              <v-layout justify-end>
+                <v-flex xs12 md6>
+                  <v-spacer/>
+                  <v-switch v-model="user.archived" label="Archived" required></v-switch>
+                </v-flex>
+              </v-layout>
             </v-layout>
           </v-form>
-          <v-progress-linear indeterminate v-if="showProgress" />
         </v-flex>
       </v-card-title>
       <v-card-actions>
         <v-spacer />
         <v-btn color="primary" :disabled="true">Reset Password</v-btn>
-        <v-btn color="red" @click="deleteUser">Delete</v-btn>
         <v-btn color="primary" @click="saveUser" :disabled="!valid">Save</v-btn>
       </v-card-actions>
     </v-container>
@@ -77,7 +83,8 @@ export default {
         surname: this.user.surname,
         company: this.user.company,
         email: this.user.email,
-        role: this.user.role
+        role: this.user.role,
+        archived: this.user.archived
       };
       let self = this
       Axios.put("accounts/" + this.user._id, payload).then(res => {
