@@ -1,10 +1,21 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12>
+      <v-text-field
+          solo
+          v-model="search"
+          append-icon="search"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
+    </v-flex>
+    <v-flex xs12>
       <v-data-table
         :items='projects'
         :headers='headers'
         :loading='isGettingProjectData'
+        :search='search'
         v-model="selected"
         item-key="name"
         select-all
@@ -59,6 +70,7 @@ export default {
       projectsResource: [],
       isGettingProjectData: false,
       selected: [],
+      search: "",
       headers: [
         { text: 'Name', value: 'name'},
         { text: 'Owner', value: 'owner' },

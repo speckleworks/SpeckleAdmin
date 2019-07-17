@@ -1,32 +1,45 @@
 <template>
   <v-layout row wrap>
     <v-flex xs12>
+      <v-text-field
+        solo
+        v-model="search"
+        append-icon="search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-flex>
+    <v-flex xs12>
       <v-data-table
         :items='streams'
         :headers='headers'
         :loading='isGettingUsersData'
+        :search='search'
         v-model="selected"
+        
         item-key="name"
-        select-all
       >
         <template v-slot:items="props">
           <tr :active="props.selected" @click="props.selected = !props.selected">
-            <td>
-              <v-checkbox
-                :input-value="props.selected"
-                primary
-                hide-details
-              ></v-checkbox>
-            </td>
             <td>{{ props.item.email }}</td>
             <td>{{ props.item.name }}</td>
             <td >{{ props.item.surname }}</td>
+            <td >{{ props.item.role }} </td>
             <td >{{ props.item.company }}</td>
             <td>{{ props.item.createdAt }}</td>
             <td>{{ props.item.logins.length }}</td>
+            <td>
+              <v-btn right icon>
+                <v-icon small @click='editUser(props.item)'>edit</v-icon>
+              </v-btn>
+            </td>
           </tr>
         </template>
       </v-data-table>
+          <v-dialog max-width='600'  v-model='showEditDialog'>
+            <users-edit-card v-on:close-dialog='closeDialog()' v-on:close-dialog-success='closeDialogSuccess()' v-if='userToEdit != null'  :user='userToEdit'/>
+          </v-dialog>
     </v-flex>
   </v-layout>
 </template>
@@ -36,10 +49,12 @@ import union from 'lodash.union'
 import Axios from 'axios'
 import uuid from 'uuid/v4'
 import papa from 'papaparse'
+import UsersEditCard from '../components/UserEditCard'
 
 export default {
   name: 'AdminUsersView',
   components: {
+    UsersEditCard
   },
   watch: {
   },
@@ -53,14 +68,19 @@ export default {
       usersResource: [],
       isGettingUsersData: false,
       selected: [],
+      userToEdit: null,
+      search:'',
       headers: [
         { text: 'Email', value: 'email'},
         { text: 'Name', value: 'name'},
         { text: 'Surname', value: 'surname' },
-        { text: 'Organization', value: 'organization'},
+        { text: 'Role', value: 'role'},
+        { text: 'Company', value: 'company'},
         { text: 'Joined', value: 'name'},
         { text: 'Logins', value: 'logins.length' },
+        { text: 'Edit', value: '' },
       ],
+      showEditDialog: false
     }
   },
   methods: {
@@ -77,6 +97,17 @@ export default {
           console.error( err )
         } )
     },
+    editUser(user){
+      this.showEditDialog = true
+      this.userToEdit = user
+    },
+    closeDialog(){
+      this.showEditDialog = false
+    },
+    closeDialogSuccess(){
+      this.showEditDialog = false
+      this.fetchData()
+    }
   },
   mounted( ) {
     this.fetchData()
