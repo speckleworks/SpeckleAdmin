@@ -3,7 +3,7 @@
     <v-flex xs12 ma-0 pa-0>
       <v-card>
         <v-card-title>
-          <v-icon small class="mr-2">
+          <v-icon small class="ml-2 mr-2">
             {{block.icon ? block.icon : 'code'}}
           </v-icon>
           <span class='font-weight-light mr-2'>

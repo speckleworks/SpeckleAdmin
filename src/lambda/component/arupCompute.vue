@@ -44,7 +44,7 @@
       </v-autocomplete>
     </v-flex>
 
-    <v-flex v-if="params.selectedLibrary && params.selectedFunction && functions.length > 0" xs12>
+    <v-flex mt-0 v-if="params.selectedLibrary && params.selectedFunction && functions.length > 0" xs12>
       <v-card>
         <v-card-title>
           <span class='font-weight-light'>
@@ -65,7 +65,7 @@
                     :append-icon="isInputByValue(input.name) ? 'edit' : 'input'"
                     :hint="isInputByValue(input.name) ? 'Input by value' : 'Input by object path'"
                     :persistent-hint="true"
-                    :error-messages="!input.isOptional && (!inputs.hasOwnProperty(input.name) || inputs[input.name] === null) ? 'Input required' : ''"
+                    :error-messages="!input.isOptional && (!inputs.hasOwnProperty(input.name) || inputs[input.name] === null) ? ['Input required'] : ''"
                     @click:append="toggleInputSource({name: input.name, value: $event})"
                     @change="updateInput({name: input.name, value: $event})">
                   </v-autocomplete> 
@@ -90,38 +90,22 @@
             </v-tooltip>
           </v-flex>
         </v-layout>
-      </v-card>
-    </v-flex>
-
-    <v-flex v-if="params.selectedLibrary && params.selectedFunction && functions.length > 0" xs12>
-      <v-card>
+        <v-divider/>
         <v-card-title>
           <span class='font-weight-light'>
-            Outputs
+            Output
           </span>
         </v-card-title>
         <v-divider/>
-        <v-layout row wrap pa-3>
-          <v-flex xs12 sm6 md3 v-for='output in params.selectedFunction.outputs' :key='output.name'>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-text-field 
-                  :label='output.name'
-                  v-model='outputs[output.name]'
-                  hint="Object path to embed"
-                  :persistent-hint="true"
-                  v-on="on"
-                  @change="updateOutput({name: output.name, value: $event})">
-                </v-text-field> 
-              </template>
-              <div>
-                <span><b>Description:</b> {{output.description}}</span>
-                <br>
-                <span class="caption"><b>Type:</b> {{output.type}}</span>
-              </div>
-            </v-tooltip>
-          </v-flex>
-        </v-layout>
+        <v-flex xs12>
+          <v-text-field 
+            label='Output path'
+            v-model='params.outputPath'
+            hint="Object path to embed all results under"
+            :persistent-hint="true"
+            @change="$emit('update-param', params)">
+          </v-text-field>
+        </v-flex>
       </v-card>
     </v-flex>
 
@@ -149,9 +133,6 @@ export default {
     inputs () {
       return Object.assign({ }, this.params.valueData, this.params.pathData)
     },
-    outputs () {
-      return Object.assign({ }, this.params.outputPath)
-    }
   },
   methods: {
     selectLibrary ( payload ) {
@@ -182,7 +163,7 @@ export default {
 
       this.params.valueData = {}
       this.params.pathData = {}
-      this.params.outputPath = {}
+      this.params.outputPath = ''
 
       this.$emit('update-param', this.params)
     },
@@ -228,14 +209,6 @@ export default {
       else
         this.params.pathData[payload.name] = payload.value
         
-      this.$emit('update-param', this.params)
-    },
-    updateOutput ( payload ) {
-      if (!this.params.outputPath)
-        this.params.outputPath = {}
-
-      this.params.outputPath[payload.name] = payload.value
-
       this.$emit('update-param', this.params)
     }
   },
