@@ -54,19 +54,77 @@
         <v-divider/>
         <v-layout row wrap pa-3>
           <v-flex xs12 sm6 md3 v-for='input in params.selectedFunction.inputs' :key='input.name'>
-            <v-text-field 
-              :label='input.name'
-              v-model='inputs[input.name]'
-              :append-icon="isInputByValue(input.name) ? 'edit' : 'input'"
-              :hint="isInputByValue(input.name) ? 'Input by value' : 'Input by object path'"
-              :persistent-hint="true"
-              @click:append="toggleInputSource({name: input.name, value: $event})"
-              @change="updateInput({name: input.name, value: $event})">
-            </v-text-field> 
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <div v-on="on" ma-0 pa-0>
+                  <v-autocomplete
+                    v-if="(input.values || input.type === 'System.Boolean') && isInputByValue(input.name)"
+                    :items="input.values ? input.values : [true, false]"
+                    :label='input.name'
+                    v-model='inputs[input.name]'
+                    :append-icon="isInputByValue(input.name) ? 'edit' : 'input'"
+                    :hint="isInputByValue(input.name) ? 'Input by value' : 'Input by object path'"
+                    :persistent-hint="true"
+                    :error-messages="!input.isOptional && (!inputs.hasOwnProperty(input.name) || inputs[input.name] === null) ? 'Input required' : ''"
+                    @click:append="toggleInputSource({name: input.name, value: $event})"
+                    @change="updateInput({name: input.name, value: $event})">
+                  </v-autocomplete> 
+                  <v-text-field
+                    v-else
+                    :label='input.name'
+                    v-model='inputs[input.name]'
+                    :append-icon="isInputByValue(input.name) ? 'edit' : 'input'"
+                    :hint="isInputByValue(input.name) ? 'Input by value' : 'Input by object path'"
+                    :persistent-hint="true"
+                    :error-messages="!input.isOptional && (!inputs.hasOwnProperty(input.name) || inputs[input.name] === null) ? 'Input required' : ''"
+                    @click:append="toggleInputSource({name: input.name, value: $event})"
+                    @change="updateInput({name: input.name, value: $event})">
+                  </v-text-field>
+                </div>
+              </template>
+              <div>
+                <span><b>Description:</b> {{input.description}}</span>
+                <br>
+                <span class="caption"><b>Type:</b> {{input.type}}</span>
+              </div>
+            </v-tooltip>
           </v-flex>
         </v-layout>
       </v-card>
     </v-flex>
+
+    <v-flex v-if="params.selectedLibrary && params.selectedFunction && functions.length > 0" xs12>
+      <v-card>
+        <v-card-title>
+          <span class='font-weight-light'>
+            Outputs
+          </span>
+        </v-card-title>
+        <v-divider/>
+        <v-layout row wrap pa-3>
+          <v-flex xs12 sm6 md3 v-for='output in params.selectedFunction.outputs' :key='output.name'>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-text-field 
+                  :label='output.name'
+                  v-model='outputs[output.name]'
+                  hint="Object path to embed"
+                  :persistent-hint="true"
+                  v-on="on"
+                  @change="updateOutput({name: output.name, value: $event})">
+                </v-text-field> 
+              </template>
+              <div>
+                <span><b>Description:</b> {{output.description}}</span>
+                <br>
+                <span class="caption"><b>Type:</b> {{output.type}}</span>
+              </div>
+            </v-tooltip>
+          </v-flex>
+        </v-layout>
+      </v-card>
+    </v-flex>
+
   </v-layout>
 </template>
 <script>
@@ -90,6 +148,9 @@ export default {
   computed: {
     inputs () {
       return Object.assign({ }, this.params.valueData, this.params.pathData)
+    },
+    outputs () {
+      return Object.assign({ }, this.params.outputPath)
     }
   },
   methods: {
@@ -121,6 +182,7 @@ export default {
 
       this.params.valueData = {}
       this.params.pathData = {}
+      this.params.outputPath = {}
 
       this.$emit('update-param', this.params)
     },
@@ -140,28 +202,39 @@ export default {
         
       if (this.isInputByValue(payload.name))
       {
-        this.params.pathData[payload.name] = this.params.valueData[payload.name]
+        this.params.pathData[payload.name] = null
         delete this.params.valueData[payload.name]
       }
       else
       {
-        this.params.valueData[payload.name] = this.params.pathData[payload.name]
+        this.params.valueData[payload.name] = null
         delete this.params.pathData[payload.name]
       }
 
       this.$emit('update-param', this.params)
     },
     updateInput ( payload ) {
+      if (payload.value === null || payload.value === '' || payload.value === undefined)
+        payload.value = null
+
       if (!this.params.pathData)
         this.params.pathData = {}
 
       if (!this.params.valueData)
         this.params.valueData = {}
-        
+
       if (this.isInputByValue(payload.name))
-        this.params.valueData[payload.name] = payload.isInputByValue
+        this.params.valueData[payload.name] = payload.value
       else
         this.params.pathData[payload.name] = payload.value
+        
+      this.$emit('update-param', this.params)
+    },
+    updateOutput ( payload ) {
+      if (!this.params.outputPath)
+        this.params.outputPath = {}
+
+      this.params.outputPath[payload.name] = payload.value
 
       this.$emit('update-param', this.params)
     }

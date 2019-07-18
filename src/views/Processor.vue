@@ -85,9 +85,11 @@
         </v-flex>
         <v-card>
           <v-flex xs12>
-            <v-select
+            <v-autocomplete
               return-object
               :items="lambdas"
+              item-text="name"
+              item-value="name"
               v-on:input="addBlock"
               label="Add new block">
               <template slot="selection">
@@ -99,7 +101,7 @@
                 </v-icon>
                 {{lambdas.item.name}}
               </template>
-            </v-select>
+            </v-autocomplete>
           </v-flex>
         </v-card>
       </v-flex>
@@ -156,7 +158,7 @@ export default {
 
       if (typeof this.blockOutput[this.blockOutput.length - 1] == 'string')
         return this.blockOutput[this.blockOutput.length - 1]
-      else if (Object.keys(this.blockOutput[this.blockOutput.length - 1]).length < 3)
+      else if (Object.keys(this.blockOutput[this.blockOutput.length - 1]).length <= 10)
         return this.removeArraysRecursive( this.blockOutput[this.blockOutput.length - 1] )
       else
       {
@@ -164,10 +166,10 @@ export default {
         for ( let key in this.blockOutput[this.blockOutput.length - 1] ) {
           bar[key] = this.blockOutput[this.blockOutput.length - 1][key]
 
-          if (Object.keys(bar).length >= 3)
+          if (Object.keys(bar).length > 10)
             break
         }
-        bar['_hidden'] = `... (${Object.keys(this.blockOutput[this.blockOutput.length - 1]).length - 3} more objects)`
+        bar['_hidden'] = `... (${Object.keys(this.blockOutput[this.blockOutput.length - 1]).length - 10} more objects)`
         return this.removeArraysRecursive( bar )
       }
     }

@@ -11,19 +11,26 @@ exports.handler = async (event, context, callback) => {
         parameters : [
           {
             name: "selectedLibrary",
-            type: "hidden",
+            type: "object",
           },
           {
             name: "selectedFunction",
-            type: "hidden",
+            type: "object",
           },
           {
             name: "pathData",
-            type: "hidden",
+            type: "objectarray",
+            headers: ["name", "path"]
           },
           {
             name: "valueData",
-            type: "hidden",
+            type: "objectarray",
+            headers: ["name", "value"]
+          },
+          {
+            name: "outputPath",
+            type: "objectarray",
+            headers: ["name", "path"]
           }
         ],
       }),
@@ -36,7 +43,8 @@ exports.handler = async (event, context, callback) => {
     input,
     parameters,
   } = JSON.parse(event.body)
-  console.log(parameters)
+  console.log(parameters.pathData)
+  console.log(parameters.valueData)
   return {
     statusCode: 200,
     body: JSON.stringify(parameters)

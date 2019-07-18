@@ -199,7 +199,7 @@ export default {
     },
     responseObject() {
       console.log(this.numOutput)
-      if (this.numOutput <= 3)
+      if (this.numOutput <= 10)
         return this.removeArraysRecursive( this.output )
       else
       {
@@ -207,10 +207,10 @@ export default {
         for ( let key in this.output ) {
           bar[key] = this.output[key]
 
-          if (Object.keys(bar).length >= 3)
+          if (Object.keys(bar).length >= 10)
             break
         }
-        bar['_hidden'] = `... (${this.numOutput - 3} more objects)`
+        bar['_hidden'] = `... (${this.numOutput - 10} more objects)`
         return this.removeArraysRecursive( bar )
       }
     }
