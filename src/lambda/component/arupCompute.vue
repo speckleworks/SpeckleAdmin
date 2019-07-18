@@ -140,8 +140,8 @@ export default {
       
       Axios({
         method: 'GET',
-        url: `${payload.api}?flat=true`,
-        baseURL: `https://arupcompute-dev.azurewebsites.net/`,
+        url: `https://arupcompute-dev.azurewebsites.net/${payload.api}?flat=true`,
+        baseURL: ``,
       })
       .then ( res =>{
         this.functions = res.data
@@ -215,8 +215,8 @@ export default {
   created () {
     Axios({
       method: 'GET',
-      url: `api`,
-      baseURL: `https://arupcompute-dev.azurewebsites.net/`,
+      url: `https://arupcompute-dev.azurewebsites.net/api`,
+      baseURL: ``,
     })
     .then ( res =>{
       this.libraries = res.data
