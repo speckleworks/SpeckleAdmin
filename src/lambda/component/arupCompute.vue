@@ -140,8 +140,11 @@ export default {
       
       Axios({
         method: 'GET',
-        url: `https://arupcompute-dev.azurewebsites.net/${payload.api}?flat=true`,
-        baseURL: ``,
+        url: `${payload.api}?flat=true`,
+        baseURL: `https://arupcompute-dev.azurewebsites.net/`,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        }
       })
       .then ( res =>{
         this.functions = res.data
@@ -213,10 +216,14 @@ export default {
     }
   },
   created () {
+
     Axios({
       method: 'GET',
-      url: `https://arupcompute-dev.azurewebsites.net/api`,
-      baseURL: ``,
+      url: `api`,
+      baseURL: `https://arupcompute-dev.azurewebsites.net/`,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      }
     })
     .then ( res =>{
       this.libraries = res.data
