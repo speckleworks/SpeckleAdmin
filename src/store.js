@@ -6,6 +6,8 @@ import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
 import flatten from 'flat'
 
+import { LambdaSettings } from './lambda/_lambdaSettings.js'
+
 Vue.use( Vuex )
 
 function removeArraysRecursive( foo ) {
@@ -811,16 +813,19 @@ export default new Vuex.Store( {
     loadLambdas ( context ) {
       return new Promise(( resolve, reject ) => {
         let promises = []
-        for(let i = 0; i < context.state.blocks.length; i++)
+        let myLambdas = new LambdaSettings().Lambdas
+
+        for(let i = 0; i < myLambdas.length; i++)
         {
           promises.push(
             Axios({
               method: 'GET',
-              url: `.netlify/functions/${context.state.blocks[i]}`,
+              url: `.netlify/functions/${myLambdas[i]}`,
               baseURL: location.protocol + '//' + location.host,
             })
           )
         }
+        console.log(promises)
 
         Promise.all(promises)
           .then( res => {
@@ -831,12 +836,13 @@ export default new Vuex.Store( {
               data.function = r.request.responseURL.split('/').slice(-1).pop()
               lambdas.push(data)
             })
-            
+
             context.commit( 'ADD_LAMBDAS', lambdas )
             return resolve ( lambdas )
           } )
-          .cach ( err => {return reject( err )})
       }) 
+
+
     },
     getProcessor( context, props ) {
       var processor = JSON.parse(window.localStorage.getItem("processor_" + props._id))

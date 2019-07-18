@@ -9,6 +9,7 @@ exports.handler = async (event, context, callback) => {
         description: "Filters an array of objects by performing a string comparison of the paths against the criteria.",
         icon: "filter_list",
         allowBucketing: true,
+        customComponent: false,
         parameters : [
           {
             name: "exactMatch",

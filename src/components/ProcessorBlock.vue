@@ -38,7 +38,14 @@
         </v-card-title>
         <v-divider v-if="this.block.parameters.length > 0" class='mx-0 my-0'></v-divider>
         <v-card-text v-if="this.block.parameters.length > 0">
-          <v-layout row wrap v-if="this.block.parameters.length > 0">
+          <component
+            :block='block'
+            :params='params'
+            v-if="this.block.customComponent"
+            v-bind:is="this.block.function"
+            v-on:update-param="updateParams">
+          </component>
+          <v-layout row wrap v-else-if="this.block.parameters.length > 0">
             <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>
               <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
               </v-combobox>
@@ -136,7 +143,7 @@
             </span>
           </v-card-title>
           <v-card-text>
-            <vue-json-pretty :data='responseObject' :deep='0' highlight-mouseover-node show-length :show-line='false' :show-double-quotes='false'>
+            <vue-json-pretty :data='responseObject' :deep='1' highlight-mouseover-node show-length :show-line='false' :show-double-quotes='false'>
             </vue-json-pretty>
           </v-card-text>
         </v-card>
@@ -154,11 +161,13 @@
 <script>
 
 import VueJsonPretty from 'vue-json-pretty'
+import ArupCompute from '../lambda/component/arupCompute.vue'
 
 export default {
   name: 'ProcessorBlock',
   components: {
-    VueJsonPretty
+    VueJsonPretty,
+    ArupCompute
   },
   props: {
     index: null,
@@ -189,7 +198,8 @@ export default {
         return Object.keys(this.output).length
     },
     responseObject() {
-      if (this.numOutput < 3)
+      console.log(this.numOutput)
+      if (this.numOutput <= 3)
         return this.removeArraysRecursive( this.output )
       else
       {
@@ -200,7 +210,7 @@ export default {
           if (Object.keys(bar).length >= 3)
             break
         }
-        bar['_hidden'] = `... (${this.output.length - 3} more objects)`
+        bar['_hidden'] = `... (${this.numOutput - 3} more objects)`
         return this.removeArraysRecursive( bar )
       }
     }
@@ -272,6 +282,10 @@ export default {
       this.objectArrayItem = Object.assign({}, this.params[param.name][index])
       this.objectArrayIndex = index
       this.displayDialog[param.name] = true
+    },
+    updateParams ( payload ) {
+      this.params = payload
+      this.$emit('update-param', {index: this.index, params: this.params})
     }
   },
   created () {

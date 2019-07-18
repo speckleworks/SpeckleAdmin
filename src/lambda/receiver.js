@@ -9,6 +9,7 @@ exports.handler = async (event, context, callback) => {
         description: "Gets objects from the specified streams using the queries given. It is heavily recommended that you extract only the necessary fields. If no fields are specified, all fields will be obtained.",
         icon: "cloud_download",
         allowBucketing: false,
+        customComponent: false,
         parameters : [
           {
             name: "streamIds",

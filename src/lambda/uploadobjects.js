@@ -9,6 +9,7 @@ exports.handler = async (event, context, callback) => {
         description: "Uploads and updates the Speckle objects in the server.",
         icon: "send",
         allowBucketing: true,
+        customComponent: false,
         parameters : [ ],
       }),
     }

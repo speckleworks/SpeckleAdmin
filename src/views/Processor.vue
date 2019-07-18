@@ -167,7 +167,7 @@ export default {
           if (Object.keys(bar).length >= 3)
             break
         }
-        bar['_hidden'] = `... (${this.blockOutput[this.blockOutput.length - 1].length - 3} more objects)`
+        bar['_hidden'] = `... (${Object.keys(this.blockOutput[this.blockOutput.length - 1]).length - 3} more objects)`
         return this.removeArraysRecursive( bar )
       }
     }
@@ -359,9 +359,12 @@ export default {
     updateParam ( payload ) {
       this.blockOutput.splice(payload.index, this.blockOutput.length - payload.index)
       this.blockStatus.splice(payload.index, this.blockStatus.length - payload.index)
-
+      
       this.processor.params[payload.index] = Object.assign({}, ...
         Object.entries(payload.params).filter(([k,v]) => {
+          if (v === null)
+            return false
+
           if (typeof v == 'boolean')
             return v
           

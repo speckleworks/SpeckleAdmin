@@ -11,6 +11,7 @@ exports.handler = async (event, context, callback) => {
         description: "Embeds the results of a REST API call into each object. Assumes that the REST API accepts batch (array) inputs.",
         icon: "swap_horiz",
         allowBucketing: true,
+        customComponent: false,
         parameters : [
           {
             name: "apiUrl",

@@ -9,6 +9,7 @@ exports.handler = async (event, context, callback) => {
         description: "Takes the objects and sends them as a new stream. If the objects have been modified, use the Upload Speckle Object block before in order to update the objects in the server.",
         icon: "cloud_upload",
         allowBucketing: false,
+        customComponent: false,
         parameters : [
           {
             name: "streamName",
