@@ -232,7 +232,7 @@ export default {
         {
           // Try to chunk the payload if it is an array
           var bucket = [ ],
-            maxReq = 50 // magic number; maximum objects to request in a bucket
+            maxReq = 250 // magic number; maximum objects to request in a bucket
 
           var output = [ ]
 
