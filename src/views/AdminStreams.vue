@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12>
+    <v-flex xs12 md8>
       <v-text-field
         solo
         v-model="search"
@@ -9,6 +9,15 @@
         single-line
         hide-details
       ></v-text-field>
+    </v-flex>
+    <v-flex xs12 md1>
+      <v-btn :disabled="buttonsDisabled" flat class='transparent' @click="archiveSelected(true)">Archive</v-btn>
+    </v-flex>
+    <v-flex xs12 md1>
+      <v-btn :disabled="buttonsDisabled" flat class='transparent' @click="archiveSelected(false)">Restore</v-btn>
+    </v-flex>
+    <v-flex xs12 md1>
+      <v-btn :disabled="buttonsDisabled" flat color='error' class='transparent' @click='showWarning = true'>Delete</v-btn>
     </v-flex>
     <v-flex xs12>
       <v-data-table
@@ -23,16 +32,32 @@
         <template v-slot:items="props">
           <tr :active="props.selected" @click="props.selected = !props.selected">
             <td>
-              <v-checkbox :input-value="props.selected" primary hide-details></v-checkbox>
+              <v-checkbox color='primary' :input-value="props.selected" primary hide-details></v-checkbox>
             </td>
             <td>{{ props.item.name }}</td>
             <td>{{ props.item.streamId }}</td>
             <td>{{ props.item.owner }}</td>
             <td>{{ props.item.private }}</td>
+            <td>
+              <v-checkbox disabled hide-details class="align-center justify-left" v-model=props.item.deleted></v-checkbox>
+            </td>
           </tr>
         </template>
       </v-data-table>
     </v-flex>
+    <v-dialog v-model="showWarning" max-width="500">
+      <v-card>
+        <v-card-title>
+          <span class="headline font-weight-light"><strong>Permanently</strong> delete these streams?</span>
+          <v-progress-linear color='error' indeterminate v-show='showDeleteProgress'/>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer/>
+          <v-btn flat color='error' class='transparent' @click="deleteSelected()">Delete Permanently</v-btn>
+          <v-btn @click="showWarning = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 <script>
@@ -47,17 +72,16 @@ export default {
   components: {},
   watch: {},
   computed: {
-    streams() {
-      return this.streamsResource
-        .filter(stream => stream.parent == null && stream.deleted === false)
-        .sort((a, b) => {
-          return new Date(b.updatedAt) - new Date(a.updatedAt);
-        });
+    buttonsDisabled(){
+      if (this.selected.length > 0){
+        return false
+      }
+      return true
     }
   },
   data() {
     return {
-      streamsResource: [],
+      streams: [],
       isGettingStreamData: false,
       selected: [],
       search: "",
@@ -65,8 +89,11 @@ export default {
         { text: "Name", value: "name" },
         { text: "Id", value: "streamdId" },
         { text: "Owner", value: "owner" },
-        { text: "Private", value: "private" }
-      ]
+        { text: "Private", value: "private" },
+        { text: "Archived", value: "deleted"}
+      ],
+      showWarning: false,
+      showDeleteProgress: false
     };
   },
   methods: {
@@ -74,7 +101,7 @@ export default {
       this.isGettingStreamData = true;
       Axios.get("streams/admin")
         .then(res => {
-          this.streamsResource = res.data.resources;
+          this.streams = res.data.resources;
           this.isGettingStreamData = false;
         })
         .catch(err => {
@@ -82,6 +109,29 @@ export default {
           // TODO: Handle error
           console.error(err);
         });
+    },
+    archiveSelected(boolean){
+      let streamsToModify = this.selected.length
+      this.selected.forEach(stream => {
+        Axios.put("streams/" + stream.streamId, {deleted: boolean } ).then(res => {
+          streamsToModify -= 1
+          if (streamsToModify == 0) this.fetchData()
+        })
+      })
+    },
+    deleteSelected(){
+      this.showDeleteProgress = true
+      let streamsToDelete = this.selected.length
+      this.selected.forEach(stream => {
+        Axios.delete("streams/" + stream.streamId).then(res => {
+          streamsToDelete -= 1
+          if (streamsToDelete == 0) {
+            this.showDeleteProgress = false
+            this.showWarning = false
+            this.fetchData()
+          }
+        })
+      })
     }
   },
   mounted() {
