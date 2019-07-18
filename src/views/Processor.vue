@@ -144,7 +144,7 @@ export default {
       delete copy.anonymousComments
       delete copy.comments
 
-      return window.location.origin + "/#/processors/import?processor=" + btoa(JSON.stringify(copy))
+      return window.location.origin + "/#/processors/import?processor=" + btoa(encodeURI(JSON.stringify(copy)))
     },
     successRun( ) {
       if (this.blockStatus.length > 0 && this.blockStatus.length == this.processor.blocks.length)
@@ -377,7 +377,8 @@ export default {
     },
 
     updateName( args ) {
-      this.$store.dispatch( 'updateProcessor', { _id: this.id, name: args.text } )
+      this.processor.name = args.text
+      this.$store.dispatch( 'updateProcessor', { _id: this.id, name: this.processor.name } )
     },
 
     updateTags: debounce( function( e ) {
@@ -425,9 +426,11 @@ export default {
     if (this.id == 'import')
     {
       var parsed = null
+      
       try
       {
-        parsed = JSON.parse(atob(this.$route.query.processor))
+        console.log(this.$route.query.processor)
+        parsed = JSON.parse(decodeURI(atob(this.$route.query.processor)))
       }
       catch
       {
@@ -436,6 +439,8 @@ export default {
       }
 
       if (parsed)
+      {
+        parsed.name = 'Imported: ' + parsed.name
         this.$store.dispatch( 'createProcessor', parsed )
           .then( res => {
             this.processor = res
@@ -449,6 +454,7 @@ export default {
             console.log( 'failed to import' )
             this.$router.push( `/processors/` )
           })
+      }
     }
     else
     {

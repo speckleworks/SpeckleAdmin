@@ -80,7 +80,7 @@ exports.handler = async (event, context, callback) => {
   
   if (parameters.outputPath === null || parameters.outputPath === undefined)
       parameters.outputPath = ''
-
+  
   // Try to send stream objects
   var output = [ ]
   var validObjects = [ ]
@@ -144,13 +144,26 @@ exports.handler = async (event, context, callback) => {
     var objResult = result.data.splice(0,1)[0]
     var outputObj = JSON.parse(JSON.stringify(obj))
     
-    objResult.arupComputeResultItems.forEach( res => {
+    if (objResult.arupComputeResultItems.length === 1)
       outputObj = set(
         outputObj,
-        parameters.outputPath.replace("/^.+|.+$/g", '') + '.' + res.symbol,
-        res.value
+        parameters.outputPath.replace("/^.+|.+$/g", ''),
+        objResult.arupComputeResultItems[0].value
       )
-    })
+    else if (objResult.arupComputeResultItems.length > 0)
+      objResult.arupComputeResultItems.forEach( res => {
+        outputObj = set(
+          outputObj,
+          parameters.outputPath.replace("/^.+|.+$/g", '') + '.' + res.symbol,
+          res.value
+        )
+      })
+    else
+      outputObj = set(
+        outputObj,
+        parameters.outputPath.replace("/^.+|.+$/g", ''),
+        objResult.result
+      )
 
     delete outputObj.hash
 
