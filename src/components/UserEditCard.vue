@@ -79,6 +79,7 @@ export default {
     saveUser() {
       this.showProgress = true
       let payload = {
+        _id: this.user._id,
         name: this.user.name,
         surname: this.user.surname,
         company: this.user.company,
@@ -86,17 +87,11 @@ export default {
         role: this.user.role,
         archived: this.user.archived
       };
-      let self = this
-      Axios.put("accounts/" + this.user._id, payload).then(res => {
-        self.showProgress = false
-        if (res.data.success === true){
-          return self.$emit("close-dialog-success")
-        }
-        return console.error("Unable to update user")
+      this.$store.dispatch('updateUserAdmin', payload)
+      .then (() => {
+        this.showProgress = false
+        this.$emit('close-dialog')
       })
-    },
-    deleteUser() {
-      console.log("deleteUser is not implemented");
     },
     closeDialog() {
       this.$emit("close-dialog");

@@ -82,6 +82,9 @@ export default {
   watch: {
   },
   computed: {
+    projects(){
+      return this.$store.state.admin.projects
+    },
     buttonsDisabled(){
       if (this.selected.length > 0){
         return false
@@ -92,7 +95,6 @@ export default {
   },
   data( ) {
     return {
-      projects: [],
       isGettingProjectData: false,
       selected: [],
       search: "",
@@ -111,19 +113,6 @@ export default {
     }
   },
   methods: {
-    fetchData() {
-      this.isGettingProjectData = true
-      Axios.get( 'projects/admin' )
-        .then( res => {
-          this.projects = res.data.resources
-          this.isGettingProjectData = false
-        } )
-        .catch( err => {
-          this.isGettingProjectData = false
-          // TODO: Handle error
-          console.error( err )
-        } )
-    },
     ownerName(owner){
       Axios.get( `accounts/${owner}` )
         .then( res => {
@@ -137,41 +126,16 @@ export default {
         } )
     },
     archiveSelected(boolean){
-      let projectsToModify = this.selected.length
       this.selected.forEach(project => {
-        Axios.put("projects/" + project._id, {deleted: boolean } ).then(res => {
-          projectsToModify -= 1
-          if (projectsToModify == 0) this.fetchData()
-        })
-        .catch( err => {
-          // TODO: Handle error
-          console.error( err )
-          return "Coundn't archive project"
-        } )
-      })
+      this.$store.dispatch( 'updateProject', { _id: project._id, deleted: boolean } )})
     },
     deleteSelected(){
-      this.showDeleteProgress = true
-      let projectsToDelete = this.selected.length
       this.selected.forEach(project => {
-        Axios.delete("projects/" + project._id).then(res => {
-          projectsToDelete -= 1
-          if (projectsToDelete == 0) {
-            this.showDeleteProgress = false
-            this.showWarning = false
-            this.fetchData()
-          }
-        })
-        .catch( err => {
-          // TODO: Handle error
-          console.error( err )
-          return "Coundn't delete project"
-        } )
-      })
-    }
+      this.$store.dispatch( 'deleteProject', project )})
+      this.showWarning = false
+    },
   },
   mounted( ) {
-    this.fetchData()
   }
 }
 

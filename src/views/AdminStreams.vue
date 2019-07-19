@@ -23,7 +23,6 @@
       <v-data-table
         :items="streams"
         :headers="headers"
-        :loading="isGettingStreamData"
         :search="search"
         v-model="selected"
         item-key="name"
@@ -49,7 +48,6 @@
       <v-card>
         <v-card-title>
           <span class="headline font-weight-light"><strong>Permanently</strong> delete these streams?</span>
-          <v-progress-linear color='error' indeterminate v-show='showDeleteProgress'/>
         </v-card-title>
         <v-card-actions>
           <v-spacer/>
@@ -77,12 +75,13 @@ export default {
         return false
       }
       return true
+    },
+    streams(){
+      return this.$store.state.admin.streams
     }
   },
   data() {
     return {
-      streams: [],
-      isGettingStreamData: false,
       selected: [],
       search: "",
       headers: [
@@ -93,49 +92,21 @@ export default {
         { text: "Archived", value: "deleted"}
       ],
       showWarning: false,
-      showDeleteProgress: false
     };
   },
   methods: {
-    fetchData() {
-      this.isGettingStreamData = true;
-      Axios.get("streams/admin")
-        .then(res => {
-          this.streams = res.data.resources;
-          this.isGettingStreamData = false;
-        })
-        .catch(err => {
-          this.isGettingStreamData = false;
-          // TODO: Handle error
-          console.error(err);
-        });
-    },
     archiveSelected(boolean){
-      let streamsToModify = this.selected.length
       this.selected.forEach(stream => {
-        Axios.put("streams/" + stream.streamId, {deleted: boolean } ).then(res => {
-          streamsToModify -= 1
-          if (streamsToModify == 0) this.fetchData()
-        })
+        this.$store.dispatch( 'updateStream', { streamId: stream.streamId, deleted: boolean } )
       })
     },
     deleteSelected(){
-      this.showDeleteProgress = true
-      let streamsToDelete = this.selected.length
       this.selected.forEach(stream => {
-        Axios.delete("streams/" + stream.streamId).then(res => {
-          streamsToDelete -= 1
-          if (streamsToDelete == 0) {
-            this.showDeleteProgress = false
-            this.showWarning = false
-            this.fetchData()
-          }
-        })
+        this.$store.dispatch( 'deleteStream', stream )
       })
     }
   },
   mounted() {
-    this.fetchData();
   }
 };
 </script>

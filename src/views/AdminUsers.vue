@@ -12,30 +12,31 @@
     </v-flex>
     <v-flex xs12>
       <v-data-table
-        :items='streams'
+        disable-initial-sort
+        :items='users'
         :headers='headers'
         :loading='isGettingUsersData'
         :search='search'
         v-model="selected"
-        
         item-key="name"
       >
         <template v-slot:items="props">
           <tr :active="props.selected" @click="props.selected = !props.selected">
-            <td>{{ props.item.email }}</td>
-            <td>{{ props.item.name }}</td>
-            <td >{{ props.item.surname }}</td>
-            <td >{{ props.item.role }} </td>
-            <td >{{ props.item.company }}</td>
-            <td>{{ props.item.createdAt }}</td>
-            <td>{{ props.item.logins.length }}</td>
-            <td>
-              <v-checkbox disabled hide-details class="align-center justify-center" v-model=props.item.archived></v-checkbox>
-            </td>
             <td>
               <v-btn right icon>
                 <v-icon small @click='editUser(props.item)'>edit</v-icon>
               </v-btn>
+            </td>
+            <td>{{ props.item._id  }}</td>
+            <td>{{ props.item.email }}</td>
+            <td>{{ props.item.name }}</td>
+            <td>{{ props.item.surname }}</td>
+            <td>{{ props.item.role }} </td>
+            <td>{{ props.item.company }}</td>
+            <td>{{ props.item.createdAt }}</td>
+            <td>{{ props.item.logins.length }}</td>
+            <td>
+              <v-checkbox disabled hide-details class="align-center justify-center" v-model=props.item.archived></v-checkbox>
             </td>
           </tr>
         </template>
@@ -49,7 +50,6 @@
 <script>
 import debounce from 'lodash.debounce'
 import union from 'lodash.union'
-import Axios from 'axios'
 import uuid from 'uuid/v4'
 import papa from 'papaparse'
 import UsersEditCard from '../components/UserEditCard'
@@ -62,8 +62,8 @@ export default {
   watch: {
   },
   computed: {
-    streams( ) {
-      return this.usersResource
+    users( ) {
+      return this.$store.state.admin.users
     },
   },
   data( ) {
@@ -74,6 +74,8 @@ export default {
       userToEdit: null,
       search:'',
       headers: [
+        { text: 'Edit', value: '' },
+        { text: 'Id', value: '_id'},
         { text: 'Email', value: 'email'},
         { text: 'Name', value: 'name'},
         { text: 'Surname', value: 'surname' },
@@ -82,25 +84,11 @@ export default {
         { text: 'Joined', value: 'name'},
         { text: 'Logins', value: 'logins.length' },
         { text: 'Archived', value: 'archived' },
-        { text: 'Edit', value: '' },
       ],
       showEditDialog: false
     }
   },
   methods: {
-    fetchData() {
-      this.isGettingUsersData = true
-      Axios.get( 'accounts/admin' )
-        .then( res => {
-          this.usersResource = res.data.resource
-          this.isGettingUsersData = false
-        } )
-        .catch( err => {
-          this.isGettingUsersData = false
-          // TODO: Handle error
-          console.error( err )
-        } )
-    },
     editUser(user){
       this.showEditDialog = true
       this.userToEdit = user
@@ -110,11 +98,9 @@ export default {
     },
     closeDialogSuccess(){
       this.showEditDialog = false
-      this.fetchData()
     }
   },
   mounted( ) {
-    this.fetchData()
   }
 }
 

@@ -36,7 +36,11 @@ export default {
   },
   methods: {
   },
-  created( ) {}
+  created( ) {
+      this.$store.dispatch( 'getStreamsAdmin' )
+      this.$store.dispatch( 'getProjectsAdmin' )
+      this.$store.dispatch( 'getUsersAdmin' )
+  }
 }
 
 </script>
