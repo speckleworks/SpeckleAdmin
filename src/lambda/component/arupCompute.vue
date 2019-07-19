@@ -142,9 +142,7 @@ export default {
         method: 'GET',
         url: `${payload.api}?flat=true`,
         baseURL: `https://arupcompute-dev.azurewebsites.net/`,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        }
+        crossDomain : true,
       })
       .then ( res =>{
         this.functions = res.data
@@ -216,14 +214,11 @@ export default {
     }
   },
   created () {
-
     Axios({
       method: 'GET',
       url: `api`,
       baseURL: `https://arupcompute-dev.azurewebsites.net/`,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      }
+      crossDomain : true,
     })
     .then ( res =>{
       this.libraries = res.data
