@@ -6,6 +6,8 @@ import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
 import flatten from 'flat'
 
+import { LambdaSettings } from './lambda/_lambdaSettings.js'
+
 Vue.use( Vuex )
 
 function removeArraysRecursive( foo ) {
@@ -60,7 +62,7 @@ export default new Vuex.Store( {
     // global store for users. it's dynamically assembled as the end-user moves through
     // the admin ui, and new user profiles need to be requested.
     users: [ ],
-    // viewer related
+    // viewer/processor related
     loadedStreamIds: [ ],
     objects: [ ],
     legend: null,
@@ -70,7 +72,13 @@ export default new Vuex.Store( {
     // app dark mode?
     dark: false,
     // toggles viewer controls
-    viewerControls: true
+    viewerControls: true,
+
+    // processor related
+    // these are the function names for each block from /src/lambda
+    // if you want to add your own lambda, add the function/file name to the list to expose it
+    lambdas: [ ],
+    processors: [ ],
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -328,6 +336,38 @@ export default new Vuex.Store( {
         console.log( `Failed to remove project ${props._id} from store.` )
     },
 
+    // Processors
+    ADD_LAMBDAS( state, lambdas ) {
+      lambdas.forEach( lambda => {
+        if ( state.lambdas.findIndex( p => p.function === lambda.function ) === -1 ) {
+          state.lambdas.push( lambda )
+        }
+      } )
+    },
+    ADD_PROCESSORS( state, processors ) {
+      processors.forEach( processor => {
+        if ( state.processors.findIndex( p => p._id === processor._id ) === -1 ) {
+          // potentially enforce here extra fields
+          if ( !processor.tags ) processor.tags = [ ]
+          state.processors.unshift( processor )
+        }
+      } )
+    },
+    UPDATE_PROCESSOR( state, props ) {
+      let found = state.processors.find( p => p._id == props._id )
+
+      Object.keys( props ).forEach( key => {
+        found[ key ] = props[ key ]
+      } )
+    },
+    DELETE_PROCESSOR( state, props ) {
+      let index = state.processors.findIndex( p => p._id === props._id )
+      if ( index > -1 ) {
+        state.processors.splice( index, 1 )
+      } else
+        console.log( `Failed to remove processor ${props._id} from store.` )
+    },
+
     // Users
     ADD_USER( state, user ) {
       let found = state.users.find( u => u._id === user._id )
@@ -576,6 +616,13 @@ export default new Vuex.Store( {
           .catch( err => reject( err ) )
       } )
     },
+    createObjects( context, objects ) {
+      return new Promise( (resolve, reject) => {
+        Axios.post(`objects`, objects)
+        .then( res => resolve( res.data.resources ) )
+        .catch( err => reject( err ))
+      })
+    },
 
     // projects
     getProject( context, props ) {
@@ -763,6 +810,151 @@ export default new Vuex.Store( {
         } )
     } ),
 
+    // processors
+    loadLambdas ( context ) {
+      return new Promise(( resolve, reject ) => {
+        let promises = []
+        let myLambdas = new LambdaSettings().Lambdas
+
+        for(let i = 0; i < myLambdas.length; i++)
+        {
+          promises.push(
+            Axios({
+              method: 'GET',
+              url: `.netlify/functions/${myLambdas[i]}`,
+              baseURL: location.protocol + '//' + location.host,
+            })
+          )
+        }
+
+        Promise.all(promises)
+          .then( res => {
+            var lambdas = []
+
+            res.forEach( r => {
+              let data = r.data
+              data.function = r.request.responseURL.split('/').slice(-1).pop()
+              lambdas.push(data)
+            })
+
+            context.commit( 'ADD_LAMBDAS', lambdas )
+            return resolve ( lambdas )
+          } )
+      }) 
+
+
+    },
+    getProcessor( context, props ) {
+      var processor = JSON.parse(window.localStorage.getItem("processor_" + props._id))
+
+      if (processor !== null)
+        context.commit( 'ADD_PROCESSORS', [ processor ] )
+
+      return processor
+    },
+    getProcessors( context ) {
+      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+
+      if (processorIds === null)
+        return null
+      
+      var processors = [ ]
+      processorIds.forEach( id => {
+        var processor = JSON.parse(window.localStorage.getItem("processor_" + id))
+        if (processor != null)
+          processors.push(processor)
+      })
+
+      context.commit( 'ADD_PROCESSORS', processors )
+
+      return processors
+    },
+    createProcessor( context, processor ) {
+      var id = uuid()
+      
+      var proc = processor ? processor : { name: 'A new speckle processor' }
+      
+      // Always assign new ID
+      proc._id = id
+
+      if (!proc.hasOwnProperty('description'))
+        proc.description = "This is a simple speckle processor."
+      
+      if (!proc.hasOwnProperty('tags'))
+        proc.tags = [ ]
+        
+      if (!proc.hasOwnProperty('blocks'))
+        proc.blocks = [ ]
+      
+      if (!proc.hasOwnProperty('params'))
+        proc.params = [ ]
+
+      // Properties added for compatibility with other components
+      // as well as for future storage in server
+      proc.owner = context.state.user._id
+      proc.private = false
+      proc.canRead = [ context.state.user._id ]
+      proc.canWrite = [ context.state.user._id ]
+
+      proc.anonymousComments = false
+      proc.comments = []
+
+      window.localStorage.setItem(
+        "processor_" + id,
+        JSON.stringify(proc)
+      )
+
+      context.commit( 'ADD_PROCESSORS', [ proc ] )
+
+      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+
+      if (processorIds === null)
+        processorIds = [ ]
+      
+      processorIds.unshift(id)
+
+      window.localStorage.setItem(
+        "processorIds",
+        JSON.stringify(processorIds)
+      )
+
+      return proc
+    },
+    updateProcessor( context, props ) {
+      let found = JSON.parse(window.localStorage.getItem("processor_" + props._id))
+
+      Object.keys( props ).forEach( key => {
+        found[ key ] = props[ key ]
+      } )
+      window.localStorage.setItem(
+        "processor_" + props._id,
+        JSON.stringify(found)
+      )
+
+      context.commit( 'UPDATE_PROCESSOR', props )
+    },
+    deleteProcessor( context, props ) {
+      window.localStorage.removeItem("processor_" + props._id)
+
+      context.commit( 'DELETE_PROCESSOR', props )
+
+      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+
+      if (processorIds !== null)
+      {
+        var foundIndex = processorIds.indexOf(props._id)
+        if (foundIndex !== -1)
+        {
+          processorIds.splice(foundIndex, 1)
+          
+          window.localStorage.setItem(
+            "processorIds",
+            JSON.stringify(processorIds)
+          )
+        }
+      }
+    },
+    
     // client for ws ids, etc.
     createClient: ( context, props ) => new Promise( ( resolve, reject ) => {
 
@@ -830,6 +1022,6 @@ export default new Vuex.Store( {
       context.commit( 'FLUSH_ALL' )
       localStorage.removeItem( 'token' )
       Axios.defaults.headers.common[ 'Authorization' ] = ''
-    }
-  },
-} )
+    },
+  }
+})
