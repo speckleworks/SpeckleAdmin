@@ -328,6 +328,16 @@ let Converter = {
     } )
   },
 
+  Structural1DElement( args, cb ) {
+    console.log( args.obj )
+    args.obj.value = args.obj.properties.structural.resultVertices
+    this.Polyline( { obj: args.obj }, ( err, obj ) => {
+      if ( err ) return cb( err, null )
+      console.log( obj )
+      return cb( null, obj )
+    } )
+  },
+
   Polyline( args, cb ) {
     let geometry = new THREE.BufferGeometry( )
 
@@ -335,6 +345,7 @@ let Converter = {
       args.obj.value.push( args.obj.value[ 0 ], args.obj.value[ 1 ], args.obj.value[ 2 ] )
 
     geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
+    geometry.addAttribute( 'colors', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
     geometry.computeBoundingSphere( )
 
     let polyline = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
