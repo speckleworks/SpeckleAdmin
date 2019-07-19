@@ -150,11 +150,9 @@ exports.handler = async (event, context, callback) => {
     var objResult
 
     if (parameters.selectedFunction.inputs.length > 0)
-      objResult = result.data.splice(0,1)[0]
+      objResult = Array.isArray(result.data) ? result.data.splice(0,1)[0] : result.data
     else
-    {
       objResult = Array.isArray(result.data) ? result.data[0] : result.data
-    }
     
     try
     {
