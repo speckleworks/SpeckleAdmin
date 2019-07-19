@@ -138,13 +138,17 @@ export default {
     selectLibrary ( payload ) {
       this.functions.slice(0, this.functions.length)
       
-      Axios({
-        method: 'GET',
-        url: `${payload.api}?flat=true`,
+      var auth = Axios.defaults.headers.common["Authorization"]
+      delete Axios.defaults.headers.common["Authorization"]
+
+      Axios.get(`${payload.api}?flat=true`, {
         baseURL: `https://arupcompute-dev.azurewebsites.net/`,
         crossDomain : true,
+        headers: null,
       })
       .then ( res =>{
+        Axios.defaults.headers.common["Authorization"] = auth
+
         this.functions = res.data
         this.functions.sort((x, y) => (x.name.toLowerCase() > y.name.toLowerCase()) ? 1 : -1)
 
@@ -214,13 +218,15 @@ export default {
     }
   },
   created () {
-    Axios({
-      method: 'GET',
-      url: `api`,
+    var auth = Axios.defaults.headers.common["Authorization"]
+    delete Axios.defaults.headers.common["Authorization"]
+    Axios.get(`api`, {
       baseURL: `https://arupcompute-dev.azurewebsites.net/`,
       crossDomain : true,
+      headers: null,
     })
     .then ( res =>{
+      Axios.defaults.headers.common["Authorization"] = auth
       this.libraries = res.data
       this.libraries.sort((x, y) => (x.name.toLowerCase() > y.name.toLowerCase()) ? 1 : -1)
       
