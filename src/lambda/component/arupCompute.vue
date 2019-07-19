@@ -116,7 +116,7 @@
 import Axios from 'axios'
 
 export default {
-  name: 'ProcessorBlock',
+  name: 'ArupCompute',
   components: {
   },
   props: {

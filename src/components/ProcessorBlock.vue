@@ -42,7 +42,7 @@
             :block='block'
             :params='params'
             v-if="this.block.customComponent"
-            v-bind:is="this.block.function"
+            v-bind:is="customComponent"
             v-on:update-param="updateParams">
           </component>
           <v-layout row wrap v-else-if="this.block.parameters.length > 0">
@@ -161,13 +161,11 @@
 <script>
 
 import VueJsonPretty from 'vue-json-pretty'
-import ArupCompute from '../lambda/component/arupCompute.vue'
 
 export default {
   name: 'ProcessorBlock',
   components: {
-    VueJsonPretty,
-    ArupCompute
+    VueJsonPretty
   },
   props: {
     index: null,
@@ -177,6 +175,9 @@ export default {
     params: { },
   },
   computed: {
+    customComponent () {
+      return () => import(`../lambda/component/${this.block.function}.vue`)
+    },
     arrayParams( ) {
       return this.block.parameters.filter(p => p.type == 'array')
     },
