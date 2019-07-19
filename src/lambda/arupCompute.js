@@ -169,6 +169,8 @@ exports.handler = async (event, context, callback) => {
 
     output.push(outputObj)
   }
+  
+  output.push(...invalidObjects)
 
   return {
     statusCode: 200,

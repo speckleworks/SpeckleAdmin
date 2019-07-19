@@ -31,7 +31,7 @@
         v-model="params.selectedFunction"
         v-on:input="selectFunction"
         :loading="functions.length === 0"
-        label="Select a library">
+        label="Select a function">
         <template slot="item" slot-scope="functions">
           <div>
             {{functions.item.name}}

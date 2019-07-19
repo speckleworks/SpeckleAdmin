@@ -824,7 +824,6 @@ export default new Vuex.Store( {
             })
           )
         }
-        console.log(promises)
 
         Promise.all(promises)
           .then( res => {

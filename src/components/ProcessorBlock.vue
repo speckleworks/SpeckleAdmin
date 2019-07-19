@@ -199,7 +199,6 @@ export default {
         return Object.keys(this.output).length
     },
     responseObject() {
-      console.log(this.numOutput)
       if (this.numOutput <= 10)
         return this.removeArraysRecursive( this.output )
       else

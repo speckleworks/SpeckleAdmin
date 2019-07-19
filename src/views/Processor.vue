@@ -107,7 +107,9 @@
       </v-flex>
     </v-layout>
     <v-btn color="primary" dark fixed large bottom right fab @click="runProcessor">
-      <v-icon>
+      <v-progress-circular v-if="isRunning" indeterminate>
+      </v-progress-circular>
+      <v-icon v-else>
         {{this.successRun ? "replay" : "play_arrow"}}
       </v-icon>
     </v-btn>
@@ -308,8 +310,9 @@ export default {
             return
           }
         }
-        this.isRunning = false
       }
+
+      this.isRunning = false
     },
 
     callLambda( func, input, params ) {
