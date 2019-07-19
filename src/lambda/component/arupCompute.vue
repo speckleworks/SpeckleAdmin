@@ -5,7 +5,7 @@
         return-object
         :items="libraries"
         item-text="name"
-        item-value="name"
+        item-value="api"
         v-model="params.selectedLibrary"
         v-on:input="selectLibrary"
         :loading="libraries.length === 0"
@@ -27,7 +27,7 @@
         return-object
         :items="functions"
         item-text="name"
-        item-value="name"
+        item-value="api"
         v-model="params.selectedFunction"
         v-on:input="selectFunction"
         :loading="functions.length === 0"

@@ -93,83 +93,113 @@ exports.handler = async (event, context, callback) => {
     data: { }
   }
 
-  for (let obj of input) {
-    var skip = false
-    var tempDict = { }
+  if (parameters.selectedFunction.inputs.length > 0)
+  {
+    for (let obj of input) {
+      var skip = false
+      var tempDict = { }
 
-    for (let i = 0; i < Object.keys(parameters.pathData).length; i++)
-    {
-      let k = Object.keys(parameters.pathData)[i]
-      tempDict[k] = get(obj, parameters.pathData[k])
-      if (tempDict[k] == null)
+      for (let i = 0; i < Object.keys(parameters.pathData).length; i++)
       {
-        invalidObjects.push(obj)
-        skip = true
-        break
+        let k = Object.keys(parameters.pathData)[i]
+        tempDict[k] = get(obj, parameters.pathData[k])
+        if (tempDict[k] == null)
+        {
+          invalidObjects.push(obj)
+          skip = true
+          break
+        }
+      }
+
+      if (skip) continue
+
+      for (let key in parameters.valueData)
+        tempDict[key] = parameters.valueData[key]
+
+      for (let k in tempDict) {
+        var arr = get(restInput, 'data.' + k)
+        if (arr == null)
+          arr = [ ]
+        arr.push(tempDict[k])
+
+        restInput = set(
+          restInput,
+          'data.' + k,
+          arr
+        )
+      }
+
+      validObjects.push(obj)
+    }
+    if (Object.keys(restInput.data).length == 0)
+    {
+      return{
+        statusCode: 200,
+        body: JSON.stringify(input)
       }
     }
-
-    if (skip) continue
-
-    for (let key in parameters.valueData)
-      tempDict[key] = parameters.valueData[key]
-
-    for (let k in tempDict) {
-      var arr = get(restInput, 'data.' + k)
-      if (arr == null)
-        arr = [ ]
-      arr.push(tempDict[k])
-
-      restInput = set(
-        restInput,
-        'data.' + k,
-        arr
-      )
-    }
-
-    validObjects.push(obj)
   }
-
-  if (Object.keys(restInput.data).length == 0)
-  {
-    return{
-      statusCode: 200,
-      body: JSON.stringify(input)
-    }
-  }
+  else
+    validObjects = input
 
   let result = await callAPI(restInput)
-
+  
   for (let obj of validObjects) {
-    var objResult = result.data.splice(0,1)[0]
     var outputObj = JSON.parse(JSON.stringify(obj))
+
+    var objResult
+
+    if (parameters.selectedFunction.inputs.length > 0)
+      objResult = result.data.splice(0,1)[0]
+    else
+    {
+      objResult = Array.isArray(result.data) ? result.data[0] : result.data
+    }
     
-    if (objResult.arupComputeResultItems.length === 1)
-      outputObj = set(
-        outputObj,
-        parameters.outputPath.replace("/^.+|.+$/g", ''),
-        objResult.arupComputeResultItems[0].value
-      )
-    else if (objResult.arupComputeResultItems.length > 0)
-      objResult.arupComputeResultItems.forEach( res => {
+    try
+    {
+      if (objResult.arupComputeResultItems.length === 1)
+      {
         outputObj = set(
           outputObj,
-          parameters.outputPath.replace("/^.+|.+$/g", '') + '.' + res.symbol,
-          res.value
+          parameters.outputPath.replace("/^.+|.+$/g", ''),
+          objResult.arupComputeResultItems[0].value
         )
-      })
-    else
+      }
+      else if (objResult.arupComputeResultItems.length > 0)
+      {
+        objResult.arupComputeResultItems.forEach( res => {
+          outputObj = set(
+            outputObj,
+            parameters.outputPath.replace("/^.+|.+$/g", '') + '.' + res.symbol,
+            res.value
+          )
+        })
+      }
+      else
+      {
+        outputObj = set(
+          outputObj,
+          parameters.outputPath.replace("/^.+|.+$/g", ''),
+          objResult.result
+        )
+      }
+    }
+    catch
+    {
+      // Desperately stuff all data in there :O
       outputObj = set(
         outputObj,
         parameters.outputPath.replace("/^.+|.+$/g", ''),
-        objResult.result
+        objResult.hasOwnProperty('result') ? objResult.result : objResult
       )
+    }
 
     delete outputObj.hash
 
     output.push(outputObj)
   }
-  
+
   output.push(...invalidObjects)
 
   return {
