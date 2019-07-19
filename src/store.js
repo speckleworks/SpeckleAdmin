@@ -90,7 +90,8 @@ export default new Vuex.Store( {
       filters.forEach( query => {
         query.key = query.key.toLowerCase( )
         if ( query.value === null ) base = base
-        else
+        else {
+          base = base.filter( stream => stream.name !== '' )
           switch ( query.key ) {
             case 'private':
               if ( query.value )
@@ -126,6 +127,7 @@ export default new Vuex.Store( {
               base = base.filter( stream => stream.streamId.toLowerCase( ).includes( query.value.toLowerCase( ) ) )
               break
           }
+        }
       } )
       return base
     },
