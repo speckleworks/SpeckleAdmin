@@ -626,6 +626,8 @@ export default new Vuex.Store( {
             stream.streamId = res.data.resource.streamId
             res.data.resource.onlineEditable = true
             context.commit( 'ADD_STREAMS', [ res.data.resource ] )
+            //namespacing the admin module caused other issues, so we'll call this here as well
+            context.commit( 'ADD_STREAMS_ADMIN', [ res.data.resource ] )
             return Axios.put( `streams/${res.data.resource.streamId}`, stream )
           } )
           .then( res => {
@@ -750,6 +752,8 @@ export default new Vuex.Store( {
         Axios.post( `projects`, project ? project : { name: 'A new speckle project' } )
           .then( res => {
             context.commit( 'ADD_PROJECTS', [ res.data.resource ] )
+            //namespacing the admin module caused other issues, so we'll call this here as well
+            context.commit( 'ADD_PROJECTS_ADMIN', [ res.data.resource ] )
             return resolve( res.data.resource )
           } )
           .catch( err => {
