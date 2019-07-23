@@ -106,6 +106,7 @@ const adminStore = {
     },
     UPDATE_PROJECT( state, props ) {
       let found = state.projects.find( p => p._id === props._id )
+      if (null == found) return 
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )

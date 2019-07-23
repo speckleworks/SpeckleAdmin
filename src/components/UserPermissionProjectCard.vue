@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     canEdit(){
-      return this.user.surname.includes(`(that is you!)`) || this.globalDisabled || this.user.isOwner || this.$store.state.user.role === 'admin'
+      return this.user.surname.includes(`(that is you!)`) || !this.globalDisabled || this.$store.state.user.role === 'admin'
     },
     hasWritePermissionStreams(){
       return this.project.permissions.canWrite.indexOf( this.user._id ) > -1
