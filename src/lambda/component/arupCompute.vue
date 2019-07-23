@@ -1,5 +1,5 @@
 <template>
-  <v-layout v-if="isAuthenticated" row wrap>
+  <v-layout row wrap>
     <v-flex xs12>
       <v-autocomplete
         return-object
@@ -110,13 +110,6 @@
     </v-flex>
 
   </v-layout>
-  <v-layout v-else row wrap>
-    <v-flex xs12>
-      <v-alert :value="true" type="error" flat outline >
-        Not authenticated
-      </v-alert>
-    </v-flex>
-  </v-layout>
 </template>
 <script>
 
@@ -140,41 +133,6 @@ export default {
   computed: {
     inputs () {
       return Object.assign({ }, this.params.valueData, this.params.pathData)
-    },
-    isAuthenticated () {
-      var tokenID = 'msal|' + this.block.msal.clientId
-      if (this.$store.state.tokens.hasOwnProperty(tokenID))
-      {
-        if (this.libraries.length === 0)
-        {
-          Axios.get(`api`, {
-            baseURL: `https://compute.arup.digital/`,
-            headers: {
-              Authorization: 'Bearer ' + this.token
-            }
-          })
-          .then ( res =>{
-            this.libraries = res.data
-            this.libraries.sort((x, y) => (x.name.toLowerCase() > y.name.toLowerCase()) ? 1 : -1)
-            
-            if (this.params.selectedLibrary)
-              this.selectLibrary (this.params.selectedLibrary)
-          })
-          .catch (err => {
-            console.log(err)
-            if (err.response.status === 401)
-            {
-              this.$store.commit('DELETE_TOKEN', tokenID)
-              this.$store.dispatch('authenticateBlocks', [ this.block ])
-            }
-          })
-          return false
-        }
-        else
-          return true
-      }
-      else
-        return false
     },
     token () {
       return this.$store.state.tokens['msal|' + this.block.msal.clientId]
@@ -258,7 +216,36 @@ export default {
         
       this.$emit('update-param', this.params)
     },
+    async getLibraries ( rerun = false ) {
+      Axios.get(`api`, {
+        baseURL: `https://compute.arup.digital/`,
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+      .then ( res =>{
+        this.libraries = res.data
+        this.libraries.sort((x, y) => (x.name.toLowerCase() > y.name.toLowerCase()) ? 1 : -1)
+        
+        if (this.params.selectedLibrary)
+          this.selectLibrary (this.params.selectedLibrary)
+      })
+      .catch (err => {
+        console.log(err)
+        if (err.response.status === 401 && !rerun)
+        {
+          this.$store.commit('DELETE_TOKEN', 'msal|' + this.block.msal.clientId)
+          this.$store.dispatch('authenticateBlocks', [ this.block ])
+          .then(res => {
+            this.getLibraries(true)
+          })
+        }
+      })
+    }
   },
+  created () {
+    this.getLibraries()
+  }
 }
 </script>
 <style scoped lang='scss'>

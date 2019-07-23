@@ -37,86 +37,100 @@
           </span>
         </v-card-title>
         <v-divider v-if="this.block.parameters.length > 0" class='mx-0 my-0'></v-divider>
-        <v-card-text v-if="this.block.parameters.length > 0">
-          <component
-            :block='block'
-            :params='params'
-            v-if="this.block.customComponent"
-            v-bind:is="customComponent"
-            v-on:update-param="updateParams">
-          </component>
-          <v-layout row wrap v-else-if="this.block.parameters.length > 0">
-            <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>
-              <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
-              </v-combobox>
-            </v-flex>
-            <v-flex xs12 sm6 md3 v-for='param in stringParams' :key='param.name'>
-              <v-text-field :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
-              </v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md3 v-for='param in booleanParams' :key='param.name'>
-              <v-checkbox :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
-              </v-checkbox>
-            </v-flex>
-            <v-flex xs12 sm12 md12 v-for='param in objectarrayParams' :key='param.name'>
-              <v-card outlined>
-                <v-flex>
-                  <span class='font-weight-light mr-3'>{{param.name}}</span>
-                  <v-dialog :persistent='true' v-model="displayDialog[param.name]" max-width='300'>
-                    <template v-slot:activator="{ on }">
-                      <v-btn round small v-on="on">
-                        <v-icon small>add</v-icon>
-                        <span class="mx-2">new entry</span>
-                      </v-btn>
+        <div v-if="isAuthenticated">
+          <v-card-text v-if="this.block.customComponent">
+            <component
+              :block='block'
+              :params='params'
+              v-bind:is="customComponent"
+              v-on:update-param="updateParams">
+            </component>
+          </v-card-text>
+          <v-card-text v-else-if="this.block.parameters.length > 0 && isAuthenticated">
+            <v-layout row wrap>
+              <v-flex xs12 sm6 md3 v-for='param in arrayParams' :key='param.name'>
+                <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
+                </v-combobox>
+              </v-flex>
+              <v-flex xs12 sm6 md3 v-for='param in stringParams' :key='param.name'>
+                <v-text-field :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
+                </v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md3 v-for='param in booleanParams' :key='param.name'>
+                <v-checkbox :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
+                </v-checkbox>
+              </v-flex>
+              <v-flex xs12 sm12 md12 v-for='param in objectarrayParams' :key='param.name'>
+                <v-card outlined>
+                  <v-flex>
+                    <span class='font-weight-light mr-3'>{{param.name}}</span>
+                    <v-dialog :persistent='true' v-model="displayDialog[param.name]" max-width='300'>
+                      <template v-slot:activator="{ on }">
+                        <v-btn round small v-on="on">
+                          <v-icon small>add</v-icon>
+                          <span class="mx-2">new entry</span>
+                        </v-btn>
+                      </template>
+                      <v-card>
+                        <v-card-title class='title font-weight-light'>
+                          {{objectArrayIndex == -1 ? 'New Entry' : 'Modify Entry'}}
+                        </v-card-title>
+                        <v-card-text>
+                          <v-layout row wrap>
+                            <v-flex xs12 sm12 md12 v-for='header in param.headers' :key='param.name + "_" + header'>
+                              <v-text-field :label='header' v-model='objectArrayItem[header]'>
+                              </v-text-field>
+                            </v-flex>
+                          </v-layout>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-btn flat color='primary' @click='addObjectArrayItem(param)'>
+                            {{objectArrayIndex == -1 ? 'Add' : 'Modify'}}
+                          </v-btn>
+                          <v-btn flat color='primary' @click='resetObjectArrayDialog(param)'>
+                            Cancel
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-flex>
+                  <v-data-table disable-initial-sort hide-actions :headers='tableHeader(param.headers)' :items='params[param.name]'>
+                    <template v-slot:items="props">
+                      <td v-for='p in Object.entries(props.item)' :key='p[0]'>{{p[1]}}</td>
+                      <td width='200px'>
+                        <v-btn flat icon small @click="deleteObjectArrayItem(param, props.index)">
+                          <v-icon small>
+                            delete
+                          </v-icon>
+                        </v-btn>
+                        <v-btn flat icon small @click="editObjectArrayItem(param, props.index)">
+                          <v-icon small>
+                            edit
+                          </v-icon>
+                        </v-btn>
+                      </td>
                     </template>
-                    <v-card>
-                      <v-card-title class='title font-weight-light'>
-                        {{objectArrayIndex == -1 ? 'New Entry' : 'Modify Entry'}}
-                      </v-card-title>
-                      <v-card-text>
-                        <v-layout row wrap>
-                          <v-flex xs12 sm12 md12 v-for='header in param.headers' :key='param.name + "_" + header'>
-                            <v-text-field :label='header' v-model='objectArrayItem[header]'>
-                            </v-text-field>
-                          </v-flex>
-                        </v-layout>
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-btn flat color='primary' @click='addObjectArrayItem(param)'>
-                          {{objectArrayIndex == -1 ? 'Add' : 'Modify'}}
-                        </v-btn>
-                        <v-btn flat color='primary' @click='resetObjectArrayDialog(param)'>
-                          Cancel
-                        </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </v-flex>
-                <v-data-table disable-initial-sort hide-actions :headers='tableHeader(param.headers)' :items='params[param.name]'>
-                  <template v-slot:items="props">
-                    <td v-for='p in Object.entries(props.item)' :key='p[0]'>{{p[1]}}</td>
-                    <td width='200px'>
-                      <v-btn flat icon small @click="deleteObjectArrayItem(param, props.index)">
-                        <v-icon small>
-                          delete
-                        </v-icon>
-                      </v-btn>
-                      <v-btn flat icon small @click="editObjectArrayItem(param, props.index)">
-                        <v-icon small>
-                          edit
-                        </v-icon>
-                      </v-btn>
-                    </td>
-                  </template>
-                  <template v-slot:no-data>
-                    <td v-for='h in param.headers' :key='h'></td>
-                    <td width='10%'></td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-card-text>
+                    <template v-slot:no-data>
+                      <td v-for='h in param.headers' :key='h'></td>
+                      <td width='10%'></td>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-flex>
+            </v-layout>
+          </v-card-text>
+        </div>
+        <div v-else>
+          <v-card-text>
+            <v-layout row wrap>
+              <v-flex xs12 class="text-xs-center">
+                <v-btn @click="$store.dispatch('authenticateBlocks', [block])" round depressed color="primary">
+                  Authenticate
+                </v-btn>
+              </v-flex>
+            </v-layout>
+          </v-card-text>
+        </div>
         <v-progress-linear
           color='primary'
           v-bind:indeterminate="this.status == 'running'">
@@ -175,6 +189,19 @@ export default {
     params: { },
   },
   computed: {
+    isAuthenticated () {
+      // Maybe add other auth methods?
+      if (this.block.msal)
+      {
+        var tokenID = 'msal|' + this.block.msal.clientId
+        if (this.$store.state.tokens.hasOwnProperty(tokenID))
+          return true
+        
+        return false
+      }
+
+      return true
+    },
     customComponent () {
       return () => import(`../lambda/component/${this.block.function}.vue`)
     },

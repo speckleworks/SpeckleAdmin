@@ -352,7 +352,6 @@ export default {
         this.processor.params.push({})
       }
       this.updateBlock ( )
-      this.$store.dispatch('authenticateBlocks', this.processor.blocks)
     },
 
     removeBlock ( index ) {
