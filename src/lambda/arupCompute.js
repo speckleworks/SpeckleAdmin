@@ -34,6 +34,14 @@ exports.handler = async (event, context, callback) => {
             type: "string",
           }
         ],
+        msal :{
+          clientId: "b69b78cf-f613-4bd2-ad91-df0c8f86835b",
+          authority: "https://login.microsoftonline.com/4ae48b41-0137-4599-8661-fc641fe77bea",
+          loginRequest: 
+          {
+            scopes: ["api://df8247c5-9e83-4409-9946-6daf9722271a/access_as_user"]
+          }
+        }
       }),
     }
   }
@@ -89,8 +97,11 @@ exports.handler = async (event, context, callback) => {
   var restInput = {
     method: 'POST',
     url: parameters.selectedFunction.api,
-    baseURL: `https://arupcompute-dev.azurewebsites.net/api`,
-    data: { }
+    baseURL: `https://compute.arup.digital/api`,
+    data: { },
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
   }
 
   if (parameters.selectedFunction.inputs.length > 0)
@@ -213,6 +224,7 @@ function callAPI ( payload ) {
       url: payload.url,
       baseURL: payload.baseURL,
       data: payload.data,
+      headers: payload.headers
     })
       .then (res => resolve( res ))
       .catch( err => reject( err ))

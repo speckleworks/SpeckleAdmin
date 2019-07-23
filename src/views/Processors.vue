@@ -144,8 +144,7 @@ export default {
       this.isSearching = false
       this.searchfilter = e
     }, 1000 ),
-  },
-  created( ) {}
+  }
 }
 
 </script>

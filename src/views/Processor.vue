@@ -154,7 +154,7 @@ export default {
 
       return false
     },
-    responseObject() {
+    responseObject( ) {
       if (!this.successRun)
         return null
 
@@ -228,6 +228,8 @@ export default {
       {
         this.blockStatus.push('running')
 
+        var token = this.getToken(this.processor.blocks[i])
+
         var params = this.processor.params[i] ? this.processor.params[i] : new Object
         
         if (this.processor.blocks[i].allowBucketing && blockInput.constructor === Array)
@@ -245,7 +247,7 @@ export default {
             if ( j % maxReq === 0 && j !== 0 ) {
               try
               {
-                let result = await this.callLambda( this.processor.blocks[i].function, bucket, params )
+                let result = await this.callLambda( this.processor.blocks[i].function, bucket, params, token )
                 if (result.data.constructor === Array)
                   output.push(...result.data)
                 else
@@ -267,7 +269,7 @@ export default {
           if ( bucket.length > 0 ) {
             try
             {
-              let result = await this.callLambda( this.processor.blocks[i].function, bucket, params )
+              let result = await this.callLambda( this.processor.blocks[i].function, bucket, params, token )
 
               if (result.data.constructor === Array)
                 output.push(...result.data)
@@ -295,7 +297,7 @@ export default {
         {
           try
           {
-            let result = await this.callLambda( this.processor.blocks[i].function, blockInput, params )
+            let result = await this.callLambda( this.processor.blocks[i].function, blockInput, params, token )
             this.blockStatus.pop()
             this.blockStatus.push('success')
             this.blockOutput.push(result.data)
@@ -315,7 +317,7 @@ export default {
       this.isRunning = false
     },
 
-    callLambda( func, input, params ) {
+    callLambda( func, input, params, token ) {
       return new Promise((resolve, reject) => {
         Axios({
           method: 'POST',
@@ -323,7 +325,7 @@ export default {
           baseURL: location.protocol + '//' + location.host,
           data: {
             baseUrl: this.$store.state.server,
-            token: Axios.defaults.headers.common[ 'Authorization' ],
+            token: token,
             input: input,
             parameters: params,
           },
@@ -349,7 +351,8 @@ export default {
         this.processor.blocks.push( sender )
         this.processor.params.push({})
       }
-      this.updateBlock ( );
+      this.updateBlock ( )
+      this.$store.dispatch('authenticateBlocks', this.processor.blocks)
     },
 
     removeBlock ( index ) {
@@ -358,7 +361,7 @@ export default {
 
       this.processor.params.splice(index, 1)
       this.processor.blocks.splice(index, 1)
-      this.updateBlock ( );
+      this.updateBlock ( )
     },
 
     updateParam ( payload ) {
@@ -376,7 +379,7 @@ export default {
           return Object.keys(v).length > 0
         }).map(([k,v]) => ({[k]:v}))
       )
-      this.updateBlock ( );
+      this.updateBlock ( )
     },
 
     updateName( args ) {
@@ -422,6 +425,18 @@ export default {
       }
       return bar
     },
+
+    getToken( block ) {
+      if (block.msal)
+      {
+        var tokenID = 'msal|' + block.msal.clientId
+
+        if (this.$store.state.tokens.hasOwnProperty(tokenID))
+          return this.$store.state.tokens[tokenID]
+      }
+
+      return Axios.defaults.headers.common[ 'Authorization' ]
+    }
   },
   activated( ) {
     this.id = this.$route.params.processorId
@@ -450,6 +465,8 @@ export default {
             this.id = this.processor._id
             this.$router.replace( `${this.id}` )
 
+            this.$store.dispatch('authenticateBlocks', this.processor.blocks)
+
             console.log( 'activated' )
             this.isLoading = false
           })
@@ -467,6 +484,8 @@ export default {
             this.$router.push( `/processors/` )
           
           this.processor = res
+
+          this.$store.dispatch('authenticateBlocks', this.processor.blocks)
 
           console.log( 'activated' )
         })

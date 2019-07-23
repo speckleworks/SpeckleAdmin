@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Axios from 'axios'
+import * as Msal from 'msal'
 
 import uniq from 'lodash.uniq'
 import uuid from 'uuid/v4'
@@ -38,6 +39,51 @@ function getStructuralArrPropKeys( foo ) {
     }
   }
   return bar
+}
+
+async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
+  // TODO: THIS CANNOT BE CALLED MULTIPLE TIMES!!!
+  // DEPENDS ON LOCAL STORAGE TO PROPERLY OBTAIN CLIENTID
+  var userAgent = new Msal.UserAgentApplication({
+    auth: {
+      clientId: clientId,
+      authority: authority,
+      redirectUri: window.location.origin + "/msal.html"
+    },
+    cache: {
+      cacheLocation: "localStorage",
+      storeAuthStateInCookie: true
+    },
+  })
+
+  var token = await userAgent.getCachedToken(clientId)
+
+  if (token)
+    return token.accessToken
+
+  try
+  {
+    token = await userAgent.acquireTokenSilent(loginRequest)
+  }
+  catch (e)
+  {
+    console.log(e.errorCode)
+    if (e.errorCode === "user_login_error")
+    {
+      window.localStorage.msalClientId = clientId
+      await userAgent.loginPopup(loginRequest)
+      delete window.localStorage.msalClientId
+      token = getTokenMSAL( {clientId: clientId, authority: authority, loginRequest: loginRequest})
+    }
+    else if (e.errorCode === "token_renewal_error")
+    {
+      window.localStorage.msalClientId = clientId
+      token = await userAgent.acquireTokenPopup(loginRequest)
+      delete window.localStorage.msalClientId
+    }
+  }
+  
+  return token.accessToken
 }
 
 export default new Vuex.Store( {
@@ -79,6 +125,7 @@ export default new Vuex.Store( {
     // if you want to add your own lambda, add the function/file name to the list to expose it
     lambdas: [ ],
     processors: [ ],
+    tokens: { },
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -366,6 +413,14 @@ export default new Vuex.Store( {
         state.processors.splice( index, 1 )
       } else
         console.log( `Failed to remove processor ${props._id} from store.` )
+    },
+    ADD_TOKEN( state, {id, token} ) {
+      Vue.set(state.tokens, id, token)
+      console.log(state.tokens)
+    },
+    DELETE_TOKEN( state, id ) {
+      Vue.delete(state.tokens, id)
+      console.log(state.tokens)
     },
 
     // Users
@@ -951,6 +1006,17 @@ export default new Vuex.Store( {
             "processorIds",
             JSON.stringify(processorIds)
           )
+        }
+      }
+    },
+    async authenticateBlocks( context, blocks ) {
+      for (let i = 0; i < blocks.length; i++)
+      {
+        if(blocks[i].msal)
+        {
+          let propName = 'msal|' + blocks[i].msal.clientId
+          let token = await getTokenMSAL(blocks[i].msal)
+          context.commit( 'ADD_TOKEN', {id: propName, token: token})
         }
       }
     },
