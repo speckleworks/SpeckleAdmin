@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12 md9>
+    <v-flex xs12 md8>
       <v-text-field
           solo
           v-model="search"
