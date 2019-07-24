@@ -124,9 +124,11 @@
           <v-card-text>
             <v-layout row wrap>
               <v-flex xs12 class="text-xs-center">
-                <v-btn @click="$store.dispatch('authenticateBlocks', [block])" round depressed color="primary">
+                <v-btn v-if="!isAuthenticating" @click="authenticate()" round depressed color="primary">
                   Authenticate
                 </v-btn>
+                <v-progress-circular v-else indeterminate color="primary">
+                </v-progress-circular>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -247,6 +249,8 @@ export default {
       displayDialog: { },
       objectArrayItem: { },
       objectArrayIndex: -1,
+
+      isAuthenticating: false,
     }
   },
   methods: {
@@ -313,7 +317,22 @@ export default {
     updateParams ( payload ) {
       this.params = payload
       this.$emit('update-param', {index: this.index, params: this.params})
+    },
+    authenticate ( ) {
+      if (this.isAuthenticated)
+        return
+      
+      this.isAuthenticating = true
+      this.$store.dispatch('authenticateBlocks', [this.block])
+      .then( res => {
+        this.isAuthenticating = false
+      })
+      .catch( err => {
+        console.log(err)
+        this.isAuthenticated = false
+      })
     }
+
   },
   created () {
   }

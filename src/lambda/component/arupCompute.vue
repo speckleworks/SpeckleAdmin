@@ -234,11 +234,15 @@ export default {
         console.log(err)
         if (err.response.status === 401 && !rerun)
         {
-          this.$store.commit('DELETE_TOKEN', 'msal|' + this.block.msal.clientId)
           this.$store.dispatch('authenticateBlocks', [ this.block ])
           .then(res => {
             this.getLibraries(true)
           })
+        }
+        else
+        {
+          console.log('Unable to access ArupCompute')
+          this.$store.commit('DELETE_TOKEN', 'msal|' + this.block.msal.clientId)
         }
       })
     }

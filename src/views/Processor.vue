@@ -464,8 +464,6 @@ export default {
             this.id = this.processor._id
             this.$router.replace( `${this.id}` )
 
-            this.$store.dispatch('authenticateBlocks', this.processor.blocks)
-
             console.log( 'activated' )
             this.isLoading = false
           })
@@ -483,8 +481,6 @@ export default {
             this.$router.push( `/processors/` )
           
           this.processor = res
-
-          this.$store.dispatch('authenticateBlocks', this.processor.blocks)
 
           console.log( 'activated' )
         })

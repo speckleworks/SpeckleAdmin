@@ -67,13 +67,13 @@ async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
   }
   catch (e)
   {
-    console.log(e.errorCode)
+    console.log('MSAL Error: ' + e.errorCode)
     if (e.errorCode === "user_login_error")
     {
       window.localStorage.msalClientId = clientId
       await userAgent.loginPopup(loginRequest)
       delete window.localStorage.msalClientId
-      token = getTokenMSAL( {clientId: clientId, authority: authority, loginRequest: loginRequest})
+      return await getTokenMSAL( {clientId: clientId, authority: authority, loginRequest: loginRequest})
     }
     else if (e.errorCode === "token_renewal_error")
     {
