@@ -1,9 +1,10 @@
 <template>
-  <v-card tile class='pa-3 elevation-0' v-if='user'>
+  <v-card tile class='pa-3 elevation-0' v-if='user' :class="{ disabled: user.archived }">
     <v-layout row wrap align-center justify-space-between>
       <v-flex xs8>
         <span>{{user.name}} {{user.surname}}</span><br>
-        <span class='caption'>{{user.company}}</span>
+        <span class='caption'>{{user.company}}</span><br>
+        <span class='caption' v-if='user.archived'>archived</span>
       </v-flex>
       <v-flex xs4>
         <!-- write streams -->
@@ -32,7 +33,8 @@ export default {
   },
   computed: {
     canEdit(){
-      return this.user.surname.includes(`(that is you!)`) || !this.globalDisabled || this.$store.state.user.role === 'admin'
+      console.log(!this.user.archived)
+      return (this.user.surname.includes(`(that is you!)`) || !this.globalDisabled || this.$store.state.user.role === 'admin') && !this.user.archived
     },
     hasWritePermissionStreams(){
       return this.project.permissions.canWrite.indexOf( this.user._id ) > -1
@@ -57,4 +59,8 @@ export default {
 
 </script>
 <style scoped lang='scss'>
+.disabled {
+  
+  color: lightgrey
+}
 </style>
