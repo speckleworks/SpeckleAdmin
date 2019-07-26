@@ -109,7 +109,7 @@ function isWithin (obj, sourceLocation, maxDistance, allowNonGeometry)
   }
   else if (obj.type.startsWith("Polycurve"))
   {
-    if (obj.segments.some(x => isWithin(x, sourceLocation, maxDistance)))
+    if (obj.segments.some(x => isWithin(x, sourceLocation, maxDistance, allowNonGeometry)))
       return true
   }
   else if (obj.type.startsWith("Box"))
@@ -154,7 +154,7 @@ function isWithin (obj, sourceLocation, maxDistance, allowNonGeometry)
   }
   else if (obj.type.startsWith("Brep"))
   {
-    // TODO
+    if (isWithin(obj.displayValue, sourceLocation, maxDistance, allowNonGeometry))
     return false
   }
   else if (obj.type.startsWith("Extrusion"))

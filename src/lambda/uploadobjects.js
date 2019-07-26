@@ -6,8 +6,8 @@ exports.handler = async (event, context, callback) => {
       statusCode: 200,
       body: JSON.stringify({
         name: "Upload Speckle Objects",
-        description: "Uploads and updates the Speckle objects in the server.",
-        icon: "send",
+        description: "Uploads and updates the Speckle objects in the server. Use in conjunction with Upload Speckle Objects to update new objects.",
+        icon: "arrow_upward",
         allowBucketing: true,
         customComponent: false,
         parameters : [ ],
