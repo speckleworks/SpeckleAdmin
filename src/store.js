@@ -917,7 +917,7 @@ export default new Vuex.Store( {
       processorIds.forEach( id => {
         var processor = JSON.parse(window.localStorage.getItem("processor_" + id))
         if (processor != null)
-          processors.push(processor)
+          processors.unshift(processor)
       })
 
       context.commit( 'ADD_PROCESSORS', processors )

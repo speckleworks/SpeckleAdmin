@@ -18,6 +18,10 @@ exports.handler = async (event, context, callback) => {
             type: "string",
           },
           {
+            name: "apiMethod",
+            type: "string",
+          },
+          {
             name: "inputMap",
             type: "objectarray",
             headers: ["source", "target"]
@@ -59,58 +63,75 @@ exports.handler = async (event, context, callback) => {
   var invalidObjects = [ ]
   
   var restInput = {
-    method: 'POST',
+    method: parameters.apiMethod,
     url: parameters.apiUrl,
     data: { }
   }
 
-  for (let obj of input) {
-    var skip = false
-    var tempDict = { }
+  var result
 
-    for (let i = 0; i < parameters.inputMap.length; i++)
-    {
-      tempDict[parameters.inputMap[i].target] = get(obj, parameters.inputMap[i].source)
-      if (tempDict[parameters.inputMap[i].target] == null)
+  if (parameters.inputMap !== undefined && parameters.inputMap.length > 0)
+  {
+    for (let obj of input) {
+      var skip = false
+      var tempDict = { }
+
+      for (let i = 0; i < parameters.inputMap.length; i++)
       {
-        invalidObjects.push(obj)
-        skip = true
-        break
+        tempDict[parameters.inputMap[i].target] = get(obj, parameters.inputMap[i].source)
+        if (tempDict[parameters.inputMap[i].target] == null)
+        {
+          invalidObjects.push(obj)
+          skip = true
+          break
+        }
+      }
+
+      if (skip) continue
+
+      for (let k in tempDict) {
+        var arr = get(restInput, 'data.' + k)
+        if (arr == null)
+          arr = [ ]
+        arr.push(tempDict[k])
+
+        restInput = set(
+          restInput,
+          'data.' + k,
+          arr
+        )
+      }
+
+      validObjects.push(obj)
+    }
+
+    if (Object.keys(restInput.data).length == 0)
+    {
+      return{
+        statusCode: 200,
+        body: JSON.stringify(input)
       }
     }
-
-    if (skip) continue
-
-    for (let k in tempDict) {
-      var arr = get(restInput, 'data.' + k)
-      if (arr == null)
-        arr = [ ]
-      arr.push(tempDict[k])
-
-      restInput = set(
-        restInput,
-        'data.' + k,
-        arr
-      )
-    }
-
-    validObjects.push(obj)
+    
+    result = await callAPI(restInput)
   }
-
-  if (Object.keys(restInput.data).length == 0)
-  {
-    return{
-      statusCode: 200,
-      body: JSON.stringify(input)
-    }
-  }
+  else
+    validObjects = input
   
-  let result = await callAPI(restInput)
-
   for (let obj of validObjects) {
-    var objResult = result.data.splice(0,1)[0]
+
     var outputObj = JSON.parse(JSON.stringify(obj))
 
+    var objResult
+
+    if (parameters.inputMap !== undefined && parameters.inputMap.length > 0)
+      objResult = Array.isArray(result.data) ? result.data.splice(0,1)[0] : result.data
+    else
+    {
+      result = await callAPI(restInput)
+      objResult = Array.isArray(result.data) ? result.data[0] : result.data
+    }
+    
     for (let i = 0; i < parameters.resultMap.length; i++)
     {
       outputObj = set(
