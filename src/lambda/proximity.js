@@ -123,14 +123,15 @@ function isWithin (obj, sourceLocation, maxDistance, allowNonGeometry)
       {
         for (let z = 0; z < 2; z++)
         {
-          flatPoints.push(originPoint[0] + x === 0 ? obj.xSize.start : obj.xSize.end)
-          flatPoints.push(originPoint[1] + y === 0 ? obj.ySize.start : obj.ySize.end)
-          flatPoints.push(originPoint[2] + z === 0 ? obj.zSize.start : obj.zSize.end)
+          flatPoints.push(originPoint[0] + (x === 0 ? obj.xSize.start : obj.xSize.end))
+          flatPoints.push(originPoint[1] + (y === 0 ? obj.ySize.start : obj.ySize.end))
+          flatPoints.push(originPoint[2] + (z === 0 ? obj.zSize.start : obj.zSize.end))
         }
       }
     }
-    // TODO
-    return false
+    
+    if (distances(sourceLocation, flatPoints).some(x => x <= maxDistance))
+      return true
   }
   else if (obj.type.startsWith("Line"))
   {
