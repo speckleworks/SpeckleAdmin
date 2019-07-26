@@ -52,7 +52,7 @@
                 <v-combobox multiple small-chips :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
                 </v-combobox>
               </v-flex>
-              <v-flex xs12 sm6 md3 v-for='param in stringParams' :key='param.name'>
+              <v-flex xs12 sm6 md3 v-for='param in genericParams' :key='param.name'>
                 <v-text-field :label='param.name' v-model='params[param.name]' @change="$emit('update-param', {index: index, params: params})">
                 </v-text-field>
               </v-flex>
@@ -210,11 +210,11 @@ export default {
     arrayParams( ) {
       return this.block.parameters.filter(p => p.type == 'array')
     },
-    stringParams( ) {
-      return this.block.parameters.filter(p => p.type == 'string')
-    },
     booleanParams( ) {
       return this.block.parameters.filter(p => p.type == 'boolean')
+    },
+    genericParams( ) {
+      return this.block.parameters.filter(p => ['string', 'int', 'double'].includes(p.type))
     },
     objectarrayParams( ) {
       return this.block.parameters.filter(p => p.type == 'objectarray')

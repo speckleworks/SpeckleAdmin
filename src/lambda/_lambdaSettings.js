@@ -1,3 +1,3 @@
 export function LambdaSettings() {
-  this.Lambdas = [ "receiver", "filter", "sender", "restAPI", "uploadobjects", "arupCompute" ]
+  this.Lambdas = [ "receiver", "filter", "sender", "restAPI", "uploadobjects", "arupCompute", "proximity"]
 }
