@@ -93,6 +93,25 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
+      path: '/admin',
+      name: '',
+      component: ( ) => import( './views/Admin.vue' ),
+      meta: { requiresAuth: true },
+      children: [ {
+        name: 'admin users',
+        path: '',
+        component: ( ) => import( './views/AdminUsers.vue' )
+      }, {
+        name: 'admin streams',
+        path: 'streams',
+        component: ( ) => import( './views/AdminStreams.vue' )
+      }, {
+        name: 'admin projects',
+        path: 'projects',
+        component: ( ) => import( './views/AdminProjects.vue' )
+      } ]
+    },
+    {
       path: '/processors',
       name: 'processors',
       component: ( ) => import( './views/Processors.vue' ),

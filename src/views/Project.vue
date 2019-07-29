@@ -60,7 +60,7 @@ export default {
   props: {},
   computed: {
     canEdit( ) {
-      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
+      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1 || this.$store.state.user.role === 'admin'
     },
     project( ) {
       return this.$store.state.projects.find( p => p._id === this.$route.params.projectId )

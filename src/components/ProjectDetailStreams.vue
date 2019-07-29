@@ -20,7 +20,7 @@
             </v-list-tile-sub-title>
           </v-list-tile-content>
           <v-list-tile-action>
-            <v-btn small icon @click.stop.native='removeStream(stream.streamId)'><v-icon>close</v-icon></v-btn>
+            <v-btn :disabled='!canEdit' small icon @click.stop.native='removeStream(stream.streamId)'><v-icon>close</v-icon></v-btn>
           </v-list-tile-action>
         </v-list-tile>
       </v-list>
@@ -49,7 +49,7 @@ export default {
       return this.$store.state.streams.filter( stream => this.streams.indexOf( stream.streamId ) !== -1 )
     },
     canEdit( ) {
-      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
+      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1 || this.$store.state.user.role === 'admin'
     },
   },
   watch: {},
