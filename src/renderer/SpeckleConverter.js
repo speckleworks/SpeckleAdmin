@@ -46,16 +46,6 @@ class MaterialManager {
     return this.meshGhostMat
   }
 
-  getLineGhostMat( ) {
-    if ( this.lineGhostMat ) return this.lineGhostMat
-    return null // TODO
-  }
-
-  getPointGhostMat( ) {
-    if ( this.pointGhostMat ) return this.pointGhostMat
-    return null // TODO
-  }
-
   getMeshMaterial( color ) {
     let c = colourNameToHex( color.hex )
     if ( c !== false ) color.hex = c
@@ -68,10 +58,12 @@ class MaterialManager {
   getLineMaterial( color ) {
     let c = colourNameToHex( color.hex )
     if ( c !== false ) color.hex = c
+    console.log( color.hex )
     return new THREE.LineBasicMaterial( {
       color: new THREE.Color( color.hex ),
-      linewidth: 2,
-      opacity: color.a
+      linewidth: 1,
+      opacity: color.a,
+      transparent: true
     } )
   }
 
@@ -91,7 +83,7 @@ class MaterialManager {
 // the conversion logic; needs cleanup
 let Converter = {
   materialManager: new MaterialManager( ),
-  defaultColor: new THREE.Color( '#FC02FF' ),
+  defaultColor: new THREE.Color( '#909090' ),
 
   // https://stackoverflow.com/a/1568551/3446736
   getSignedVolumeOfTriangle( p1x, p1y, p1z, p2x, p2y, p2z, p3x, p3y, p3z ) {
@@ -336,8 +328,21 @@ let Converter = {
     } )
   },
 
+  Structural1DElement( args, cb ) {
+    console.log( args.obj )
+    args.obj.value = args.obj.properties.structural.resultVertices
+    this.Polyline( { obj: args.obj }, ( err, obj ) => {
+      if ( err ) return cb( err, null )
+      console.log( obj )
+      return cb( null, obj )
+    } )
+  },
+
   Polyline( args, cb ) {
     let geometry = new THREE.BufferGeometry( )
+
+    if ( args.obj.closed )
+      args.obj.value.push( args.obj.value[ 0 ], args.obj.value[ 1 ], args.obj.value[ 2 ] )
 
     geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
     geometry.computeBoundingSphere( )

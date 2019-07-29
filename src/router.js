@@ -110,6 +110,18 @@ let myRouter = new Router( {
         path: 'projects',
         component: ( ) => import( './views/AdminProjects.vue' )
       } ]
+    },
+    {
+      path: '/processors',
+      name: 'processors',
+      component: ( ) => import( './views/Processors.vue' ),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/processors/:processorId',
+      name: 'processor overview',
+      component: ( ) => import( './views/Processor.vue' ),
+      meta: { requiresAuth: true },
     }
   ],
   // scrollBehavior( to, from, savedPosition ) {
