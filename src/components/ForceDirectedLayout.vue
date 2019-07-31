@@ -26,29 +26,54 @@ export default {
     showDocGroups: Array,
     clientdatafilter: Array,
     timeFilter: Array,
-    dateFilter: Array,
     toggleDrag: Boolean,
     userLinksForce: Number,
     documentLinksForce: Number,
-    switchForce: Boolean
+    switchForce: Boolean,
+    collapse: Boolean
   },
 
   watch: {
+    collapse: function(){
+      console.log(this.forceLinks)
+      if(this.collapse){
+        console.log('collapsed')
+
+        var links = this.clientdata[1]
+        for (var i = 0; i < this.forceLinks.length; i++) {
+          if(this.forceLinks[i].sourceDoc){
+            this.forceLinks[i].source.index = this.forceLinks[i].sourceDoc
+          }
+          if(this.forceLinks[i].targetDoc){
+            this.forceLinks[i].target.index = this.forceLinks[i].targetDoc
+          }
+        }
+      }else{
+        console.log('expanded')
+        var links = this.clientdata[1]
+        for (var i = 0; i < this.forceLinks.length; i++) {
+          if(this.forceLinks[i].sourceClient){
+            this.forceLinks[i].source.index = this.forceLinks[i].sourceClient
+          }
+          if(this.forceLinks[i].targetClient){
+            this.forceLinks[i].target.index = this.forceLinks[i].targetClient
+            
+          }
+        }
+        
+      }
+      this.drawGraph();
+    },
     switchForce: function(){
       if(this.switchForce){
-        // docs
         var filterLinks = this.forceLinks.filter(d => d.type != "documentGuidForceGroup");
         this.$data.force.links(filterLinks).start()
       }else{
-        // users
         var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
         this.$data.force.links(filterLinks).start()
       }
     },
     userLinksForce: function(){
-
-
-
       this.$data.force.linkDistance(d => {
           if (d.type == "ownerForceGroup") {
             return this.userLinksForce;
@@ -58,25 +83,20 @@ export default {
             return 116;
           }
         }).start();
-        //this.drawGraph()
     },
     documentLinksForce: function(){
-      
+      this.$data.force.linkDistance(d => {
+        if (d.type == "ownerForceGroup") {
+          return this.userLinksForce;
+        } else if (d.type == "documentGuidForceGroup") {
+          return this.documentLinksForce;
+        } else {
+          return 116;
+        }
+      }).start();
 
-          this.$data.force.linkDistance(d => {
-          if (d.type == "ownerForceGroup") {
-            return this.userLinksForce;
-          } else if (d.type == "documentGuidForceGroup") {
-            return this.documentLinksForce;
-          } else {
-            return 116;
-          }
-        }).start();
-        //this.drawGraph()
     },
     toggleDrag: function(){
-      console.log('lol')
-      console.log(this.clientdata[0])
       if(this.toggleDrag){
         d3.selectAll('circle').classed("fixed", (d) => {d.fixed = true});
         d3.selectAll('rect').classed("fixed", (d) => {d.fixed = true});
@@ -84,33 +104,18 @@ export default {
         d3.selectAll('circle').classed("fixed", (d) => {d.fixed = false});
         d3.selectAll('rect').classed("fixed", (d) => {d.fixed = false});
       }
-      // Array.from(document.querySelector('#circleSender').children).forEach(function(node) {
-      //     d3.select(node).classed("fixed", d.fixed = true);
-      // });
-      //d3.select(this).classed("fixed", d.fixed = true);
     },
     clientdatafilter: function (){
       console.log('ooups')
       console.log(this.timeFilter)
     },
-    dateFilter: function(){ 
-      console.log('lol')
-    },
-    timeFilter: function (){
 
+    timeFilter: function (){
       this.updateDisplayNodes("#circleSender")
       this.updateDisplayNodes("#circleReceiver")
       this.updateDisplayNodes("#rectStream")
       this.updateDisplayNodes("#text")
       this.updateDisplayLinks("#pathLink")
-      //this.updateDisplayHull()
-      //
-      
-      
-      // var myHull = document.querySelector("#hullDoc")
-      // myHull.style.display = "none"
-      // myHull.innerHTML = "";
-
     },
 
   },
@@ -184,25 +189,28 @@ export default {
   methods: {
 
     updateDisplayLinks(id){
+      console.log(this.timeFilter[0])
       var context = this
       Array.from(document.querySelector(id).children).forEach(function(node) {
-          if((node.getAttribute("source_timestamp") >= context.timeFilter[0] && node.getAttribute("source_timestamp") <= context.timeFilter[1]) &&
-          (node.getAttribute("target_timestamp") >= context.timeFilter[0] && node.getAttribute("target_timestamp") <= context.timeFilter[1])
+
+          var nodeTimeComparerSource = new Date(node.getAttribute("source_timestamp")).toISOString().split('.')[0]+".000Z"
+          var nodeTimeComparerTarget = new Date(node.getAttribute("target_timestamp")).toISOString().split('.')[0]+".000Z"
+          
+          if((nodeTimeComparerSource >= context.timeFilter[0] && nodeTimeComparerSource <= context.timeFilter[1]) &&
+          (nodeTimeComparerTarget >= context.timeFilter[0] && nodeTimeComparerTarget <= context.timeFilter[1])
           ){
-              //node.style.display = "block"
               node.style.opacity = 1
-              
           }else{
-              //node.style.display = "none"
               node.style.opacity = 0.2
-              
           }
       });
     },
     updateDisplayNodes(id){
       var context = this
+      
       Array.from(document.querySelector(id).children).forEach(function(node) {
-          if(node.getAttribute("timestamp") >= context.timeFilter[0] && node.getAttribute("timestamp") <= context.timeFilter[1]){
+        var nodeTimeComparer = new Date(node.getAttribute("timestamp")).toISOString().split('.')[0]+".000Z"
+          if(nodeTimeComparer >= context.timeFilter[0] && nodeTimeComparer <= context.timeFilter[1]){
               //node.style.display = "block"
               node.style.opacity = 1
               
@@ -296,13 +304,11 @@ export default {
       console.log(links);
 
 
-
-
-      var _links = [];
       var thisContext = this;
       
       for (let i = 0; i < links.length; i++) {
         if (links[i].action === "sending") {
+          
           let source = _nodes
             .map(function(e) {
               if (e.type === "Client") {
@@ -310,35 +316,69 @@ export default {
               }
             })
             .indexOf(links[i].source);
+
+
+
+          // defines a source per client
+          let sourceClient = _nodes
+            .map(function(e) {
+              if (e.type === "Client") {
+                return e._id;
+              }
+            })
+            .indexOf(links[i].sourceClient);
+
+          // defines a source per document
+          let sourceDoc = _nodes
+            .map(function(e) {
+              if (e.type === "Client") {
+                return e.documentGuid;
+              }
+            })
+            .indexOf(links[i].sourceDoc);
+
           let target = _nodes
             .map(function(e) {
               return e._id;
             })
             .indexOf(links[i].target);
-          thisContext.forceLinks.push({ source, target, type: `sending`, display: true });
+          thisContext.forceLinks.push({ source, sourceDoc, sourceClient, target, type: `sending`, display: true });
         }
         if (links[i].action === "receiving") {
-          let source = _nodes
-            .map(function(e) {
-              return e._id;
-            })
-            .indexOf(links[i].source);
-          let target = _nodes
-            .map(function(e) {
+          let source = _nodes.map(function(e) {return e._id}).indexOf(links[i].source);
+
+          let target = _nodes.map(function(e) {
               if (e.type === "Client") {
                 return e._id;
               }
             })
             .indexOf(links[i].target);
-          thisContext.forceLinks.push({ source, target, type: `receiving`, display: true });
+          
+          // defines a target per document
+          let targetDoc = _nodes.map(function(e) {
+              if (e.type === "Client") {
+                return e.documentGuid;
+              }
+            })
+            .indexOf(links[i].targetDoc);
+
+          // defines a target per client
+          let targetClient = _nodes.map(function(e) {
+              if (e.type === "Client") {
+                return e._id;
+              }
+            })
+            .indexOf(links[i].targetClient);
+
+          thisContext.forceLinks.push({ source, target, targetDoc, targetClient, type: `receiving`, display: true });
         }
       }
 
-      console.log(Array.from(new Set(thisContext.forceLinks)));
+      
 
       let clientNodes = _nodes.filter(data => data.type == "Client");
       var parentGroups = this.groupBy(clientNodes, "owner");
-      console.log(parentGroups)
+
       for (var property in parentGroups) {
         var parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
@@ -354,7 +394,6 @@ export default {
         
 
       }
-
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
         for (var property in childGroups) {
@@ -372,7 +411,6 @@ export default {
         }
 
       var svg = d3.select("#graphLayout")
-
 
       this.$data.force = d3.layout
         .force()
@@ -400,25 +438,20 @@ export default {
         .on("tick", tick)
         
 
-      // var drag = this.$data.force.drag()
-      //     .on("dragstart", dragstart);
-       if(this.switchForce){
+      if(this.switchForce){
         // docs
         var filterLinks = this.forceLinks.filter(d => d.type != "documentGuidForceGroup");
         this.$data.force.links(filterLinks).start()
-        
       }else{
-        // users
-
-
-                var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
+        var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
         this.$data.force.links(filterLinks).start()
-      }         
+      }
+
       this.$data.colour = d3.scale
         .linear()
         .domain([0, _nodes.length - 1])
         .interpolate(d3.interpolateHcl)
-        .range([d3.rgb("white"), d3.rgb("blue")]);
+        .range([d3.rgb("lightgray"), d3.rgb("blue")]);
 
       // Define the div for the tooltip
       var divCircle = d3
@@ -677,9 +710,9 @@ export default {
         .text(function(d) {
           return d.name;
         });
-      //
+      
       function dblclick(d) {
-        d3.select(this).classed("fixed", d.fixed = false);
+        d3.select(this).classed("fixed", d.fixed = !d.fixed);
       }
       function dragstart(d) {
         if(this.toggleDrag){
@@ -750,8 +783,8 @@ export default {
           return "translate(" + d.x + "," + d.y + ")";
         });
       }
-      console.log('loooooooooooooool')
-            this.updateDisplayNodes("#circleSender")
+
+      this.updateDisplayNodes("#circleSender")
       this.updateDisplayNodes("#circleReceiver")
       this.updateDisplayNodes("#rectStream")
       this.updateDisplayNodes("#text")

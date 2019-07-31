@@ -2,7 +2,7 @@
   <v-card class="elevation-0">
     <v-toolbar class="elevation-0 transparent">
       <v-icon left small>share</v-icon>
-      <span class="title font-weight-light">Project's Graph</span>
+      <span class="title font-weight-light">Project's <i>Metagraph</i></span>
       <v-spacer></v-spacer>
       <span right></span>
     </v-toolbar>
@@ -37,15 +37,26 @@
 
           <v-divider class="ml-3" vertical></v-divider>
 
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
+
+
               <v-btn icon @click="toggleDrag = !toggleDrag" v-model="toggleDrag">
                 <v-icon v-if="toggleDrag">gps_fixed</v-icon>
                 <v-icon v-if="!toggleDrag">gps_not_fixed</v-icon>
               </v-btn>
+
+
+
+
+
+
+            <template>
+              <div class="text-center">
+                <v-btn round color="primary" dark @click="collapse = !collapse" v-model="collapse" v-if="collapse">Expand</v-btn>
+                <v-btn round color="primary" dark @click="collapse = !collapse" v-model="collapse" v-if="!collapse">Collapse</v-btn>
+              </div>
             </template>
-            <span>Enable drag</span>
-          </v-tooltip>
+
+ 
         </v-toolbar>
 
         <!-- <v-flex xs12>This graph represents the data flow between the project's users and clients.</v-flex> -->
@@ -120,11 +131,12 @@
         :clientdata="result"
         :clientdatafilter="filteredResult"
         :timeFilter="filteredTime"
-        :dateFilter="dateMinMax"
+
         :toggleDrag="toggleDrag"
         :userLinksForce="userLinksForce"
         :documentLinksForce="documentLinksForce"
         :switchForce="switchForce"
+        :collapse="collapse"
       />
     </div>
   </v-card>
@@ -151,12 +163,6 @@ export default {
   props: {
     project: Object
   },
-  // watch:{
-  //   switchForce: function(){
-  //     console.log('lol')
-  //     //toggle_multiple: [1, 2],
-  //   }
-  // },
   data: () => ({
     switchForce: false,
     documentLinksForce: 0,
@@ -164,41 +170,34 @@ export default {
     toggleDrag: false,
     dates: [],
     sliderValue: [],
-    lowerIndex: 0,
-    upperIndex: 0,
-    
+    collapse: false,
     showDocGroups: true,
     redrawToggle: true,
     result: null,
 
     sortedNodesByCreationDate: null,
-    svgHeight: 600,
+    svgHeight: 650,
     filteredResult: null,
     filteredTime: null,
     dateMinMax: []
   }),
   computed: {
+    toggle_multiple: function(){
+      if(this.switchForce){
+        return [2]
+      }
+      if(!this.switchForce){
+        return [1]
 
-        toggle_multiple: function(){
-        if(this.switchForce){
-          return [2]
-        }
-        if(!this.switchForce){
-          return [1]
-
-        }else{
-          return [1,2]
-        }
-        }
+      }else{
+        return [1,2]
+      }
+    }
   },
   watch: {
     sliderValue: function() {
-      //console.log(this.sliderValue.map( d => ( new Date( d ) ).toISOString()))
-
       this.filteredTime = this.sliderValue.map(d => new Date(d).toISOString());
     },
-
-    
   },
 
   methods: {
@@ -208,7 +207,6 @@ export default {
     expandUsers() {
       this.userLinksForce = this.userLinksForce + 10;
     },
-
     collapseDocuments() {
       this.documentLinksForce = this.documentLinksForce - 10;
     },
@@ -223,7 +221,9 @@ export default {
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[1]];
     },
-    mounted() {},
+    mounted() {
+
+    },
     saveAsPNG() {
       svgtopng.saveSvgAsPng(
         document.getElementById("graphLayout"),
@@ -250,15 +250,6 @@ export default {
   },
   updated() {
     this.AddResizeListener();
-      console.log('lol')
-      // if(this.switchForce){
-      //   this.toggle_multiple = [1]
-      //   break
-      // }else{
-      //   this.toggle_multiple = [2]
-      //   break
-      // }
-  //     //toggle_multiple: [1, 2],
   },
   asyncComputed: {
     async myResolvedValue() {
@@ -337,19 +328,25 @@ export default {
               documentType: clientDocumentType,
               documentName: clientDocumentName,
               documentGuid: clientDocumentID,
-              name: `${clientRole.charAt(0)}`
+              name: `${clientRole.charAt(0)}` // S or R labels for Senders and Receivers
             });
 
             if (clientRole == "Receiver") {
               streamLinks.push({
                 source: stream_id,
                 target: client_id,
+
+                targetClient: client_id,
+                targetDoc: clientDocumentID,
                 action: "receiving"
               });
             } else if (clientRole == "Sender") {
               streamLinks.push({
                 source: client_id,
                 target: stream_id,
+                
+                sourceClient: client_id,
+                sourceDoc: clientDocumentID,
                 action: "sending"
               });
             }
@@ -374,7 +371,7 @@ export default {
       this.result = [nodes, streamLinks];
       //this.value3 = [0,this.result[0].length-1]
       this.dates = createdAts;
-      //console.log(createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en', { minimumFractionDigits: 10 } ) ))
+      this.dates = createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en' ) )
       //this.dates = createdAts;
       this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]];
 
