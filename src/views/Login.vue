@@ -105,8 +105,6 @@ export default {
     }
     if ( this.$store.state.isAuth === true ) {
       this.$router.push( '/' )
-      // this.errorMessage = 'You are already logged in!'
-      // this.showError = true
     }
   }
 }

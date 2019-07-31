@@ -13,6 +13,31 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
+      path: '/signin',
+      name: 'signin',
+      component: ( ) => import( './views/Signin.vue' ),
+      beforeEnter( to, from, next ) {
+        console.log( 'beforeEnter -> singin route' )
+        next( )
+      }
+    },
+    {
+      path: '/signin/callback',
+      name: '',
+      component: ( ) => import( './views/SigninCallback.vue' ),
+      // beforeEnter( to, from, next ) {
+      //   // console.log( to.query.token )
+      //   let conn = to.query.token.split(':::')
+      //   console.log( conn )
+      //   let jwt = window.atob(conn[0])
+      //   let server = window.atob(conn[1])
+      //   console.log(server)
+      //   console.log(jwt)
+      //   next( { name: 'feedback' } )
+      // },
+      // redirect: '/'
+    },
+    {
       path: '/login/:redirectTo?',
       name: 'login',
       component: ( ) => import( './views/Login.vue' )
@@ -84,13 +109,13 @@ let myRouter = new Router( {
       path: '/plugins',
       name: 'plugins',
       component: ( ) => import( './views/Plugins.vue' ),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: '/feedback',
       name: 'feedback',
       component: ( ) => import( './views/Feedback.vue' ),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: '/admin',
