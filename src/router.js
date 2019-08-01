@@ -160,10 +160,12 @@ let myRouter = new Router( {
 // } )
 
 myRouter.beforeEach( ( to, from, next ) => {
+
   if ( to.meta.requiresAuth ) {
     if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
-      return next( { path: '/login' + ( to !== null ? "/" + window.btoa( to.path ) : "" ) } )
+      return next( { path: '/signin' })
   }
+
   next( )
 } )
 

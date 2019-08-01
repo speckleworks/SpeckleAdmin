@@ -44,13 +44,13 @@ function getStructuralArrPropKeys( foo ) {
 
 // the admin module is a seperate store that includes all the users / streams / projects on the system
 // its ADD mutations are unique, and are called by get*Admin actions contained in this module
-// but its UPDATE and DELETE mutations are the same as those in the rootStore, so rootStore actions update 
+// but its UPDATE and DELETE mutations are the same as those in the rootStore, so rootStore actions update
 // or delete state for projects, streams, and the current user across both stores
 const adminStore = {
   state: {
-    streams: [],
-    users: [],
-    projects : []
+    streams: [ ],
+    users: [ ],
+    projects: [ ]
   },
   mutations: {
     //streams
@@ -110,7 +110,7 @@ const adminStore = {
     },
     UPDATE_PROJECT( state, props ) {
       let found = state.projects.find( p => p._id === props._id )
-      if (null == found) return 
+      if ( null == found ) return
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
@@ -124,8 +124,7 @@ const adminStore = {
         console.log( `Failed to remove project ${props._id} from store.` )
     },
   },
-  getters: {
-  },
+  getters: {},
   actions: {
     //streams
     getStreamsAdmin( context ) {
@@ -141,7 +140,7 @@ const adminStore = {
           } )
       } )
     },
-    
+
     //users
     getUsersAdmin( context ) {
       return new Promise( ( resolve, reject ) => {
@@ -156,16 +155,16 @@ const adminStore = {
           } )
       } )
     },
-    updateUserAdmin (context, user) {
+    updateUserAdmin( context, user ) {
       return new Promise( ( resolve, reject ) => {
-        Axios.put("accounts/" + user._id, user)
-        .then(res => {
-            return resolve(context.commit( 'UPDATE_USER', user))
-        })
-        .catch (err => {
-          return reject (err)
-        })
-      })
+        Axios.put( "accounts/" + user._id, user )
+          .then( res => {
+            return resolve( context.commit( 'UPDATE_USER', user ) )
+          } )
+          .catch( err => {
+            return reject( err )
+          } )
+      } )
 
     },
     //projects
@@ -185,10 +184,10 @@ const adminStore = {
   }
 }
 
-async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
+async function getTokenMSAL( { clientId, authority, loginRequest } ) {
   // TODO: THIS CANNOT BE CALLED MULTIPLE TIMES!!!
   // DEPENDS ON LOCAL STORAGE TO PROPERLY OBTAIN CLIENTID
-  var userAgent = new Msal.UserAgentApplication({
+  var userAgent = new Msal.UserAgentApplication( {
     auth: {
       clientId: clientId,
       authority: authority,
@@ -198,35 +197,29 @@ async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
       cacheLocation: "localStorage",
       storeAuthStateInCookie: true
     },
-  })
+  } )
 
-  var token = await userAgent.getCachedToken(clientId)
+  var token = await userAgent.getCachedToken( clientId )
 
-  if (token)
+  if ( token )
     return token.accessToken
 
-  try
-  {
-    token = await userAgent.acquireTokenSilent(loginRequest)
-  }
-  catch (e)
-  {
-    console.log('MSAL Error: ' + e.errorCode)
-    if (e.errorCode === "user_login_error")
-    {
+  try {
+    token = await userAgent.acquireTokenSilent( loginRequest )
+  } catch ( e ) {
+    console.log( 'MSAL Error: ' + e.errorCode )
+    if ( e.errorCode === "user_login_error" ) {
       window.localStorage.msalClientId = clientId
-      await userAgent.loginPopup(loginRequest)
+      await userAgent.loginPopup( loginRequest )
       delete window.localStorage.msalClientId
-      return await getTokenMSAL( {clientId: clientId, authority: authority, loginRequest: loginRequest})
-    }
-    else if (e.errorCode === "token_renewal_error")
-    {
+      return await getTokenMSAL( { clientId: clientId, authority: authority, loginRequest: loginRequest } )
+    } else if ( e.errorCode === "token_renewal_error" ) {
       window.localStorage.msalClientId = clientId
-      token = await userAgent.acquireTokenPopup(loginRequest)
+      token = await userAgent.acquireTokenPopup( loginRequest )
       delete window.localStorage.msalClientId
     }
   }
-  
+
   return token.accessToken
 }
 
@@ -269,7 +262,7 @@ export default new Vuex.Store( {
     // if you want to add your own lambda, add the function/file name to the list to expose it
     lambdas: [ ],
     processors: [ ],
-    tokens: { },
+    tokens: {},
   },
   getters: {
     streamClients: ( state ) => ( streamId ) => {
@@ -514,7 +507,7 @@ export default new Vuex.Store( {
     },
     UPDATE_PROJECT( state, props ) {
       let found = state.projects.find( p => p._id === props._id )
-      if (found == null) return console.warn('The admin user is not on this project')
+      if ( found == null ) return console.warn( 'The admin user is not on this project' )
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
@@ -559,13 +552,13 @@ export default new Vuex.Store( {
       } else
         console.log( `Failed to remove processor ${props._id} from store.` )
     },
-    ADD_TOKEN( state, {id, token} ) {
-      Vue.set(state.tokens, id, token)
-      console.log(state.tokens)
+    ADD_TOKEN( state, { id, token } ) {
+      Vue.set( state.tokens, id, token )
+      console.log( state.tokens )
     },
     DELETE_TOKEN( state, id ) {
-      Vue.delete(state.tokens, id)
-      console.log(state.tokens)
+      Vue.delete( state.tokens, id )
+      console.log( state.tokens )
     },
 
     // Users
@@ -820,11 +813,11 @@ export default new Vuex.Store( {
       } )
     },
     createObjects( context, objects ) {
-      return new Promise( (resolve, reject) => {
-        Axios.post(`objects`, objects)
-        .then( res => resolve( res.data.resources ) )
-        .catch( err => reject( err ))
-      })
+      return new Promise( ( resolve, reject ) => {
+        Axios.post( `objects`, objects )
+          .then( res => resolve( res.data.resources ) )
+          .catch( err => reject( err ) )
+      } )
     },
 
     // projects
@@ -1016,82 +1009,81 @@ export default new Vuex.Store( {
     } ),
 
     // processors
-    loadLambdas ( context ) {
-      return new Promise(( resolve, reject ) => {
-        let promises = []
-        let myLambdas = new LambdaSettings().Lambdas
+    loadLambdas( context ) {
+      return new Promise( ( resolve, reject ) => {
+        let promises = [ ]
+        let myLambdas = new LambdaSettings( ).Lambdas
 
-        for(let i = 0; i < myLambdas.length; i++)
-        {
+        for ( let i = 0; i < myLambdas.length; i++ ) {
           promises.push(
-            Axios({
+            Axios( {
               method: 'GET',
               url: `.netlify/functions/${myLambdas[i]}`,
               baseURL: location.protocol + '//' + location.host,
-            })
+            } )
           )
         }
 
-        Promise.all(promises)
+        Promise.all( promises )
           .then( res => {
-            var lambdas = []
+            var lambdas = [ ]
 
             res.forEach( r => {
               let data = r.data
-              data.function = r.request.responseURL.split('/').slice(-1).pop()
-              lambdas.push(data)
-            })
+              data.function = r.request.responseURL.split( '/' ).slice( -1 ).pop( )
+              lambdas.push( data )
+            } )
 
             context.commit( 'ADD_LAMBDAS', lambdas )
-            return resolve ( lambdas )
+            return resolve( lambdas )
           } )
-      }) 
+      } )
 
 
     },
     getProcessor( context, props ) {
-      var processor = JSON.parse(window.localStorage.getItem("processor_" + props._id))
+      var processor = JSON.parse( window.localStorage.getItem( "processor_" + props._id ) )
 
-      if (processor !== null)
+      if ( processor !== null )
         context.commit( 'ADD_PROCESSORS', [ processor ] )
 
       return processor
     },
     getProcessors( context ) {
-      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+      var processorIds = JSON.parse( window.localStorage.getItem( "processorIds" ) )
 
-      if (processorIds === null)
+      if ( processorIds === null )
         return null
-      
+
       var processors = [ ]
       processorIds.forEach( id => {
-        var processor = JSON.parse(window.localStorage.getItem("processor_" + id))
-        if (processor != null)
-          processors.unshift(processor)
-      })
+        var processor = JSON.parse( window.localStorage.getItem( "processor_" + id ) )
+        if ( processor != null )
+          processors.unshift( processor )
+      } )
 
       context.commit( 'ADD_PROCESSORS', processors )
 
       return processors
     },
     createProcessor( context, processor ) {
-      var id = uuid()
-      
+      var id = uuid( )
+
       var proc = processor ? processor : { name: 'A new speckle processor' }
-      
+
       // Always assign new ID
       proc._id = id
 
-      if (!proc.hasOwnProperty('description'))
+      if ( !proc.hasOwnProperty( 'description' ) )
         proc.description = "This is a simple speckle processor."
-      
-      if (!proc.hasOwnProperty('tags'))
+
+      if ( !proc.hasOwnProperty( 'tags' ) )
         proc.tags = [ ]
-        
-      if (!proc.hasOwnProperty('blocks'))
+
+      if ( !proc.hasOwnProperty( 'blocks' ) )
         proc.blocks = [ ]
-      
-      if (!proc.hasOwnProperty('params'))
+
+      if ( !proc.hasOwnProperty( 'params' ) )
         proc.params = [ ]
 
       // Properties added for compatibility with other components
@@ -1102,75 +1094,71 @@ export default new Vuex.Store( {
       proc.canWrite = [ context.state.user._id ]
 
       proc.anonymousComments = false
-      proc.comments = []
+      proc.comments = [ ]
 
       window.localStorage.setItem(
         "processor_" + id,
-        JSON.stringify(proc)
+        JSON.stringify( proc )
       )
 
       context.commit( 'ADD_PROCESSORS', [ proc ] )
 
-      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+      var processorIds = JSON.parse( window.localStorage.getItem( "processorIds" ) )
 
-      if (processorIds === null)
+      if ( processorIds === null )
         processorIds = [ ]
-      
-      processorIds.unshift(id)
+
+      processorIds.unshift( id )
 
       window.localStorage.setItem(
         "processorIds",
-        JSON.stringify(processorIds)
+        JSON.stringify( processorIds )
       )
 
       return proc
     },
     updateProcessor( context, props ) {
-      let found = JSON.parse(window.localStorage.getItem("processor_" + props._id))
+      let found = JSON.parse( window.localStorage.getItem( "processor_" + props._id ) )
 
       Object.keys( props ).forEach( key => {
         found[ key ] = props[ key ]
       } )
       window.localStorage.setItem(
         "processor_" + props._id,
-        JSON.stringify(found)
+        JSON.stringify( found )
       )
 
       context.commit( 'UPDATE_PROCESSOR', props )
     },
     deleteProcessor( context, props ) {
-      window.localStorage.removeItem("processor_" + props._id)
+      window.localStorage.removeItem( "processor_" + props._id )
 
       context.commit( 'DELETE_PROCESSOR', props )
 
-      var processorIds = JSON.parse(window.localStorage.getItem("processorIds"))
+      var processorIds = JSON.parse( window.localStorage.getItem( "processorIds" ) )
 
-      if (processorIds !== null)
-      {
-        var foundIndex = processorIds.indexOf(props._id)
-        if (foundIndex !== -1)
-        {
-          processorIds.splice(foundIndex, 1)
-          
+      if ( processorIds !== null ) {
+        var foundIndex = processorIds.indexOf( props._id )
+        if ( foundIndex !== -1 ) {
+          processorIds.splice( foundIndex, 1 )
+
           window.localStorage.setItem(
             "processorIds",
-            JSON.stringify(processorIds)
+            JSON.stringify( processorIds )
           )
         }
       }
     },
     async authenticateBlocks( context, blocks ) {
-      for (let i = 0; i < blocks.length; i++)
-      {
-        if(blocks[i].msal)
-        {
-          let propName = 'msal|' + blocks[i].msal.clientId
-          let token = await getTokenMSAL(blocks[i].msal)
-          context.commit( 'ADD_TOKEN', {id: propName, token: token})
+      for ( let i = 0; i < blocks.length; i++ ) {
+        if ( blocks[ i ].msal ) {
+          let propName = 'msal|' + blocks[ i ].msal.clientId
+          let token = await getTokenMSAL( blocks[ i ].msal )
+          context.commit( 'ADD_TOKEN', { id: propName, token: token } )
         }
       }
     },
-    
+
     // client for ws ids, etc.
     createClient: ( context, props ) => new Promise( ( resolve, reject ) => {
 
@@ -1208,7 +1196,7 @@ export default new Vuex.Store( {
     },
 
     updateLoggedInUser: ( context, payload ) => new Promise( ( resolve, reject ) => {
-      console.log(payload)
+      console.log( payload )
       Axios.put( `accounts`, payload )
         .then( res => {
           context.commit( 'UPDATE_USER', payload )
@@ -1218,6 +1206,36 @@ export default new Vuex.Store( {
     } ),
 
     // Auth
+    authenticate: ( context, payload ) => new Promise( async ( resolve, reject ) => {
+      try {
+        let userProfile = await Axios.get( `${payload.server}/api/accounts`, { headers: { 'Authorization': payload.token } } )
+        console.log( userProfile )
+        context.commit( 'SET_TOKEN', payload.token )
+        context.commit( 'SET_USER', userProfile.data.resource )
+        context.commit( 'SET_SERVER', `${payload.server}/api` )
+
+        let serverDetails = await Axios.get( `${payload.server}/api` )
+        context.commit( 'SET_SERVER_DETAILS', serverDetails.data )
+
+        Axios.defaults.headers.common[ 'Authorization' ] = payload.token
+        Axios.defaults.baseURL = `${payload.server}/api`
+
+        localStorage.setItem( 'currentServer', `${payload.server}/api` )
+        localStorage.setItem( 'token', payload.token )
+
+        let usedServers = localStorage.getItem( 'allSpeckleServers' ) ? new Set( localStorage.getItem( 'allSpeckleServers' ).split( ',' ) ) : new Set( [ `${payload.server}/api` ] )
+        // if( !usedServers ) usedServers = new Set([`${payload.server}/api`])
+        usedServers.add( `${payload.server}/api` )
+        localStorage.setItem( 'allSpeckleServers', [...usedServers] )
+
+        return resolve( )
+      } catch ( err ) {
+        console.log( err )
+        return reject( )
+      }
+    } ),
+
+    // TODO: Deprecate
     login( context, payload ) {
       return new Promise( ( resolve, reject ) => {
         Axios.post( 'accounts/login', { email: payload.email, password: payload.password } )

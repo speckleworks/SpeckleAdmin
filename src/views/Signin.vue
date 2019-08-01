@@ -43,7 +43,8 @@ export default {
     return {
       server: null,
       errorMessage: null,
-      showError: false
+      showError: false,
+      servers: []
     }
   },
   methods: {
@@ -53,21 +54,17 @@ export default {
       try {
         url = new URL( this.server )
         let originUrl = new URL( window.location.href )
-
         window.open( `${url.origin}/signin?redirectUrl=${ window.encodeURIComponent( location.origin +'/#/signin/callback') }`, 'login screen', 'height=700,width=800' )
       } catch(err) {
         this.errorMessage = err.message
         this.showError = true
       }
-      // window.location.href =
-
-    },
-    checkServer( ) {
-
     }
   },
   mounted( ) {
     // TODO: chekc local storage for any previously used servers
+    let usedServers = localStorage.getItem( 'allSpeckleServers' ) ? localStorage.getItem( 'allSpeckleServers' ).split( ',' ) : null
+
     if ( this.$store.state.isAuth === true ) {
       this.$router.push( '/' )
     }
