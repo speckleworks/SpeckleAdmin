@@ -27,7 +27,7 @@
     </v-toolbar>
     <v-content>
       <!-- <v-container fluid> -->
-      <keep-alive exclude='StreamDetailView'>
+      <keep-alive exclude='StreamDetailView,SigninViewCallback'>
         <router-view></router-view>
       </keep-alive>
       <!-- </v-container> -->

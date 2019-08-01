@@ -26,7 +26,7 @@
 import Axios from 'axios'
 
 export default {
-  name: 'SigninView',
+  name: 'SigninViewCallback',
   components: {},
   computed: {},
   watch: {},

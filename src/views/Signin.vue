@@ -15,6 +15,7 @@
             </v-card-text>
             <v-card-text>
               Previously used accounts:
+              {{servers}}
               <!-- {{localStorage}} -->
             </v-card-text>
             <v-card-actions>
@@ -44,7 +45,7 @@ export default {
       server: null,
       errorMessage: null,
       showError: false,
-      servers: []
+      servers: [ ]
     }
   },
   methods: {
@@ -55,7 +56,7 @@ export default {
         url = new URL( this.server )
         let originUrl = new URL( window.location.href )
         window.open( `${url.origin}/signin?redirectUrl=${ window.encodeURIComponent( location.origin +'/#/signin/callback') }`, 'login screen', 'height=700,width=800' )
-      } catch(err) {
+      } catch ( err ) {
         this.errorMessage = err.message
         this.showError = true
       }
@@ -64,6 +65,22 @@ export default {
   mounted( ) {
     // TODO: chekc local storage for any previously used servers
     let usedServers = localStorage.getItem( 'allSpeckleServers' ) ? localStorage.getItem( 'allSpeckleServers' ).split( ',' ) : null
+
+    console.log( usedServers )
+
+    let promises = usedServers.map( s => Axios.get( s ) )
+    let servers = []
+    Promise.all( promises )
+      .then( results => {
+        servers = results.map( res => {
+          return {
+            url: res.config.url,
+            name: res.data.serverName,
+            version: res.data.version
+          }
+        })
+        this.servers = servers
+      } )
 
     if ( this.$store.state.isAuth === true ) {
       this.$router.push( '/' )
