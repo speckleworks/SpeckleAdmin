@@ -14,8 +14,19 @@
               </v-btn>
             </v-card-text>
             <v-card-text>
-              Previously used accounts:
-              {{servers}}
+              <!-- <p class='pl-3'><small>Previously used accounts:</small></p> -->
+              <v-list two-line>
+                <v-list-tile v-for='server in servers' :key='server.url' @click='prevAccountClick(server.url)'>
+                  <v-list-tile-content>
+                    <v-list-tile-title>{{server.name}}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{server.url}} <small>({{server.version}})</small></v-list-tile-sub-title>
+                  </v-list-tile-content>
+                  <v-list-tile-action>
+                    <v-icon>arrow_right_alt</v-icon>
+                  </v-list-tile-action>
+                </v-list-tile>
+              </v-list>
+              <!-- {{servers}} -->
               <!-- {{localStorage}} -->
             </v-card-text>
             <v-card-actions>
@@ -49,6 +60,10 @@ export default {
     }
   },
   methods: {
+    prevAccountClick( serverUrl ) {
+      this.server = serverUrl
+      this.login( )
+    },
     login( ) {
       this.showError = false
       let url = null
@@ -68,8 +83,8 @@ export default {
 
     console.log( usedServers )
 
-    let promises = usedServers.map( s => Axios.get( s ) )
-    let servers = []
+    let promises = usedServers.map( s => Axios.get( s ).catch( err => { this.servers.push( { url: s, name: 'Server Unreachable', version: 'n/a' } ) } ) )
+    let servers = [ ]
     Promise.all( promises )
       .then( results => {
         servers = results.map( res => {
@@ -78,7 +93,7 @@ export default {
             name: res.data.serverName,
             version: res.data.version
           }
-        })
+        } )
         this.servers = servers
       } )
 
