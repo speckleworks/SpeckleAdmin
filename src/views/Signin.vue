@@ -78,23 +78,24 @@ export default {
     },
     checkExistingServers( ) {
       let usedServers = localStorage.getItem( 'allSpeckleServers' ) ? localStorage.getItem( 'allSpeckleServers' ).split( ',' ) : null
-      let promises = usedServers.map( s => Axios.get( s ).catch( err => { this.servers.push( { url: s, name: 'Server Unreachable', version: 'n/a' } ) } ) )
-      let servers = [ ]
-      Promise.all( promises )
-        .then( results => {
-          servers = results.map( res => {
-            return {
-              url: res.config.url,
-              name: res.data.serverName,
-              version: res.data.version
-            }
+      let promises = usedServers.map( s => {
+        Axios.get( s )
+          .then( res => {
+            this.servers.push( { url: s, name: res.data.serverName, version: res.data.version } )
           } )
-          this.servers = servers
-        } )
+          .catch( err => {
+            this.servers.push( { url: s, name: 'Server Unreachable', version: 'n/a' } )
+          } )
+      } )
+      let servers = [ ]
+
     },
     checkRedirect( ) {
       //TODO
     }
+  },
+  activated( ) {
+    this.checkExistingServers( )
   },
   mounted( ) {
     this.checkExistingServers( )
