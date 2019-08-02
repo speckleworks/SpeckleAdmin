@@ -1020,7 +1020,7 @@ export default new Vuex.Store( {
               method: 'GET',
               url: `.netlify/functions/${myLambdas[i]}`,
               baseURL: location.protocol + '//' + location.host,
-            } )
+            } ).catch( err => console.log( `Failed to load lambda: ${myLambdas[i]}` ) )
           )
         }
 
@@ -1237,27 +1237,11 @@ export default new Vuex.Store( {
       }
     } ),
 
-    // TODO: Deprecate
-    login( context, payload ) {
-      return new Promise( ( resolve, reject ) => {
-        Axios.post( 'accounts/login', { email: payload.email, password: payload.password } )
-          .then( res => {
-            context.commit( 'SET_TOKEN', res.data.resource.token )
-            context.commit( 'SET_USER', res.data.resource )
-            // save them for later
-            localStorage.setItem( 'token', res.data.resource.token )
-            Axios.defaults.headers.common[ 'Authorization' ] = res.data.resource.token
-            return resolve( res.data.resource )
-          } )
-          .catch( err => {
-            return reject( err )
-          } )
-      } )
-    },
     logout( context, payload ) {
       context.commit( 'FLUSH_ALL' )
       localStorage.removeItem( 'token' )
       Axios.defaults.headers.common[ 'Authorization' ] = ''
+      Axios.defaults.baseURL = ''
     }
   },
   modules: {

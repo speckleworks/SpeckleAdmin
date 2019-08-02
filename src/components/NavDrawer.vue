@@ -101,26 +101,17 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
-<!--     <v-list v-else three-line>
-      <v-list-tile to='/login'>
+    <v-list v-else three-line>
+      <v-list-tile to='/signin'>
         <v-list-tile-action>
-          <v-icon>face</v-icon>
+          <v-icon>lock</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
-          <v-list-tile-title>Login</v-list-tile-title>
-          <v-list-tile-sub-title>If you already have an account, login here!</v-list-tile-sub-title>
+          <v-list-tile-title>Signin</v-list-tile-title>
+          <v-list-tile-sub-title>Login or register</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile to='/register'>
-        <v-list-tile-action>
-          <v-icon>add</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Register</v-list-tile-title>
-          <v-list-tile-sub-title>If you don't have an account, create one here!</v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
-    </v-list> -->
+    </v-list>
   </div>
 </template>
 <script>

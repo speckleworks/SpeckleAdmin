@@ -75,11 +75,11 @@ export default {
     this.$store.dispatch( 'loadLambdas' )
   },
   updated( ) {
-    let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
-    if ( !overlay ) return
-    overlay.onclick = ( function ( ) {
-      this.showSidebar = false
-    } ).bind( this )
+    // let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
+    // if ( !overlay ) return
+    // overlay.onclick = ( function ( ) {
+    //   this.showSidebar = false
+    // } ).bind( this )
   }
 
 }
