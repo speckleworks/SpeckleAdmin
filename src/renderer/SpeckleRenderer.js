@@ -51,6 +51,7 @@ export default class SpeckleRenderer extends EE {
     this.isSettingColors = false
     this.currentColorByProp = null
     this.colorTable = {}
+    this.edgesGroup = new THREE.Group()
 
     this.initialise( )
   }
@@ -101,6 +102,9 @@ export default class SpeckleRenderer extends EE {
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
+
+    this.edgesGroup.visible = false
+    this.scene.add( this.edgesGroup )
 
 
     // this.controls.enableDamping = true
@@ -401,6 +405,9 @@ export default class SpeckleRenderer extends EE {
             threeObj.geometry.computeBoundingSphere( )
             threeObj.castShadow = true
             threeObj.receiveShadow = true
+            var objEdges = new THREE.EdgesGeometry( threeObj.geometry )
+            var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
+            this.edgesGroup.add( edgeLines )
             this.scene.add( threeObj )
           } )
       } catch ( e ) {
@@ -849,7 +856,7 @@ export default class SpeckleRenderer extends EE {
 
   updateSettings( settings ){
     this.shadowLight.visible = settings.castShadows
-    console.log(this.scene.children)
+    this.edgesGroup.visible = settings.showEdges
   }
 }
 
