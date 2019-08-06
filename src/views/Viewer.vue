@@ -25,6 +25,9 @@
                   </v-icon>
                 </v-badge>
               </v-tab>
+              <v-tab key='settings'>
+                <v-icon>settings</v-icon>
+              </v-tab>
               <v-tab-item key='streams'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
@@ -44,6 +47,13 @@
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
                     <selected-objects></selected-objects>
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
+              <v-tab-item key='settings'>
+                <v-card class='elevation-0 transparent'>
+                  <v-card-text>
+                    <settings @update='updateSettings'/>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -73,12 +83,13 @@ import StreamCard from '@/components/ViewerLoadedStreamsCard.vue'
 import StreamSearch from '@/components/StreamSearch.vue'
 import ObjectGroups from '@/components/ViewerObjectGroups.vue'
 import SelectedObjects from '@/components/ViewerSelectedObjects.vue'
+import Settings from '@/components/ViewerSettings.vue'
 
 import SpeckleRenderer from '@/renderer/SpeckleRenderer.js'
 
 export default {
   name: 'ViewerView',
-  components: { StreamSearch, StreamCard, ObjectGroups, SelectedObjects },
+  components: { StreamSearch, StreamCard, ObjectGroups, SelectedObjects, Settings },
   computed: {
     loadedStreamIds( ) {
       return this.$store.state.loadedStreamIds
@@ -324,6 +335,10 @@ export default {
         streamsToUnload.forEach( sid => this.removeStream( sid ) )
         streamsToLoad.forEach( sid => this.addStream( sid ) )
       }
+    },
+
+    updateSettings( ) {
+      this.renderer.updateSettings( this.$store.state.viewer )
     }
   },
   activated( ) {

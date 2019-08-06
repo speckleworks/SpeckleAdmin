@@ -27,6 +27,7 @@ export default class SpeckleRenderer extends EE {
     this.orbitControls = null
     this.hemiLight = null
     this.flashLight = null
+    this.shadowLight = null
 
     this.raycaster = null
     this.mouse = null
@@ -74,6 +75,16 @@ export default class SpeckleRenderer extends EE {
     hemiLight.name = 'world lighting'
     hemiLight.up.set( 0, 0, 1 )
     this.scene.add( hemiLight )
+
+    this.shadowLight = new THREE.DirectionalLight( 0xffffff, .5 )
+    this.shadowLight.position.set( 1, 1, 5 )
+    this.shadowLight.castShadow = true;
+    this.shadowLight.visible = false
+    this.scene.add( this.shadowLight )
+    this.shadowLight.shadow.mapSize.width = 512;  // default
+    this.shadowLight.shadow.mapSize.height = 512; // default
+    this.shadowLight.shadow.camera.near = 0.5;    // default
+    this.shadowLight.shadow.camera.far = 500;    
 
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
     this.camera.up.set( 0, 0, 1 )
@@ -388,6 +399,8 @@ export default class SpeckleRenderer extends EE {
             threeObj.userData.properties = obj.properties ? flatten( obj.properties, { safe: true } ) : null
             threeObj.userData.originalColor = threeObj.material.color.clone( )
             threeObj.geometry.computeBoundingSphere( )
+            threeObj.castShadow = true
+            threeObj.receiveShadow = true
             this.scene.add( threeObj )
           } )
       } catch ( e ) {
@@ -832,6 +845,11 @@ export default class SpeckleRenderer extends EE {
       if ( index < array.length ) setTimeout( doChunk, 1 )
     }
     doChunk( )
+  }
+
+  updateSettings( settings ){
+    this.shadowLight.visible = settings.castShadows
+    console.log(this.scene.children)
   }
 }
 

@@ -1,0 +1,52 @@
+<template>
+  <v-layout row wrap>
+    <v-flex xs12>Viewer Settings</v-flex>
+    <v-list>
+        <v-switch color="primary" v-model="showEdges" label="Show Edges"></v-switch>
+        <v-switch color="primary" v-model="castShadows" label="Shadows"></v-switch>
+    </v-list>
+  </v-layout>
+</template>
+<script>
+export default {
+  name: "ViewerSettings",
+  computed: {
+    showEdges: {
+      get () {
+        return this.$store.state.viewer.showEdges
+      },
+      set (value) {
+        this.$store.commit("TOGGLE_EDGES", value )
+        this.$emit('update')
+      }
+    },
+    castShadows: {
+      get () {
+        return this.$store.state.viewer.castShadows
+      },
+      set( value ){
+        this.$store.commit("TOGGLE_SHADOWS", value)
+        this.$emit('update')
+      }
+    }
+  },
+  data() {
+    return {
+    }
+  },
+  watch: {
+    showEdges() {
+      
+    },
+    castShadows() {
+    }
+  }
+}
+</script>
+<style scoped>
+.v-input--selection-controls{
+  margin-top:0px;
+}
+</style>
+
+

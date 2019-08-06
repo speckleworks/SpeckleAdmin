@@ -185,6 +185,22 @@ const adminStore = {
   }
 }
 
+//viewer store for viewer settings
+const viewerStore = {
+  state: {
+    showEdges: false,
+    castShadows: false,
+  },
+  mutations: {
+    TOGGLE_EDGES ( state, payload ) {
+      state.showEdges = payload
+    },
+    TOGGLE_SHADOWS ( state, payload ) {
+      state.castShadows = payload
+    }
+  }
+}
+
 async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
   // TODO: THIS CANNOT BE CALLED MULTIPLE TIMES!!!
   // DEPENDS ON LOCAL STORAGE TO PROPERLY OBTAIN CLIENTID
@@ -1241,6 +1257,7 @@ export default new Vuex.Store( {
     }
   },
   modules: {
-    admin: adminStore
+    admin: adminStore,
+    viewer: viewerStore
   }
 } )
