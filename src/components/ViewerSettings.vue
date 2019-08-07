@@ -33,7 +33,7 @@ export default {
     },
     meshMaterialOpacity: {
       get () {
-        return this.$store.state.viewer.meshMaterial.opacity
+        return this.$store.state.viewer.meshOverrides.opacity
       },
       set ( value ) {
         this.$store.commit( "SET_MESH_OPACITY", value )
@@ -42,7 +42,7 @@ export default {
     },
     meshMaterialSpecular: {
       get () {
-        return this.$store.state.viewer.meshMaterial.specular
+        return this.$store.state.viewer.meshOverrides.specular
       },
       set ( value ) {
         this.$store.commit( "SET_MESH_SPECULAR", value )

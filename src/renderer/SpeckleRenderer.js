@@ -17,7 +17,7 @@ import SelectionHelper from './SelectionHelper.js'
 
 export default class SpeckleRenderer extends EE {
 
-  constructor( { domObject } ) {
+  constructor( { domObject }, viewerSettings ) {
     super( ) // event emitter init
     this.domObject = domObject
     this.renderer = null
@@ -52,6 +52,8 @@ export default class SpeckleRenderer extends EE {
     this.currentColorByProp = null
     this.colorTable = {}
     this.edgesGroup = new THREE.Group()
+
+    this.viewerSettings = viewerSettings
 
     this.initialise( )
   }
@@ -106,7 +108,7 @@ export default class SpeckleRenderer extends EE {
     this.edgesGroup.visible = false
     this.scene.add( this.edgesGroup )
 
-
+    this.updateViewerSettings()
     // this.controls.enableDamping = true
     // this.controls.dampingFactor = 0.45
     // this.controls = new TrackballControls( this.camera, this.renderer.domElement  )
@@ -137,6 +139,7 @@ export default class SpeckleRenderer extends EE {
     window.addEventListener( 'keydown', this.keydown.bind( this ) )
     window.addEventListener( 'keyup', this.keyup.bind( this ) )
 
+    // this.updateViewerSettings( )
     this.computeSceneBoundingSphere( )
     this.render( )
 
@@ -667,20 +670,6 @@ export default class SpeckleRenderer extends EE {
     if ( propagateLegend ) this.emit( 'clear-analysis-legend' )
   }
 
-  setDefaultMeshMaterial ( meshMaterial ) {
-    for ( let obj of this.scene.children ) {
-      if ( obj.type === 'Mesh' ) {
-        if ( obj.material ) {
-          obj.material.opacity = meshMaterial.opacity / 100
-          let specColor = new THREE.Color()
-          specColor.setHSL( 0, 0, meshMaterial.specular / 100 )
-          obj.material.specular = specColor
-          obj.material.needsUpdate = true
-        }
-      }
-    }
-  }
-
   // TODO
   ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
@@ -807,7 +796,7 @@ export default class SpeckleRenderer extends EE {
     }
 
     if ( !center ) {
-      center = new THREE.Vector3(0, 0, 0)
+      center = new THREE.Vector3( 0, 0, 0 )
     }
 
     this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3( ), radius: radius > 1 ? radius * 1.1 : 100 }
@@ -869,10 +858,32 @@ export default class SpeckleRenderer extends EE {
     doChunk( )
   }
 
-  updateSettings( settings ){
-    this.setDefaultMeshMaterial(settings.meshMaterial)
-    this.shadowLight.visible = settings.castShadows
-    this.edgesGroup.visible = settings.showEdges
+  updateViewerSettings( ){
+    this.setDefaultMeshMaterial( )
+    this.updateMaterialManager( )
+    this.shadowLight.visible = this.viewerSettings.castShadows
+    this.edgesGroup.visible = this.viewerSettings.showEdges
+  }
+
+  setDefaultMeshMaterial ( ) {
+    for ( let obj of this.scene.children ) {
+      if ( obj.type === 'Mesh' ) {
+        if ( obj.material ) {
+          obj.material.opacity = this.viewerSettings.meshOverrides.opacity / 100
+          let specColor = new THREE.Color()
+          specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
+          obj.material.specular = specColor
+          obj.material.needsUpdate = true
+        }
+      }
+    }
+  }
+
+  updateMaterialManager ( ) {
+    let specColor = new THREE.Color()
+    specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
+    Converter.materialManager.defaultMeshMat.specular = specColor
+    Converter.materialManager.defaultMeshMat.opacity = this.viewerSettings.meshOverrides.opacity / 100
   }
 }
 

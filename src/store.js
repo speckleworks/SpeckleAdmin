@@ -190,7 +190,7 @@ const viewerStore = {
   state: {
     showEdges: false,
     castShadows: false,
-    meshMaterial: {
+    meshOverrides: {
       opacity: 84,
       specular: 30
     }
@@ -203,10 +203,10 @@ const viewerStore = {
       state.castShadows = payload
     },
     SET_MESH_OPACITY ( state, payload ) {
-      state.meshMaterial.opacity = payload
+      state.meshOverrides.opacity = payload
     },
     SET_MESH_SPECULAR ( state, payload ) {
-      state.meshMaterial.specular = payload
+      state.meshOverrides.specular = payload
     }
   }
 }

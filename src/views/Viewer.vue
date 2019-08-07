@@ -53,7 +53,7 @@
               <v-tab-item key='settings'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    <settings @update='updateSettings'/>
+                    <settings @update='updateViewerSettings'/>
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -330,15 +330,14 @@ export default {
         let urlStreams = this.$route.params.streamIds.split( ',' )
         let streamsToLoad = urlStreams.filter( id => this.$store.state.loadedStreamIds.indexOf( id ) === -1 )
         let streamsToUnload = this.$store.state.loadedStreamIds.filter( id => urlStreams.indexOf( id ) === -1 )
-        console.log( `i need to load ${streamsToLoad.join(", ")}` )
-        console.log( `i need to unload ${streamsToUnload.join(", ")}` )
         streamsToUnload.forEach( sid => this.removeStream( sid ) )
         streamsToLoad.forEach( sid => this.addStream( sid ) )
       }
     },
 
-    updateSettings( ) {
-      this.renderer.updateSettings( this.$store.state.viewer )
+    updateViewerSettings( ) {
+      this.renderer.viewerSettings = this.$store.state.viewer
+      this.renderer.updateViewerSettings( )
     }
   },
   activated( ) {
@@ -355,7 +354,8 @@ export default {
   mounted( ) {
     console.log( 'mounted' )
     this.objectAccumulator = [ ]
-    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render } )
+    //store viewer configs somewhere? localStorage? vuex-persist?
+    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer ) 
     this.renderer.animate( )
 
     // if you like polluting the global scope, clap twice
