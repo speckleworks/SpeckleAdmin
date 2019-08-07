@@ -652,7 +652,7 @@ export default class SpeckleRenderer extends EE {
 
     for ( let obj of this.scene.children ) {
       if ( obj.material ) {
-        obj.material.opacity = 0.84
+        obj.material.opacity = this.viewerSettings.meshOverrides.opacity
         obj.material.vertexColors = THREE.NoColors
         obj.material.needsUpdate = true
       }
