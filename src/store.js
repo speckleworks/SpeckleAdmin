@@ -198,17 +198,27 @@ const viewerStore = {
   mutations: {
     TOGGLE_EDGES ( state, payload ) {
       state.showEdges = payload
+      localStorage.setItem ('viewerSettings', JSON.stringify(state) )
     },
     TOGGLE_SHADOWS ( state, payload ) {
       state.castShadows = payload
+      localStorage.setItem ('viewerSettings', JSON.stringify(state))
     },
     SET_MESH_OPACITY ( state, payload ) {
       state.meshOverrides.opacity = payload
+      localStorage.setItem ('viewerSettings', JSON.stringify(state))
     },
     SET_MESH_SPECULAR ( state, payload ) {
       state.meshOverrides.specular = payload
+      localStorage.setItem ('viewerSettings', JSON.stringify(state))
+    },
+    SET_ALL_VIEWER_SETTINGS ( state, payload ) {
+      Object.keys(payload).forEach(key => {
+        state[key] = payload[key]
+      })
     }
   }
+
 }
 
 async function getTokenMSAL ( { clientId, authority, loginRequest } ) {
@@ -1263,6 +1273,7 @@ export default new Vuex.Store( {
     logout( context, payload ) {
       context.commit( 'FLUSH_ALL' )
       localStorage.removeItem( 'token' )
+      localStorage.removeItem( 'viewerSettings' )
       Axios.defaults.headers.common[ 'Authorization' ] = ''
     }
   },

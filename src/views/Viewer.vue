@@ -354,7 +354,11 @@ export default {
   mounted( ) {
     console.log( 'mounted' )
     this.objectAccumulator = [ ]
-    //store viewer configs somewhere? localStorage? vuex-persist?
+
+    let settingsString = localStorage.getItem( 'viewerSettings' ) 
+    let viewerSettings = JSON.parse(settingsString)
+    if (null != viewerSettings ) this.$store.commit('SET_ALL_VIEWER_SETTINGS', viewerSettings)
+
     this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer ) 
     this.renderer.animate( )
 
