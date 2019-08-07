@@ -190,6 +190,10 @@ const viewerStore = {
   state: {
     showEdges: false,
     castShadows: false,
+    meshMaterial: {
+      opacity: 84,
+      specular: 30
+    }
   },
   mutations: {
     TOGGLE_EDGES ( state, payload ) {
@@ -197,6 +201,12 @@ const viewerStore = {
     },
     TOGGLE_SHADOWS ( state, payload ) {
       state.castShadows = payload
+    },
+    SET_MESH_OPACITY ( state, payload ) {
+      state.meshMaterial.opacity = payload
+    },
+    SET_MESH_SPECULAR ( state, payload ) {
+      state.meshMaterial.specular = payload
     }
   }
 }

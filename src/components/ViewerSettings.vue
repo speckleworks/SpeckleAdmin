@@ -1,9 +1,11 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12>Viewer Settings</v-flex>
     <v-list>
         <v-switch color="primary" v-model="showEdges" label="Show Edges"></v-switch>
         <v-switch color="primary" v-model="castShadows" label="Shadows"></v-switch>
+        <v-slider min='0' max='100' v-model='meshMaterialOpacity' label='Opacity'/>
+        <v-slider min='0' max='100' v-model='meshMaterialSpecular' label='Specular'/>
+        </v-list-group>
     </v-list>
   </v-layout>
 </template>
@@ -25,7 +27,25 @@ export default {
         return this.$store.state.viewer.castShadows
       },
       set( value ){
-        this.$store.commit("TOGGLE_SHADOWS", value)
+        this.$store.commit( "TOGGLE_SHADOWS", value )
+        this.$emit('update')
+      }
+    },
+    meshMaterialOpacity: {
+      get () {
+        return this.$store.state.viewer.meshMaterial.opacity
+      },
+      set ( value ) {
+        this.$store.commit( "SET_MESH_OPACITY", value )
+        this.$emit('update')
+      }
+    },
+    meshMaterialSpecular: {
+      get () {
+        return this.$store.state.viewer.meshMaterial.specular
+      },
+      set ( value ) {
+        this.$store.commit( "SET_MESH_SPECULAR", value )
         this.$emit('update')
       }
     }

@@ -407,6 +407,7 @@ export default class SpeckleRenderer extends EE {
             threeObj.receiveShadow = true
             var objEdges = new THREE.EdgesGeometry( threeObj.geometry )
             var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
+            edgeLines.userData._id = obj._id
             this.edgesGroup.add( edgeLines )
             this.scene.add( threeObj )
           } )
@@ -434,7 +435,7 @@ export default class SpeckleRenderer extends EE {
     } )
 
     toRemove.forEach( ( object, index ) => {
-      this.scene.remove( object )
+      object.parent.remove( object )
       if ( index === toRemove.length - 1 ) {
         this.computeSceneBoundingSphere( )
         this.zoomExtents( )
@@ -666,6 +667,20 @@ export default class SpeckleRenderer extends EE {
     if ( propagateLegend ) this.emit( 'clear-analysis-legend' )
   }
 
+  setDefaultMeshMaterial ( meshMaterial ) {
+    for ( let obj of this.scene.children ) {
+      if ( obj.type === 'Mesh' ) {
+        if ( obj.material ) {
+          obj.material.opacity = meshMaterial.opacity / 100
+          let specColor = new THREE.Color()
+          specColor.setHSL( 0, 0, meshMaterial.specular / 100 )
+          obj.material.specular = specColor
+          obj.material.needsUpdate = true
+        }
+      }
+    }
+  }
+
   // TODO
   ghostObjects( objIds ) {}
   unGhostObjects( objIds ) {}
@@ -855,6 +870,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   updateSettings( settings ){
+    this.setDefaultMeshMaterial(settings.meshMaterial)
     this.shadowLight.visible = settings.castShadows
     this.edgesGroup.visible = settings.showEdges
   }
