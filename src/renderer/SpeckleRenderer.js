@@ -52,6 +52,7 @@ export default class SpeckleRenderer extends EE {
     this.currentColorByProp = null
     this.colorTable = {}
     this.edgesGroup = new THREE.Group()
+    this.edgesGroup.name = 'displayEdgesGroup'
 
     this.viewerSettings = viewerSettings
 
@@ -678,11 +679,20 @@ export default class SpeckleRenderer extends EE {
   showObjects( objIds ) {
     if ( objIds.length !== 0 )
       this.scene.traverse( obj => {
-        if ( objIds.indexOf( obj.userData._id ) !== -1 )
+        if ( objIds.indexOf( obj.userData._id ) !== -1 ) {
+          if ( obj.name !== null ) {
+            if ( obj.name == 'displayEdgesGroup' ) return
+          }
           obj.visible = true
+        }
       } )
     else
-      this.scene.traverse( obj => obj.visible = true )
+      this.scene.traverse( obj => {
+        if ( obj.name !== null ) {
+          if ( obj.name == 'displayEdgesGroup' ) return
+        }
+        obj.visible = true
+      } )
   }
 
   hideObjects( objIds ) {
