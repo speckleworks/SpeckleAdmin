@@ -1,10 +1,11 @@
 <template>
   <v-layout row wrap>
     <v-list>
-        <v-switch color="primary" v-model="showEdges" label="Show Edges"></v-switch>
         <v-switch color="primary" v-model="castShadows" label="Shadows"></v-switch>
-        <v-slider min='0' max='100' v-model='meshMaterialOpacity' label='Opacity'/>
-        <v-slider min='0' max='100' v-model='meshMaterialSpecular' label='Specular'/>
+        <v-switch color="primary" v-model="showEdges" label="Show Edges"></v-switch>
+        <v-slider v-show='showEdges' thumb-label min='0' max='180' step='1' v-model='edgesThreshold' label='Edge Display Threshold'/>
+        <v-slider min='0' thumb-label max='100' v-model='meshMaterialOpacity' label='Opacity'/>
+        <v-slider min='0' thumb-label max='100' v-model='meshMaterialSpecular' label='Specular'/>
         </v-list-group>
     </v-list>
   </v-layout>
@@ -19,6 +20,15 @@ export default {
       },
       set (value) {
         this.$store.commit("TOGGLE_EDGES", value )
+        this.$emit('update')
+      }
+    },
+    edgesThreshold: {
+      get () {
+        return this.$store.state.viewer.edgesThreshold
+      },
+      set ( value ) {
+        this.$store.commit( "SET_EDGES_THRESHOLD", value )
         this.$emit('update')
       }
     },

@@ -51,8 +51,10 @@ export default class SpeckleRenderer extends EE {
     this.isSettingColors = false
     this.currentColorByProp = null
     this.colorTable = {}
+    
     this.edgesGroup = new THREE.Group()
     this.edgesGroup.name = 'displayEdgesGroup'
+    this.edgesThreshold = null
 
     this.viewerSettings = viewerSettings
 
@@ -409,10 +411,7 @@ export default class SpeckleRenderer extends EE {
             threeObj.geometry.computeBoundingSphere( )
             threeObj.castShadow = true
             threeObj.receiveShadow = true
-            var objEdges = new THREE.EdgesGeometry( threeObj.geometry )
-            var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
-            edgeLines.userData._id = obj._id
-            this.edgesGroup.add( edgeLines )
+            this.drawEdges ( threeObj, obj._id )
             this.scene.add( threeObj )
           } )
       } catch ( e ) {
@@ -426,6 +425,23 @@ export default class SpeckleRenderer extends EE {
         this.computeSceneBoundingSphere( )
         this.zoomExtents( )
       }
+    } )
+  }
+
+  drawEdges ( threeObj, id ) {
+    var objEdges = new THREE.EdgesGeometry( threeObj.geometry, this.viewerSettings.edgesThreshold )
+    var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
+    edgeLines.userData._id = id
+    this.edgesGroup.add( edgeLines )
+  }
+
+  updateEdges ( ) {
+    this.processLargeArray( this.edgesGroup.children, ( obj ) => {
+      this.edgesGroup.remove( obj )
+    } )
+    this.processLargeArray( this.scene.children, ( obj ) => {
+      if ( obj.type !== 'Mesh' ) return
+      this.drawEdges( obj, obj.userData._id )
     } )
   }
 
@@ -873,6 +889,10 @@ export default class SpeckleRenderer extends EE {
     this.updateMaterialManager( )
     this.shadowLight.visible = this.viewerSettings.castShadows
     this.edgesGroup.visible = this.viewerSettings.showEdges
+    if ( this.edgesThreshold != this.viewerSettings.edgesThreshold )  {
+      this.updateEdges( )
+    }
+    this.edgesThreshold = this.viewerSettings.edgesThreshold
   }
 
   setDefaultMeshMaterial ( ) {

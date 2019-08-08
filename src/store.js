@@ -189,6 +189,7 @@ const adminStore = {
 const viewerStore = {
   state: {
     showEdges: false,
+    edgesThreshold: 45,
     castShadows: false,
     meshOverrides: {
       opacity: 84,
@@ -198,6 +199,10 @@ const viewerStore = {
   mutations: {
     TOGGLE_EDGES ( state, payload ) {
       state.showEdges = payload
+      localStorage.setItem ('viewerSettings', JSON.stringify(state) )
+    },
+    SET_EDGES_THRESHOLD ( state, payload ) {
+      state.edgesThreshold = payload
       localStorage.setItem ('viewerSettings', JSON.stringify(state) )
     },
     TOGGLE_SHADOWS ( state, payload ) {
