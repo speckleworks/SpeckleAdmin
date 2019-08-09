@@ -655,8 +655,7 @@ export default class SpeckleRenderer extends EE {
       obj.geometry.attributes.color.needsUpdate = true
       obj.geometry.colorsNeedUpdate = true
       obj.material.vertexColors = THREE.VertexColors
-      obj.material.opacity = 1
-      obj.material.needsUpdate = true
+      this.setMaterialOverrides( obj )
     }
     this.emit( 'analysis-legend', { propertyName: propertyName, isNumeric: false, min: globalMin, max: globalMax, objectCount: toColour.length } )
   }
@@ -669,7 +668,7 @@ export default class SpeckleRenderer extends EE {
 
     for ( let obj of this.scene.children ) {
       if ( obj.material ) {
-        obj.material.opacity = this.viewerSettings.meshOverrides.opacity
+        this.setMaterialOverrides( obj )
         obj.material.vertexColors = THREE.NoColors
         obj.material.needsUpdate = true
       }
@@ -899,14 +898,18 @@ export default class SpeckleRenderer extends EE {
     for ( let obj of this.scene.children ) {
       if ( obj.type === 'Mesh' ) {
         if ( obj.material ) {
-          obj.material.opacity = this.viewerSettings.meshOverrides.opacity / 100
-          let specColor = new THREE.Color()
-          specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
-          obj.material.specular = specColor
-          obj.material.needsUpdate = true
+          this.setMaterialOverrides( obj )
         }
       }
     }
+  }
+
+  setMaterialOverrides ( obj ){
+    obj.material.opacity = this.viewerSettings.meshOverrides.opacity / 100
+    let specColor = new THREE.Color()
+    specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
+    obj.material.specular = specColor
+    obj.material.needsUpdate = true
   }
 
   updateMaterialManager ( ) {
