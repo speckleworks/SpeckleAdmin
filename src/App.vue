@@ -18,7 +18,7 @@
         <v-btn small round flat @click.native='toggleControlsViewer'>{{$store.state.viewerControls ? "close" :"show"}} controls</v-btn>
       </div>
       <v-spacer></v-spacer>
-      <v-btn small flat @click.native='logout()'>
+      <v-btn v-if='$store.state.isAuth' small flat @click.native='logout()'>
         Logout
       </v-btn>
       <v-btn flat small icon @click.native='toggleDark()'>
@@ -27,7 +27,7 @@
     </v-toolbar>
     <v-content>
       <!-- <v-container fluid> -->
-      <keep-alive exclude='StreamDetailView'>
+      <keep-alive exclude='StreamDetailView,SigninViewCallback,SigninView'>
         <router-view></router-view>
       </keep-alive>
       <!-- </v-container> -->
@@ -54,7 +54,7 @@ export default {
     },
     logout( ) {
       this.$store.dispatch( 'logout' )
-      this.$router.push( '/login' )
+      this.$router.push( '/signin' )
     },
     toggleControlsViewer( ) {
       this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
@@ -75,11 +75,11 @@ export default {
     this.$store.dispatch( 'loadLambdas' )
   },
   updated( ) {
-    let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
-    if ( !overlay ) return
-    overlay.onclick = ( function ( ) {
-      this.showSidebar = false
-    } ).bind( this )
+    // let overlay = document.getElementsByClassName( "md-overlay" )[ 0 ]
+    // if ( !overlay ) return
+    // overlay.onclick = ( function ( ) {
+    //   this.showSidebar = false
+    // } ).bind( this )
   }
 
 }

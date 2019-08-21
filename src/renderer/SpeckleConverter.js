@@ -321,7 +321,9 @@ let Converter = {
   },
 
   Structural1DElementPolyline( args, cb ) {
-    args.obj.value = args.obj.properties.structural.resultVertices
+    if (args.obj.properties.structural.resultVertices !== undefined)
+      args.obj.value = args.obj.properties.structural.resultVertices
+
     this.Polyline( { obj: args.obj }, ( err, obj ) => {
       if ( err ) return cb( err, null )
       return cb( null, obj )
@@ -329,11 +331,11 @@ let Converter = {
   },
 
   Structural1DElement( args, cb ) {
-    console.log( args.obj )
-    args.obj.value = args.obj.properties.structural.resultVertices
+    if (args.obj.properties.structural.resultVertices !== undefined)
+      args.obj.value = args.obj.properties.structural.resultVertices
+    
     this.Polyline( { obj: args.obj }, ( err, obj ) => {
       if ( err ) return cb( err, null )
-      console.log( obj )
       return cb( null, obj )
     } )
   },

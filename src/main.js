@@ -23,7 +23,7 @@ import VueTimeago from 'vue-timeago'
 Vue.use( VueTimeago, { locale: 'en' } )
 
 // Set up the server route.
-let server = localStorage.getItem( 'server' )
+let server = localStorage.getItem( 'currentServer' )
 if ( server )
   Store.state.server = server
 else

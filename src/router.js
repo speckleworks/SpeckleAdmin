@@ -13,14 +13,17 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
-      path: '/login/:redirectTo?',
-      name: 'login',
-      component: ( ) => import( './views/Login.vue' )
+      path: '/signin:redirectTo?',
+      name: 'signin',
+      component: ( ) => import( './views/Signin.vue' ),
+      beforeEnter( to, from, next ) {
+        next()
+      }
     },
     {
-      path: '/register',
-      name: 'register',
-      component: ( ) => import( './views/Register.vue' ),
+      path: '/signin/callback',
+      name: '',
+      component: ( ) => import( './views/SigninCallback.vue' ),
     },
     {
       path: '/streams',
@@ -84,13 +87,13 @@ let myRouter = new Router( {
       path: '/plugins',
       name: 'plugins',
       component: ( ) => import( './views/Plugins.vue' ),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: '/feedback',
       name: 'feedback',
       component: ( ) => import( './views/Feedback.vue' ),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: '/admin',
@@ -135,10 +138,12 @@ let myRouter = new Router( {
 // } )
 
 myRouter.beforeEach( ( to, from, next ) => {
+
   if ( to.meta.requiresAuth ) {
     if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
-      return next( { path: '/login' + ( to !== null ? "/" + window.btoa( to.path ) : "" ) } )
+      return next( { path: '/signin' })
   }
+
   next( )
 } )
 

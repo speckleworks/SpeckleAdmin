@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "precache-manifest.178e1579a22f4ab17d5d6a9f8e075c09.js"
+  "precache-manifest.324c2b5ff3c9bc1bb1cf0f9a1a38e98c.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "speckle-admin"});
