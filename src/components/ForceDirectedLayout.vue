@@ -38,8 +38,6 @@ export default {
       console.log(this.forceLinks)
       if(this.collapse){
         console.log('collapsed')
-
-        var links = this.clientdata[1]
         for (var i = 0; i < this.forceLinks.length; i++) {
           if(this.forceLinks[i].sourceDoc){
             this.forceLinks[i].source.index = this.forceLinks[i].sourceDoc
@@ -50,27 +48,24 @@ export default {
         }
       }else{
         console.log('expanded')
-        var links = this.clientdata[1]
         for (var i = 0; i < this.forceLinks.length; i++) {
           if(this.forceLinks[i].sourceClient){
             this.forceLinks[i].source.index = this.forceLinks[i].sourceClient
           }
           if(this.forceLinks[i].targetClient){
             this.forceLinks[i].target.index = this.forceLinks[i].targetClient
-            
           }
         }
-        
       }
-      this.drawGraph();
+    console.log(this.forceLinks)
     },
     switchForce: function(){
       if(this.switchForce){
-        var filterLinks = this.forceLinks.filter(d => d.type != "documentGuidForceGroup");
-        this.$data.force.links(filterLinks).start()
+
+        this.$data.force.links(this.forceLinks.filter(d => d.type != "documentGuidForceGroup")).start()
       }else{
-        var filterLinks = this.forceLinks.filter(d => d.type != "ownerForceGroup");
-        this.$data.force.links(filterLinks).start()
+
+        this.$data.force.links(this.forceLinks.filter(d => d.type != "ownerForceGroup")).start()
       }
     },
     userLinksForce: function(){
@@ -122,6 +117,7 @@ export default {
 
   data: () => ({
       forceLinks: [ ],
+
       filteredNodes: null,
       colour: null,
       groupPath: null,
@@ -342,6 +338,10 @@ export default {
               return e._id;
             })
             .indexOf(links[i].target);
+          
+          console.log(source)
+          console.log(sourceDoc)
+          console.log('ahhaha')
           thisContext.forceLinks.push({ source, sourceDoc, sourceClient, target, type: `sending`, display: true });
         }
         if (links[i].action === "receiving") {
