@@ -35,6 +35,9 @@
           </v-card-text>
         </v-card>
       </v-flex>
+            <v-flex xs12>
+        <client-graph :project='project'></client-graph>
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -47,6 +50,7 @@ import PermissionTable from '../components/PermissionTableProject.vue'
 import DetailDescription from '../components/DetailDescription.vue'
 import ProjectDetailStreams from '../components/ProjectDetailStreams.vue'
 import ProjectDetailTitle from '../components/ProjectDetailTitle.vue'
+import ClientGraph from '../components/ClientGraph.vue'
 
 export default {
   name: 'ProjectDetailView',
@@ -55,7 +59,8 @@ export default {
     PermissionTable,
     DetailDescription,
     ProjectDetailStreams,
-    ProjectDetailTitle
+    ProjectDetailTitle,
+    ClientGraph
   },
   props: {},
   computed: {
