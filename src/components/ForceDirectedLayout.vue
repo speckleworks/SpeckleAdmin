@@ -1,6 +1,7 @@
 <template>
   <div id="clientGraph">
     <svg width="100%" :height="svgHeight" id="graphLayout">
+      
       <g v-show="showDocGroups.includes(1)" id="hullDoc" />
       <g v-show="showDocGroups.includes(2)" id="hullOwner" />
       <g id="pathLink" />
@@ -27,33 +28,44 @@ export default {
     clientdatafilter: Array,
     timeFilter: Array,
     toggleDrag: Boolean,
-
+    brush: Boolean,
     documentLinksForce: Number,
     switchForce: Boolean,
-    linearcs: Boolean
+    linearcs: Boolean,
+    inspectTimeframe: Boolean
   },
 
   watch: {
+    inspectTimeframe: function(){
+      var selectedStreams = []
+      Array.from(document.querySelector("#rectStream").children)
+      .forEach(function(d) {
+        if(d.classList.contains("selected")){
+          selectedStreams.push(d3.select(d).datum().streamId)
+        }
+      })
+      
+      var url = "https://hestia.speckle.works/#/view/" + selectedStreams.join(',');
+          window.open(url, "_blank").focus();
+    },
+    brush: function(){
+      console.log(this.brush)
+    },
     linearcs: function() {
       this.drawGraph.tick();
     },
     switchForce: function() {
       if (this.switchForce) {
-        this.$data.force
-          .links(
-            this.forceLinks.filter(d => d.type != "documentGuidForceGroup")
-          )
-          .start();
+        this.$data.simulation.force("link").links(this.forceLinks.filter(d => d.type != "documentGuidForceGroup"))
+        this.$data.simulation.alpha(1).restart();
       } else {
-        this.$data.force
-          .links(this.forceLinks.filter(d => d.type != "ownerForceGroup"))
-          .start();
+        this.$data.simulation.force("link").links(this.forceLinks.filter(d => d.type != "ownerForceGroup"))
+        this.$data.simulation.alpha(1).restart();
       }
     },
 
     documentLinksForce: function() {
-      this.$data.force
-        .linkDistance(d => {
+      this.$data.simulation.force("link").distance(d => {
           if (d.type == "ownerForceGroup") {
             return this.documentLinksForce;
           } else if (d.type == "documentGuidForceGroup") {
@@ -62,7 +74,7 @@ export default {
             return 116;
           }
         })
-        .start();
+      this.$data.simulation.alpha(1).restart();
     },
     toggleDrag: function() {
       if (this.toggleDrag) {
@@ -98,11 +110,10 @@ export default {
   data: () => ({
     forceLinks: [],
     shiftKey: null,
-    ctrlKey: null,
     filteredNodes: null,
     colour: null,
     groupPath: null,
-    force: null,
+    simulation: null,
 
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
     menuStream: [
@@ -165,6 +176,33 @@ export default {
 
   methods: {
 
+    // Drag events for the whole d3 force simulation
+    drag() {
+      var parentContext = this
+      function dragstarted(d) {
+          if (!d3.event.active) parentContext.simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+      }
+      
+      function dragged(d) {
+          d.fx = d3.event.x;
+          d.fy = d3.event.y;
+      }
+      
+      function dragended(d) {
+          if (!d3.event.active) parentContext.simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+      }
+      
+    return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+    },
+
+
 
     updateDisplayLinks(id) {
       console.log(this.timeFilter[0]);
@@ -202,10 +240,13 @@ export default {
           nodeTimeComparer >= context.timeFilter[0] &&
           nodeTimeComparer <= context.timeFilter[1]
         ) {
-          //node.style.display = "block"
+          node.classList.remove("unselected")
+          node.classList.add("selected")
           node.style.opacity = 1;
         } else {
           //node.style.display = "none"
+          node.classList.remove("selected")
+          node.classList.add("unselected")
           node.style.opacity = 0.2;
         }
       });
@@ -407,59 +448,79 @@ export default {
         }
       }
 
+
+    // d3.select("#graphLayout")
+    //   .call( d3.brush()                     // Add the brush feature using the d3.brush function
+    //     .extent( [ [0,0], [this.$data.svgWidth,this.$props.svgHeight] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+    //   )
+    
       var svg = d3
         .select("#graphLayout")
 
-      this.$data.force = d3.layout
-        .force()
+      // var brush = svg.append("g")
+      //   .attr("class", "brush");
+
+      // if(this.$props.brush){
+      // brush.call(d3.brush()
+      //       .extent([[0, 0], [this.$data.svgWidth, this.$props.svgHeight]])
+      //       .on("start", brushstarted)
+      //       .on("brush", brushed)
+      //       .on("end", brushended));
+      // }
+
+      this.$data.simulation = d3.forceSimulation()
         .nodes(d3.values(_nodes))
-        .links(thisContext.forceLinks)
-        .size([this.$data.svgWidth, this.$props.svgHeight])
-        .linkDistance(d => {
+        .force("link", d3.forceLink(thisContext.forceLinks).distance(d => {
           if (d.type == "ownerForceGroup") {
             return this.documentLinksForce;
           } else if (d.type == "documentGuidForceGroup") {
-            return this.documentLinksForce;
+            return this.documentLinksForce; 
           } else {
-            return 116;
+            return 100;
           }
-        })
-        .charge(d => {
+        }
+        ))
+        .force("center", d3.forceCenter(this.$data.svgWidth / 2, this.$props.svgHeight / 2))
+        .force("charge", d3.forceManyBody().strength(function (d) {
           if (d.type == "ownerForceGroup") {
-            return 1000;
+            return 200;
           } else if (d.type == "documentGuidForceGroup") {
-            return 1000;
+            return 200;
           } else {
-            return -1000;
+            return -200;
           }
-        })
+        }))
         .on("tick", tick);
+      
+      this.$data.simulation.nodes().forEach(function(d) {
+        d.selected = false;
+        d.previouslySelected = false;
+      })
 
       if (this.switchForce) {
         // docs
         var filterLinks = this.forceLinks.filter(
           d => d.type != "documentGuidForceGroup"
         );
-        this.$data.force.links(filterLinks).start();
+        this.$data.simulation.force("link").links(filterLinks)
+        this.$data.simulation.alpha(1).restart();
       } else {
         var filterLinks = this.forceLinks.filter(
           d => d.type != "ownerForceGroup"
         );
-        this.$data.force.links(filterLinks).start();
+        this.$data.simulation.force("link").links(filterLinks)
+        this.$data.simulation.alpha(1).restart();
       }
 
-      this.$data.colour = d3.scale
-        .linear()
+      this.$data.colour = d3.scaleLinear()
         .domain([0, _nodes.length - 1])
         .interpolate(d3.interpolateHcl)
         .range([d3.rgb("lightgray"), d3.rgb("blue")]);
 
-      var xScale = d3.scale
-        .linear()
+      var xScale = d3.scaleLinear()
         .domain([0, this.svgWidth])
         .range([0, this.svgWidth]);
-      var yScale = d3.scale
-        .linear()
+      var yScale = d3.scaleLinear()
         .domain([0, this.svgHeight])
         .range([0, this.svgHeight]);
 
@@ -526,7 +587,7 @@ export default {
           return d.owner;
         })
         .entries(
-          this.$data.force.nodes().filter(data => data.type == "Client")
+          this.$data.simulation.nodes().filter(data => data.type == "Client")
         );
 
       var groupDocs = d3
@@ -535,28 +596,27 @@ export default {
           return d.documentGuid;
         })
         .entries(
-          this.$data.force.nodes().filter(data => data.type == "Client")
+          this.$data.simulation.nodes().filter(data => data.type == "Client")
         );
 
-      var groupPath = function(d) {
-        return (
-          "M" +
-          d3.geom
-            .hull(
-              d.values.map(function(i) {
-                return [i.x, i.y];
-              })
-            )
-            .join("L") +
-          "Z"
-        );
-      };
+      // var groupPath = function(d) {
+      //   return (
+      //     "M" +
+      //     d3.polygonHull(
+      //         d.values.map(function(i) {
+      //           return [i.x, i.y];
+      //         })
+      //       )
+      //       .join("L") +
+      //     "Z"
+      //   );
+      // };
 
       //
       svg
         .select("#marker")
         .selectAll("marker")
-        .data(this.$data.force.links().filter(data => data.display))
+        .data(this.$data.simulation.force("link").links().filter(data => data.display))
         //.data(['sending', 'receiving'])
         .enter()
         .append("svg:marker")
@@ -585,7 +645,7 @@ export default {
       var path = svg
         .select("#pathLink")
         .selectAll("path")
-        .data(this.$data.force.links().filter(data => data.display))
+        .data(this.$data.simulation.force("link").links().filter(data => data.display))
         .enter()
         .append("svg:path")
         .attr("source_timestamp", data => data.source.createdAt)
@@ -602,7 +662,7 @@ export default {
       var circleSender = svg
         .select("#circleSender")
         .selectAll("circle")
-        .data(this.$data.force.nodes().filter(data => data.role == "Sender"))
+        .data(this.$data.simulation.nodes().filter(data => data.role == "Sender"))
         .enter()
         .append("svg:circle")
         .attr("class", "sender")
@@ -612,7 +672,7 @@ export default {
           return d.createdAt;
         })
         .on("dblclick", dblclick)
-        .call(this.$data.force.drag)
+        .call(this.drag(this.$data.simulation))
         // .on("mouseover", function(d) {
         //   divCircle.
         //       style("opacity", .8);
@@ -631,7 +691,7 @@ export default {
       var circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
-        .data(this.$data.force.nodes().filter(data => data.role == "Receiver"))
+        .data(this.$data.simulation.nodes().filter(data => data.role == "Receiver"))
         .enter()
         .append("svg:circle")
         .attr("class", "receiver")
@@ -641,7 +701,7 @@ export default {
           return d.createdAt;
         })
         .on("dblclick", dblclick)
-        .call(this.$data.force.drag)
+        .call(this.drag(this.$data.simulation))
         // .on("mouseover", function(d) {
         //   divCircle.
         //       style("opacity", .8);
@@ -662,7 +722,7 @@ export default {
       var rect = svg
         .select("#rectStream")
         .selectAll("rect")
-        .data(this.$data.force.nodes().filter(d => d.type == "Stream"))
+        .data(this.$data.simulation.nodes().filter(d => d.type == "Stream"))
         .enter()
         .append("svg:rect")
         .attr("class", "node")
@@ -676,13 +736,13 @@ export default {
           return d.createdAt;
         })
         .on("dblclick", dblclick)
-        .call(this.$data.force.drag)
+        .call(this.drag(this.$data.simulation))
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
       //text content.
       var text = svg
         .select("#text")
         .selectAll("g")
-        .data(this.$data.force.nodes())
+        .data(this.$data.simulation.nodes())
         .enter()
         .append("svg:g")
         .attr("timestamp", function(d) {
@@ -705,6 +765,39 @@ export default {
         .text(function(d) {
           return d.name;
         });
+
+      var parentContext = this
+      function brushstarted() {
+        if (d3.event.sourceEvent.type !== "end") {
+          svg
+        .select("#rectStream")
+        .selectAll("rect").classed("selected", function(d) {
+            return d.selected = d.previouslySelected = parentContext.$data.shiftKey && d.selected;
+          });
+        }
+      }
+
+      function brushed() {
+        if (d3.event.sourceEvent.type !== "end") {
+          var selection = d3.event.selection;
+          svg
+        .select("#rectStream")
+        .selectAll("rect").classed("selected", function(d) {
+            return d.selected = d.previouslySelected ^
+                (selection != null
+                && selection[0][0] <= d.x && d.x < selection[1][0]
+                && selection[0][1] <= d.y && d.y < selection[1][1]);
+          });
+        }
+      }
+
+      function brushended() {
+        if (d3.event.selection != null) {
+          d3.select(this).call(d3.event.target.move, null);
+        }
+      }
+
+
 
       function dblclick(d) {
         d3.select(this).classed("fixed", (d.fixed = !d.fixed));
@@ -735,22 +828,22 @@ export default {
               Math.min(parentContext.svgHeight - 30, d.y)
             ));
           });
-        svg
-          .select("#hullOwner")
-          .selectAll(".subhullOwner")
-          .data(groupOwners)
-          .attr("d", groupPath)
-          .enter()
-          .insert("path")
-          .attr("d", groupPath);
-        svg
-          .select("#hullDoc")
-          .selectAll(".subhullDoc")
-          .data(groupDocs)
-          .attr("d", groupPath)
-          .enter()
-          .insert("path")
-          .attr("d", groupPath);
+        // svg
+        //   .select("#hullOwner")
+        //   .selectAll(".subhullOwner")
+        //   .data(groupOwners)
+        //   .attr("d", groupPath)
+        //   .enter()
+        //   .insert("path")
+        //   .attr("d", groupPath);
+        // svg
+        //   .select("#hullDoc")
+        //   .selectAll(".subhullDoc")
+        //   .data(groupDocs)
+        //   .attr("d", groupPath)
+        //   .enter()
+        //   .insert("path")
+        //   .attr("d", groupPath);
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
@@ -818,7 +911,9 @@ export default {
   mounted() {
     this.svgWidth = document.getElementById("clientGraph").offsetWidth
     this.drawGraph();
-  
+      window.addEventListener("keypress", function(e) {
+      console.log(String.fromCharCode(e.keyCode));
+    });
 
   },
 
@@ -846,6 +941,17 @@ rect {
   stroke: lightgray;
   stroke-width: 2px;
 }
+
+/* .selected {
+  stroke: red;
+  stroke-width: 5px;
+}
+
+.unselected {
+  stroke: lightgray;
+  stroke-width: 2px;
+  stroke-width: 0px;
+} */
 
 circle {
   cursor: pointer;
@@ -976,5 +1082,9 @@ path.link {
   fill: none;
   stroke-width: 1.5px;
 }
-
+.brush {
+  stroke: #222;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
 </style>

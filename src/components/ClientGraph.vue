@@ -102,6 +102,8 @@
           </v-btn-toggle> -->
         
           <v-switch class="custom-switch" v-model="switchForce" :label="`${switchForce ? 'Data flow per users' : 'Data flow per documents'}`" color="blue lighten-2" hide-details></v-switch>
+            <v-btn depressed small @click="brush = !brush" v-if="brush">BRUSH</v-btn>
+            <v-btn depressed small @click="brush = !brush" v-if="!brush">NO BRUSH</v-btn>
             <div class="flex-grow-1"></div>
 
           <v-slider
@@ -115,7 +117,7 @@
             @click:append="expandDocuments"
             @click:prepend="collapseDocuments"
             :max="300"
-            :min="0"
+            :min="-50"
             hide-details label=""
           ></v-slider>
           
@@ -143,6 +145,14 @@
         
       
       <span class="font-weight-light caption">Drag this slider to select and highlight a specific timeframe from your project!</span>
+                <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon @click="inspectTimeframe = !inspectTimeframe" v-on="on">
+                <v-icon>360</v-icon>
+              </v-btn>
+            </template>
+            <span>Inspect the timeframe</span>
+          </v-tooltip>
     </v-container>
  
 
@@ -162,6 +172,8 @@
         :documentLinksForce="documentLinksForce"
         :switchForce="switchForce"
         :linearcs="linearcs"
+        :brush="brush"
+        :inspectTimeframe="inspectTimeframe"
       />
     </div>
   </v-card>
@@ -190,8 +202,9 @@ export default {
   },
   data: () => ({
     dialog: false,
+    brush: true,
     switchForce: false,
-    documentLinksForce: 0,
+    documentLinksForce: -50,
     toggleDrag: false,
     dates: [],
     sliderValue: [],
@@ -199,7 +212,7 @@ export default {
     showDocGroups: true,
     redrawToggle: true,
     result: null,
-
+    inspectTimeframe: true,
     sortedNodesByCreationDate: null,
     svgHeight: 700,
     filteredResult: null,
