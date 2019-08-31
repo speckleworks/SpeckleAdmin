@@ -48,6 +48,6 @@
     "vue-template-compiler": "^2.6.10",
     "vue-timeago": "^5.0.0",
     "vue-tweet-embed": "^2.2.1",
-    "vuetify": "^1.5.12"
+    "vuetify": "^1.5.18"
   }
 }

@@ -32,10 +32,14 @@ export default {
     documentLinksForce: Number,
     switchForce: Boolean,
     linearcs: Boolean,
-    inspectTimeframe: Boolean
+    inspectTimeframe: Boolean,
+    streamTags: Array
   },
 
   watch: {
+    streamTags: function(){
+      console.log(this.streamTags)
+    },
     inspectTimeframe: function(){
       var selectedStreams = []
       Array.from(document.querySelector("#rectStream").children)

@@ -102,9 +102,16 @@
           </v-btn-toggle> -->
         
           <v-switch class="custom-switch" v-model="switchForce" :label="`${switchForce ? 'Data flow per users' : 'Data flow per documents'}`" color="blue lighten-2" hide-details></v-switch>
-            <v-btn depressed small @click="brush = !brush" v-if="brush">BRUSH</v-btn>
-            <v-btn depressed small @click="brush = !brush" v-if="!brush">NO BRUSH</v-btn>
-            <div class="flex-grow-1"></div>
+          <div>
+            <!-- <v-autocomplete
+                label="Search Streams per tag"
+                :items="allStreamTags"
+                prepend-icon="search"
+              ></v-autocomplete> -->
+
+        
+          </div>
+            
 
           <v-slider
             v-model="documentLinksForce"
@@ -153,6 +160,45 @@
             </template>
             <span>Inspect the timeframe</span>
           </v-tooltip>
+
+
+
+            <v-autocomplete
+              v-model="allStreamTagsJSON_default"
+              :items="allStreamTagsJSON"
+              filled
+              chips
+              label="Select"
+              item-text="name"
+              item-value="name"
+              multiple
+              prepend-icon="search"
+              dense
+            >
+           <template v-slot:selection="data">
+                <v-chip
+                  :selected="data.selected"
+                  close
+                  class="chip--select-multi"
+                  @input="remove(data.item)"
+                >
+
+                  {{ data.item.name }}
+                </v-chip>
+              </template>
+              <template v-slot:item="data">
+                <template v-if="typeof data.item !== 'object'">
+                  <v-list-tile-content v-text="data.item.name"></v-list-tile-content>
+                </template>
+                <template v-else>
+
+                  <v-list-tile-content>
+                    <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+
+                  </v-list-tile-content>
+                </template>
+              </template>
+            </v-autocomplete>
     </v-container>
  
 
@@ -174,6 +220,7 @@
         :linearcs="linearcs"
         :brush="brush"
         :inspectTimeframe="inspectTimeframe"
+        :streamTags="allStreamTagsJSON_default"
       />
     </div>
   </v-card>
@@ -201,6 +248,7 @@ export default {
     project: Object
   },
   data: () => ({
+    friends: null,
     dialog: false,
     brush: true,
     switchForce: false,
@@ -217,7 +265,12 @@ export default {
     svgHeight: 700,
     filteredResult: null,
     filteredTime: null,
-    dateMinMax: []
+    dateMinMax: [],
+    allStreamTags: [],
+    allStreamTagsJSON: [],
+    allStreamTagsJSON_default: [],
+    isUpdating: false,
+    
   }),
   computed: {
     toggle_multiple: function(){
@@ -229,7 +282,10 @@ export default {
       }else{
         return [1,2]
       }
-    }
+    },
+
+
+
   },
 
   watch: {
@@ -238,10 +294,29 @@ export default {
     },
     linearcs: function(){
         //this.refresh()
-    }
+    },
+          isUpdating (val) {
+        if (val) {
+          setTimeout(() => (this.isUpdating = false), 3000)
+        }
+          }
+
   },
 
   methods: {
+
+    remove (item) {
+      const index = this.allStreamTagsJSON_default.indexOf(item.name)
+      if (index >= 0) this.allStreamTagsJSON_default.splice(index, 1)
+    },
+
+    flatten(arr) {
+      var flat = [];
+      for (var i = 0; i < arr.length; i++) {
+          flat = flat.concat(arr[i]);
+      }
+      return flat;
+    },
     collapseDocuments() {
       this.documentLinksForce = this.documentLinksForce - 10;
     },
@@ -257,7 +332,7 @@ export default {
       return createdAts[this.value3[1]];
     },
     mounted() {
-
+      
     },
     saveAsPNG() {
       svgtopng.saveSvgAsPng(
@@ -303,7 +378,7 @@ export default {
       }
 
       var projectStreams = resProject.data.resource.streams;
-
+      var alltags = []
       for (var i = 0; i < projectStreams.length; i++) {
         var streamShortID = projectStreams[i];
         let stream_id;
@@ -320,6 +395,12 @@ export default {
           let streamCreatedAt = resStream.data.resource.createdAt;
           let streamUpdatedAt = resStream.data.resource.updatedAt;
           let streamName = resStream.data.resource.name;
+          let streamTags = resStream.data.resource.tags
+          this.$data.allStreamTags.concat(streamTags)
+          for (var j = 0; j < streamTags.length; j++) {
+            this.$data.allStreamTagsJSON.push({name: streamTags[j]})
+          }
+          alltags.push(streamTags)
 
           nodes.push({
             type: "Stream",
@@ -329,11 +410,14 @@ export default {
             createdAt: streamCreatedAt,
             updatedAt: streamUpdatedAt,
             size: "10",
-            name: streamName
+            name: streamName,
+            tags: streamTags
           });
         } catch (error) {
           console.log("Can't access stream: " + streamShortID);
         }
+
+        
 
         //
         let resClient;
@@ -391,7 +475,8 @@ export default {
         }
       }
       console.log(nodes);
-
+      
+      this.allStreamTags = this.flatten(alltags)
       this.sortedNodesByCreationDate = nodes;
       this.sortedNodesByCreationDate.sort(function(a, b) {
         return a.createdAt < b.createdAt
@@ -409,7 +494,7 @@ export default {
       this.dates = createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en' ) )
       //this.dates = createdAts;
       this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]];
-
+      //console.log(JSON.stringify(this.allStreamTagsJSON), 'lol')
       return [nodes, streamLinks];
     }
   }
