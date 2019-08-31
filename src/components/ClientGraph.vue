@@ -164,18 +164,21 @@
 
 
             <v-autocomplete
+              
               v-model="allStreamTagsJSON_default"
               :items="allStreamTagsJSON"
               filled
               chips
-              label="Select"
+              label="Select streams by tag(s)"
               item-text="name"
               item-value="name"
               multiple
               prepend-icon="search"
               dense
+              item-color="black"
+              
             >
-           <template v-slot:selection="data">
+            <template v-slot:selection="data">
                 <v-chip
                   :selected="data.selected"
                   close
@@ -198,13 +201,22 @@
                   </v-list-tile-content>
                 </template>
               </template>
+
+
+            <template v-slot:append-outer>
+              <v-slide-x-reverse-transition mode="out-in">
+                <v-icon>360</v-icon>
+              </v-slide-x-reverse-transition>
+            </template>
+
             </v-autocomplete>
+
     </v-container>
  
 
 
 
-    <v-divider></v-divider>
+    
     <div id="appClientGraph">
       <svg v-if="!redrawToggle || !result" width="100%" :height="svgHeight" />
       <ForceDirectedLayout
@@ -520,4 +532,10 @@ export default {
 .custom-switch .v-input--selection-controls__input div {
   color: #f06292;
 }
+
+// .transparent {
+//    background-color: white!important;
+//    opacity: 0.65;
+//    border-color: transparent!important;
+//  }
 </style>

@@ -38,7 +38,37 @@ export default {
 
   watch: {
     streamTags: function(){
-      console.log(this.streamTags)
+      
+      var context = this
+      Array.from(document.querySelector("#rectStream").children)
+      .forEach(function(d) {
+        var myStreamTags = Array.from(d3.select(d).datum().tags)
+        var selected = context.findCommonElement(myStreamTags, context.streamTags)
+        if(selected){
+              d.classList.remove("tagSelected")
+              d.classList.add("tagSelected")
+            }else{
+              d.classList.remove("tagSelected")
+            }
+        //console.log(context.streamTags)
+
+        // context.streamTags.forEach( function(t){
+        //     if(myStreamTags.includes(t)){
+        //       d.classList.add("tagSelected")
+        //     }else{
+        //       d.classList.remove("tagSelected")
+        //     }
+        //   }
+
+        // )
+        // myStreamTags.forEach(function(t){
+        //   console.log(t)
+        //   console.log(d)
+        //   console.log(context.streamTags)
+        // })
+
+
+      })
     },
     inspectTimeframe: function(){
       var selectedStreams = []
@@ -122,11 +152,21 @@ export default {
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
     menuStream: [
       {
-        title: "View Stream",
+        title: "View Stream in Viewer",
         action: function(d, i) {
           var data = d3.select(d).datum();
           console.log(data);
           var url = "https://hestia.speckle.works/#/view/" + data.streamId;
+          window.open(url, "_blank").focus();
+        },
+        disabled: false // optional, defaults to false
+      },
+      {
+        title: "View Stream in Admin",
+        action: function(d, i) {
+          var data = d3.select(d).datum();
+          console.log(data);
+          var url = "https://hestia.speckle.works/#/streams/" + data.streamId;
           window.open(url, "_blank").focus();
         },
         disabled: false // optional, defaults to false
@@ -179,7 +219,28 @@ export default {
   }),
 
   methods: {
-
+    findCommonElement(array1, array2) { 
+          
+        // Loop for array1 
+        for(let i = 0; i < array1.length; i++) { 
+              
+            // Loop for array2 
+            for(let j = 0; j < array2.length; j++) { 
+                  
+                // Compare the element of each and 
+                // every element from both of the 
+                // arrays 
+                if(array1[i] === array2[j]) { 
+                  
+                    // Return if common element found 
+                    return true; 
+                } 
+            } 
+        } 
+          
+        // Return if no common element exist 
+        return false;  
+    },
     // Drag events for the whole d3 force simulation
     drag() {
       var parentContext = this
@@ -946,16 +1007,10 @@ rect {
   stroke-width: 2px;
 }
 
-/* .selected {
-  stroke: red;
-  stroke-width: 5px;
+.tagSelected {
+  stroke: rgba(44, 165, 202, 0.4);
+  stroke-width: 15px;
 }
-
-.unselected {
-  stroke: lightgray;
-  stroke-width: 2px;
-  stroke-width: 0px;
-} */
 
 circle {
   cursor: pointer;
@@ -1062,6 +1117,16 @@ text.shadow {
   stroke-width: 22px;
   stroke-opacity: 1;
   stroke-linejoin: round;
+}
+
+
+
+.v-list {
+  background: transparent !important
+}
+
+.v-select-list {
+  background: transparent !important
 }
 
 .subhullOwner {
