@@ -1,7 +1,6 @@
 <template>
   <div id="clientGraph">
     <svg width="100%" :height="svgHeight" id="graphLayout">
-      
       <g v-show="showDocGroups.includes(1)" id="hullDoc" />
       <g v-show="showDocGroups.includes(2)" id="hullOwner" />
       <g id="pathLink" />
@@ -33,10 +32,26 @@ export default {
     switchForce: Boolean,
     linearcs: Boolean,
     inspectTimeframe: Boolean,
+    inspectSelectedTags: Boolean,
     streamTags: Array
   },
 
   watch: {
+    inspectSelectedTags: function(){
+      var taggedStreams = []
+      Array.from(document.querySelector("#rectStream").children)
+      .forEach(function(d) {
+          if(d.classList.contains("tagSelected")){
+            taggedStreams.push(d3.select(d).datum().streamId)
+          }else{
+
+          }
+      })
+
+      var url = "https://hestia.speckle.works/#/view/" + taggedStreams.join(',');
+      window.open(url, "_blank").focus();
+
+    },
     streamTags: function(){
       
       var context = this
@@ -44,6 +59,7 @@ export default {
       .forEach(function(d) {
         var myStreamTags = Array.from(d3.select(d).datum().tags)
         var selected = context.findCommonElement(myStreamTags, context.streamTags)
+        console.log(myStreamTags)
         if(selected){
               d.classList.remove("tagSelected")
               d.classList.add("tagSelected")
@@ -535,6 +551,7 @@ export default {
 
       this.$data.simulation = d3.forceSimulation()
         .nodes(d3.values(_nodes))
+        .force("forceY", d3.forceY(0).strength(0.08))
         .force("link", d3.forceLink(thisContext.forceLinks).distance(d => {
           if (d.type == "ownerForceGroup") {
             return this.documentLinksForce;
@@ -682,7 +699,6 @@ export default {
         .select("#marker")
         .selectAll("marker")
         .data(this.$data.simulation.force("link").links().filter(data => data.display))
-        //.data(['sending', 'receiving'])
         .enter()
         .append("svg:marker")
         .attr("source_timestamp", data => data.source.createdAt)
@@ -700,19 +716,48 @@ export default {
           }
         })
         .attr("refY", 0)
-        .attr("markerWidth", 7)
+        .attr("markerWidth", 20)
         .attr("markerHeight", 12)
         .attr("orient", "auto")
         .attr("fill-opacity", 1)
+        
         //.attr("fill", data => this.colour(data.target.index))
-        .append("svg:path")
-        .attr("d", "M0,-5L10,0L0,5");
+        .attr("markerUnits", "userSpaceOnUse")
+        .attr("stroke-linecap", "round")
+        // .append("svg:path")
+        // .attr("d", "M0,-5L10,0L0,5");
       var path = svg
         .select("#pathLink")
         .selectAll("path")
         .data(this.$data.simulation.force("link").links().filter(data => data.display))
         .enter()
         .append("svg:path")
+        .attr("stroke-width", 1.5)
+        .attr("stroke-width", data => {
+          if(data.source.type === "Stream"){
+            if(data.source.objectsNumber > 15){
+              return 8
+            }
+            else if(data.source.objectsNumber < 2){
+              return 3
+            }
+            else{
+              return data.source.objectsNumber
+            }
+          }
+          if(data.target.type === "Stream"){
+            if(data.target.objectsNumber > 15){
+              return 8
+            }
+            else if(data.target.objectsNumber < 2){
+              return 3
+            }
+            else{
+              return data.target.objectsNumber
+            }
+          }
+        })
+        .attr("stroke-linecap", "round")
         .attr("source_timestamp", data => data.source.createdAt)
         .attr("target_timestamp", data => data.target.createdAt)
         .attr("class", function(d) {
@@ -914,23 +959,31 @@ export default {
             var dx = d.target.x - d.source.x,
               dy = d.target.y - d.source.y,
               dr = Math.sqrt(dx * dx + dy * dy);
-
+              var x0 = d.source.x;
+              var y0 = d.source.y;
+              var x1 = d.target.x;
+              var y1 = d.target.y;
+              var xcontrol = x1 * 0.5 + x0 * 0.5;
             if (!parentContext.linearcs) {
-              return (
-                "M" +
-                d.source.x +
-                "," +
-                d.source.y +
-                "A" +
-                dr +
-                "," +
-                dr +
-                " 0 0,1 " +
-                d.target.x +
-                "," +
-                d.target.y
-              );
+              // return (
+              //   "M" +
+              //   d.source.x +
+              //   "," +
+              //   d.source.y +
+              //   "A" +
+              //   dr +
+              //   "," +
+              //   dr +
+              //   " 0 0,1 " +
+              //   d.target.x +
+              //   "," +
+              //   d.target.y
+              // );
+              return ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ");
             } else if (parentContext.linearcs) {
+
+
+
               return (
                 "M" +
                 d.source.x +
@@ -940,6 +993,8 @@ export default {
                 d.target.x +
                 "," +
                 d.target.y
+
+
               );
             }
           })
@@ -1008,8 +1063,10 @@ rect {
 }
 
 .tagSelected {
-  stroke: rgba(44, 165, 202, 0.4);
-  stroke-width: 15px;
+  stroke: rgba(255, 0, 100, 0.4);
+  stroke-width: 5px;
+
+  fill:  rgba(255, 0, 221, 0.445)
 }
 
 circle {
@@ -1149,7 +1206,12 @@ text.shadow {
 
 path.link {
   fill: none;
-  stroke-width: 1.5px;
+
+}
+
+
+marker {
+  stroke-width: 1000 !important
 }
 .brush {
   stroke: #222;

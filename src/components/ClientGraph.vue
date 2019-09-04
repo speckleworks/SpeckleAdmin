@@ -205,7 +205,14 @@
 
             <template v-slot:append-outer>
               <v-slide-x-reverse-transition mode="out-in">
+                                <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn icon @click="inspectSelectedTags = !inspectSelectedTags" v-on="on">
                 <v-icon>360</v-icon>
+              </v-btn>
+            </template>
+            <span>Inspect the tagged streams</span>
+          </v-tooltip>
               </v-slide-x-reverse-transition>
             </template>
 
@@ -232,6 +239,7 @@
         :linearcs="linearcs"
         :brush="brush"
         :inspectTimeframe="inspectTimeframe"
+        :inspectSelectedTags="inspectSelectedTags"
         :streamTags="allStreamTagsJSON_default"
       />
     </div>
@@ -273,6 +281,7 @@ export default {
     redrawToggle: true,
     result: null,
     inspectTimeframe: true,
+    inspectSelectedTags: true,
     sortedNodesByCreationDate: null,
     svgHeight: 700,
     filteredResult: null,
@@ -407,7 +416,8 @@ export default {
           let streamCreatedAt = resStream.data.resource.createdAt;
           let streamUpdatedAt = resStream.data.resource.updatedAt;
           let streamName = resStream.data.resource.name;
-          let streamTags = resStream.data.resource.tags
+          let streamTags = resStream.data.resource.tags;
+          let objectsNumber = resStream.data.resource.objects.length;
           this.$data.allStreamTags.concat(streamTags)
           for (var j = 0; j < streamTags.length; j++) {
             this.$data.allStreamTagsJSON.push({name: streamTags[j]})
@@ -422,6 +432,7 @@ export default {
             createdAt: streamCreatedAt,
             updatedAt: streamUpdatedAt,
             size: "10",
+            objectsNumber: objectsNumber,
             name: streamName,
             tags: streamTags
           });
