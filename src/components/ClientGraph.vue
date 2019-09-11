@@ -48,12 +48,7 @@
 
     <v-container fluid>
       <v-layout>
-        <!-- https://vuetifyjs.com/en/components/button-groups -->
         <v-toolbar>
-
-       
-
-      
 
 
 
@@ -83,7 +78,20 @@
             </v-btn>
             </template>
             <span>Fix/Release the graph</span>
-          </v-tooltip>
+        </v-tooltip>
+
+
+        <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+            <v-btn icon @click="refocus()" v-on="on">
+                <v-icon>center_focus_strong</v-icon>
+            </v-btn>
+            </template>
+            <span>Recenter focus</span>
+        </v-tooltip>
+
+
+
         <v-tooltip bottom>
             <template v-slot:activator="{ on }">
             <v-btn icon @click="linearcs = !linearcs" v-on="on" v-model="linearcs">
@@ -93,8 +101,46 @@
             </template>
             <span>Show arcs/edges</span>
           </v-tooltip>
-
-
+   <v-menu offset-y>
+      <template v-slot:activator="{ on }">
+        <v-btn
+          small
+          
+          v-on="on"
+        >
+          Edges Display
+        </v-btn>
+      </template>
+      <v-list>
+        <v-list-tile
+          v-for="(item, index) in items"
+          :key="index"
+          @click=""
+        >
+          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+   <v-menu offset-y>
+      <template v-slot:activator="{ on }">
+        <v-btn
+          small
+          
+          v-on="on"
+        >
+          Graph Layout
+        </v-btn>
+      </template>
+      <v-list>
+        <v-list-tile
+          v-for="(item, index) in items"
+          :key="index"
+          @click=""
+        >
+          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
 
           <!-- <v-btn-toggle v-model="toggle_multiple" class="transparent" multiple>
             <v-btn color="pink lighten-2" :value="1" flat>Documents</v-btn>
@@ -103,11 +149,7 @@
         
           <v-switch class="custom-switch" v-model="switchForce" :label="`${switchForce ? 'Data flow per users' : 'Data flow per documents'}`" color="blue lighten-2" hide-details></v-switch>
           <div>
-            <!-- <v-autocomplete
-                label="Search Streams per tag"
-                :items="allStreamTags"
-                prepend-icon="search"
-              ></v-autocomplete> -->
+ 
 
         
           </div>
@@ -141,7 +183,7 @@
           ref="timeSlider"
           :data="dates"
           v-model="sliderValue"
-          piecewise
+          
           process-dragable
           :piecewise-label="dates.length < 5 ? true : false"
           xxxwidth="100%"
@@ -152,19 +194,22 @@
         
       
       <span class="font-weight-light caption">Drag this slider to select and highlight a specific timeframe from your project!</span>
-                <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon @click="inspectTimeframe = !inspectTimeframe" v-on="on">
-                <v-icon>360</v-icon>
-              </v-btn>
-            </template>
+
+
+          <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn icon @click="inspectTimeframe = !inspectTimeframe" v-on="on">
+                    <v-badge top >
+                      <span slot="badge" v-if="streamsInTimeFrame.length">{{streamsInTimeFrame.length}}</span>
+                      <v-icon>360</v-icon>
+                    </v-badge>
+                </v-btn>
+              </template>
             <span>Inspect the timeframe</span>
           </v-tooltip>
-
-
-
+    
             <v-autocomplete
-              
+
               v-model="allStreamTagsJSON_default"
               :items="allStreamTagsJSON"
               filled
@@ -205,14 +250,21 @@
 
             <template v-slot:append-outer>
               <v-slide-x-reverse-transition mode="out-in">
-                                <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon @click="inspectSelectedTags = !inspectSelectedTags" v-on="on">
-                <v-icon>360</v-icon>
-              </v-btn>
-            </template>
+
+
+          <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn icon @click="inspectSelectedTags = !inspectSelectedTags" v-on="on">
+                    <v-badge  top color="cyan">
+                      <span slot="badge" v-if="taggedStreams.length">{{taggedStreams.length}}</span>
+                      <v-icon>360</v-icon>
+                    </v-badge>
+                </v-btn>
+              </template>
             <span>Inspect the tagged streams</span>
           </v-tooltip>
+
+
               </v-slide-x-reverse-transition>
             </template>
 
@@ -241,6 +293,9 @@
         :inspectTimeframe="inspectTimeframe"
         :inspectSelectedTags="inspectSelectedTags"
         :streamTags="allStreamTagsJSON_default"
+        :refocus="focus"
+        @triggeredTimeFrame="triggeredTimeFrame"
+        @triggeredTags="triggeredTags"
       />
     </div>
   </v-card>
@@ -268,6 +323,12 @@ export default {
     project: Object
   },
   data: () => ({
+          items: [
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me 2' },
+      ],
     friends: null,
     dialog: false,
     brush: true,
@@ -291,6 +352,9 @@ export default {
     allStreamTagsJSON: [],
     allStreamTagsJSON_default: [],
     isUpdating: false,
+    streamsInTimeFrame: [],
+    taggedStreams: [],
+    focus: false,
     
   }),
   computed: {
@@ -325,6 +389,18 @@ export default {
   },
 
   methods: {
+
+    triggeredTimeFrame (val) {
+      this.streamsInTimeFrame = val
+      console.log(this.streamsInTimeFrame)
+    },
+
+    triggeredTags (val) {
+      this.taggedStreams = val
+      console.log(this.taggedStreams)
+    },
+
+
 
     remove (item) {
       const index = this.allStreamTagsJSON_default.indexOf(item.name)
@@ -361,6 +437,9 @@ export default {
         "diagram.png",
         { scale: 3 }
       );
+    },
+    refocus(){
+      this.$data.focus = !this.$data.focus;
     },
     refresh() {
       this.$asyncComputed.myResolvedValue.update();
@@ -433,7 +512,7 @@ export default {
             updatedAt: streamUpdatedAt,
             size: "10",
             objectsNumber: objectsNumber,
-            name: streamName,
+            name: `📦${streamName}`,
             tags: streamTags
           });
         } catch (error) {
@@ -458,7 +537,13 @@ export default {
             let clientDocumentType = resClient.data.resources[j].documentType;
             let clientDocumentName = resClient.data.resources[j].documentName;
             let clientDocumentID = resClient.data.resources[j].documentGuid;
-
+            let customName = ``
+            if(clientRole == "Sender"){
+              customName = `🚀`
+            }
+            if(clientRole == "Receiver"){
+              customName = `🛬`
+            }
             nodes.push({
               type: "Client",
               _id: client_id,
@@ -470,7 +555,7 @@ export default {
               documentType: clientDocumentType,
               documentName: clientDocumentName,
               documentGuid: clientDocumentID,
-              name: `${clientRole.charAt(0)}` // S or R labels for Senders and Receivers
+              name: customName // S or R labels for Senders and Receivers
             });
 
             if (clientRole == "Receiver") {
@@ -542,6 +627,14 @@ export default {
 
 .custom-switch .v-input--selection-controls__input div {
   color: #f06292;
+}
+.v-list--dense{
+  background: transparent !important
+}
+
+
+.v-select-list {
+  background: transparent !important
 }
 
 // .transparent {

@@ -1,14 +1,16 @@
 <template>
   <div id="clientGraph">
-    <svg width="100%" :height="svgHeight" id="graphLayout">
-      <g v-show="showDocGroups.includes(1)" id="hullDoc" />
-      <g v-show="showDocGroups.includes(2)" id="hullOwner" />
-      <g id="pathLink" />
-      <g id="marker" />
-      <g id="circleSender" />
-      <g id="circleReceiver" />
-      <g id="rectStream" />
-      <g id="text" />
+    <svg width="100%" :height="svgHeight" id="graphLayout"> 
+        <g class="everything">  
+          <g v-show="showDocGroups.includes(1)" id="hullDoc" />
+          <g v-show="showDocGroups.includes(2)" id="hullOwner" />
+          <g id="pathLink"/>
+          <g id="marker"/>
+          <g id="circleSender"/>
+          <g id="circleReceiver"/>
+          <g id="rectStream"/>
+          <g id="text"/>
+        </g>
     </svg>
   </div>
 </template>
@@ -33,10 +35,22 @@ export default {
     linearcs: Boolean,
     inspectTimeframe: Boolean,
     inspectSelectedTags: Boolean,
-    streamTags: Array
+    streamTags: Array,
+    refocus: Boolean
+    
   },
 
   watch: {
+
+    refocus: function(){
+      var container = d3.select(".everything")
+      var zoom = d3.zoom().
+          scaleExtent([0, 0]).
+          on("zoom", () => {       
+              container.attr("transform", d3.event.transform)                
+          })
+      d3.select("#graphLayout").call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1))
+    },
     inspectSelectedTags: function(){
       var taggedStreams = []
       Array.from(document.querySelector("#rectStream").children)
@@ -44,47 +58,33 @@ export default {
           if(d.classList.contains("tagSelected")){
             taggedStreams.push(d3.select(d).datum().streamId)
           }else{
-
           }
       })
-
       var url = "https://hestia.speckle.works/#/view/" + taggedStreams.join(',');
       window.open(url, "_blank").focus();
-
     },
     streamTags: function(){
-      
       var context = this
       Array.from(document.querySelector("#rectStream").children)
       .forEach(function(d) {
         var myStreamTags = Array.from(d3.select(d).datum().tags)
         var selected = context.findCommonElement(myStreamTags, context.streamTags)
-        console.log(myStreamTags)
         if(selected){
               d.classList.remove("tagSelected")
+              //context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
+              if(context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId) != -1){
+              context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
+              }
               d.classList.add("tagSelected")
+              context.selectedTaggedStreams.push(d3.select(d).datum().streamId)
             }else{
               d.classList.remove("tagSelected")
+              if(context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId) != -1){
+              context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
+              }
             }
-        //console.log(context.streamTags)
-
-        // context.streamTags.forEach( function(t){
-        //     if(myStreamTags.includes(t)){
-        //       d.classList.add("tagSelected")
-        //     }else{
-        //       d.classList.remove("tagSelected")
-        //     }
-        //   }
-
-        // )
-        // myStreamTags.forEach(function(t){
-        //   console.log(t)
-        //   console.log(d)
-        //   console.log(context.streamTags)
-        // })
-
-
       })
+      context.$emit('triggeredTags', context.selectedTaggedStreams)
     },
     inspectTimeframe: function(){
       var selectedStreams = []
@@ -164,6 +164,7 @@ export default {
     colour: null,
     groupPath: null,
     simulation: null,
+    selectedTaggedStreams: [],
 
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
     menuStream: [
@@ -231,10 +232,92 @@ export default {
           );
         }
       }
-    ]
+    ],
+    hullPadding: 60,
+    pointRadius: 20,
+    roundedHull: function (polyPoints) {
+      // Returns the SVG path data string representing the polygon, expanded and rounded.
+
+      // Handle special cases
+      if (!polyPoints || polyPoints.length < 1) return "";
+      if (polyPoints.length === 1) return roundedHull1 (polyPoints);
+      if (polyPoints.length === 2) return roundedHull2 (polyPoints);
+
+      var segments = new Array (polyPoints.length);
+
+      // Calculate each offset (outwards) segment of the convex hull.
+      for (var segmentIndex = 0;  segmentIndex < segments.length;  ++segmentIndex) {
+          var p0 = (segmentIndex === 0) ? polyPoints[polyPoints.length-1] : polyPoints[segmentIndex-1];
+          var p1 = polyPoints[segmentIndex];
+
+          // Compute the offset vector for the line segment, with length = hullPadding.
+          var offset = vecScale (hullPadding, unitNormal (p0, p1));
+
+          segments[segmentIndex] = [ vecSum (p0, offset), vecSum (p1, offset) ];
+      }
+
+      var arcData = 'A ' + [hullPadding, hullPadding, '0,0,0,'].join(',');
+
+      segments = segments.map (function (segment, index) {
+          var pathFragment = "";
+          if (index === 0) {
+              var pathFragment = 'M ' + segments[segments.length-1][1] + ' ';
+          }
+          pathFragment += arcData + segment[0] + ' L ' + segment[1];
+
+          return pathFragment;
+      });
+
+      return segments.join(' ');
+  },
+  roundedHull1: function (polyPoints) {
+      // Returns the path for a rounded hull around a single point (a circle).
+
+      var p1 = [polyPoints[0][0], polyPoints[0][1] - hullPadding];
+      var p2 = [polyPoints[0][0], polyPoints[0][1] + hullPadding];
+
+      return 'M ' + p1
+          + ' A ' + [hullPadding, hullPadding, '0,0,0', p2].join(',')
+          + ' A ' + [hullPadding, hullPadding, '0,0,0', p1].join(',');
+  },
+  roundedHull2: function (polyPoints) {
+      // Returns the path for a rounded hull around two points (a "capsule" shape).
+
+      var offsetVector = vecScale (hullPadding, unitNormal (polyPoints[0], polyPoints[1]));
+      var invOffsetVector = vecScale (-1, offsetVector);
+
+      var p0 = vecSum (polyPoints[0], offsetVector);
+      var p1 = vecSum (polyPoints[1], offsetVector);
+      var p2 = vecSum (polyPoints[1], invOffsetVector);
+      var p3 = vecSum (polyPoints[0], invOffsetVector);
+
+      return 'M ' + p0
+          + ' L ' + p1 + ' A ' + [hullPadding, hullPadding, '0,0,0', p2].join(',')
+          + ' L ' + p3 + ' A ' + [hullPadding, hullPadding, '0,0,0', p0].join(',');
+  },
+  vecScale: function (scale, v) {
+    // Returns the vector 'v' scaled by 'scale'.
+    return [ scale * v[0], scale * v[1] ];
+  },
+  vecSum: function (pv1, pv2) {
+    // Returns the sum of two vectors, or a combination of a point and a vector.
+    return [ pv1[0] + pv2[0], pv1[1] + pv2[1] ];
+  },
+  unitNormal: function (p0, p1) {
+    // Returns the unit normal to the line segment from p0 to p1.
+    var n = [ p0[1] - p1[1], p1[0] - p0[0] ];
+    var nLength = Math.sqrt (n[0]*n[0] + n[1]*n[1]);
+    return [ n[0] / nLength, n[1] / nLength ];
+  }
+
   }),
 
   methods: {
+    
+    zoom_actions(){
+      d3.select(".everything").attr("transform", d3.event.transform)
+    },
+
     findCommonElement(array1, array2) { 
           
         // Loop for array1 
@@ -305,8 +388,10 @@ export default {
             nodeTimeComparerTarget <= context.timeFilter[1])
         ) {
           node.style.opacity = 1;
+          node.style.transition = "visibility 0s, opacity 0.4s linear";
         } else {
           node.style.opacity = 0.2;
+          node.style.transition = "visibility 0s, opacity 0.4s linear";
         }
       });
     },
@@ -323,14 +408,26 @@ export default {
         ) {
           node.classList.remove("unselected")
           node.classList.add("selected")
+          node.style.transition = "visibility 0s, opacity 0.4s linear";
+          
           node.style.opacity = 1;
         } else {
           //node.style.display = "none"
           node.classList.remove("selected")
           node.classList.add("unselected")
           node.style.opacity = 0.2;
+          node.style.transition = "visibility 0s, opacity 0.4s linear";
         }
       });
+
+      var selectedStreams = []
+      Array.from(document.querySelector("#rectStream").children)
+      .forEach(function(d) {
+        if(d.classList.contains("selected")){
+          selectedStreams.push(d3.select(d).datum().streamId)
+        }
+      })
+      context.$emit('triggeredTimeFrame', selectedStreams)
     },
 
     contextMenu(type, menu, openCallback) {
@@ -390,6 +487,8 @@ export default {
     },
 
     drawGraph() {
+
+
       var _nodes = this.clientdata[0];
       var links = this.clientdata[1];
 
@@ -573,7 +672,13 @@ export default {
           }
         }))
         .on("tick", tick);
-      
+
+      //add zoom capabilities 
+      var zoom_handler = d3.zoom()
+          .on("zoom", this.zoom_actions);
+
+      zoom_handler(svg);
+
       this.$data.simulation.nodes().forEach(function(d) {
         d.selected = false;
         d.previouslySelected = false;
@@ -641,27 +746,30 @@ export default {
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
 
-      svg
-        .select("#hullDoc")
-        .selectAll("path")
-        .data(Object.keys(childGroups))
-        .enter()
-        .append("path")
-        .attr("class", "subhullDoc")
-        .on("mouseover", function(d) {
-          divDoc.style("opacity", 0.8);
-          divDoc
-            .html(
-              `DocumentGuid: ${d.values[0].documentGuid}<br/>
-            DocumentType: ${d.values[0].documentType}<br/>
-            DocumentName: ${d.values[0].documentName}`
-            )
-            .style("left", d3.event.pageX + "px")
-            .style("top", d3.event.pageY - 28 + "px");
-        })
-        .on("mouseout", function(d) {
-          divDoc.style("opacity", 0);
-        });
+
+
+
+      // svg
+      //   .select("#hullDoc")
+      //   .selectAll("path")
+      //   .data(Object.keys(childGroups))
+      //   .enter()
+      //   .append("path")
+      //   .attr("class", "subhullDoc")
+      //   .on("mouseover", function(d) {
+      //     divDoc.style("opacity", 0.8);
+      //     divDoc
+      //       .html(
+      //         `DocumentGuid: ${d.values[0].documentGuid}<br/>
+      //       DocumentType: ${d.values[0].documentType}<br/>
+      //       DocumentName: ${d.values[0].documentName}`
+      //       )
+      //       .style("left", d3.event.pageX + "px")
+      //       .style("top", d3.event.pageY - 28 + "px");
+      //   })
+      //   .on("mouseout", function(d) {
+      //     divDoc.style("opacity", 0);
+      //   });
 
       var groupOwners = d3
         .nest()
@@ -927,16 +1035,18 @@ export default {
 
           .attr("fill", data => parentContext.colour(data.index))
           .attr("cx", function(d) {
-            return (d.x = Math.max(
-              30,
-              Math.min(parentContext.svgWidth - 30, d.x)
-            ));
+            return d.x
+            // return (d.x = Math.max(
+            //   30,
+            //   Math.min(parentContext.svgWidth - 30, d.x)
+            // ));
           })
           .attr("cy", function(d) {
-            return (d.y = Math.max(
-              30,
-              Math.min(parentContext.svgHeight - 30, d.y)
-            ));
+            return d.y
+            // return (d.y = Math.max(
+            //   30,
+            //   Math.min(parentContext.svgHeight - 30, d.y)
+            // ));
           });
         // svg
         //   .select("#hullOwner")
@@ -1056,6 +1166,10 @@ export default {
   overflow: hidden;
 }
 
+#graphLayout {
+  cursor: all-scroll
+}
+
 rect {
   cursor: pointer;
   stroke: lightgray;
@@ -1063,11 +1177,12 @@ rect {
 }
 
 .tagSelected {
-  stroke: rgba(255, 0, 100, 0.4);
+  stroke: rgba(0, 255, 200, 0.4);
   stroke-width: 5px;
 
-  fill:  rgba(255, 0, 221, 0.445)
+  fill:  rgba(0, 255, 200, 0.4)
 }
+
 
 circle {
   cursor: pointer;
@@ -1178,13 +1293,6 @@ text.shadow {
 
 
 
-.v-list {
-  background: transparent !important
-}
-
-.v-select-list {
-  background: transparent !important
-}
 
 .subhullOwner {
   fill: rgb(126, 191, 243);
@@ -1206,7 +1314,7 @@ text.shadow {
 
 path.link {
   fill: none;
-
+  
 }
 
 
