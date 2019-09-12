@@ -12,12 +12,12 @@
     >
       <template v-slot:header>
       
-      <span class="title">The <b>Speckle Project's Metagraph&trade;</b><span right class="caption font-weight-light">&nbsp; ...need help? click me for more information! <v-icon>contact_support</v-icon></span></span>
+      <span class="title"><b>SpeckleViz&trade;</b>  👁️<span right class="caption font-weight-light">&nbsp; ...need help? click me for more information! <v-icon>contact_support</v-icon></span></span>
       
 
       </template>
       <v-card>
-        <v-card-text class="caption font-weight-light">Welcome to the <b>Speckle Project's Metagraph&trade;</b> interface!<br />
+        <v-card-text class="caption font-weight-light">Welcome to the <b>SPECKLEVIZ&trade;</b> interface!<br />
             The term <i>Metagraph</i> is composed of the prefix "Meta" (from the Greek <b>μετά-</b> meaning "after" or "beyond") and the suffix "Graph" (from the Greek <b>-γραφω</b> meaning "that is written")<br/>
             In other words, this graph has been created to help you get a better understanding of the <b>data flow</b> between the project's users, streams and documents.<br />
             
@@ -50,8 +50,19 @@
       <v-layout>
         <v-toolbar>
 
-
-
+             
+                <v-switch class="custom-switch" v-model="switchForce" color="blue lighten-2" hide-details>
+      <template v-slot:label>
+        <v-chip outline>
+                Data flow per&nbsp;
+      <v-icon v-if="switchForce">supervised_user_circle</v-icon>
+      <v-icon v-if="!switchForce">folder</v-icon>
+      
+    </v-chip>
+      </template>
+    </v-switch>
+          
+          
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon @click="refresh()" v-on="on">
@@ -72,9 +83,10 @@
 
         <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-            <v-btn icon @click="toggleDrag = !toggleDrag" v-on="on" v-model="toggleDrag">
-                <v-icon v-if="toggleDrag">gps_fixed</v-icon>
-                <v-icon v-if="!toggleDrag">gps_not_fixed</v-icon>
+            <v-btn icon @click="toggleFix = !toggleFix" v-on="on" v-model="toggleFix">
+                <v-icon v-if="!toggleFix">center_focus_weak</v-icon>
+                <v-icon v-if="toggleFix">filter_center_focus</v-icon>
+                
             </v-btn>
             </template>
             <span>Fix/Release the graph</span>
@@ -84,7 +96,7 @@
         <v-tooltip bottom>
             <template v-slot:activator="{ on }">
             <v-btn icon @click="refocus()" v-on="on">
-                <v-icon>center_focus_strong</v-icon>
+                <v-icon>gps_fixed</v-icon>
             </v-btn>
             </template>
             <span>Recenter focus</span>
@@ -92,20 +104,12 @@
 
 
 
-        <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-            <v-btn icon @click="linearcs = !linearcs" v-on="on" v-model="linearcs">
-                <v-icon v-if="linearcs">trending_flat</v-icon>
-                <v-icon v-if="!linearcs">redo</v-icon>
-            </v-btn>
-            </template>
-            <span>Show arcs/edges</span>
-          </v-tooltip>
+
    <v-menu offset-y>
       <template v-slot:activator="{ on }">
         <v-btn
+                  
           small
-          
           v-on="on"
         >
           Edges Display
@@ -113,47 +117,53 @@
       </template>
       <v-list>
         <v-list-tile
-          v-for="(item, index) in items"
+          v-for="(item, index) in edgesdisplay"
           :key="index"
-          @click=""
+          @click="selectedEdgesDisplay = item.title"
         >
-          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+          <v-list-tile-title>
+            <b v-if="item.title==selectedEdgesDisplay">{{item.title}}</b>
+            <span v-else class="font-weight-light">{{item.title}}</span>
+          </v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-menu>
-   <v-menu offset-y>
-      <template v-slot:activator="{ on }">
-        <v-btn
-          small
-          
-          v-on="on"
-        >
-          Graph Layout
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-tile
-          v-for="(item, index) in items"
-          :key="index"
-          @click=""
-        >
-          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
+
+
+      <v-menu offset-y>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              small
+              
+              
+              v-on="on"
+            >
+              Graph Layout
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-tile
+              v-for="(item, index) in graphlayout"
+              :key="index"
+              @click="selectedGraphLayout = item.title; refresh()"
+            >
+              <v-list-tile-title>
+             <b v-if="item.title==selectedGraphLayout">{{item.title}}</b>
+            <span v-else class="font-weight-light">{{item.title}}</span>
+            </v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+        </v-menu>
 
           <!-- <v-btn-toggle v-model="toggle_multiple" class="transparent" multiple>
             <v-btn color="pink lighten-2" :value="1" flat>Documents</v-btn>
             <v-btn color="blue lighten-2" :value="2" flat>Users</v-btn>
           </v-btn-toggle> -->
-        
-          <v-switch class="custom-switch" v-model="switchForce" :label="`${switchForce ? 'Data flow per users' : 'Data flow per documents'}`" color="blue lighten-2" hide-details></v-switch>
-          <div>
- 
 
-        
-          </div>
-            
+          
+                      
+
+
 
           <v-slider
             v-model="documentLinksForce"
@@ -169,7 +179,7 @@
             :min="-50"
             hide-details label=""
           ></v-slider>
-          
+
         </v-toolbar>
 
         
@@ -285,7 +295,7 @@
         :clientdata="result"
         :clientdatafilter="filteredResult"
         :timeFilter="filteredTime"
-        :toggleDrag="toggleDrag"
+        :toggleFix="toggleFix"
         :documentLinksForce="documentLinksForce"
         :switchForce="switchForce"
         :linearcs="linearcs"
@@ -294,6 +304,8 @@
         :inspectSelectedTags="inspectSelectedTags"
         :streamTags="allStreamTagsJSON_default"
         :refocus="focus"
+        :selectedEdgesDisplay="selectedEdgesDisplay"
+        :selectedGraphLayout="selectedGraphLayout"
         @triggeredTimeFrame="triggeredTimeFrame"
         @triggeredTags="triggeredTags"
       />
@@ -323,18 +335,27 @@ export default {
     project: Object
   },
   data: () => ({
-          items: [
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me 2' },
+
+      edgesdisplay: [
+        { title: 'Line' },
+        { title: 'Arc' },
+        { title: 'Diagonal Horizontal' },
+        { title: 'Diagonal Vertical' },
+        { title: 'Diagonal Smart' },
       ],
+
+      graphlayout: [
+        { title: 'Free' },
+        { title: 'Horizontal' },
+        { title: 'Vertical' },
+      ],
+
     friends: null,
     dialog: false,
     brush: true,
     switchForce: false,
     documentLinksForce: -50,
-    toggleDrag: false,
+    toggleFix: false,
     dates: [],
     sliderValue: [],
     linearcs: false,
@@ -355,6 +376,8 @@ export default {
     streamsInTimeFrame: [],
     taggedStreams: [],
     focus: false,
+    selectedEdgesDisplay: "Diagonal Horizontal",
+    selectedGraphLayout: "Free"
     
   }),
   computed: {
@@ -374,12 +397,22 @@ export default {
   },
 
   watch: {
+
+    selectedGraphLayout: function(){
+      if(this.selectedGraphLayout == "Free"){
+        this.$data.selectedEdgesDisplay = "Diagonal Smart"
+      }
+      if(this.selectedGraphLayout == "Horizontal"){
+        this.$data.selectedEdgesDisplay = "Diagonal Horizontal"
+      }
+      if(this.selectedGraphLayout == "Vertical"){
+        this.$data.selectedEdgesDisplay = "Diagonal Vertical"
+      }
+    },
     sliderValue: function() {
       this.filteredTime = this.sliderValue.map(d => new Date(d).toISOString());
     },
-    linearcs: function(){
-        //this.refresh()
-    },
+
           isUpdating (val) {
         if (val) {
           setTimeout(() => (this.isUpdating = false), 3000)
@@ -463,7 +496,7 @@ export default {
   },
   asyncComputed: {
     async myResolvedValue() {
-      this.toggleDrag = false;
+      this.toggleFix = false
       var streamLinks = [];
       var nodes = [];
 
@@ -512,7 +545,7 @@ export default {
             updatedAt: streamUpdatedAt,
             size: "10",
             objectsNumber: objectsNumber,
-            name: `📦${streamName}`,
+            name: `🛰️📦${streamName}`,
             tags: streamTags
           });
         } catch (error) {
@@ -542,7 +575,7 @@ export default {
               customName = `🚀`
             }
             if(clientRole == "Receiver"){
-              customName = `🛬`
+              customName = `📡`
             }
             nodes.push({
               type: "Client",

@@ -28,19 +28,27 @@ export default {
     showDocGroups: Array,
     clientdatafilter: Array,
     timeFilter: Array,
-    toggleDrag: Boolean,
+    toggleFix: Boolean,
     brush: Boolean,
     documentLinksForce: Number,
     switchForce: Boolean,
-    linearcs: Boolean,
     inspectTimeframe: Boolean,
     inspectSelectedTags: Boolean,
     streamTags: Array,
-    refocus: Boolean
-    
+    refocus: Boolean,
+    selectedEdgesDisplay: String,
+    selectedGraphLayout: String
   },
 
   watch: {
+
+    selectedGraphLayout: function(){
+      this.drawGraph.tick();
+    },
+
+    selectedEdgesDisplay: function(){
+      this.drawGraph.tick();
+    },
 
     refocus: function(){
       var container = d3.select(".everything")
@@ -101,9 +109,6 @@ export default {
     brush: function(){
       console.log(this.brush)
     },
-    linearcs: function() {
-      this.drawGraph.tick();
-    },
     switchForce: function() {
       if (this.switchForce) {
         this.$data.simulation.force("link").links(this.forceLinks.filter(d => d.type != "documentGuidForceGroup"))
@@ -126,22 +131,31 @@ export default {
         })
       this.$data.simulation.alpha(1).restart();
     },
-    toggleDrag: function() {
-      if (this.toggleDrag) {
-        d3.selectAll("circle").classed("fixed", d => {
+    toggleFix: function() {
+      if (this.toggleFix) {
+        this.$data.simulation.stop()
+                d3.selectAll("circle").classed("fixed", d => {
           d.fixed = true;
         });
         d3.selectAll("rect").classed("fixed", d => {
           d.fixed = true;
         });
       } else {
-        d3.selectAll("circle").classed("fixed", d => {
+        this.$data.simulation.alphaTarget(0.3).restart()
+                d3.selectAll("circle").classed("fixed", d => {
           d.fixed = false;
         });
         d3.selectAll("rect").classed("fixed", d => {
           d.fixed = false;
         });
       }
+
+
+
+
+
+
+
     },
     clientdatafilter: function() {
       console.log("ooups");
@@ -319,27 +333,16 @@ export default {
     },
 
     findCommonElement(array1, array2) { 
-          
-        // Loop for array1 
         for(let i = 0; i < array1.length; i++) { 
-              
-            // Loop for array2 
             for(let j = 0; j < array2.length; j++) { 
-                  
-                // Compare the element of each and 
-                // every element from both of the 
-                // arrays 
                 if(array1[i] === array2[j]) { 
-                  
-                    // Return if common element found 
-                    return true; 
-                } 
-            } 
-        } 
-          
-        // Return if no common element exist 
+                    return true;
+                }
+            }
+        }
         return false;  
     },
+    
     // Drag events for the whole d3 force simulation
     drag() {
       var parentContext = this
@@ -650,7 +653,7 @@ export default {
 
       this.$data.simulation = d3.forceSimulation()
         .nodes(d3.values(_nodes))
-        .force("forceY", d3.forceY(0).strength(0.08))
+        //.force("forceX", d3.forceX(0).strength(0.08))
         .force("link", d3.forceLink(thisContext.forceLinks).distance(d => {
           if (d.type == "ownerForceGroup") {
             return this.documentLinksForce;
@@ -673,12 +676,35 @@ export default {
         }))
         .on("tick", tick);
 
+      if(this.selectedGraphLayout == "Free"){
+        this.$data.simulation
+          .force("forceX", d3.forceX(0).strength(0))
+          .force("forceY", d3.forceY(0).strength(0))
+      }
+
+      if(this.selectedGraphLayout == "Horizontal"){
+        
+        this.$data.simulation
+          .force("forceX", d3.forceX(0).strength(0))
+          .force("forceY", d3.forceY(0).strength(0.08))
+      }
+
+      
+      if(this.selectedGraphLayout == "Vertical"){
+        
+        this.$data.simulation
+          .force("forceX", d3.forceX(0).strength(0.08))
+          .force("forceY", d3.forceY(0).strength(0))
+      }
+
+
       //add zoom capabilities 
       var zoom_handler = d3.zoom()
           .on("zoom", this.zoom_actions);
 
       zoom_handler(svg);
-
+      // REMOVE ZOOM
+      svg.on("dblclick.zoom", null)
       this.$data.simulation.nodes().forEach(function(d) {
         d.selected = false;
         d.previouslySelected = false;
@@ -971,7 +997,13 @@ export default {
         .attr("x", 8)
         .attr("y", ".31em")
         .attr("class", "shadow")
+        .style("font-size", function(d) {
+          if(d.type == "Client"){
 
+          }else{
+            return "20px"
+          };
+        })
         .text(function(d) {
           return d.name;
         });
@@ -979,7 +1011,13 @@ export default {
         .append("svg:text")
         .attr("x", 8)
         .attr("y", ".31em")
+        .style("font-size", function(d) {
+          if(d.type == "Client"){
 
+          }else{
+            return "20px"
+          };
+        })
         .text(function(d) {
           return d.name;
         });
@@ -1021,7 +1059,8 @@ export default {
         d3.select(this).classed("fixed", (d.fixed = !d.fixed));
       }
       function dragstart(d) {
-        if (this.toggleDrag) {
+        if (this.toggleFix) {
+          console.log("loll")
           d3.select(this).classed("fixed", (d.fixed = true));
         } else {
           d3.select(this).classed("fixed", (d.fixed = false));
@@ -1030,6 +1069,7 @@ export default {
 
       var parentContext = this;
       function tick() {
+        
         svg
           .selectAll(".node")
 
@@ -1067,46 +1107,39 @@ export default {
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
-              dy = d.target.y - d.source.y,
-              dr = Math.sqrt(dx * dx + dy * dy);
-              var x0 = d.source.x;
-              var y0 = d.source.y;
-              var x1 = d.target.x;
-              var y1 = d.target.y;
-              var xcontrol = x1 * 0.5 + x0 * 0.5;
-            if (!parentContext.linearcs) {
-              // return (
-              //   "M" +
-              //   d.source.x +
-              //   "," +
-              //   d.source.y +
-              //   "A" +
-              //   dr +
-              //   "," +
-              //   dr +
-              //   " 0 0,1 " +
-              //   d.target.x +
-              //   "," +
-              //   d.target.y
-              // );
-              return ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ");
-            } else if (parentContext.linearcs) {
-
-
-
-              return (
-                "M" +
-                d.source.x +
-                "," +
-                d.source.y +
-                "L" +
-                d.target.x +
-                "," +
-                d.target.y
-
-
-              );
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+            var x0 = d.source.x;
+            var y0 = d.source.y;
+            var x1 = d.target.x;
+            var y1 = d.target.y;
+            var xcontrol = x1 * 0.5 + x0 * 0.5;
+            var ycontrol = y1 * 0.5 + y0 * 0.5;
+            var smartDiagonal;
+            if(Math.abs(x0-x1) > Math.abs(y0-y1)){
+              smartDiagonal = ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ")
             }
+            if(Math.abs(y0-y1) > Math.abs(x0-x1)){
+              smartDiagonal = ["M",x1,y1,"C",x1,ycontrol,x0,ycontrol,x0,y0].join(" ")
+            }
+            
+
+            if (parentContext.selectedEdgesDisplay == "Diagonal Horizontal") {
+              return ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ");
+            }
+            if (parentContext.selectedEdgesDisplay == "Diagonal Vertical") {
+              return ["M",x1,y1,"C",x1,ycontrol,x0,ycontrol,x0,y0].join(" ");
+            }
+            if (parentContext.selectedEdgesDisplay == "Diagonal Smart") {
+              return smartDiagonal;
+            }
+            if (parentContext.selectedEdgesDisplay == "Line") {
+              return ["M",x0,y0,"L",x1,y1].join(" ");
+            }
+            if (parentContext.selectedEdgesDisplay == "Arc") {
+              return ["M",x0,y0,"A",dr,dr," 0 0,1 ",x1,y1].join(" ");
+            }
+
           })
           .attr("stroke", data => parentContext.colour(data.source.index));
         //
