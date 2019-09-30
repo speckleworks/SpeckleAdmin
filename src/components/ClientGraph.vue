@@ -1,68 +1,88 @@
 <template>
   <v-card class="elevation-0">
-
-
     <template>
+      <v-expansion-panel focusable>
+        <v-expansion-panel-content>
+          <template v-slot:header>
+            <span class="title">
+              <b>SpeckleViz&trade;</b> 👁️
+              <span right class="caption font-weight-light">
+                &nbsp; ...need help? click me for more information!
+                <v-icon>contact_support</v-icon>
+              </span>
+            </span>
+          </template>
+          <v-card>
+            <v-card-text class="caption font-weight-light">
+              Welcome to the
+              <b>SPECKLEVIZ&trade;</b> interface!
+              <br />The term
+              <i>Metagraph</i> is composed of the prefix "Meta" (from the Greek
+              <b>μετά-</b> meaning "after" or "beyond") and the suffix "Graph" (from the Greek
+              <b>-γραφω</b> meaning "that is written")
+              <br />In other words, this graph has been created to help you get a better understanding of the
+              <b>data flow</b> between the project's users, streams and documents.
+              <br />
 
-
-        
-  <v-expansion-panel focusable>
-    <v-expansion-panel-content
-
-    >
-      <template v-slot:header>
-      
-      <span class="title"><b>SpeckleViz&trade;</b>  👁️<span right class="caption font-weight-light">&nbsp; ...need help? click me for more information! <v-icon>contact_support</v-icon></span></span>
-      
-
-      </template>
-      <v-card>
-        <v-card-text class="caption font-weight-light">Welcome to the <b>SPECKLEVIZ&trade;</b> interface!<br />
-            The term <i>Metagraph</i> is composed of the prefix "Meta" (from the Greek <b>μετά-</b> meaning "after" or "beyond") and the suffix "Graph" (from the Greek <b>-γραφω</b> meaning "that is written")<br/>
-            In other words, this graph has been created to help you get a better understanding of the <b>data flow</b> between the project's users, streams and documents.<br />
-            
-            <br/>
-            <b>1. How to read the graph</b>
-            <br/>
-            <v-icon>fiber_manual_record</v-icon> Circle nodes represent <b>Senders (S)</b> and <b>Receivers (R)</b>.<br />
-            <v-icon>crop_square</v-icon> Square nodes represent <b>Streams</b>.<br />
-            <v-icon>compare_arrows</v-icon> Arrows represent either data that has been shared to a stream by a user (<v-icon>fiber_manual_record</v-icon><v-icon>arrow_right_alt</v-icon><v-icon>crop_square</v-icon>) or data that has been retrieved by a user from a stream (<v-icon>crop_square</v-icon><v-icon>arrow_right_alt</v-icon><v-icon>fiber_manual_record</v-icon>).<br />
-            <v-icon>color_lens</v-icon> Generally, both nodes and edges are coloured according to their timestamps (dark blue for the newest created, light grey for the oldest).<br/>
-            <br/>
-            <b>2. What you can do</b><br/>
-            <v-icon>gesture</v-icon> You can drag nodes around! 😲 <br/>
-            <v-icon>group_work</v-icon> The clients are grouped either by Document GUID or User GUID. You can switch between the two by using the toggle switch situated on the toolbar.<br/>
-            <v-icon>360</v-icon> Right clicking on a stream will direct you to its related viewer interface!<br/>
-            <v-icon>timeline</v-icon> Use the slider below the toolbar to select and highlight a specific timeframe of your project!<br/>
-            <v-icon>refresh</v-icon> If you add streams to your project, you might want to hit the refresh button as the graph <b>won't update automatically</b>.<br/>
-            <v-icon>gps_not_fixed</v-icon><v-icon>gps_fixed</v-icon> It is possible to anchor/release the graph by clicking on these icons. Double clicking on specific nodes will perform these same actions locally.<br/>
-            <v-icon>trending_flat</v-icon><v-icon>redo</v-icon> The graph's edges can be visualized either by arcs or straight edges.<br/>
-            <v-icon>save_alt</v-icon> Finally, you can save your graph as PNG!<br/>
+              <br />
+              <b>1. How to read the graph</b>
+              <br />
+              <v-icon>fiber_manual_record</v-icon>Circle nodes represent
+              <b>Senders (S)</b> and
+              <b>Receivers (R)</b>.
+              <br />
+              <v-icon>crop_square</v-icon>Square nodes represent
+              <b>Streams</b>.
+              <br />
+              <v-icon>compare_arrows</v-icon>Arrows represent either data that has been shared to a stream by a user (
+              <v-icon>fiber_manual_record</v-icon>
+              <v-icon>arrow_right_alt</v-icon>
+              <v-icon>crop_square</v-icon>) or data that has been retrieved by a user from a stream (
+              <v-icon>crop_square</v-icon>
+              <v-icon>arrow_right_alt</v-icon>
+              <v-icon>fiber_manual_record</v-icon>).
+              <br />
+              <v-icon>color_lens</v-icon>Generally, both nodes and edges are coloured according to their timestamps (dark blue for the newest created, light grey for the oldest).
+              <br />
+              <br />
+              <b>2. What you can do</b>
+              <br />
+              <v-icon>gesture</v-icon>You can drag nodes around! 😲
+              <br />
+              <v-icon>group_work</v-icon>The clients are grouped either by Document GUID or User GUID. You can switch between the two by using the toggle switch situated on the toolbar.
+              <br />
+              <v-icon>360</v-icon>Right clicking on a stream will direct you to its related viewer interface!
+              <br />
+              <v-icon>timeline</v-icon>Use the slider below the toolbar to select and highlight a specific timeframe of your project!
+              <br />
+              <v-icon>refresh</v-icon>If you add streams to your project, you might want to hit the refresh button as the graph
+              <b>won't update automatically</b>.
+              <br />
+              <v-icon>gps_not_fixed</v-icon>
+              <v-icon>gps_fixed</v-icon>It is possible to anchor/release the graph by clicking on these icons. Double clicking on specific nodes will perform these same actions locally.
+              <br />
+              <v-icon>trending_flat</v-icon>
+              <v-icon>redo</v-icon>The graph's edges can be visualized either by arcs or straight edges.
+              <br />
+              <v-icon>save_alt</v-icon>Finally, you can save your graph as PNG!
+              <br />
             </v-card-text>
-      </v-card>
-    </v-expansion-panel-content>
-  </v-expansion-panel>
-
-  
-</template>
-
+          </v-card>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </template>
     <v-container fluid>
       <v-layout>
         <v-toolbar>
-
-             
-                <v-switch class="custom-switch" v-model="switchForce" color="blue lighten-2" hide-details>
-      <template v-slot:label>
-        <v-chip outline>
+          <v-switch class="custom-switch" v-model="switchForce" color="blue lighten-2" hide-details>
+            <template v-slot:label>
+              <v-chip outline>
                 Data flow per&nbsp;
-      <v-icon v-if="switchForce">supervised_user_circle</v-icon>
-      <v-icon v-if="!switchForce">folder</v-icon>
-      
-    </v-chip>
-      </template>
-    </v-switch>
-          
-          
+                <v-icon v-if="switchForce">supervised_user_circle</v-icon>
+                <v-icon v-if="!switchForce">folder</v-icon>
+              </v-chip>
+            </template>
+          </v-switch>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon @click="refresh()" v-on="on">
@@ -71,7 +91,6 @@
             </template>
             <span>Refresh</span>
           </v-tooltip>
-
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon @click="saveAsPNG()" v-on="on">
@@ -80,212 +99,151 @@
             </template>
             <span>Save as PNG</span>
           </v-tooltip>
-
-        <v-tooltip bottom>
+          <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-            <v-btn icon @click="toggleFix = !toggleFix" v-on="on" v-model="toggleFix">
+              <v-btn icon @click="toggleFix = !toggleFix" v-on="on" v-model="toggleFix">
                 <v-icon v-if="!toggleFix">center_focus_weak</v-icon>
                 <v-icon v-if="toggleFix">filter_center_focus</v-icon>
-                
-            </v-btn>
+              </v-btn>
             </template>
             <span>Fix/Release the graph</span>
-        </v-tooltip>
-
-
-        <v-tooltip bottom>
+          </v-tooltip>
+          <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-            <v-btn icon @click="refocus()" v-on="on">
+              <v-btn icon @click="refocus()" v-on="on">
                 <v-icon>gps_fixed</v-icon>
-            </v-btn>
+              </v-btn>
             </template>
             <span>Recenter focus</span>
-        </v-tooltip>
-
-
-
-
-   <v-menu offset-y>
-      <template v-slot:activator="{ on }">
-        <v-btn
-                  
-          small
-          v-on="on"
-        >
-          Edges Display
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-tile
-          v-for="(item, index) in edgesdisplay"
-          :key="index"
-          @click="selectedEdgesDisplay = item.title"
-        >
-          <v-list-tile-title>
-            <b v-if="item.title==selectedEdgesDisplay">{{item.title}}</b>
-            <span v-else class="font-weight-light">{{item.title}}</span>
-          </v-list-tile-title>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
-
-
-      <v-menu offset-y>
-          <template v-slot:activator="{ on }">
-            <v-btn
-              small
-              
-              
-              v-on="on"
-            >
-              Graph Layout
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-tile
-              v-for="(item, index) in graphlayout"
-              :key="index"
-              @click="selectedGraphLayout = item.title; refresh()"
-            >
-              <v-list-tile-title>
-             <b v-if="item.title==selectedGraphLayout">{{item.title}}</b>
-            <span v-else class="font-weight-light">{{item.title}}</span>
-            </v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-
-          <!-- <v-btn-toggle v-model="toggle_multiple" class="transparent" multiple>
-            <v-btn color="pink lighten-2" :value="1" flat>Documents</v-btn>
-            <v-btn color="blue lighten-2" :value="2" flat>Users</v-btn>
-          </v-btn-toggle> -->
-
-          
-                      
-
-
-
+          </v-tooltip>
+          <v-menu offset-y>
+            <template v-slot:activator="{ on }">
+              <v-btn small v-on="on">Edges Display</v-btn>
+            </template>
+            <v-list>
+              <v-list-tile
+                v-for="(item, index) in edgesdisplay"
+                :key="index"
+                @click="selectedEdgesDisplay = item.title"
+              >
+                <v-list-tile-title>
+                  <b v-if="item.title==selectedEdgesDisplay">{{item.title}}</b>
+                  <span v-else class="font-weight-light">{{item.title}}</span>
+                </v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
+          <v-menu offset-y>
+            <template v-slot:activator="{ on }">
+              <v-btn small v-on="on">Graph Layout</v-btn>
+            </template>
+            <v-list>
+              <v-list-tile
+                v-for="(item, index) in graphlayout"
+                :key="index"
+                @click="selectedGraphLayout = item.title; refresh()"
+              >
+                <v-list-tile-title>
+                  <b v-if="item.title==selectedGraphLayout">{{item.title}}</b>
+                  <span v-else class="font-weight-light">{{item.title}}</span>
+                </v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
           <v-slider
             v-model="documentLinksForce"
             always-dirty
             :thumb-size="24"
             color="grey darken-1"
-            
             append-icon="zoom_out_map"
             prepend-icon="group_work"
             @click:append="expandDocuments"
             @click:prepend="collapseDocuments"
             :max="300"
             :min="-50"
-            hide-details label=""
+            hide-details
+            label
           ></v-slider>
-
         </v-toolbar>
-
-        
       </v-layout>
       <v-divider class="ml-2" vertical></v-divider>
-
-      <br/>
-      
-      <br/>
-        <vue-slider
-          ref="timeSlider"
-          :data="dates"
-          v-model="sliderValue"
-          
-          process-dragable
-          :piecewise-label="dates.length < 5 ? true : false"
-          xxxwidth="100%"
-          xxxstyle="margin-left:10%;"
-          :tooltipStyle="{ 'font-size':'11px' }"
-          v-if="dates.length>0"
-        ></vue-slider>
-        
-      
-      <span class="font-weight-light caption">Drag this slider to select and highlight a specific timeframe from your project!</span>
-
-
-          <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn icon @click="inspectTimeframe = !inspectTimeframe" v-on="on">
-                    <v-badge top >
-                      <span slot="badge" v-if="streamsInTimeFrame.length">{{streamsInTimeFrame.length}}</span>
-                      <v-icon>360</v-icon>
-                    </v-badge>
-                </v-btn>
-              </template>
-            <span>Inspect the timeframe</span>
-          </v-tooltip>
-    
-            <v-autocomplete
-
-              v-model="allStreamTagsJSON_default"
-              :items="allStreamTagsJSON"
-              filled
-              chips
-              label="Select streams by tag(s)"
-              item-text="name"
-              item-value="name"
-              multiple
-              prepend-icon="search"
-              dense
-              item-color="black"
-              
-            >
-            <template v-slot:selection="data">
-                <v-chip
-                  :selected="data.selected"
-                  close
-                  class="chip--select-multi"
-                  @input="remove(data.item)"
-                >
-
-                  {{ data.item.name }}
-                </v-chip>
-              </template>
-              <template v-slot:item="data">
-                <template v-if="typeof data.item !== 'object'">
-                  <v-list-tile-content v-text="data.item.name"></v-list-tile-content>
-                </template>
-                <template v-else>
-
-                  <v-list-tile-content>
-                    <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
-
-                  </v-list-tile-content>
-                </template>
-              </template>
-
-
-            <template v-slot:append-outer>
-              <v-slide-x-reverse-transition mode="out-in">
-
-
-          <v-tooltip bottom>
+      <br />
+      <br />
+      <vue-slider
+        ref="timeSlider"
+        :data="dates"
+        v-model="sliderValue"
+        process-dragable
+        :piecewise-label="dates.length < 5 ? true : false"
+        xxxwidth="100%"
+        xxxstyle="margin-left:10%;"
+        :tooltipStyle="{ 'font-size':'11px' }"
+        v-if="dates.length>0"
+      ></vue-slider>
+      <span
+        class="font-weight-light caption"
+      >Drag this slider to select and highlight a specific timeframe from your project!</span>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn icon @click="inspectTimeframe = !inspectTimeframe" v-on="on">
+            <v-badge top>
+              <span slot="badge" v-if="streamsInTimeFrame.length">{{streamsInTimeFrame.length}}</span>
+              <v-icon>360</v-icon>
+            </v-badge>
+          </v-btn>
+        </template>
+        <span>Inspect the timeframe</span>
+      </v-tooltip>
+      <v-autocomplete
+        v-model="allStreamTagsJSON_default"
+        :items="allStreamTagsJSON"
+        filled
+        chips
+        label="Select streams by tag(s)"
+        item-text="name"
+        item-value="name"
+        multiple
+        prepend-icon="search"
+        dense
+        item-color="black"
+      >
+        <template v-slot:selection="data">
+          <v-chip
+            outline
+            :selected="data.selected"
+            close
+            class="chip--select-multi"
+            @input="remove(data.item)"
+          >{{ data.item.name }}</v-chip>
+        </template>
+        <template v-slot:item="data">
+          <template v-if="typeof data.item !== 'object'">
+            <v-list-tile-content v-text="data.item.name"></v-list-tile-content>
+          </template>
+          <template v-else>
+            <v-list-tile-content>
+              <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+            </v-list-tile-content>
+          </template>
+        </template>
+        <template v-slot:append-outer>
+          <v-slide-x-reverse-transition mode="out-in">
+            <v-tooltip bottom>
               <template v-slot:activator="{ on }">
                 <v-btn icon @click="inspectSelectedTags = !inspectSelectedTags" v-on="on">
-                    <v-badge  top color="cyan">
-                      <span slot="badge" v-if="taggedStreams.length">{{taggedStreams.length}}</span>
-                      <v-icon>360</v-icon>
-                    </v-badge>
+                  <v-badge top color="cyan">
+                    <span slot="badge" v-if="taggedStreams.length">{{taggedStreams.length}}</span>
+                    <v-icon>360</v-icon>
+                  </v-badge>
                 </v-btn>
               </template>
-            <span>Inspect the tagged streams</span>
-          </v-tooltip>
-
-
-              </v-slide-x-reverse-transition>
-            </template>
-
-            </v-autocomplete>
-
+              <span>Inspect the tagged streams</span>
+            </v-tooltip>
+          </v-slide-x-reverse-transition>
+        </template>
+      </v-autocomplete>
     </v-container>
- 
-
-
-
-    
+    <!-- END OF TOOLBAR / SVG CANVAS STARTS HERE -->
     <div id="appClientGraph">
       <svg v-if="!redrawToggle || !result" width="100%" :height="svgHeight" />
       <ForceDirectedLayout
@@ -335,20 +293,19 @@ export default {
     project: Object
   },
   data: () => ({
+    edgesdisplay: [
+      { title: "Line" },
+      { title: "Arc" },
+      { title: "Diagonal Horizontal" },
+      { title: "Diagonal Vertical" },
+      { title: "Diagonal Smart" }
+    ],
 
-      edgesdisplay: [
-        { title: 'Line' },
-        { title: 'Arc' },
-        { title: 'Diagonal Horizontal' },
-        { title: 'Diagonal Vertical' },
-        { title: 'Diagonal Smart' },
-      ],
-
-      graphlayout: [
-        { title: 'Free' },
-        { title: 'Horizontal' },
-        { title: 'Vertical' },
-      ],
+    graphlayout: [
+      { title: "Free" },
+      { title: "Horizontal" },
+      { title: "Vertical" }
+    ],
 
     friends: null,
     dialog: false,
@@ -378,72 +335,63 @@ export default {
     focus: false,
     selectedEdgesDisplay: "Diagonal Horizontal",
     selectedGraphLayout: "Free"
-    
   }),
   computed: {
-    toggle_multiple: function(){
-      if(this.switchForce){
-        return [2]
+    toggle_multiple: function() {
+      if (this.switchForce) {
+        return [2];
       }
-      if(!this.switchForce){
-        return [1]
-      }else{
-        return [1,2]
+      if (!this.switchForce) {
+        return [1];
+      } else {
+        return [1, 2];
       }
-    },
-
-
-
+    }
   },
 
   watch: {
-
-    selectedGraphLayout: function(){
-      if(this.selectedGraphLayout == "Free"){
-        this.$data.selectedEdgesDisplay = "Diagonal Smart"
+    selectedGraphLayout: function() {
+      if (this.selectedGraphLayout == "Free") {
+        this.$data.selectedEdgesDisplay = "Diagonal Smart";
       }
-      if(this.selectedGraphLayout == "Horizontal"){
-        this.$data.selectedEdgesDisplay = "Diagonal Horizontal"
+      if (this.selectedGraphLayout == "Horizontal") {
+        this.$data.selectedEdgesDisplay = "Diagonal Horizontal";
       }
-      if(this.selectedGraphLayout == "Vertical"){
-        this.$data.selectedEdgesDisplay = "Diagonal Vertical"
+      if (this.selectedGraphLayout == "Vertical") {
+        this.$data.selectedEdgesDisplay = "Diagonal Vertical";
       }
     },
     sliderValue: function() {
       this.filteredTime = this.sliderValue.map(d => new Date(d).toISOString());
     },
 
-          isUpdating (val) {
-        if (val) {
-          setTimeout(() => (this.isUpdating = false), 3000)
-        }
-          }
-
+    isUpdating(val) {
+      if (val) {
+        setTimeout(() => (this.isUpdating = false), 3000);
+      }
+    }
   },
 
   methods: {
-
-    triggeredTimeFrame (val) {
-      this.streamsInTimeFrame = val
-      console.log(this.streamsInTimeFrame)
+    triggeredTimeFrame(val) {
+      this.streamsInTimeFrame = val;
+      console.log(this.streamsInTimeFrame);
     },
 
-    triggeredTags (val) {
-      this.taggedStreams = val
-      console.log(this.taggedStreams)
+    triggeredTags(val) {
+      this.taggedStreams = val;
+      console.log(this.taggedStreams);
     },
 
-
-
-    remove (item) {
-      const index = this.allStreamTagsJSON_default.indexOf(item.name)
-      if (index >= 0) this.allStreamTagsJSON_default.splice(index, 1)
+    remove(item) {
+      const index = this.allStreamTagsJSON_default.indexOf(item.name);
+      if (index >= 0) this.allStreamTagsJSON_default.splice(index, 1);
     },
 
     flatten(arr) {
       var flat = [];
       for (var i = 0; i < arr.length; i++) {
-          flat = flat.concat(arr[i]);
+        flat = flat.concat(arr[i]);
       }
       return flat;
     },
@@ -461,9 +409,7 @@ export default {
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[1]];
     },
-    mounted() {
-      
-    },
+    mounted() {},
     saveAsPNG() {
       svgtopng.saveSvgAsPng(
         document.getElementById("graphLayout"),
@@ -471,7 +417,7 @@ export default {
         { scale: 3 }
       );
     },
-    refocus(){
+    refocus() {
       this.$data.focus = !this.$data.focus;
     },
     refresh() {
@@ -496,7 +442,7 @@ export default {
   },
   asyncComputed: {
     async myResolvedValue() {
-      this.toggleFix = false
+      this.toggleFix = false;
       var streamLinks = [];
       var nodes = [];
 
@@ -511,7 +457,7 @@ export default {
       }
 
       var projectStreams = resProject.data.resource.streams;
-      var alltags = []
+      var alltags = [];
       for (var i = 0; i < projectStreams.length; i++) {
         var streamShortID = projectStreams[i];
         let stream_id;
@@ -530,11 +476,11 @@ export default {
           let streamName = resStream.data.resource.name;
           let streamTags = resStream.data.resource.tags;
           let objectsNumber = resStream.data.resource.objects.length;
-          this.$data.allStreamTags.concat(streamTags)
+          this.$data.allStreamTags.concat(streamTags);
           for (var j = 0; j < streamTags.length; j++) {
-            this.$data.allStreamTagsJSON.push({name: streamTags[j]})
+            this.$data.allStreamTagsJSON.push({ name: streamTags[j] });
           }
-          alltags.push(streamTags)
+          alltags.push(streamTags);
 
           nodes.push({
             type: "Stream",
@@ -552,8 +498,6 @@ export default {
           console.log("Can't access stream: " + streamShortID);
         }
 
-        
-
         //
         let resClient;
         try {
@@ -570,12 +514,12 @@ export default {
             let clientDocumentType = resClient.data.resources[j].documentType;
             let clientDocumentName = resClient.data.resources[j].documentName;
             let clientDocumentID = resClient.data.resources[j].documentGuid;
-            let customName = ``
-            if(clientRole == "Sender"){
-              customName = `🚀`
+            let customName = ``;
+            if (clientRole == "Sender") {
+              customName = `🚀`;
             }
-            if(clientRole == "Receiver"){
-              customName = `📡`
+            if (clientRole == "Receiver") {
+              customName = `📡`;
             }
             nodes.push({
               type: "Client",
@@ -604,7 +548,7 @@ export default {
               streamLinks.push({
                 source: client_id,
                 target: stream_id,
-                
+
                 sourceClient: client_id,
                 sourceDoc: clientDocumentID,
                 action: "sending"
@@ -616,8 +560,8 @@ export default {
         }
       }
       console.log(nodes);
-      
-      this.allStreamTags = this.flatten(alltags)
+
+      this.allStreamTags = this.flatten(alltags);
       this.sortedNodesByCreationDate = nodes;
       this.sortedNodesByCreationDate.sort(function(a, b) {
         return a.createdAt < b.createdAt
@@ -632,7 +576,7 @@ export default {
       this.result = [nodes, streamLinks];
       //this.value3 = [0,this.result[0].length-1]
       this.dates = createdAts;
-      this.dates = createdAts.map( d => ( new Date( d ) ).toLocaleString( 'en' ) )
+      this.dates = createdAts.map(d => new Date(d).toLocaleString("en"));
       //this.dates = createdAts;
       this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]];
       //console.log(JSON.stringify(this.allStreamTagsJSON), 'lol')
@@ -661,13 +605,12 @@ export default {
 .custom-switch .v-input--selection-controls__input div {
   color: #f06292;
 }
-.v-list--dense{
-  background: transparent !important
+.v-list--dense {
+  background: transparent !important;
 }
 
-
 .v-select-list {
-  background: transparent !important
+  background: transparent !important;
 }
 
 // .transparent {

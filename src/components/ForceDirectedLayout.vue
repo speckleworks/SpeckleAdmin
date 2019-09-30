@@ -1,16 +1,16 @@
 <template>
   <div id="clientGraph">
-    <svg width="100%" :height="svgHeight" id="graphLayout"> 
-        <g class="everything">  
-          <g v-show="showDocGroups.includes(1)" id="hullDoc" />
-          <g v-show="showDocGroups.includes(2)" id="hullOwner" />
-          <g id="pathLink"/>
-          <g id="marker"/>
-          <g id="circleSender"/>
-          <g id="circleReceiver"/>
-          <g id="rectStream"/>
-          <g id="text"/>
-        </g>
+    <svg width="100%" :height="svgHeight" id="graphLayout">
+      <g class="everything">
+        <g v-show="!switchForce" id="hullDoc" />
+        <g v-show="switchForce" id="hullOwner" />
+        <g id="pathLink" />
+        <g id="marker" />
+        <g id="circleSender" />
+        <g id="circleReceiver" />
+        <g id="rectStream" />
+        <g id="text" />
+      </g>
     </svg>
   </div>
 </template>
@@ -41,121 +41,149 @@ export default {
   },
 
   watch: {
-
-    selectedGraphLayout: function(){
+    selectedGraphLayout: function() {
       this.drawGraph.tick();
     },
 
-    selectedEdgesDisplay: function(){
+    selectedEdgesDisplay: function() {
       this.drawGraph.tick();
     },
 
-    refocus: function(){
-      var container = d3.select(".everything")
-      var zoom = d3.zoom().
-          scaleExtent([0, 0]).
-          on("zoom", () => {       
-              container.attr("transform", d3.event.transform)                
-          })
-      d3.select("#graphLayout").call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1))
+    refocus: function() {
+      var container = d3.select(".everything");
+      var zoom = d3
+        .zoom()
+        .scaleExtent([0, 0])
+        .on("zoom", () => {
+          container.attr("transform", d3.event.transform);
+        });
+      d3.select("#graphLayout").call(
+        zoom.transform,
+        d3.zoomIdentity.translate(0, 0).scale(1)
+      );
     },
-    inspectSelectedTags: function(){
-      var taggedStreams = []
-      Array.from(document.querySelector("#rectStream").children)
-      .forEach(function(d) {
-          if(d.classList.contains("tagSelected")){
-            taggedStreams.push(d3.select(d).datum().streamId)
-          }else{
+    inspectSelectedTags: function() {
+      var taggedStreams = [];
+      Array.from(document.querySelector("#rectStream").children).forEach(
+        function(d) {
+          if (d.classList.contains("tagSelected")) {
+            taggedStreams.push(d3.select(d).datum().streamId);
+          } else {
           }
-      })
-      var url = "https://hestia.speckle.works/#/view/" + taggedStreams.join(',');
+        }
+      );
+      var url =
+        "https://hestia.speckle.works/#/view/" + taggedStreams.join(",");
       window.open(url, "_blank").focus();
     },
-    streamTags: function(){
-      var context = this
-      Array.from(document.querySelector("#rectStream").children)
-      .forEach(function(d) {
-        var myStreamTags = Array.from(d3.select(d).datum().tags)
-        var selected = context.findCommonElement(myStreamTags, context.streamTags)
-        if(selected){
-              d.classList.remove("tagSelected")
-              //context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
-              if(context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId) != -1){
-              context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
-              }
-              d.classList.add("tagSelected")
-              context.selectedTaggedStreams.push(d3.select(d).datum().streamId)
-            }else{
-              d.classList.remove("tagSelected")
-              if(context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId) != -1){
-              context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
-              }
+    streamTags: function() {
+      var context = this;
+      Array.from(document.querySelector("#rectStream").children).forEach(
+        function(d) {
+          var myStreamTags = Array.from(d3.select(d).datum().tags);
+          var selected = context.findCommonElement(
+            myStreamTags,
+            context.streamTags
+          );
+          if (selected) {
+            d.classList.remove("tagSelected");
+            //context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
+            if (
+              context.selectedTaggedStreams.indexOf(
+                d3.select(d).datum().streamId
+              ) != -1
+            ) {
+              context.selectedTaggedStreams.splice(
+                context.selectedTaggedStreams.indexOf(
+                  d3.select(d).datum().streamId
+                ),
+                1
+              );
             }
-      })
-      context.$emit('triggeredTags', context.selectedTaggedStreams)
-    },
-    inspectTimeframe: function(){
-      var selectedStreams = []
-      Array.from(document.querySelector("#rectStream").children)
-      .forEach(function(d) {
-        if(d.classList.contains("selected")){
-          selectedStreams.push(d3.select(d).datum().streamId)
+            d.classList.add("tagSelected");
+            context.selectedTaggedStreams.push(d3.select(d).datum().streamId);
+          } else {
+            d.classList.remove("tagSelected");
+            if (
+              context.selectedTaggedStreams.indexOf(
+                d3.select(d).datum().streamId
+              ) != -1
+            ) {
+              context.selectedTaggedStreams.splice(
+                context.selectedTaggedStreams.indexOf(
+                  d3.select(d).datum().streamId
+                ),
+                1
+              );
+            }
+          }
         }
-      })
-      
-      var url = "https://hestia.speckle.works/#/view/" + selectedStreams.join(',');
-          window.open(url, "_blank").focus();
+      );
+      context.$emit("triggeredTags", context.selectedTaggedStreams);
     },
-    brush: function(){
-      console.log(this.brush)
+    inspectTimeframe: function() {
+      var selectedStreams = [];
+      Array.from(document.querySelector("#rectStream").children).forEach(
+        function(d) {
+          if (d.classList.contains("selected")) {
+            selectedStreams.push(d3.select(d).datum().streamId);
+          }
+        }
+      );
+
+      var url =
+        "https://hestia.speckle.works/#/view/" + selectedStreams.join(",");
+      window.open(url, "_blank").focus();
+    },
+    brush: function() {
+      console.log(this.brush);
     },
     switchForce: function() {
       if (this.switchForce) {
-        this.$data.simulation.force("link").links(this.forceLinks.filter(d => d.type != "documentGuidForceGroup"))
+        this.$data.simulation
+          .force("link")
+          .links(
+            this.forceLinks.filter(d => d.type != "documentGuidForceGroup")
+          );
         this.$data.simulation.alpha(1).restart();
       } else {
-        this.$data.simulation.force("link").links(this.forceLinks.filter(d => d.type != "ownerForceGroup"))
+        this.$data.simulation
+          .force("link")
+          .links(this.forceLinks.filter(d => d.type != "ownerForceGroup"));
         this.$data.simulation.alpha(1).restart();
       }
     },
 
     documentLinksForce: function() {
       this.$data.simulation.force("link").distance(d => {
-          if (d.type == "ownerForceGroup") {
-            return this.documentLinksForce;
-          } else if (d.type == "documentGuidForceGroup") {
-            return this.documentLinksForce;
-          } else {
-            return 116;
-          }
-        })
+        if (d.type == "ownerForceGroup") {
+          return this.documentLinksForce;
+        } else if (d.type == "documentGuidForceGroup") {
+          return this.documentLinksForce;
+        } else {
+          return 116;
+        }
+      });
       this.$data.simulation.alpha(1).restart();
     },
     toggleFix: function() {
       if (this.toggleFix) {
-        this.$data.simulation.stop()
-                d3.selectAll("circle").classed("fixed", d => {
+        this.$data.simulation.stop();
+        d3.selectAll("circle").classed("fixed", d => {
           d.fixed = true;
         });
         d3.selectAll("rect").classed("fixed", d => {
           d.fixed = true;
         });
       } else {
-        this.$data.simulation.alphaTarget(0.3).restart()
-                d3.selectAll("circle").classed("fixed", d => {
+        this.$data.simulation.alphaTarget(0.3).restart();
+        d3.selectAll("circle").classed("fixed", d => {
           d.fixed = false;
         });
         d3.selectAll("rect").classed("fixed", d => {
           d.fixed = false;
         });
       }
-
-
-
-
-
-
-
     },
     clientdatafilter: function() {
       console.log("ooups");
@@ -247,129 +275,152 @@ export default {
         }
       }
     ],
-    hullPadding: 60,
-    pointRadius: 20,
-    roundedHull: function (polyPoints) {
+    hullPadding: 10,
+    //pointRadius: 10,
+    roundedHull: function(polyPoints) {
+      
       // Returns the SVG path data string representing the polygon, expanded and rounded.
 
       // Handle special cases
       if (!polyPoints || polyPoints.length < 1) return "";
-      if (polyPoints.length === 1) return roundedHull1 (polyPoints);
-      if (polyPoints.length === 2) return roundedHull2 (polyPoints);
+      if (polyPoints.length === 1) return this.roundedHull1(polyPoints);
+      if (polyPoints.length === 2) return this.roundedHull2(polyPoints);
 
-      var segments = new Array (polyPoints.length);
+      var segments = new Array(polyPoints.length);
 
       // Calculate each offset (outwards) segment of the convex hull.
-      for (var segmentIndex = 0;  segmentIndex < segments.length;  ++segmentIndex) {
-          var p0 = (segmentIndex === 0) ? polyPoints[polyPoints.length-1] : polyPoints[segmentIndex-1];
-          var p1 = polyPoints[segmentIndex];
+      for (
+        var segmentIndex = 0;
+        segmentIndex < segments.length;
+        ++segmentIndex
+      ) {
+        var p0 =
+          segmentIndex === 0
+            ? polyPoints[polyPoints.length - 1]
+            : polyPoints[segmentIndex - 1];
+        var p1 = polyPoints[segmentIndex];
 
-          // Compute the offset vector for the line segment, with length = hullPadding.
-          var offset = vecScale (hullPadding, unitNormal (p0, p1));
+        // Compute the offset vector for the line segment, with length = hullPadding.
+        var offset = vecScale(this.hullPadding, this.unitNormal(p0, p1));
 
-          segments[segmentIndex] = [ vecSum (p0, offset), vecSum (p1, offset) ];
+        segments[segmentIndex] = [this.vecSum(p0, offset), this.vecSum(p1, offset)];
       }
 
-      var arcData = 'A ' + [hullPadding, hullPadding, '0,0,0,'].join(',');
+      var arcData = "A " + [this.hullPadding, this.hullPadding, "0,0,0,"].join(",");
 
-      segments = segments.map (function (segment, index) {
-          var pathFragment = "";
-          if (index === 0) {
-              var pathFragment = 'M ' + segments[segments.length-1][1] + ' ';
-          }
-          pathFragment += arcData + segment[0] + ' L ' + segment[1];
+      segments = segments.map(function(segment, index) {
+        var pathFragment = "";
+        if (index === 0) {
+          var pathFragment = "M " + segments[segments.length - 1][1] + " ";
+        }
+        pathFragment += arcData + segment[0] + " L " + segment[1];
 
-          return pathFragment;
+        return pathFragment;
       });
 
-      return segments.join(' ');
-  },
-  roundedHull1: function (polyPoints) {
+      return segments.join(" ");
+    },
+    roundedHull1: function(polyPoints) {
       // Returns the path for a rounded hull around a single point (a circle).
 
-      var p1 = [polyPoints[0][0], polyPoints[0][1] - hullPadding];
-      var p2 = [polyPoints[0][0], polyPoints[0][1] + hullPadding];
+      var p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding];
+      var p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding];
 
-      return 'M ' + p1
-          + ' A ' + [hullPadding, hullPadding, '0,0,0', p2].join(',')
-          + ' A ' + [hullPadding, hullPadding, '0,0,0', p1].join(',');
-  },
-  roundedHull2: function (polyPoints) {
+      return (
+        "M " +
+        p1 +
+        " A " +
+        [this.hullPadding, this.hullPadding, "0,0,0", p2].join(",") +
+        " A " +
+        [this.hullPadding, this.hullPadding, "0,0,0", p1].join(",")
+      );
+    },
+    roundedHull2: function(polyPoints) {
       // Returns the path for a rounded hull around two points (a "capsule" shape).
 
-      var offsetVector = vecScale (hullPadding, unitNormal (polyPoints[0], polyPoints[1]));
-      var invOffsetVector = vecScale (-1, offsetVector);
+      var offsetVector = this.vecScale(
+        this.hullPadding,
+        this.unitNormal(polyPoints[0], polyPoints[1])
+      );
+      var invOffsetVector = this.vecScale(-1, offsetVector);
 
-      var p0 = vecSum (polyPoints[0], offsetVector);
-      var p1 = vecSum (polyPoints[1], offsetVector);
-      var p2 = vecSum (polyPoints[1], invOffsetVector);
-      var p3 = vecSum (polyPoints[0], invOffsetVector);
+      var p0 = this.vecSum(polyPoints[0], offsetVector);
+      var p1 = this.vecSum(polyPoints[1], offsetVector);
+      var p2 = this.vecSum(polyPoints[1], invOffsetVector);
+      var p3 = this.vecSum(polyPoints[0], invOffsetVector);
 
-      return 'M ' + p0
-          + ' L ' + p1 + ' A ' + [hullPadding, hullPadding, '0,0,0', p2].join(',')
-          + ' L ' + p3 + ' A ' + [hullPadding, hullPadding, '0,0,0', p0].join(',');
-  },
-  vecScale: function (scale, v) {
-    // Returns the vector 'v' scaled by 'scale'.
-    return [ scale * v[0], scale * v[1] ];
-  },
-  vecSum: function (pv1, pv2) {
-    // Returns the sum of two vectors, or a combination of a point and a vector.
-    return [ pv1[0] + pv2[0], pv1[1] + pv2[1] ];
-  },
-  unitNormal: function (p0, p1) {
-    // Returns the unit normal to the line segment from p0 to p1.
-    var n = [ p0[1] - p1[1], p1[0] - p0[0] ];
-    var nLength = Math.sqrt (n[0]*n[0] + n[1]*n[1]);
-    return [ n[0] / nLength, n[1] / nLength ];
-  }
-
+      return (
+        "M " +
+        p0 +
+        " L " +
+        p1 +
+        " A " +
+        [this.hullPadding, this.hullPadding, "0,0,0", p2].join(",") +
+        " L " +
+        p3 +
+        " A " +
+        [this.hullPadding, this.hullPadding, "0,0,0", p0].join(",")
+      );
+    },
+    vecScale: function(scale, v) {
+      // Returns the vector 'v' scaled by 'scale'.
+      return [scale * v[0], scale * v[1]];
+    },
+    vecSum: function(pv1, pv2) {
+      // Returns the sum of two vectors, or a combination of a point and a vector.
+      return [pv1[0] + pv2[0], pv1[1] + pv2[1]];
+    },
+    unitNormal: function(p0, p1) {
+      // Returns the unit normal to the line segment from p0 to p1.
+      var n = [p0[1] - p1[1], p1[0] - p0[0]];
+      var nLength = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+      return [n[0] / nLength, n[1] / nLength];
+    }
   }),
 
   methods: {
-    
-    zoom_actions(){
-      d3.select(".everything").attr("transform", d3.event.transform)
+    zoom_actions() {
+      d3.select(".everything").attr("transform", d3.event.transform);
     },
 
-    findCommonElement(array1, array2) { 
-        for(let i = 0; i < array1.length; i++) { 
-            for(let j = 0; j < array2.length; j++) { 
-                if(array1[i] === array2[j]) { 
-                    return true;
-                }
-            }
+    findCommonElement(array1, array2) {
+      for (let i = 0; i < array1.length; i++) {
+        for (let j = 0; j < array2.length; j++) {
+          if (array1[i] === array2[j]) {
+            return true;
+          }
         }
-        return false;  
+      }
+      return false;
     },
-    
+
     // Drag events for the whole d3 force simulation
     drag() {
-      var parentContext = this
+      var parentContext = this;
       function dragstarted(d) {
-          if (!d3.event.active) parentContext.simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
+        if (!d3.event.active)
+          parentContext.simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
       }
-      
+
       function dragged(d) {
-          d.fx = d3.event.x;
-          d.fy = d3.event.y;
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
       }
-      
+
       function dragended(d) {
-          if (!d3.event.active) parentContext.simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
+        if (!d3.event.active) parentContext.simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
       }
-      
-    return d3.drag()
+
+      return d3
+        .drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended);
     },
-
-
 
     updateDisplayLinks(id) {
       console.log(this.timeFilter[0]);
@@ -409,28 +460,29 @@ export default {
           nodeTimeComparer >= context.timeFilter[0] &&
           nodeTimeComparer <= context.timeFilter[1]
         ) {
-          node.classList.remove("unselected")
-          node.classList.add("selected")
+          node.classList.remove("unselected");
+          node.classList.add("selected");
           node.style.transition = "visibility 0s, opacity 0.4s linear";
-          
+
           node.style.opacity = 1;
         } else {
           //node.style.display = "none"
-          node.classList.remove("selected")
-          node.classList.add("unselected")
+          node.classList.remove("selected");
+          node.classList.add("unselected");
           node.style.opacity = 0.2;
           node.style.transition = "visibility 0s, opacity 0.4s linear";
         }
       });
 
-      var selectedStreams = []
-      Array.from(document.querySelector("#rectStream").children)
-      .forEach(function(d) {
-        if(d.classList.contains("selected")){
-          selectedStreams.push(d3.select(d).datum().streamId)
+      var selectedStreams = [];
+      Array.from(document.querySelector("#rectStream").children).forEach(
+        function(d) {
+          if (d.classList.contains("selected")) {
+            selectedStreams.push(d3.select(d).datum().streamId);
+          }
         }
-      })
-      context.$emit('triggeredTimeFrame', selectedStreams)
+      );
+      context.$emit("triggeredTimeFrame", selectedStreams);
     },
 
     contextMenu(type, menu, openCallback) {
@@ -490,8 +542,6 @@ export default {
     },
 
     drawGraph() {
-
-
       var _nodes = this.clientdata[0];
       var links = this.clientdata[1];
 
@@ -631,14 +681,12 @@ export default {
         }
       }
 
+      // d3.select("#graphLayout")
+      //   .call( d3.brush()                     // Add the brush feature using the d3.brush function
+      //     .extent( [ [0,0], [this.$data.svgWidth,this.$props.svgHeight] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+      //   )
 
-    // d3.select("#graphLayout")
-    //   .call( d3.brush()                     // Add the brush feature using the d3.brush function
-    //     .extent( [ [0,0], [this.$data.svgWidth,this.$props.svgHeight] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-    //   )
-    
-      var svg = d3
-        .select("#graphLayout")
+      var svg = d3.select("#graphLayout");
 
       // var brush = svg.append("g")
       //   .attr("class", "brush");
@@ -651,96 +699,98 @@ export default {
       //       .on("end", brushended));
       // }
 
-      this.$data.simulation = d3.forceSimulation()
+      this.$data.simulation = d3
+        .forceSimulation()
         .nodes(d3.values(_nodes))
         //.force("forceX", d3.forceX(0).strength(0.08))
-        .force("link", d3.forceLink(thisContext.forceLinks).distance(d => {
-          if (d.type == "ownerForceGroup") {
-            return this.documentLinksForce;
-          } else if (d.type == "documentGuidForceGroup") {
-            return this.documentLinksForce; 
-          } else {
-            return 100;
-          }
-        }
-        ))
-        .force("center", d3.forceCenter(this.$data.svgWidth / 2, this.$props.svgHeight / 2))
-        .force("charge", d3.forceManyBody().strength(function (d) {
-          if (d.type == "ownerForceGroup") {
-            return 200;
-          } else if (d.type == "documentGuidForceGroup") {
-            return 200;
-          } else {
-            return -200;
-          }
-        }))
+        .force(
+          "link",
+          d3.forceLink(thisContext.forceLinks).distance(d => {
+            if (d.type == "ownerForceGroup") {
+              return this.documentLinksForce;
+            } else if (d.type == "documentGuidForceGroup") {
+              return this.documentLinksForce;
+            } else {
+              return 100;
+            }
+          })
+        )
+        .force(
+          "center",
+          d3.forceCenter(this.$data.svgWidth / 2, this.$props.svgHeight / 2)
+        )
+        .force(
+          "charge",
+          d3.forceManyBody().strength(function(d) {
+            if (d.type == "ownerForceGroup") {
+              return 200;
+            } else if (d.type == "documentGuidForceGroup") {
+              return 200;
+            } else {
+              return -200;
+            }
+          })
+        )
         .on("tick", tick);
 
-      if(this.selectedGraphLayout == "Free"){
+      if (this.selectedGraphLayout == "Free") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0))
-          .force("forceY", d3.forceY(0).strength(0))
+          .force("forceY", d3.forceY(0).strength(0));
       }
 
-      if(this.selectedGraphLayout == "Horizontal"){
-        
+      if (this.selectedGraphLayout == "Horizontal") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0))
-          .force("forceY", d3.forceY(0).strength(0.08))
+          .force("forceY", d3.forceY(0).strength(0.08));
       }
 
-      
-      if(this.selectedGraphLayout == "Vertical"){
-        
+      if (this.selectedGraphLayout == "Vertical") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0.08))
-          .force("forceY", d3.forceY(0).strength(0))
+          .force("forceY", d3.forceY(0).strength(0));
       }
 
-
-      //add zoom capabilities 
-      var zoom_handler = d3.zoom()
-          .on("zoom", this.zoom_actions);
+      //add zoom capabilities
+      var zoom_handler = d3.zoom().on("zoom", this.zoom_actions);
 
       zoom_handler(svg);
       // REMOVE ZOOM
-      svg.on("dblclick.zoom", null)
+      svg.on("dblclick.zoom", null);
       this.$data.simulation.nodes().forEach(function(d) {
         d.selected = false;
         d.previouslySelected = false;
-      })
+      });
 
       if (this.switchForce) {
         // docs
         var filterLinks = this.forceLinks.filter(
           d => d.type != "documentGuidForceGroup"
         );
-        this.$data.simulation.force("link").links(filterLinks)
+        this.$data.simulation.force("link").links(filterLinks);
         this.$data.simulation.alpha(1).restart();
       } else {
         var filterLinks = this.forceLinks.filter(
           d => d.type != "ownerForceGroup"
         );
-        this.$data.simulation.force("link").links(filterLinks)
+        this.$data.simulation.force("link").links(filterLinks);
         this.$data.simulation.alpha(1).restart();
       }
 
-      this.$data.colour = d3.scaleLinear()
+      this.$data.colour = d3
+        .scaleLinear()
         .domain([0, _nodes.length - 1])
         .interpolate(d3.interpolateHcl)
         .range([d3.rgb("lightgray"), d3.rgb("blue")]);
 
-      var xScale = d3.scaleLinear()
+      var xScale = d3
+        .scaleLinear()
         .domain([0, this.svgWidth])
         .range([0, this.svgWidth]);
-      var yScale = d3.scaleLinear()
+      var yScale = d3
+        .scaleLinear()
         .domain([0, this.svgHeight])
         .range([0, this.svgHeight]);
-
-
-
-
-
 
       // Define the div for the tooltip
       var divCircle = d3.select(".tooltip").style("opacity", 0);
@@ -772,67 +822,84 @@ export default {
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
 
-
-
-
-      // svg
-      //   .select("#hullDoc")
-      //   .selectAll("path")
-      //   .data(Object.keys(childGroups))
-      //   .enter()
-      //   .append("path")
-      //   .attr("class", "subhullDoc")
-      //   .on("mouseover", function(d) {
-      //     divDoc.style("opacity", 0.8);
-      //     divDoc
-      //       .html(
-      //         `DocumentGuid: ${d.values[0].documentGuid}<br/>
-      //       DocumentType: ${d.values[0].documentType}<br/>
-      //       DocumentName: ${d.values[0].documentName}`
-      //       )
-      //       .style("left", d3.event.pageX + "px")
-      //       .style("top", d3.event.pageY - 28 + "px");
-      //   })
-      //   .on("mouseout", function(d) {
-      //     divDoc.style("opacity", 0);
-      //   });
+      svg
+        .select("#hullDoc")
+        .selectAll("path")
+        .data(Object.keys(childGroups))
+        .enter()
+        .append("path")
+        .attr("class", "subhullDoc")
+        .on("mouseover", function(d) {
+          divDoc.style("opacity", 0.8);
+          divDoc
+            .html(
+              `DocumentGuid: ${d.values[0].documentGuid}<br/>
+            DocumentType: ${d.values[0].documentType}<br/>
+            DocumentName: ${d.values[0].documentName}`
+            )
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY - 28 + "px");
+        })
+        .on("mouseout", function(d) {
+          divDoc.style("opacity", 0);
+        });
 
       var groupOwners = d3
         .nest()
         .key(function(d) {
           return d.owner;
         })
-        .entries(
-          this.$data.simulation.nodes().filter(data => data.type == "Client")
-        );
+        .entries(this.simulation.nodes().filter(data => data.type == "Client"));
 
       var groupDocs = d3
         .nest()
         .key(function(d) {
           return d.documentGuid;
         })
-        .entries(
-          this.$data.simulation.nodes().filter(data => data.type == "Client")
-        );
+        .entries(this.simulation.nodes().filter(data => data.type == "Client"));
 
-      // var groupPath = function(d) {
-      //   return (
-      //     "M" +
-      //     d3.polygonHull(
-      //         d.values.map(function(i) {
-      //           return [i.x, i.y];
-      //         })
-      //       )
-      //       .join("L") +
-      //     "Z"
-      //   );
-      // };
+      var context = this
+      var groupPath = function(d) {
+        
+        //console.log(d.values);
+        if(d.values.length >= 3){
+          return (
+            "M" +
+            d3
+              .polygonHull(
+                d.values.map(function(i) {
+                  return [i.x, i.y];
+                })
+              )
+              .join("L") +
+            "Z"
+          )
+        }
+        else{
+          
+         return (
+
+            context.$data.roundedHull(
+                d.values.map(function(i) {
+                  return [i.x, i.y];
+                })
+              )
+
+          )
+        }
+
+      };
 
       //
       svg
         .select("#marker")
         .selectAll("marker")
-        .data(this.$data.simulation.force("link").links().filter(data => data.display))
+        .data(
+          this.$data.simulation
+            .force("link")
+            .links()
+            .filter(data => data.display)
+        )
         .enter()
         .append("svg:marker")
         .attr("source_timestamp", data => data.source.createdAt)
@@ -854,40 +921,41 @@ export default {
         .attr("markerHeight", 12)
         .attr("orient", "auto")
         .attr("fill-opacity", 1)
-        
+
         //.attr("fill", data => this.colour(data.target.index))
         .attr("markerUnits", "userSpaceOnUse")
-        .attr("stroke-linecap", "round")
-        // .append("svg:path")
-        // .attr("d", "M0,-5L10,0L0,5");
+        .attr("stroke-linecap", "round");
+      // .append("svg:path")
+      // .attr("d", "M0,-5L10,0L0,5");
       var path = svg
         .select("#pathLink")
         .selectAll("path")
-        .data(this.$data.simulation.force("link").links().filter(data => data.display))
+        .data(
+          this.$data.simulation
+            .force("link")
+            .links()
+            .filter(data => data.display)
+        )
         .enter()
         .append("svg:path")
         .attr("stroke-width", 1.5)
         .attr("stroke-width", data => {
-          if(data.source.type === "Stream"){
-            if(data.source.objectsNumber > 15){
-              return 8
-            }
-            else if(data.source.objectsNumber < 2){
-              return 3
-            }
-            else{
-              return data.source.objectsNumber
+          if (data.source.type === "Stream") {
+            if (data.source.objectsNumber > 15) {
+              return 8;
+            } else if (data.source.objectsNumber < 2) {
+              return 3;
+            } else {
+              return data.source.objectsNumber;
             }
           }
-          if(data.target.type === "Stream"){
-            if(data.target.objectsNumber > 15){
-              return 8
-            }
-            else if(data.target.objectsNumber < 2){
-              return 3
-            }
-            else{
-              return data.target.objectsNumber
+          if (data.target.type === "Stream") {
+            if (data.target.objectsNumber > 15) {
+              return 8;
+            } else if (data.target.objectsNumber < 2) {
+              return 3;
+            } else {
+              return data.target.objectsNumber;
             }
           }
         })
@@ -906,7 +974,9 @@ export default {
       var circleSender = svg
         .select("#circleSender")
         .selectAll("circle")
-        .data(this.$data.simulation.nodes().filter(data => data.role == "Sender"))
+        .data(
+          this.$data.simulation.nodes().filter(data => data.role == "Sender")
+        )
         .enter()
         .append("svg:circle")
         .attr("class", "sender")
@@ -935,7 +1005,9 @@ export default {
       var circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
-        .data(this.$data.simulation.nodes().filter(data => data.role == "Receiver"))
+        .data(
+          this.$data.simulation.nodes().filter(data => data.role == "Receiver")
+        )
         .enter()
         .append("svg:circle")
         .attr("class", "receiver")
@@ -998,11 +1070,10 @@ export default {
         .attr("y", ".31em")
         .attr("class", "shadow")
         .style("font-size", function(d) {
-          if(d.type == "Client"){
-
-          }else{
-            return "20px"
-          };
+          if (d.type == "Client") {
+          } else {
+            return "20px";
+          }
         })
         .text(function(d) {
           return d.name;
@@ -1012,24 +1083,25 @@ export default {
         .attr("x", 8)
         .attr("y", ".31em")
         .style("font-size", function(d) {
-          if(d.type == "Client"){
-
-          }else{
-            return "20px"
-          };
+          if (d.type == "Client") {
+          } else {
+            return "20px";
+          }
         })
         .text(function(d) {
           return d.name;
         });
 
-      var parentContext = this
+      var parentContext = this;
       function brushstarted() {
         if (d3.event.sourceEvent.type !== "end") {
           svg
-        .select("#rectStream")
-        .selectAll("rect").classed("selected", function(d) {
-            return d.selected = d.previouslySelected = parentContext.$data.shiftKey && d.selected;
-          });
+            .select("#rectStream")
+            .selectAll("rect")
+            .classed("selected", function(d) {
+              return (d.selected = d.previouslySelected =
+                parentContext.$data.shiftKey && d.selected);
+            });
         }
       }
 
@@ -1037,13 +1109,17 @@ export default {
         if (d3.event.sourceEvent.type !== "end") {
           var selection = d3.event.selection;
           svg
-        .select("#rectStream")
-        .selectAll("rect").classed("selected", function(d) {
-            return d.selected = d.previouslySelected ^
-                (selection != null
-                && selection[0][0] <= d.x && d.x < selection[1][0]
-                && selection[0][1] <= d.y && d.y < selection[1][1]);
-          });
+            .select("#rectStream")
+            .selectAll("rect")
+            .classed("selected", function(d) {
+              return (d.selected =
+                d.previouslySelected ^
+                (selection != null &&
+                  selection[0][0] <= d.x &&
+                  d.x < selection[1][0] &&
+                  selection[0][1] <= d.y &&
+                  d.y < selection[1][1]));
+            });
         }
       }
 
@@ -1053,14 +1129,12 @@ export default {
         }
       }
 
-
-
       function dblclick(d) {
         d3.select(this).classed("fixed", (d.fixed = !d.fixed));
       }
       function dragstart(d) {
         if (this.toggleFix) {
-          console.log("loll")
+          console.log("loll");
           d3.select(this).classed("fixed", (d.fixed = true));
         } else {
           d3.select(this).classed("fixed", (d.fixed = false));
@@ -1069,46 +1143,44 @@ export default {
 
       var parentContext = this;
       function tick() {
-        
         svg
           .selectAll(".node")
-
           .attr("fill", data => parentContext.colour(data.index))
           .attr("cx", function(d) {
-            return d.x
+            return d.x;
             // return (d.x = Math.max(
             //   30,
             //   Math.min(parentContext.svgWidth - 30, d.x)
             // ));
           })
           .attr("cy", function(d) {
-            return d.y
+            return d.y;
             // return (d.y = Math.max(
             //   30,
             //   Math.min(parentContext.svgHeight - 30, d.y)
             // ));
           });
-        // svg
-        //   .select("#hullOwner")
-        //   .selectAll(".subhullOwner")
-        //   .data(groupOwners)
-        //   .attr("d", groupPath)
-        //   .enter()
-        //   .insert("path")
-        //   .attr("d", groupPath);
-        // svg
-        //   .select("#hullDoc")
-        //   .selectAll(".subhullDoc")
-        //   .data(groupDocs)
-        //   .attr("d", groupPath)
-        //   .enter()
-        //   .insert("path")
-        //   .attr("d", groupPath);
+        svg
+          .select("#hullOwner")
+          .selectAll(".subhullOwner")
+          .data(groupOwners)
+          .attr("d", groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", groupPath);
+        svg
+          .select("#hullDoc")
+          .selectAll(".subhullDoc")
+          .data(groupDocs)
+          .attr("d", groupPath)
+          .enter()
+          .insert("path")
+          .attr("d", groupPath);
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy);
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
             var x0 = d.source.x;
             var y0 = d.source.y;
             var x1 = d.target.x;
@@ -1116,30 +1188,72 @@ export default {
             var xcontrol = x1 * 0.5 + x0 * 0.5;
             var ycontrol = y1 * 0.5 + y0 * 0.5;
             var smartDiagonal;
-            if(Math.abs(x0-x1) > Math.abs(y0-y1)){
-              smartDiagonal = ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ")
+            if (Math.abs(x0 - x1) > Math.abs(y0 - y1)) {
+              smartDiagonal = [
+                "M",
+                x0,
+                y0,
+                "C",
+                xcontrol,
+                y0,
+                xcontrol,
+                y1,
+                x1,
+                y1
+              ].join(" ");
             }
-            if(Math.abs(y0-y1) > Math.abs(x0-x1)){
-              smartDiagonal = ["M",x1,y1,"C",x1,ycontrol,x0,ycontrol,x0,y0].join(" ")
+            if (Math.abs(y0 - y1) > Math.abs(x0 - x1)) {
+              smartDiagonal = [
+                "M",
+                x1,
+                y1,
+                "C",
+                x1,
+                ycontrol,
+                x0,
+                ycontrol,
+                x0,
+                y0
+              ].join(" ");
             }
-            
 
             if (parentContext.selectedEdgesDisplay == "Diagonal Horizontal") {
-              return ["M",x0,y0,"C",xcontrol,y0,xcontrol,y1,x1,y1].join(" ");
+              return [
+                "M",
+                x0,
+                y0,
+                "C",
+                xcontrol,
+                y0,
+                xcontrol,
+                y1,
+                x1,
+                y1
+              ].join(" ");
             }
             if (parentContext.selectedEdgesDisplay == "Diagonal Vertical") {
-              return ["M",x1,y1,"C",x1,ycontrol,x0,ycontrol,x0,y0].join(" ");
+              return [
+                "M",
+                x1,
+                y1,
+                "C",
+                x1,
+                ycontrol,
+                x0,
+                ycontrol,
+                x0,
+                y0
+              ].join(" ");
             }
             if (parentContext.selectedEdgesDisplay == "Diagonal Smart") {
               return smartDiagonal;
             }
             if (parentContext.selectedEdgesDisplay == "Line") {
-              return ["M",x0,y0,"L",x1,y1].join(" ");
+              return ["M", x0, y0, "L", x1, y1].join(" ");
             }
             if (parentContext.selectedEdgesDisplay == "Arc") {
-              return ["M",x0,y0,"A",dr,dr," 0 0,1 ",x1,y1].join(" ");
+              return ["M", x0, y0, "A", dr, dr, " 0 0,1 ", x1, y1].join(" ");
             }
-
           })
           .attr("stroke", data => parentContext.colour(data.source.index));
         //
@@ -1172,12 +1286,11 @@ export default {
     }
   },
   mounted() {
-    this.svgWidth = document.getElementById("clientGraph").offsetWidth
+    this.svgWidth = document.getElementById("clientGraph").offsetWidth;
     this.drawGraph();
-      window.addEventListener("keypress", function(e) {
+    window.addEventListener("keypress", function(e) {
       console.log(String.fromCharCode(e.keyCode));
     });
-
   },
 
   computed: {}
@@ -1200,7 +1313,7 @@ export default {
 }
 
 #graphLayout {
-  cursor: all-scroll
+  cursor: all-scroll;
 }
 
 rect {
@@ -1213,9 +1326,8 @@ rect {
   stroke: rgba(0, 255, 200, 0.4);
   stroke-width: 5px;
 
-  fill:  rgba(0, 255, 200, 0.4)
+  fill: rgba(0, 255, 200, 0.4);
 }
-
 
 circle {
   cursor: pointer;
@@ -1324,9 +1436,6 @@ text.shadow {
   stroke-linejoin: round;
 }
 
-
-
-
 .subhullOwner {
   fill: rgb(126, 191, 243);
   stroke: rgb(126, 191, 243);
@@ -1341,22 +1450,20 @@ text.shadow {
   stroke: hotpink;
 
   stroke-width: 20;
-  opacity: 0.2;
+  opacity: 0.5;
   stroke-linejoin: round;
 }
 
 path.link {
   fill: none;
-  
 }
 
-
 marker {
-  stroke-width: 1000 !important
+  stroke-width: 1000 !important;
 }
 .brush {
   stroke: #222;
-  fill-opacity: .125;
+  fill-opacity: 0.125;
   shape-rendering: crispEdges;
 }
 </style>
