@@ -3,7 +3,10 @@
     <svg width="100%" :height="svgHeight" id="graphLayout">
       <g class="everything">
         <g v-show="!switchForce" id="hullDoc" />
+        <g v-show="!switchForce" id="cenDoc" />
+        <g v-show="!switchForce" id="textDoc" />
         <g v-show="switchForce" id="hullOwner" />
+        <g v-show="switchForce" id="cenOwner" />
         <g id="pathLink" />
         <g id="marker" />
         <g id="circleSender" />
@@ -275,8 +278,8 @@ export default {
         }
       }
     ],
-    hullPadding: 10,
-    //pointRadius: 10,
+    hullPadding: 11,
+
     roundedHull: function(polyPoints) {
       
       // Returns the SVG path data string representing the polygon, expanded and rounded.
@@ -322,10 +325,8 @@ export default {
     },
     roundedHull1: function(polyPoints) {
       // Returns the path for a rounded hull around a single point (a circle).
-
       var p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding];
       var p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding];
-
       return (
         "M " +
         p1 +
@@ -337,18 +338,15 @@ export default {
     },
     roundedHull2: function(polyPoints) {
       // Returns the path for a rounded hull around two points (a "capsule" shape).
-
       var offsetVector = this.vecScale(
         this.hullPadding,
         this.unitNormal(polyPoints[0], polyPoints[1])
       );
       var invOffsetVector = this.vecScale(-1, offsetVector);
-
       var p0 = this.vecSum(polyPoints[0], offsetVector);
       var p1 = this.vecSum(polyPoints[1], offsetVector);
       var p2 = this.vecSum(polyPoints[1], invOffsetVector);
       var p3 = this.vecSum(polyPoints[0], invOffsetVector);
-
       return (
         "M " +
         p0 +
@@ -667,9 +665,42 @@ export default {
       }
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
+
+    var textDocData = []
+    var circleDocData = []
       for (var property in childGroups) {
+        
         var childGroup = childGroups[property];
-        for (let i = 0; i < childGroup.length - 1; i++) {
+
+        var infoDoc = ""
+        if(childGroup[0].documentType === "Grasshopper"){
+          infoDoc = `🦗`
+        }
+        if(childGroup[0].documentType === "Rhinoceros"){
+          infoDoc = `🦏`
+        }
+        console.log(infoDoc)
+
+        var sumX = 0
+        var sumY = 0
+        for (let i = 0; i < childGroup.length; i++) {
+          sumX += childGroup[i].x
+          sumY += childGroup[i].y
+          
+        }
+        var avX = sumX / childGroup.length
+        var avY = sumY / childGroup.length
+        var circCenterDoc = {"cx": avX, "cy": avY, "radius": 4, "color": "hotpink", "infoDoc": infoDoc}
+        circleDocData.push(circCenterDoc)
+        textDocData.push(infoDoc)
+      }
+
+      for (var property in childGroups) {
+        
+        var childGroup = childGroups[property];
+
+        
+        for (let i = 0; i < childGroup.length - 1; i++) {          
           for (let j = i + 1; j < childGroup.length; j++) {
             thisContext.forceLinks.push({
               source: childGroup[i],
@@ -679,6 +710,12 @@ export default {
             });
           }
         }
+        
+  
+
+
+
+        
       }
 
       // d3.select("#graphLayout")
@@ -798,7 +835,7 @@ export default {
       var divDoc = d3.select(".tooltipDoc").style("opacity", 0);
 
       //
-
+      
       svg
         .select("#hullOwner")
         .selectAll("path")
@@ -809,6 +846,7 @@ export default {
         .attr("class", "subhullOwner")
 
         .on("mouseover", function(d) {
+          
           divOwner.style("opacity", 0.8);
           divOwner
             .html(`Owner: ${d.values[0].owner}`)
@@ -822,6 +860,8 @@ export default {
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
 
+
+      
       svg
         .select("#hullDoc")
         .selectAll("path")
@@ -830,6 +870,7 @@ export default {
         .append("path")
         .attr("class", "subhullDoc")
         .on("mouseover", function(d) {
+          
           divDoc.style("opacity", 0.8);
           divDoc
             .html(
@@ -850,7 +891,7 @@ export default {
           return d.owner;
         })
         .entries(this.simulation.nodes().filter(data => data.type == "Client"));
-
+      
       var groupDocs = d3
         .nest()
         .key(function(d) {
@@ -860,7 +901,6 @@ export default {
 
       var context = this
       var groupPath = function(d) {
-        
         //console.log(d.values);
         if(d.values.length >= 3){
           return (
@@ -876,18 +916,14 @@ export default {
           )
         }
         else{
-          
          return (
-
             context.$data.roundedHull(
                 d.values.map(function(i) {
                   return [i.x, i.y];
                 })
               )
-
           )
         }
-
       };
 
       //
@@ -1092,6 +1128,46 @@ export default {
           return d.name;
         });
 
+
+    var circleDoc = svg
+        .select("#cenDoc")
+        .selectAll("circle")
+        .data(circleDocData)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return d.cx; })
+        .attr("cy", function (d) { return d.cy; })
+        .attr("r", function (d) { return d.radius; })
+        .style("fill", function (d) { return d.color; })
+        
+    var textDoc = svg
+        .select("#textDoc")
+        .selectAll("text")
+        .data(circleDocData)
+        .enter()
+        .append("svg:g")
+      textDoc
+        .append("svg:text")
+        .attr("x", -50)
+        .attr("y", 20)
+        //.attr("class", "shadow")
+        .style("font-size", "80px")
+        .text(function(d) {
+          return d.infoDoc;
+        })
+      // textDoc
+      //   .append("svg:text")
+      //   // .attr("x", 8)
+      //   // .attr("y", ".31em")
+      //   .style("font-size", "40px")
+      //   .text(function(d) {
+      //     return d.infoDoc;
+      //   });
+
+
+
+
+
       var parentContext = this;
       function brushstarted() {
         if (d3.event.sourceEvent.type !== "end") {
@@ -1143,6 +1219,8 @@ export default {
 
       var parentContext = this;
       function tick() {
+        var context = this
+        
         svg
           .selectAll(".node")
           .attr("fill", data => parentContext.colour(data.index))
@@ -1160,6 +1238,7 @@ export default {
             //   Math.min(parentContext.svgHeight - 30, d.y)
             // ));
           });
+        
         svg
           .select("#hullOwner")
           .selectAll(".subhullOwner")
@@ -1167,7 +1246,63 @@ export default {
           .attr("d", groupPath)
           .enter()
           .insert("path")
-          .attr("d", groupPath);
+          .attr("d", groupPath)
+        
+        
+        svg
+          .select("#hullDoc")
+          .selectAll(".subhullDoc")
+          .each(function (d,i) {
+            //console.log(circleDoc)
+            // console.log(Object.values(d)[1].length)
+              var sumX = 0
+              var sumY = 0
+              for (let i = 0; i < Object.values(d)[1].length; i++) {
+                sumX += Object.values(d)[1][i].x
+                sumY += Object.values(d)[1][i].y
+              }
+              var avX = sumX / Object.values(d)[1].length
+              var avY = sumY / Object.values(d)[1].length
+
+          svg
+            .select("#cenDoc")
+            .selectAll("circle")
+            .each(function (d, j) {
+              if (j === i) {
+                // put all your operations on the second element, e.g.
+                d3.select(this)
+                  .attr("cx", avX)
+                  .attr("cy", avY)    
+              }
+            })
+            
+
+          svg
+            .select("#textDoc")
+            .selectAll("text")
+            .each(function (d, j) {
+              if (j === i) {
+                // put all your operations on the second element, e.g.
+                d3.select(this)
+                .attr("transform", function(d) {
+                  return "translate(" + avX + "," + avY + ")";
+                })
+                  // .attr("cx", avX)
+                  // .attr("cy", avY)    
+              }
+            })
+
+
+            // var circleDoc = svg
+            //   .select("#cenDoc")
+            //   .append("circle")
+            //   .attr("cx", avX)
+            //   .attr("cy", avY)
+            //   .attr("r", 5)
+            //   .style("fill", "purple");
+        });
+        
+                
         svg
           .select("#hullDoc")
           .selectAll(".subhullDoc")
@@ -1176,6 +1311,7 @@ export default {
           .enter()
           .insert("path")
           .attr("d", groupPath);
+        
         path
           .attr("d", function(d) {
             var dx = d.target.x - d.source.x,
@@ -1274,6 +1410,7 @@ export default {
         text.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
+
       }
 
       this.drawGraph.tick = tick; // create a reference to the inner function
@@ -1439,17 +1576,15 @@ text.shadow {
 .subhullOwner {
   fill: rgb(126, 191, 243);
   stroke: rgb(126, 191, 243);
-
-  stroke-width: 20;
-  opacity: 0.2;
+  stroke-width: 40;
+  opacity: 0.5;
   stroke-linejoin: round;
 }
 
 .subhullDoc {
   fill: hotpink;
   stroke: hotpink;
-
-  stroke-width: 20;
+  stroke-width: 40;
   opacity: 0.5;
   stroke-linejoin: round;
 }
