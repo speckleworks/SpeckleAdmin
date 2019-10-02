@@ -40,7 +40,7 @@
                       <v-icon small>fingerprint</v-icon> {{stream.streamId}}
                       &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
                     </span>&nbsp;
-                    <span class='text-capitalize'>{{stream.name}}</span>
+                    <span>{{stream.name}}</span>
                   </v-list-tile-title>
                   <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
                     last changed <timeago :datetime='stream.updatedAt'></timeago>, created on {{new Date( stream.createdAt ).toLocaleString()}}
