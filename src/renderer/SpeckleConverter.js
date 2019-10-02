@@ -58,7 +58,6 @@ class MaterialManager {
   getLineMaterial( color ) {
     let c = colourNameToHex( color.hex )
     if ( c !== false ) color.hex = c
-    console.log( color.hex )
     return new THREE.LineBasicMaterial( {
       color: new THREE.Color( color.hex ),
       linewidth: 1,
@@ -333,7 +332,7 @@ let Converter = {
   Structural1DElement( args, cb ) {
     if (args.obj.properties.structural.resultVertices !== undefined)
       args.obj.value = args.obj.properties.structural.resultVertices
-    
+
     this.Polyline( { obj: args.obj }, ( err, obj ) => {
       if ( err ) return cb( err, null )
       return cb( null, obj )

@@ -51,7 +51,7 @@ export default class SpeckleRenderer extends EE {
     this.isSettingColors = false
     this.currentColorByProp = null
     this.colorTable = {}
-    
+
     this.edgesGroup = new THREE.Group()
     this.edgesGroup.name = 'displayEdgesGroup'
     this.edgesThreshold = null
@@ -90,7 +90,7 @@ export default class SpeckleRenderer extends EE {
     this.shadowLight.shadow.mapSize.width = 512;  // default
     this.shadowLight.shadow.mapSize.height = 512; // default
     this.shadowLight.shadow.camera.near = 0.5;    // default
-    this.shadowLight.shadow.camera.far = 500;    
+    this.shadowLight.shadow.camera.far = 500;
 
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
     this.camera.up.set( 0, 0, 1 )
@@ -417,6 +417,7 @@ export default class SpeckleRenderer extends EE {
       } catch ( e ) {
         console.warn( `Something went wrong in the conversion of ${obj._id} (${obj.type})` )
         console.log( obj )
+        console.log( e )
         return
       }
 
@@ -429,6 +430,7 @@ export default class SpeckleRenderer extends EE {
   }
 
   drawEdges ( threeObj, id ) {
+    if ( threeObj.type !== 'Mesh' ) return
     var objEdges = new THREE.EdgesGeometry( threeObj.geometry, this.viewerSettings.edgesThreshold )
     var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
     edgeLines.userData._id = id
