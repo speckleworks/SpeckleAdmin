@@ -334,7 +334,7 @@ export default {
     taggedStreams: [],
     focus: false,
     selectedEdgesDisplay: "Diagonal Horizontal",
-    selectedGraphLayout: "Free"
+    selectedGraphLayout: "Horizontal"
   }),
   computed: {
     toggle_multiple: function() {
@@ -446,6 +446,20 @@ export default {
       var streamLinks = [];
       var nodes = [];
 
+      // let resLogin;
+      // try {
+      //   let resLogin = await axios.post(
+      //     "https://hestia.speckle.works/api/accounts/login",
+      //     { email: "p.poinet@ucl.ac.uk", password: "0403924199" }
+      //   );
+      //   axios.defaults.headers.common["Authorization"] =
+      //     resLogin.data.resource.token;
+      // } catch (err) {
+      //   console.log(err); // from creation.
+      //   return;
+      // }
+
+
       let resProject;
       try {
         resProject = await axios.get(
@@ -503,11 +517,24 @@ export default {
         try {
           resClient = await axios.get(
             `https://hestia.speckle.works/api/streams/${streamShortID}/clients`
-          );
+          )
 
           for (var j = 0; j < resClient.data.resources.length; j++) {
             let client_id = resClient.data.resources[j]._id;
             let clientOwnerID = resClient.data.resources[j].owner;
+            
+            let resOwner
+            try {
+              resOwner = await axios.get(
+                `https://hestia.speckle.works/api/accounts/${clientOwnerID}`
+              )
+            }catch (error) {
+              console.log("Can't access user info");
+            }
+            let userInfo = resOwner.data.resource
+
+            
+
             let clientCreatedAt = resClient.data.resources[j].createdAt;
             let clientUpdatedAt = resClient.data.resources[j].updatedAt;
             let clientRole = resClient.data.resources[j].role;
@@ -525,6 +552,7 @@ export default {
               type: "Client",
               _id: client_id,
               owner: clientOwnerID,
+              userInfo: userInfo,
               createdAt: clientCreatedAt,
               updatedAt: clientUpdatedAt,
               role: clientRole,

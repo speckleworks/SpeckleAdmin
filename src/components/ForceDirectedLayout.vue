@@ -7,6 +7,7 @@
         <g v-show="!switchForce" id="textDoc" />
         <g v-show="switchForce" id="hullOwner" />
         <g v-show="switchForce" id="cenOwner" />
+        <g v-show="switchForce" id="textOwner" />
         <g id="pathLink" />
         <g id="marker" />
         <g id="circleSender" />
@@ -650,6 +651,24 @@ export default {
       let clientNodes = _nodes.filter(data => data.type == "Client");
       var parentGroups = this.groupBy(clientNodes, "owner");
 
+    
+    var circleOwnerData = []
+      for (var property in parentGroups) {
+        var parGroup = parentGroups[property];
+
+        var sumX = 0
+        var sumY = 0
+        for (let i = 0; i < parGroup.length; i++) {
+          sumX += parGroup[i].x
+          sumY += parGroup[i].y
+        }
+        var avX = sumX / parGroup.length
+        var avY = sumY / parGroup.length
+        var circCenterOwner = {"cx": avX, "cy": avY, "radius": 4, "color": "#7ebff3", userInfo: parGroup[0].userInfo}
+        circleOwnerData.push(circCenterOwner)
+      }
+
+
       for (var property in parentGroups) {
         var parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
@@ -664,14 +683,14 @@ export default {
         }
       }
 
-      var childGroups = this.groupBy(clientNodes, "documentGuid");
 
-    var textDocData = []
+
+    var childGroups = this.groupBy(clientNodes, "documentGuid");
+
+    
     var circleDocData = []
       for (var property in childGroups) {
-        
         var childGroup = childGroups[property];
-
         var infoDoc = ""
         if(childGroup[0].documentType === "Grasshopper"){
           infoDoc = `🦗`
@@ -679,20 +698,17 @@ export default {
         if(childGroup[0].documentType === "Rhinoceros"){
           infoDoc = `🦏`
         }
-        console.log(infoDoc)
-
         var sumX = 0
         var sumY = 0
         for (let i = 0; i < childGroup.length; i++) {
           sumX += childGroup[i].x
           sumY += childGroup[i].y
-          
         }
         var avX = sumX / childGroup.length
         var avY = sumY / childGroup.length
         var circCenterDoc = {"cx": avX, "cy": avY, "radius": 4, "color": "hotpink", "infoDoc": infoDoc}
         circleDocData.push(circCenterDoc)
-        textDocData.push(infoDoc)
+        
       }
 
       for (var property in childGroups) {
@@ -1129,6 +1145,37 @@ export default {
         });
 
 
+
+
+    var circleOwner = svg
+        .select("#cenOwner")
+        .selectAll("circle")
+        .data(circleOwnerData)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return d.cx; })
+        .attr("cy", function (d) { return d.cy; })
+        .attr("r", function (d) { return d.radius; })
+        .style("fill", function (d) { return d.color; })
+
+      var textOwner = svg
+        .select("#textOwner")
+        .selectAll("text")
+        .data(circleOwnerData)
+        .enter()
+        .append("svg:g")
+      textOwner
+        .append("svg:text")
+        .attr("x", -50)
+        .attr("y", 20)
+        //.attr("class", "shadow")
+        .style("font-size", "80px")
+        .text(function(d) {
+          console.log(d.userInfo.surname)
+          
+          return d.userInfo.surname.charAt(0) + d.userInfo.name.charAt(0) + " - " + d.userInfo.company;
+        })
+
     var circleDoc = svg
         .select("#cenDoc")
         .selectAll("circle")
@@ -1239,6 +1286,50 @@ export default {
             // ));
           });
         
+
+        svg
+          .select("#hullOwner")
+          .selectAll(".subhullOwner")
+          .each(function (d,i) {
+
+              var sumX = 0
+              var sumY = 0
+              for (let i = 0; i < Object.values(d)[1].length; i++) {
+                sumX += Object.values(d)[1][i].x
+                sumY += Object.values(d)[1][i].y
+              }
+              var avX = sumX / Object.values(d)[1].length
+              var avY = sumY / Object.values(d)[1].length
+
+              svg
+                .select("#cenOwner")
+                .selectAll("circle")
+                .each(function (d, j) {
+                  if (j === i) {
+                    // put all your operations on the second element, e.g.
+                    d3.select(this)
+                      .attr("cx", avX)
+                      .attr("cy", avY)    
+                  }
+                })
+            
+
+              svg
+                .select("#textOwner")
+                .selectAll("text")
+                .each(function (d, j) {
+                  if (j === i) {
+                    // put all your operations on the second element, e.g.
+                    d3.select(this)
+                    .attr("transform", function(d) {
+                      return "translate(" + avX + "," + avY + ")";
+                    })
+                  }
+                })
+
+        });
+
+
         svg
           .select("#hullOwner")
           .selectAll(".subhullOwner")
@@ -1253,8 +1344,7 @@ export default {
           .select("#hullDoc")
           .selectAll(".subhullDoc")
           .each(function (d,i) {
-            //console.log(circleDoc)
-            // console.log(Object.values(d)[1].length)
+
               var sumX = 0
               var sumY = 0
               for (let i = 0; i < Object.values(d)[1].length; i++) {
@@ -1264,42 +1354,32 @@ export default {
               var avX = sumX / Object.values(d)[1].length
               var avY = sumY / Object.values(d)[1].length
 
-          svg
-            .select("#cenDoc")
-            .selectAll("circle")
-            .each(function (d, j) {
-              if (j === i) {
-                // put all your operations on the second element, e.g.
-                d3.select(this)
-                  .attr("cx", avX)
-                  .attr("cy", avY)    
-              }
-            })
+              svg
+                .select("#cenDoc")
+                .selectAll("circle")
+                .each(function (d, j) {
+                  if (j === i) {
+                    // put all your operations on the second element, e.g.
+                    d3.select(this)
+                      .attr("cx", avX)
+                      .attr("cy", avY)    
+                  }
+                })
             
 
-          svg
-            .select("#textDoc")
-            .selectAll("text")
-            .each(function (d, j) {
-              if (j === i) {
-                // put all your operations on the second element, e.g.
-                d3.select(this)
-                .attr("transform", function(d) {
-                  return "translate(" + avX + "," + avY + ")";
+              svg
+                .select("#textDoc")
+                .selectAll("text")
+                .each(function (d, j) {
+                  if (j === i) {
+                    // put all your operations on the second element, e.g.
+                    d3.select(this)
+                    .attr("transform", function(d) {
+                      return "translate(" + avX + "," + avY + ")";
+                    })
+                  }
                 })
-                  // .attr("cx", avX)
-                  // .attr("cy", avY)    
-              }
-            })
 
-
-            // var circleDoc = svg
-            //   .select("#cenDoc")
-            //   .append("circle")
-            //   .attr("cx", avX)
-            //   .attr("cy", avY)
-            //   .attr("r", 5)
-            //   .style("fill", "purple");
         });
         
                 
