@@ -1,6 +1,7 @@
 <template>
   <v-container grid-list-sm v-if='allUsersPop.length > 0 && project' class='pa-0 ma-0'>
     <v-layout row wrap>
+      <v-flex xs12 v-if='!canEdit'>You cannot add users to this project.</v-flex>
       <v-flex xs12 v-for='user in allUsersPop' v-if='user' :key='user._id'>
         <user-perm-card
         @change-permission-streams='changePermissionStreams'
@@ -30,6 +31,9 @@ export default {
     }
   },
   computed: {
+    canEdit( ) {
+      return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1 || this.$store.state.user.role === 'admin'
+    },
     canReadProject( ) { return this.project.canRead },
     canWriteProject( ) { return this.project.canWrite },
     canReadStreams( ) { return this.project.permissions.canRead },

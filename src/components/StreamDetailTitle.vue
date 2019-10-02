@@ -17,13 +17,19 @@
         <v-icon small>history</v-icon> {{ stream.children.length }} &nbsp;
         <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong></span>
       </v-flex>
-      <v-flex xs12 class='ma-0 pa-0 mb-2'>
-        <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="stream.tags" :items='stream.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
-          <template v-slot:no-data>stream has no tags.</template>
-        </v-combobox>
+      <v-flex xs12 class='ma-0 pa-0 mt-3 mb-2'>
+        <v-layout row align-center>
+          <v-flex xs3 class='pr-4'>
+            <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='stream.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
+          </v-flex>
+          <v-flex xs9>
+            <v-combobox @input='updateTags' :disabled='!canEdit' v-model="stream.tags" :items='allTags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+              <template v-slot:no-data><p>Add a new tag!</p></template>
+            </v-combobox>
+          </v-flex>
+        </v-layout>
       </v-flex>
     </v-layout>
-    <!-- <md-chips v-model="stream.tags" @input='updateTags' md-placeholder="add tags" class='stream-chips' md-disabled='!canEdit'></md-chips> -->
   </v-card>
 </template>
 <script>
@@ -36,6 +42,9 @@ export default {
     stream: Object, // can be alert or info
   },
   computed: {
+    allTags() {
+      return this.$store.getters.allTags
+    },
     canEdit( ) {
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
     },
@@ -73,12 +82,15 @@ export default {
     }
   },
   methods: {
-    updateTags: debounce( function( e ) {
+    updateTags: debounce( function ( e ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, tags: this.stream.tags } )
     }, 1000 ),
     updateName( args ) {
       this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, name: args.text } )
-    }
+    },
+    updateJobNumber: debounce( function ( e ) {
+      this.$store.dispatch( 'updateStream', { streamId: this.stream.streamId, jobNumber: this.stream.jobNumber } )
+    }, 1000 )
   },
   mounted( ) {}
 }

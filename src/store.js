@@ -196,30 +196,30 @@ const viewerStore = {
     }
   },
   mutations: {
-    TOGGLE_EDGES ( state, payload ) {
+    TOGGLE_EDGES( state, payload ) {
       state.showEdges = payload
-      localStorage.setItem ('viewerSettings', JSON.stringify(state) )
+      localStorage.setItem( 'viewerSettings', JSON.stringify( state ) )
     },
-    SET_EDGES_THRESHOLD ( state, payload ) {
+    SET_EDGES_THRESHOLD( state, payload ) {
       state.edgesThreshold = payload
-      localStorage.setItem ('viewerSettings', JSON.stringify(state) )
+      localStorage.setItem( 'viewerSettings', JSON.stringify( state ) )
     },
-    TOGGLE_SHADOWS ( state, payload ) {
+    TOGGLE_SHADOWS( state, payload ) {
       state.castShadows = payload
-      localStorage.setItem ('viewerSettings', JSON.stringify(state))
+      localStorage.setItem( 'viewerSettings', JSON.stringify( state ) )
     },
-    SET_MESH_OPACITY ( state, payload ) {
+    SET_MESH_OPACITY( state, payload ) {
       state.meshOverrides.opacity = payload
-      localStorage.setItem ('viewerSettings', JSON.stringify(state))
+      localStorage.setItem( 'viewerSettings', JSON.stringify( state ) )
     },
-    SET_MESH_SPECULAR ( state, payload ) {
+    SET_MESH_SPECULAR( state, payload ) {
       state.meshOverrides.specular = payload
-      localStorage.setItem ('viewerSettings', JSON.stringify(state))
+      localStorage.setItem( 'viewerSettings', JSON.stringify( state ) )
     },
-    SET_ALL_VIEWER_SETTINGS ( state, payload ) {
-      Object.keys(payload).forEach(key => {
-        state[key] = payload[key]
-      })
+    SET_ALL_VIEWER_SETTINGS( state, payload ) {
+      Object.keys( payload ).forEach( key => {
+        state[ key ] = payload[ key ]
+      } )
     }
   }
 
@@ -397,6 +397,16 @@ export default new Vuex.Store( {
         } catch {}
       }
       return [ ...keys ]
+    },
+    allTags: ( state ) => {
+      let tagSet = new Set( )
+      state.streams.forEach( stream => {
+        stream.tags.forEach( t => tagSet.add( t ) )
+      } )
+      state.projects.forEach( project => {
+        project.tags.forEach( t => tagSet.add( t ) )
+      } )
+      return [ ...tagSet ]
     }
   },
   mutations: {
@@ -413,6 +423,7 @@ export default new Vuex.Store( {
           // defensive code (vue 3.0 we're off to typescript baby, can't wait)
           if ( !stream.description ) stream.description = '...'
           if ( !stream.tags ) stream.tags = [ ]
+          if ( !stream.jobNumber ) stream.jobNumber = ''
           state.streams.unshift( stream )
         }
       } )
@@ -542,6 +553,7 @@ export default new Vuex.Store( {
           // potentially enforce here extra fields
           if ( !project.tags ) project.tags = [ ]
           if ( !project.deleted ) project.deleted = false
+          if ( !project.jobNumber ) project.jobNumber = ''
           state.projects.unshift( project )
         }
       } )
@@ -1070,9 +1082,11 @@ export default new Vuex.Store( {
             var lambdas = [ ]
 
             res.forEach( r => {
-              let data = r.data
-              data.function = r.request.responseURL.split( '/' ).slice( -1 ).pop( )
-              lambdas.push( data )
+              if ( r ) {
+                let data = r.data
+                data.function = r.request.responseURL.split( '/' ).slice( -1 ).pop( )
+                lambdas.push( data )
+              }
             } )
 
             context.commit( 'ADD_LAMBDAS', lambdas )

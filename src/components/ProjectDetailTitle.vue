@@ -2,6 +2,10 @@
   <v-card class='elevation-0 pa-3'>
     <v-layout row wrap>
       <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
+        <v-btn icon @click.native='$router.push(`/view/${allProjectStreams}`)'>
+          <v-icon>360</v-icon>
+        </v-btn>
+        <!-- {{allProjectStreams}} -->
         <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span>
         <span v-else>{{project.name}}</span>
       </v-flex>
@@ -10,12 +14,19 @@
         <v-icon small>import_export</v-icon> <span class='caption'>{{project.streams.length}}</span>&nbsp;
         <v-icon small>fingerprint</v-icon>&nbsp;<strong style="user-select:all">{{project._id}}</strong>&nbsp;
         <v-icon small>access_time</v-icon>&nbsp;<timeago :datetime='project.updatedAt'></timeago>&nbsp;
-        <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong></span>
+        <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong>. You {{canEdit ? 'can' : 'cannot'}} edit.</span>
       </v-flex>
-      <v-flex xs12 class='ma-0 pa-0 mb-2'>
-        <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="project.tags" :items='project.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
-          <template v-slot:no-data>project has no tags.</template>
-        </v-combobox>
+      <v-flex xs12 class='ma-0 pa-0 mt-3 mb-2'>
+        <v-layout row align-center>
+          <v-flex xs3 class=''>
+            <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='project.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
+          </v-flex>
+          <v-flex xs9>
+            <v-combobox @input='updateTags' :disabled='!canEdit' v-model="project.tags" :items='allTags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+              <template v-slot:no-data>Add a new tag!</template>
+            </v-combobox>
+          </v-flex>
+        </v-layout>
       </v-flex>
     </v-layout>
   </v-card>
@@ -30,6 +41,12 @@ export default {
     project: Object
   },
   computed: {
+    allProjectStreams( ) {
+      return this.project.streams.join(',')
+    },
+    allTags( ) {
+      return this.$store.getters.allTags
+    },
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
     },
@@ -53,9 +70,12 @@ export default {
     updateName( args ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, name: args.text } )
     },
-    updateTags: debounce( function( e ) {
+    updateTags: debounce( function ( e ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, tags: this.project.tags } )
     }, 1000 ),
+    updateJobNumber: debounce( function ( e ) {
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, jobNumber: this.project.jobNumber } )
+    }, 1000 )
   }
 }
 

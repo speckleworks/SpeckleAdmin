@@ -4,30 +4,44 @@
       <v-flex xs11 md6 lg6>
         <form @submit.prevent='login' v-if='$store.state.isAuth === false'>
           <v-card class="elevation-3">
-            <v-toolbar dense class='title small text-uppercase elevation-0'>
-              <v-icon small>lock</v-icon>&nbsp;<span class='font-weight-light'>Sign In</span>
+            <v-toolbar dense class='title small text-uppercase elevation-0' v-if='servers.length!==0'>
+              <v-icon small>account_circle</v-icon>&nbsp;&nbsp;<span class='font-weight-light'>Previously used servers</span>
             </v-toolbar>
-            <v-card-text>
-              <v-text-field xxx-prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' label='server url' placeholder='https://speckle.yourdomain.com'></v-text-field>
-              <v-btn type="submit" block color='primary' class="md-primary md-raised">
-                <v-icon>arrow_right_alt</v-icon>
-              </v-btn>
-            </v-card-text>
-            <v-card-text>
+            <v-card-text v-if='servers.length!==0'>
               <!-- <p class='pl-3'><small>Previously used accounts:</small></p> -->
               <v-list two-line>
-                <v-list-tile v-for='server in servers' :key='server.url' @click='prevAccountClick(server.url)'>
+                <v-list-tile v-for='server in servers' :key='server.url' @click='prevAccountClick(server.url)' class='elevation-0 my-3'>
                   <v-list-tile-content>
                     <v-list-tile-title><b>{{server.name}}</b></v-list-tile-title>
                     <v-list-tile-sub-title>{{server.url}} <small>({{server.version}})</small></v-list-tile-sub-title>
                   </v-list-tile-content>
                   <v-list-tile-action>
-                    <v-icon>arrow_right_alt</v-icon>
+                    <v-btn color="primary" fab small dark>
+                      <v-icon>arrow_right_alt</v-icon>
+                    </v-btn>
                   </v-list-tile-action>
                 </v-list-tile>
               </v-list>
               <!-- {{servers}} -->
               <!-- {{localStorage}} -->
+            </v-card-text>
+            <v-toolbar dense class='title small text-uppercase elevation-0'>
+              <v-icon small>group_add</v-icon>&nbsp;&nbsp;<span class='font-weight-light'>Signin</span>
+            </v-toolbar>
+            <v-card-text>
+              <p class='pl-3'>Login or register to a new server by inputting its url below:</p>
+              <v-list two-line>
+                <v-list-tile>
+                  <v-list-tile-content>
+                    <v-text-field style='width: 90%' xxx-prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' label='server url' placeholder='https://speckle.yourdomain.com'></v-text-field>
+                  </v-list-tile-content>
+                  <v-list-tile-action>
+                    <v-btn color="black" fab small dark type="submit">
+                      <v-icon>arrow_right_alt</v-icon>
+                    </v-btn>
+                  </v-list-tile-action>
+                </v-list-tile>
+              </v-list>
             </v-card-text>
             <v-card-actions>
             </v-card-actions>
