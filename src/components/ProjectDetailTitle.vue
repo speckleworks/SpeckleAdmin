@@ -2,6 +2,10 @@
   <v-card class='elevation-0 pa-3'>
     <v-layout row wrap>
       <v-flex xs12 class='display-1 font-weight-light text-capitalize my-5'>
+        <v-btn icon @click.native='$router.push(`/view/${allProjectStreams}`)'>
+          <v-icon>360</v-icon>
+        </v-btn>
+        <!-- {{allProjectStreams}} -->
         <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span>
         <span v-else>{{project.name}}</span>
       </v-flex>
@@ -37,7 +41,10 @@ export default {
     project: Object
   },
   computed: {
-     allTags() {
+    allProjectStreams( ) {
+      return this.project.streams.join(',')
+    },
+    allTags( ) {
       return this.$store.getters.allTags
     },
     canEdit( ) {
@@ -66,9 +73,9 @@ export default {
     updateTags: debounce( function ( e ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, tags: this.project.tags } )
     }, 1000 ),
-    updateJobNumber: debounce( function (e) {
+    updateJobNumber: debounce( function ( e ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, jobNumber: this.project.jobNumber } )
-    }, 1000)
+    }, 1000 )
   }
 }
 
