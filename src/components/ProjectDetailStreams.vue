@@ -2,7 +2,8 @@
   <v-card class='elevation-0'>
     <stream-search :streams-to-omit='streams' write-only v-on:selected-stream='selectStream' v-if='canEdit'></stream-search>
     <v-card-text class='md-layout-item md-size-100' v-if='streams.length === 0'>
-      <p>This project has no streams. Add some using the form above!</p>
+      <p v-if='canEdit'>This project has no streams. Add some using the form above!</p>
+      <p v-else>This project has no streams.</p>
     </v-card-text>
     <v-card-text v-else class='pa-0'>
       <v-list two-line>
