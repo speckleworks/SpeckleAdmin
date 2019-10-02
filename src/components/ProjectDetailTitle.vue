@@ -10,16 +10,15 @@
         <v-icon small>import_export</v-icon> <span class='caption'>{{project.streams.length}}</span>&nbsp;
         <v-icon small>fingerprint</v-icon>&nbsp;<strong style="user-select:all">{{project._id}}</strong>&nbsp;
         <v-icon small>access_time</v-icon>&nbsp;<timeago :datetime='project.updatedAt'></timeago>&nbsp;
-        <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong></span>
+        <span class='caption font-weight-light text-uppercase'>Owned by <strong>{{owner}}</strong>. You {{canEdit ? 'can' : 'cannot'}} edit.</span>
       </v-flex>
       <v-flex xs12 class='ma-0 pa-0 mt-3 mb-2'>
         <v-layout row align-center>
           <v-flex xs3 class=''>
-            <!-- <editable-span v-if='canEdit' :text='project.name' @update='updateName'></editable-span> -->
-            <v-text-field hint='Project Code' mask='###### - ##' solo persistent-hint md-disabled='!canEdit'></v-text-field>
+            <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='project.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
           </v-flex>
           <v-flex xs10 xxxclass='ma-0 pa-0'>
-            <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' md-disabled='!canEdit' v-model="project.tags" :items='project.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+            <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' :disabled='!canEdit' v-model="project.tags" :items='project.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
               <template v-slot:no-data>project has no tags.</template>
             </v-combobox>
           </v-flex>
@@ -64,6 +63,9 @@ export default {
     updateTags: debounce( function ( e ) {
       this.$store.dispatch( 'updateProject', { _id: this.project._id, tags: this.project.tags } )
     }, 1000 ),
+    updateJobNumber: debounce( function (e) {
+      this.$store.dispatch( 'updateProject', { _id: this.project._id, jobNumber: this.project.jobNumber } )
+    }, 1000)
   }
 }
 

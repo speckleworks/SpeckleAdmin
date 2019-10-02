@@ -542,6 +542,7 @@ export default new Vuex.Store( {
           // potentially enforce here extra fields
           if ( !project.tags ) project.tags = [ ]
           if ( !project.deleted ) project.deleted = false
+          if ( !project.jobNumber ) project.jobNumber = ''
           state.projects.unshift( project )
         }
       } )
