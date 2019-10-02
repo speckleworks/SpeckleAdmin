@@ -17,9 +17,9 @@
           <v-flex xs3 class=''>
             <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='project.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
           </v-flex>
-          <v-flex xs10 xxxclass='ma-0 pa-0'>
-            <v-combobox :menu-props='{"maxHeight":0, "zIndex":"0"}' @input='updateTags' :disabled='!canEdit' v-model="project.tags" :items='project.tags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
-              <template v-slot:no-data>project has no tags.</template>
+          <v-flex xs9>
+            <v-combobox @input='updateTags' :disabled='!canEdit' v-model="project.tags" :items='allTags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
+              <template v-slot:no-data>Add a new tag!</template>
             </v-combobox>
           </v-flex>
         </v-layout>
@@ -37,6 +37,9 @@ export default {
     project: Object
   },
   computed: {
+     allTags() {
+      return this.$store.getters.allTags
+    },
     canEdit( ) {
       return this.project.owner === this.$store.state.user._id || this.project.canWrite.indexOf( this.$store.state.user._id ) > -1
     },
