@@ -1,6 +1,14 @@
 <template>
   <div>
     <v-list v-if='$store.state.isAuth' two-line class='pa-0'>
+      <v-list-tile v-if='$store.state.serverManifest.serverName' class='pa-0 elevation-3 my--'>
+        <v-list-tile-action>
+          <v-icon>account_circle</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content v-if='$store.state.server'>
+          <v-list-tile-sub-title class='font-weight-light caption'><b>{{$store.state.serverManifest.serverName}}</b><br><pre>{{$store.state.server}}</pre></v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
       <v-list-tile to='/'>
         <v-list-tile-action>
           <v-icon>home</v-icon>
@@ -53,7 +61,7 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Viewer</v-list-tile-title>
-          <v-list-tile-sub-title class='font-weight-light caption'>View Things! In Dimensions! With 3D!</v-list-tile-sub-title>
+          <v-list-tile-sub-title class='font-weight-light caption'>3d speckle stream viewer</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile to='/processors'>
@@ -90,14 +98,6 @@
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Feedback</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-list-tile>
-        <v-list-tile-action>
-          <v-icon>developer_board</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content v-if='$store.state.server'>
-          <v-list-tile-sub-title class='font-weight-light caption'>You're connected at {{$store.state.serverManifest.serverName}}<br>{{$store.state.server}}</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
     </v-list>

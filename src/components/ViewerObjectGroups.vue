@@ -53,7 +53,7 @@
       <!-- <v-divider></v-divider> -->
       <v-card class='' v-if='groupKey !== undefined && !isTextProperty && $store.state.legend' xxxv-if="$store.state.legend && selectedRange.length !== 0">
         <v-card-text v-if='selectedRange'>
-          <h1 class='font-weight-light' >Min: <b>{{selectedRange[0].toLocaleString()}}</b>, Max: <b>{{selectedRange[1].toLocaleString()}}</b></h1>
+          <h1 class='font-weight-light'>Min: <b>{{selectedRange[0].toLocaleString()}}</b>, Max: <b>{{selectedRange[1].toLocaleString()}}</b></h1>
         </v-card-text>
         <v-card-text>
           <v-layout align-center row wrap>
@@ -90,12 +90,15 @@ export default {
 
       if ( newVal ) {
         this.generateGroups( newVal )
+        this.appendInfoToUrl( "groups", { key: newVal } )
         window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
       }
 
       if ( newVal === undefined ) {
+        this.appendInfoToUrl( "groups", null )
         window.renderer.showObjects( [ ] )
       }
+
     },
     legend: {
       handler: function ( newVal, oldVal ) {
@@ -142,7 +145,7 @@ export default {
       filterText: null,
       selectedRange: [ 0, 1000 ],
       rainbowColors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ],
-      coolColors: [ "#0A66FF", "#FF008A"],
+      coolColors: [ "#0A66FF", "#FF008A" ],
     }
   },
   methods: {
@@ -226,6 +229,11 @@ export default {
       } )
     },
 
+  },
+  activated( ) {
+    if ( this.groupKey  ){
+      this.appendInfoToUrl( "groups", { key: this.groupKey } )
+    }
   }
 }
 

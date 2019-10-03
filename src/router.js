@@ -17,12 +17,12 @@ let myRouter = new Router( {
       name: 'signin',
       component: ( ) => import( './views/Signin.vue' ),
       beforeEnter( to, from, next ) {
-        next()
+        next( )
       }
     },
     {
       path: '/signin/callback',
-      name: '',
+      name: 'signin-cb',
       component: ( ) => import( './views/SigninCallback.vue' ),
     },
     {
@@ -97,7 +97,7 @@ let myRouter = new Router( {
     },
     {
       path: '/admin',
-      name: '',
+      name: 'admin',
       component: ( ) => import( './views/Admin.vue' ),
       meta: { requiresAuth: true },
       children: [ {
@@ -133,17 +133,35 @@ let myRouter = new Router( {
   // }
 } )
 
-// myRouter.afterEach( ( to, from ) => {
-//   document.getElementById( 'app' ).scrollIntoView( )
-// } )
+myRouter.afterEach( ( to, from ) => {
+  console.log( 'after each entry' )
+  // console.log( to.name === 'signin-cb' )
+  // console.log( to.query.t )
+  // console.log( from.query.t )
+
+  if ( to.name === 'signin-cb' ) return
+
+
+  let existingQueryObject = to.query.s ? JSON.parse( window.decodeURI( to.query.s ) ) : {}
+  if ( existingQueryObject && existingQueryObject.server && existingQueryObject.server === Store.state.server )
+    return
+
+  console.log( 'after each' )
+
+
+  if ( Store.state.server )
+    existingQueryObject.server = Store.state.server
+
+  myRouter.replace( { name: to.name, params: to.params, query: { s: window.encodeURI( JSON.stringify( existingQueryObject ) ) } } )
+
+  console.log( existingQueryObject )
+} )
 
 myRouter.beforeEach( ( to, from, next ) => {
-
   if ( to.meta.requiresAuth ) {
     if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
-      return next( { path: '/signin' })
+      return next( { path: '/signin' } )
   }
-
   next( )
 } )
 

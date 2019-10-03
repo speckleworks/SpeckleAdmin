@@ -423,6 +423,7 @@ export default new Vuex.Store( {
       state.users = [ ]
       state.comments = [ ]
       state.isAuth = false
+      state.server = null
     },
 
     // Viewer related
@@ -1017,11 +1018,11 @@ export default new Vuex.Store( {
     // Auth
     authenticate: ( context, payload ) => new Promise( async ( resolve, reject ) => {
       try {
-        let userProfile = await Axios.get( `${payload.server}/api/accounts`, { headers: { 'Authorization': payload.token } } )
+        let userProfile = await Axios.get( new URL( "/api/accounts", payload.server ), { headers: { 'Authorization': payload.token } } )
         console.log( userProfile )
         context.commit( 'SET_TOKEN', payload.token )
         context.commit( 'SET_USER', userProfile.data.resource )
-        context.commit( 'SET_SERVER', `${payload.server}/api` )
+        context.commit( 'SET_SERVER', new URL( "/api", payload.server ) )
 
         let serverDetails = await Axios.get( `${payload.server}/api` )
         context.commit( 'SET_SERVER_DETAILS', serverDetails.data )
@@ -1050,6 +1051,7 @@ export default new Vuex.Store( {
       context.commit( 'FLUSH_ALL' )
       localStorage.removeItem( 'token' )
       localStorage.removeItem( 'viewerSettings' )
+      localStorage.removeItem( 'currentServer' )
       Axios.defaults.headers.common[ 'Authorization' ] = ''
       Axios.defaults.baseURL = ''
     }

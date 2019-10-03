@@ -26,9 +26,9 @@ Vue.use( VueTimeago, { locale: 'en' } )
 let server = localStorage.getItem( 'currentServer' )
 if ( server )
   Store.state.server = server
-else
- Store.state.server = `${window.location.origin}/api`
-
+else {
+  // TODO: try get server from url query
+}
 
 // set default server
 Axios.defaults.baseURL = Store.state.server
@@ -77,11 +77,24 @@ window.bus = new Vue( )
 // get hex color from string global mixin
 import CH from 'color-hash'
 let ColorHasher = new CH( )
+
 Vue.mixin( {
   methods: {
-    getHexFromString: str => ColorHasher.hex( str )
+    getHexFromString: str => ColorHasher.hex( str ),
+    appendInfoToUrl( key, info ) {
+      let existingQueryObject = this.$route.query.s ? JSON.parse( window.decodeURI( this.$route.query.s ) ) : {}
+      if ( info !== null )
+        existingQueryObject[ key ] = info
+      else
+        delete existingQueryObject[ key ]
+
+      this.$router.replace( { params: this.$route.params, query: { s: window.encodeURI( JSON.stringify( existingQueryObject ) ) } } )
+
+      console.log( existingQueryObject )
+    }
   }
 } )
+
 
 import EditableSpan from './components/EditableSpan.vue'
 Vue.component( 'editable-span', EditableSpan )

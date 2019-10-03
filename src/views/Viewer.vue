@@ -5,7 +5,7 @@
     </div>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless disable-resize-watcher width='420' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show ='$store.state.viewerControls'>
+      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless disable-resize-watcher width='420' value="true" :xxxclass='`${hover ? "elevation-3" : "transparent elevation-0"}`' xxxstyle='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show='$store.state.viewerControls'>
         <v-layout row wrap style="direction:ltr; padding-left:20px; height: auto;">
           <v-flex xs12>
             <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
@@ -53,7 +53,7 @@
               <v-tab-item key='settings'>
                 <v-card class='elevation-0 transparent'>
                   <v-card-text>
-                    <settings @update='updateViewerSettings'/>
+                    <settings @update='updateViewerSettings' />
                   </v-card-text>
                 </v-card>
               </v-tab-item>
@@ -121,7 +121,8 @@ export default {
       removeInterval: null,
       streamsToRemove: [ ],
       selectedFilter: null,
-      showTheThing: true
+      showTheThing: true,
+      cameraPos: null
     }
   },
   methods: {
@@ -129,8 +130,8 @@ export default {
       // NOTE: this functionality is disabled because o
       let streams = this.$store.state.loadedStreamIds.join( ',' )
       if ( streams !== '' )
-        this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
-      else this.$router.replace( { name: 'viewer' } )
+        this.$router.replace( { name: 'viewer', params: { streamIds: streams }, query: { ...this.$route.query } } )
+      else this.$router.replace( { name: 'viewer', query: { ...this.$route.query } } )
     },
     async addStream( streamId ) {
       this.showLoading = true
@@ -138,7 +139,7 @@ export default {
       this.appendStreamsToRoute( )
       let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      if(objectIds.length === 0) {
+      if ( objectIds.length === 0 ) {
         this.showLoading = false
         return
       }
@@ -361,8 +362,8 @@ export default {
     this.objectAccumulator = [ ]
 
     let settingsString = localStorage.getItem( 'viewerSettings' )
-    let viewerSettings = JSON.parse(settingsString)
-    if (null != viewerSettings ) this.$store.commit('SET_ALL_VIEWER_SETTINGS', viewerSettings)
+    let viewerSettings = JSON.parse( settingsString )
+    if ( null != viewerSettings ) this.$store.commit( 'SET_ALL_VIEWER_SETTINGS', viewerSettings )
 
     this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer )
     this.renderer.animate( )
@@ -393,6 +394,10 @@ export default {
     this.renderer.on( 'clear-analysis-legend', ( ) => {
       this.$store.commit( 'SET_LEGEND', null )
     } )
+
+    this.renderer.on( 'camera-pos', cam => {
+      this.appendInfoToUrl( "camera", cam )
+    })
   }
 }
 

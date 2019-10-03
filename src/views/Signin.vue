@@ -116,6 +116,7 @@ export default {
     this.checkRedirect( )
 
     if ( this.$store.state.isAuth === true ) {
+      this.appendInfoToUrl( 'server', { apiUrl: this.$store.state.server } )
       this.$router.push( '/' )
     }
   }

@@ -57,7 +57,9 @@ export default {
         this.$store.dispatch( 'getProcessors' )
         this.$store.dispatch( 'createClient' )
 
-        this.$router.push( '/' ) // TODO: Check redirect!
+
+
+        this.$router.push( '/' ) // TODO: Check redirect (?)
       } )
       .catch( err => {
         this.errorMessage = err.message
