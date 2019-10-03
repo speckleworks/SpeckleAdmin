@@ -13,9 +13,11 @@ import { removeArraysRecursive, getStructuralArrPropKeys, getTokenMSAL } from '.
 
 Vue.use( Vuex )
 
+// import store modules
 import admin from './admin.js'
 import viewer from './viewer.js'
 
+// main store module
 export default new Vuex.Store( {
   state: {
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`

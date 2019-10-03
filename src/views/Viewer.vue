@@ -138,6 +138,11 @@ export default {
       this.appendStreamsToRoute( )
       let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
+      if(objectIds.length === 0) {
+        this.showLoading = false
+        return
+      }
+
       // loaded already?
       let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
       let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
@@ -355,11 +360,11 @@ export default {
     console.log( 'mounted' )
     this.objectAccumulator = [ ]
 
-    let settingsString = localStorage.getItem( 'viewerSettings' ) 
+    let settingsString = localStorage.getItem( 'viewerSettings' )
     let viewerSettings = JSON.parse(settingsString)
     if (null != viewerSettings ) this.$store.commit('SET_ALL_VIEWER_SETTINGS', viewerSettings)
 
-    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer ) 
+    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer )
     this.renderer.animate( )
 
     // if you like polluting the global scope, clap twice
