@@ -198,14 +198,14 @@ export default {
         var tokenID = 'msal|' + this.block.msal.clientId
         if (this.$store.state.tokens.hasOwnProperty(tokenID))
           return true
-        
+
         return false
       }
 
       return true
     },
     customComponent () {
-      return () => import(`../lambda/component/${this.block.function}.vue`)
+      return () => import(`../store/lambda/component/${this.block.function}.vue`)
     },
     arrayParams( ) {
       return this.block.parameters.filter(p => p.type == 'array')
@@ -321,7 +321,7 @@ export default {
     authenticate ( ) {
       if (this.isAuthenticated)
         return
-      
+
       this.isAuthenticating = true
       this.$store.dispatch('authenticateBlocks', [this.block])
       .then( res => {

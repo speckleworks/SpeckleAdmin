@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Axios from 'axios'
 import App from './App.vue'
 import Router from './router'
-import Store from './store'
+import Store from './store/store'
 import './registerServiceWorker'
 
 Vue.config.productionTip = false
