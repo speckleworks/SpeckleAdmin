@@ -1,6 +1,7 @@
+import base64url from 'base64url'
 import Vue from 'vue'
 import Router from 'vue-router'
-import Store from './store'
+import Store from './store/store'
 
 Vue.use( Router )
 
@@ -17,12 +18,12 @@ let myRouter = new Router( {
       name: 'signin',
       component: ( ) => import( './views/Signin.vue' ),
       beforeEnter( to, from, next ) {
-        next()
+        next( )
       }
     },
     {
       path: '/signin/callback',
-      name: '',
+      name: 'signin-cb',
       component: ( ) => import( './views/SigninCallback.vue' ),
     },
     {
@@ -84,20 +85,8 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
-      path: '/plugins',
-      name: 'plugins',
-      component: ( ) => import( './views/Plugins.vue' ),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/feedback',
-      name: 'feedback',
-      component: ( ) => import( './views/Feedback.vue' ),
-      meta: { requiresAuth: false },
-    },
-    {
       path: '/admin',
-      name: '',
+      name: 'admin',
       component: ( ) => import( './views/Admin.vue' ),
       meta: { requiresAuth: true },
       children: [ {
@@ -127,23 +116,31 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     }
   ],
-  // scrollBehavior( to, from, savedPosition ) {
-  //   console.log( 'scrollBehavior' )
-  //   return { x: 0, y: 0 }
-  // }
 } )
 
-// myRouter.afterEach( ( to, from ) => {
-//   document.getElementById( 'app' ).scrollIntoView( )
-// } )
+myRouter.afterEach( ( to, from ) => {
+  if ( to.name === 'signin-cb' ) return
 
-myRouter.beforeEach( ( to, from, next ) => {
 
-  if ( to.meta.requiresAuth ) {
-    if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
-      return next( { path: '/signin' })
+  let existingQueryObject = to.query.s ? JSON.parse( base64url.decode( to.query.s ) ) : {}
+  if ( existingQueryObject && existingQueryObject.server && existingQueryObject.server === Store.state.server )
+    return
+
+  if ( Store.state.server )
+    existingQueryObject.server = Store.state.server
+
+  if ( myRouter.$Countly ) {
+    myRouter.$Countly.q.push( [ 'track_pageview', to.name ] )
   }
 
+  myRouter.replace( { params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
+} )
+
+myRouter.beforeEach( ( to, from, next ) => {
+  if ( to.meta.requiresAuth ) {
+    if ( to.meta.requiresAuth === true && Store.state.isAuth === false )
+      return next( { path: '/signin' } )
+  }
   next( )
 } )
 

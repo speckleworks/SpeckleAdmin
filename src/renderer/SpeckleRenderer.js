@@ -52,7 +52,7 @@ export default class SpeckleRenderer extends EE {
     this.currentColorByProp = null
     this.colorTable = {}
 
-    this.edgesGroup = new THREE.Group()
+    this.edgesGroup = new THREE.Group( )
     this.edgesGroup.name = 'displayEdgesGroup'
     this.edgesThreshold = null
 
@@ -87,9 +87,9 @@ export default class SpeckleRenderer extends EE {
     this.shadowLight.castShadow = true;
     this.shadowLight.visible = false
     this.scene.add( this.shadowLight )
-    this.shadowLight.shadow.mapSize.width = 512;  // default
+    this.shadowLight.shadow.mapSize.width = 512; // default
     this.shadowLight.shadow.mapSize.height = 512; // default
-    this.shadowLight.shadow.camera.near = 0.5;    // default
+    this.shadowLight.shadow.camera.near = 0.5; // default
     this.shadowLight.shadow.camera.far = 500;
 
     this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
@@ -108,10 +108,13 @@ export default class SpeckleRenderer extends EE {
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
 
+    // this.controls.minPolarAngle = 0;
+    // this.controls.maxPolarAngle = Math.PI / 2;
+
     this.edgesGroup.visible = false
     this.scene.add( this.edgesGroup )
 
-    this.updateViewerSettings()
+    this.updateViewerSettings( )
     // this.controls.enableDamping = true
     // this.controls.dampingFactor = 0.45
     // this.controls = new TrackballControls( this.camera, this.renderer.domElement  )
@@ -146,8 +149,17 @@ export default class SpeckleRenderer extends EE {
     this.computeSceneBoundingSphere( )
     this.render( )
 
-    // this.controls.addEventListener( 'change', this.setFar(this).bind( this ) )
+    //
+    this.controls.addEventListener( 'change', debounce( function ( ) {
+      this.emit( 'camera-pos', {
+        target: [ this.controls.target.x, this.controls.target.y, this.controls.target.z ],
+        position: [ this.camera.position.x, this.camera.position.y, this.camera.position.z ],
+        rotation: [ this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z ]
+      } )
+    }.bind( this ), 500 ) )
   }
+
+
 
   animate( ) {
     requestAnimationFrame( this.animate.bind( this ) );
@@ -322,8 +334,8 @@ export default class SpeckleRenderer extends EE {
           // unhover it first
           if ( this.hoveredObject ) {
             this.hoveredObject.userData.selected ?
-            this.hoveredObject.material.color.copy( this.selectColor ) :
-            this.hoveredObject.material.color.copy( this.hoveredObject.material.__preHoverColor )
+              this.hoveredObject.material.color.copy( this.selectColor ) :
+              this.hoveredObject.material.color.copy( this.hoveredObject.material.__preHoverColor )
 
             this.hoveredObject.userData.hovered = false
           }
@@ -411,7 +423,7 @@ export default class SpeckleRenderer extends EE {
             threeObj.geometry.computeBoundingSphere( )
             threeObj.castShadow = true
             threeObj.receiveShadow = true
-            this.drawEdges ( threeObj, obj._id )
+            this.drawEdges( threeObj, obj._id )
             this.scene.add( threeObj )
           } )
       } catch ( e ) {
@@ -429,7 +441,7 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
-  drawEdges ( threeObj, id ) {
+  drawEdges( threeObj, id ) {
     if ( threeObj.type !== 'Mesh' ) return
     var objEdges = new THREE.EdgesGeometry( threeObj.geometry, this.viewerSettings.edgesThreshold )
     var edgeLines = new THREE.LineSegments( objEdges, new THREE.LineBasicMaterial( { color: 0x000000 } ) )
@@ -437,7 +449,7 @@ export default class SpeckleRenderer extends EE {
     this.edgesGroup.add( edgeLines )
   }
 
-  updateEdges ( ) {
+  updateEdges( ) {
     this.processLargeArray( this.edgesGroup.children, ( obj ) => {
       this.edgesGroup.remove( obj )
     } )
@@ -776,7 +788,7 @@ export default class SpeckleRenderer extends EE {
       position: [ newPos.x, newPos.y, newPos.z ],
       rotation: [ this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z ],
       target: [ bsphere.center.x, bsphere.center.y, bsphere.center.z ]
-    }, 300 )
+    }, 600 )
   }
 
   zoomExtents( ) {
@@ -791,7 +803,7 @@ export default class SpeckleRenderer extends EE {
       position: [ newPos.x, newPos.y, newPos.z ],
       rotation: [ this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z ],
       target: [ this.sceneBoundingSphere.center.x, this.sceneBoundingSphere.center.y, this.sceneBoundingSphere.center.z ]
-    }, 250 )
+    }, 450 )
   }
 
   computeSceneBoundingSphere( ) {
@@ -885,18 +897,18 @@ export default class SpeckleRenderer extends EE {
     doChunk( )
   }
 
-  updateViewerSettings( ){
+  updateViewerSettings( ) {
     this.setDefaultMeshMaterial( )
     this.updateMaterialManager( )
     this.shadowLight.visible = this.viewerSettings.castShadows
     this.edgesGroup.visible = this.viewerSettings.showEdges
-    if ( this.edgesThreshold != this.viewerSettings.edgesThreshold )  {
+    if ( this.edgesThreshold != this.viewerSettings.edgesThreshold ) {
       this.updateEdges( )
     }
     this.edgesThreshold = this.viewerSettings.edgesThreshold
   }
 
-  setDefaultMeshMaterial ( ) {
+  setDefaultMeshMaterial( ) {
     for ( let obj of this.scene.children ) {
       if ( obj.type === 'Mesh' ) {
         if ( obj.material ) {
@@ -906,16 +918,16 @@ export default class SpeckleRenderer extends EE {
     }
   }
 
-  setMaterialOverrides ( obj ){
+  setMaterialOverrides( obj ) {
     obj.material.opacity = this.viewerSettings.meshOverrides.opacity / 100
-    let specColor = new THREE.Color()
+    let specColor = new THREE.Color( )
     specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
     obj.material.specular = specColor
     obj.material.needsUpdate = true
   }
 
-  updateMaterialManager ( ) {
-    let specColor = new THREE.Color()
+  updateMaterialManager( ) {
+    let specColor = new THREE.Color( )
     specColor.setHSL( 0, 0, this.viewerSettings.meshOverrides.specular / 100 )
     Converter.materialManager.defaultMeshMat.specular = specColor
     Converter.materialManager.defaultMeshMat.opacity = this.viewerSettings.meshOverrides.opacity / 100

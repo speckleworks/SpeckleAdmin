@@ -11,10 +11,10 @@
       <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
           <v-layout align-center>
-            <v-flex xs1>
+            <v-flex xs2>
               <v-avatar size="20" :color="getHexFromString(group.name)"></v-avatar>
             </v-flex>
-            <v-flex class='caption'>
+            <v-flex class='caption text-truncate'>
               <b>{{group.name}}</b>&nbsp;<span class='font-weight-light'>({{group.objects.length}} objects)</span>
             </v-flex>
             <v-flex xs4 class='text-xs-right'>
@@ -53,7 +53,7 @@
       <!-- <v-divider></v-divider> -->
       <v-card class='' v-if='groupKey !== undefined && !isTextProperty && $store.state.legend' xxxv-if="$store.state.legend && selectedRange.length !== 0">
         <v-card-text v-if='selectedRange'>
-          <h1 class='font-weight-light' >Min: <b>{{selectedRange[0].toLocaleString()}}</b>, Max: <b>{{selectedRange[1].toLocaleString()}}</b></h1>
+          <h1 class='font-weight-light'>Min: <b>{{selectedRange[0].toLocaleString()}}</b>, Max: <b>{{selectedRange[1].toLocaleString()}}</b></h1>
         </v-card-text>
         <v-card-text>
           <v-layout align-center row wrap>
@@ -73,28 +73,47 @@
 import get from 'lodash.get'
 export default {
   name: 'ObjectGroups',
-  props: {},
+  props: {
+    groupKeySeed: {
+      type: String,
+      default: null
+    }
+  },
   watch: {
-    groupKey( newVal, oldVal ) {
-      this.filterText = ''
-      window.renderer.showObjects( [ ] )
-
-      window.renderer.resetColors( { propagateLegend: true } )
-
-      if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
-        console.log( 'its a structural propertyyyyyy' )
-        this.generateGroups( 'structural.result.' + newVal )
-        window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
-        return
+    groupKeySeed( newVal, oldVal ) {
+      if ( newVal !== null && this.init === false ) {
+        this.init = true
+        this.groupKey = newVal
       }
-
-      if ( newVal ) {
-        this.generateGroups( newVal )
-        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
-      }
-
-      if ( newVal === undefined ) {
+    },
+    groupKey: {
+      immediate: true,
+      handler( newVal, oldVal ) {
+        if ( newVal === null ) return
+        console.log( "TEST " + newVal )
+        this.filterText = ''
         window.renderer.showObjects( [ ] )
+
+        window.renderer.resetColors( { propagateLegend: true } )
+
+        if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
+          console.log( 'its a structural propertyyyyyy' )
+          this.generateGroups( 'structural.result.' + newVal )
+          window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
+          return
+        }
+
+        if ( newVal ) {
+          this.generateGroups( newVal )
+          this.appendInfoToUrl( "groups", { key: newVal } )
+          window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
+        }
+
+        if ( newVal === undefined ) {
+          this.appendInfoToUrl( "groups", null )
+          window.renderer.showObjects( [ ] )
+        }
+
       }
     },
     legend: {
@@ -142,7 +161,8 @@ export default {
       filterText: null,
       selectedRange: [ 0, 1000 ],
       rainbowColors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ],
-      coolColors: [ "#0A66FF", "#FF008A"],
+      coolColors: [ "#0A66FF", "#FF008A" ],
+      init: false
     }
   },
   methods: {
@@ -226,6 +246,18 @@ export default {
       } )
     },
 
+  },
+  mounted( ) {
+    // console.log( 'mounted - object groups' )
+    // console.log( this.groupKeySeed )
+    // if ( this.groupKeySeed !== null ) {
+    //   this.groupKey = this.groupKeySeed
+    // }
+  },
+  activated( ) {
+    if ( this.groupKey ) {
+      this.appendInfoToUrl( "groups", { key: this.groupKey } )
+    }
   }
 }
 

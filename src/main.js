@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Axios from 'axios'
 import App from './App.vue'
 import Router from './router'
-import Store from './store'
+import Store from './store/store'
 import './registerServiceWorker'
 
 Vue.config.productionTip = false
@@ -22,13 +22,27 @@ Vue.use( Vuetify, {
 import VueTimeago from 'vue-timeago'
 Vue.use( VueTimeago, { locale: 'en' } )
 
-// Set up the server route.
+import base64url from 'base64url'
+// Set up the server route
+// Step 1: Get it form local storage.
 let server = localStorage.getItem( 'currentServer' )
 if ( server )
   Store.state.server = server
-else
- Store.state.server = `${window.location.origin}/api`
 
+// Step 2: If a query url is present, and different, overwrite it.
+try {
+  let queryString = window.location.href.split( '?' )[ 1 ]
+  let queryVal = queryString.split( '=' )[ 1 ]
+  let queryObject = JSON.parse( base64url.decode( queryVal ) )
+
+  if ( queryObject.server && Store.state.server != queryObject.server )
+    Store.state.server = queryObject.server
+
+  console.log( queryObject )
+} catch ( err ) {
+  console.log( 'Query borked' )
+  console.log( err )
+}
 
 // set default server
 Axios.defaults.baseURL = Store.state.server
@@ -77,20 +91,62 @@ window.bus = new Vue( )
 // get hex color from string global mixin
 import CH from 'color-hash'
 let ColorHasher = new CH( )
+
 Vue.mixin( {
   methods: {
-    getHexFromString: str => ColorHasher.hex( str )
+    getHexFromString: str => ColorHasher.hex( str ),
+    appendInfoToUrl( key, info ) {
+      let existingQueryObject = this.$route.query.s ? JSON.parse( base64url.decode( this.$route.query.s ) ) : {}
+      if ( info !== null )
+        existingQueryObject[ key ] = info
+      else
+        delete existingQueryObject[ key ]
+
+      this.$router.replace( { params: this.$route.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
+
+      console.log( existingQueryObject )
+    },
+    getUrlQueryObject( ) {
+      if ( !this.$route.query.s )
+        return null
+      return this.$route.query.s ? JSON.parse( base64url.decode( this.$route.query.s ) ) : null
+    },
   }
 } )
 
+
 import EditableSpan from './components/EditableSpan.vue'
 Vue.component( 'editable-span', EditableSpan )
+
+import Countly from 'countly-sdk-web'
+import VueCountly from 'vue-countly'
+
+
+////////////////////////////////////////////////////////////
+//                                                        //
+// Commment out the 4 lines below to disable telemetry!   //
+//                                                        //
+////////////////////////////////////////////////////////////
+Vue.use( VueCountly, Countly, {
+  app_key: '04ac5c1e31e993f2624e964475dd949e9a3443f5',
+  url: 'https://telemetry.speckle.works',
+} );
 
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
   new Vue( {
     router: Router,
     store: Store,
-    render: h => h( App )
+    render: h => h( App ),
+    created( ) {
+
+      ////////////////////////////////////////////////////////////
+      //                                                        //
+      // Commment out the two lines below to disable telemetry! //
+      //                                                        //
+      ////////////////////////////////////////////////////////////
+      this.$Countly.q.push( [ 'track_sessions' ] )
+      Router.$Countly = this.$Countly
+    }
   } ).$mount( '#app' )
 }

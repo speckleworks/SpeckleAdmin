@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build && netlify-lambda build ./src/lambda -t 120",
+    "build": "vue-cli-service build && netlify-lambda build ./src/store/lambda -t 120",
     "serve-lambda": "netlify-lambda serve ./src/lambda -t 120",
     "dev-all": "vue-cli-service serve & netlify-lambda serve ./src/lambda -t 120"
   },
@@ -23,7 +23,9 @@
     "@vue/cli-plugin-pwa": "^3.6.0",
     "@vue/cli-service": "^3.10.0",
     "axios": "^0.19.0",
+    "base64url": "^3.0.1",
     "color-hash": "^1.0.3",
+    "countly-sdk-web": "^19.8.0",
     "event-emitter-es6": "^1.1.5",
     "flat": "^4.1.0",
     "lodash.debounce": "^4.0.8",
@@ -40,6 +42,7 @@
     "three": "^0.103.0",
     "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",
+    "vue-countly": "^1.0.0",
     "vue-json-pretty": "^1.6.0",
     "vue-slider-component": "^2.8.3",
     "vue-template-compiler": "^2.6.10",

@@ -1,79 +1,66 @@
 <template>
-  <v-container fluid xxx-fill-height pa-0 style='height: calc(100vh - 64px);'>
+  <v-container fluid fill-height pa-0 xxxstyle='height: calc(100vh - 64px);'>
     <div style='position: absolute; top:0; width: 100%; z-index: 1000;'>
       <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
     </div>
+    <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless disable-resize-watcher width='420' value="true" :class='`${hover ? "elevation-3" : "transparent elevation-0"}`' style='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show ='$store.state.viewerControls'>
-        <v-layout row wrap style="direction:ltr; padding-left:20px; height: auto;">
-          <v-flex xs12>
-            <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
-              <v-tab key='streams'>
-                <v-icon>import_export</v-icon>
-              </v-tab>
-              <v-tab key='filter'>
-                <v-icon>layers</v-icon>
-              </v-tab>
-              <v-tab key='inspector'>
-                <v-badge small right :value='$store.state.selectedObjects.length>0' color='primary'>
-                  <template v-slot:badge>
-                    <span>{{$store.state.selectedObjects.length}}</span>
-                  </template>
-                  <v-icon>
-                    code
-                  </v-icon>
-                </v-badge>
-              </v-tab>
-              <v-tab key='settings'>
-                <v-icon>settings</v-icon>
-              </v-tab>
-              <v-tab-item key='streams'>
-                <v-card class='elevation-0 transparent'>
-                  <v-card-text>
-                    <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
-                    <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream' @refresh='refreshStream'></stream-card>
-                  </v-card-text>
-                </v-card>
-              </v-tab-item>
-              <v-tab-item key='filter'>
-                <v-card class='elevation-0 transparent'>
-                  <v-card-text>
-                    <object-groups :group-key='selectedFilter'></object-groups>
-                  </v-card-text>
-                </v-card>
-              </v-tab-item>
-              <v-tab-item key='inspector'>
-                <v-card class='elevation-0 transparent'>
-                  <v-card-text>
-                    <selected-objects></selected-objects>
-                  </v-card-text>
-                </v-card>
-              </v-tab-item>
-              <v-tab-item key='settings'>
-                <v-card class='elevation-0 transparent'>
-                  <v-card-text>
-                    <settings @update='updateViewerSettings'/>
-                  </v-card-text>
-                </v-card>
-              </v-tab-item>
-            </v-tabs>
-          </v-flex>
-        </v-layout>
-      </v-navigation-drawer>
-    </v-hover>
-    <v-menu top offset-y :close-on-content-click="false">
-      <template v-slot:activator='{on}'>
-        <v-btn fab fixed bottom right v-on='on'>
-          <v-icon>share</v-icon>
-        </v-btn>
-      </template>
-      <v-card>
-        <v-card-text>
-          <v-icon small>link</v-icon>&nbsp; <span class='caption' style="user-select:all">{{ shareLink }}</span>
-        </v-card-text>
-      </v-card>
-    </v-menu>
+    <v-navigation-drawer  v-model="$store.state.viewerControls" right app clipped>
+      <v-layout row wrap style="height: auto;">
+        <v-flex xs12>
+          <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
+            <v-tab key='streams'>
+              <v-icon>import_export</v-icon>
+            </v-tab>
+            <v-tab key='filter'>
+              <v-icon>layers</v-icon>
+            </v-tab>
+            <v-tab key='inspector'>
+              <v-badge small right :value='$store.state.selectedObjects.length>0' color='primary'>
+                <template v-slot:badge>
+                  <span>{{$store.state.selectedObjects.length}}</span>
+                </template>
+                <v-icon>
+                  code
+                </v-icon>
+              </v-badge>
+            </v-tab>
+            <v-tab key='settings'>
+              <v-icon>settings</v-icon>
+            </v-tab>
+            <v-tab-item key='streams'>
+              <v-card class='elevation-0 transparent'>
+                <v-card-text>
+                  <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
+                  <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream' @refresh='refreshStream'></stream-card>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item key='filter'>
+              <v-card class='elevation-0 transparent'>
+                <v-card-text>
+                  <object-groups :group-key-seed='selectedFilter'></object-groups>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item key='inspector'>
+              <v-card class='elevation-0 transparent'>
+                <v-card-text>
+                  <selected-objects></selected-objects>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item key='settings'>
+              <v-card class='elevation-0 transparent'>
+                <v-card-text>
+                  <settings @update='updateViewerSettings' />
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+          </v-tabs>
+        </v-flex>
+      </v-layout>
+    </v-navigation-drawer>
   </v-container>
 </template>
 <script>
@@ -121,7 +108,31 @@ export default {
       removeInterval: null,
       streamsToRemove: [ ],
       selectedFilter: null,
-      showTheThing: true
+      showTheThing: true,
+      cameraPos: null,
+      cameraPosToSet: null,
+      groupKeyToSet: null,
+      activeTab: 0
+    }
+  },
+  watch: {
+    showLoading( newVal, oldVal ) {
+      console.log( `showLoading is now ${newVal}` )
+      if ( this.cameraPosToSet === null && this.groupKeyToSet === null ) return
+
+      if ( newVal === false ) {
+        if ( this.cameraPosToSet ) {
+          this.renderer.computeSceneBoundingSphere()
+          this.renderer.setFar()
+          this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
+          this.cameraPosToSet = null
+        }
+        if ( this.groupKeyToSet ) {
+          this.selectedFilter = this.groupKeyToSet
+          this.groupKeyToSet = null
+          this.activeTab = 1
+        }
+      }
     }
   },
   methods: {
@@ -129,14 +140,19 @@ export default {
       // NOTE: this functionality is disabled because o
       let streams = this.$store.state.loadedStreamIds.join( ',' )
       if ( streams !== '' )
-        this.$router.replace( { name: 'viewer', params: { streamIds: streams } } )
-      else this.$router.replace( { name: 'viewer' } )
+        this.$router.replace( { name: 'viewer', params: { streamIds: streams }, query: { ...this.$route.query } } )
+      else this.$router.replace( { name: 'viewer', query: { ...this.$route.query } } )
     },
     async addStream( streamId ) {
       this.showLoading = true
       this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
       this.appendStreamsToRoute( )
       let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
+
+      if ( objectIds.length === 0 ) {
+        this.showLoading = false
+        return
+      }
 
       // loaded already?
       let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
@@ -175,7 +191,9 @@ export default {
         console.log( `done processing buckets!` )
         this.showLoading = false
 
-        this.renderer.zoomExtents( )
+        if ( this.cameraPosToSet === null )
+          this.renderer.zoomExtents( )
+
         bus.$emit( 'loading-done' )
         return
       }
@@ -346,6 +364,9 @@ export default {
 
     this.fetchStreamsFromRoute( )
     this.appendStreamsToRoute( )
+
+    if ( !this.$store.state.viewerControls )
+      this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
   },
   deactivated( ) {
     console.log( 'de-activated' )
@@ -355,11 +376,11 @@ export default {
     console.log( 'mounted' )
     this.objectAccumulator = [ ]
 
-    let settingsString = localStorage.getItem( 'viewerSettings' ) 
-    let viewerSettings = JSON.parse(settingsString)
-    if (null != viewerSettings ) this.$store.commit('SET_ALL_VIEWER_SETTINGS', viewerSettings)
+    let settingsString = localStorage.getItem( 'viewerSettings' )
+    let viewerSettings = JSON.parse( settingsString )
+    if ( null != viewerSettings ) this.$store.commit( 'SET_ALL_VIEWER_SETTINGS', viewerSettings )
 
-    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer ) 
+    this.renderer = new SpeckleRenderer( { domObject: this.$refs.render }, this.$store.state.viewer )
     this.renderer.animate( )
 
     // if you like polluting the global scope, clap twice
@@ -367,6 +388,12 @@ export default {
 
     // add streams to viewer
     this.fetchStreamsFromRoute( )
+
+    let queryObject = this.getUrlQueryObject( )
+
+    // query init events (mounted, not activated!)
+    if ( queryObject.camera ) this.cameraPosToSet = queryObject.camera
+    if ( queryObject.groups ) this.groupKeyToSet = queryObject.groups.key
 
     // Set render events
     this.renderer.on( 'select-objects', debounce( function ( ids ) {
@@ -388,6 +415,10 @@ export default {
     this.renderer.on( 'clear-analysis-legend', ( ) => {
       this.$store.commit( 'SET_LEGEND', null )
     } )
+
+    this.renderer.on( 'camera-pos', cam => {
+      this.appendInfoToUrl( "camera", cam )
+    } )
   }
 }
 
@@ -397,7 +428,7 @@ export default {
   position: absolute;
   width: 100%;
   /*don't ask re below, i just don't like round numbers */
-  height: 99.8%;
+  height: 100%;
   /*z-index: 10000;*/
 }
 

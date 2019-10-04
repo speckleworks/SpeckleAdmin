@@ -26,7 +26,7 @@
               <!-- {{localStorage}} -->
             </v-card-text>
             <v-toolbar dense class='title small text-uppercase elevation-0'>
-              <v-icon small>group_add</v-icon>&nbsp;&nbsp;<span class='font-weight-light'>Signin</span>
+              <v-icon small>group_add</v-icon>&nbsp;&nbsp;<span class='font-weight-light'>Sign in</span>
             </v-toolbar>
             <v-card-text>
               <p class='pl-3'>Login or register to a new server by inputting its url below:</p>
@@ -116,6 +116,7 @@ export default {
     this.checkRedirect( )
 
     if ( this.$store.state.isAuth === true ) {
+      this.appendInfoToUrl( 'server', { apiUrl: this.$store.state.server } )
       this.$router.push( '/' )
     }
   }
