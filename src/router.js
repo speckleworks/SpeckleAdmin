@@ -85,18 +85,6 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
-      path: '/plugins',
-      name: 'plugins',
-      component: ( ) => import( './views/Plugins.vue' ),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/feedback',
-      name: 'feedback',
-      component: ( ) => import( './views/Feedback.vue' ),
-      meta: { requiresAuth: false },
-    },
-    {
       path: '/admin',
       name: 'admin',
       component: ( ) => import( './views/Admin.vue' ),
