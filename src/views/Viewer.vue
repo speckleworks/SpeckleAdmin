@@ -8,7 +8,7 @@
     <v-navigation-drawer width='420' v-model="$store.state.viewerControls" right app clipped>
       <v-layout row wrap style="direction:ltr; padding-left:20px; height: auto;">
         <v-flex xs12>
-          <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
+          <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
             <v-tab key='streams'>
               <v-icon>import_export</v-icon>
             </v-tab>
@@ -39,7 +39,7 @@
             <v-tab-item key='filter'>
               <v-card class='elevation-0 transparent'>
                 <v-card-text>
-                  <object-groups :group-key='selectedFilter'></object-groups>
+                  <object-groups :group-key-seed='selectedFilter'></object-groups>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -112,6 +112,7 @@ export default {
       cameraPos: null,
       cameraPosToSet: null,
       groupKeyToSet: null,
+      activeTab: 0
     }
   },
   watch: {
@@ -121,12 +122,13 @@ export default {
 
       if ( newVal === false ) {
         if ( this.cameraPosToSet ) {
-          this.renderer.setCamera( {...this.cameraPosToSet }, 600 )
+          this.renderer.setCamera( { ...this.cameraPosToSet }, 600 )
           this.cameraPosToSet = null
         }
-        if( this.groupKeyToSet ) {
+        if ( this.groupKeyToSet ) {
           this.selectedFilter = this.groupKeyToSet
           this.groupKeyToSet = null
+          this.activeTab = 1
         }
       }
     }

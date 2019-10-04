@@ -74,16 +74,23 @@ import get from 'lodash.get'
 export default {
   name: 'ObjectGroups',
   props: {
-    groupKey: {
+    groupKeySeed: {
       type: String,
       default: null
     }
   },
   watch: {
+    groupKeySeed( newVal, oldVal ) {
+      if ( newVal !== null && this.init === false ) {
+        this.init = true
+        this.groupKey = newVal
+      }
+    },
     groupKey: {
       immediate: true,
       handler( newVal, oldVal ) {
-        console.log("TEST " + newVal)
+        if ( newVal === null ) return
+        console.log( "TEST " + newVal )
         this.filterText = ''
         window.renderer.showObjects( [ ] )
 
@@ -148,13 +155,14 @@ export default {
   },
   data( ) {
     return {
-      // groupKey: null,
+      groupKey: null,
       myGroups: [ ],
       loading: false,
       filterText: null,
       selectedRange: [ 0, 1000 ],
       rainbowColors: [ "#9400D3", "#4B0082", "#0000FF", "#00FF00", "#FFFF00", "#FF7F00", "#FF0000" ],
       coolColors: [ "#0A66FF", "#FF008A" ],
+      init: false
     }
   },
   methods: {
@@ -238,6 +246,13 @@ export default {
       } )
     },
 
+  },
+  mounted( ) {
+    // console.log( 'mounted - object groups' )
+    // console.log( this.groupKeySeed )
+    // if ( this.groupKeySeed !== null ) {
+    //   this.groupKey = this.groupKeySeed
+    // }
   },
   activated( ) {
     if ( this.groupKey ) {
