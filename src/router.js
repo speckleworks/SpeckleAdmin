@@ -1,3 +1,4 @@
+import base64url from 'base64url'
 import Vue from 'vue'
 import Router from 'vue-router'
 import Store from './store/store'
@@ -142,7 +143,7 @@ myRouter.afterEach( ( to, from ) => {
   if ( to.name === 'signin-cb' ) return
 
 
-  let existingQueryObject = to.query.s ? JSON.parse( window.decodeURI( to.query.s ) ) : {}
+  let existingQueryObject = to.query.s ? JSON.parse( base64url.decode( to.query.s ) ) : {}
   if ( existingQueryObject && existingQueryObject.server && existingQueryObject.server === Store.state.server )
     return
 
@@ -152,7 +153,7 @@ myRouter.afterEach( ( to, from ) => {
   if ( Store.state.server )
     existingQueryObject.server = Store.state.server
 
-  myRouter.replace( { name: to.name, params: to.params, query: { s: window.encodeURI( JSON.stringify( existingQueryObject ) ) } } )
+  myRouter.replace( { name: to.name, params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
 
   console.log( existingQueryObject )
 } )

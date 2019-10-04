@@ -22,12 +22,26 @@ Vue.use( Vuetify, {
 import VueTimeago from 'vue-timeago'
 Vue.use( VueTimeago, { locale: 'en' } )
 
-// Set up the server route.
+import base64url from 'base64url'
+// Set up the server route
+// Step 1: Get it form local storage.
 let server = localStorage.getItem( 'currentServer' )
 if ( server )
   Store.state.server = server
-else {
-  // TODO: try get server from url query
+
+// Step 2: If a query url is present, and different, overwrite it.
+try {
+  let queryString = window.location.href.split( '?' )[ 1 ]
+  let queryVal = queryString.split( '=' )[ 1 ]
+  let queryObject = JSON.parse( base64url.decode( queryVal ) )
+
+  if ( queryObject.server && Store.state.server != queryObject.server )
+    Store.state.server = queryObject.server
+
+  console.log( queryObject )
+} catch ( err ) {
+  console.log( 'Query borked' )
+  console.log( err )
 }
 
 // set default server
@@ -82,16 +96,21 @@ Vue.mixin( {
   methods: {
     getHexFromString: str => ColorHasher.hex( str ),
     appendInfoToUrl( key, info ) {
-      let existingQueryObject = this.$route.query.s ? JSON.parse( window.decodeURI( this.$route.query.s ) ) : {}
+      let existingQueryObject = this.$route.query.s ? JSON.parse( window.atob( this.$route.query.s ) ) : {}
       if ( info !== null )
         existingQueryObject[ key ] = info
       else
         delete existingQueryObject[ key ]
 
-      this.$router.replace( { params: this.$route.params, query: { s: window.encodeURI( JSON.stringify( existingQueryObject ) ) } } )
+      this.$router.replace( { params: this.$route.params, query: { s: window.btoa( JSON.stringify( existingQueryObject ) ) } } )
 
       console.log( existingQueryObject )
-    }
+    },
+    getUrlQueryObject( ) {
+      if ( !this.$route.query.s )
+        return null
+      return this.$route.query.s ? JSON.parse( window.atob( this.$route.query.s ) ) : null
+    },
   }
 } )
 

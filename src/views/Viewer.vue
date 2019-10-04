@@ -5,7 +5,7 @@
     </div>
     <div class='renderer' ref='render'></div>
     <v-hover>
-      <v-navigation-drawer slot-scope="{ hover }" floating permanent stateless disable-resize-watcher width='420' value="true" :xxxclass='`${hover ? "elevation-3" : "transparent elevation-0"}`' xxxstyle='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show='$store.state.viewerControls'>
+      <v-navigation-drawer slot-scope="{ hover }" floating right permanent stateless disable-resize-watcher width='420' value="true" :xxxclass='`${hover ? "elevation-3" : "transparent elevation-0"}`' xxxstyle='direction: rtl; left: -20px; position:relative; z-index:1; transition: all .3s ease;' v-show='$store.state.viewerControls'>
         <v-layout row wrap style="direction:ltr; padding-left:20px; height: auto;">
           <v-flex xs12>
             <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)'>
