@@ -128,18 +128,9 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     }
   ],
-  // scrollBehavior( to, from, savedPosition ) {
-  //   console.log( 'scrollBehavior' )
-  //   return { x: 0, y: 0 }
-  // }
 } )
 
 myRouter.afterEach( ( to, from ) => {
-  console.log( 'after each entry' )
-  // console.log( to.name === 'signin-cb' )
-  // console.log( to.query.t )
-  // console.log( from.query.t )
-
   if ( to.name === 'signin-cb' ) return
 
 
@@ -147,15 +138,10 @@ myRouter.afterEach( ( to, from ) => {
   if ( existingQueryObject && existingQueryObject.server && existingQueryObject.server === Store.state.server )
     return
 
-  console.log( 'after each' )
-
-
   if ( Store.state.server )
     existingQueryObject.server = Store.state.server
 
   myRouter.replace( { params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
-
-  console.log( existingQueryObject )
 } )
 
 myRouter.beforeEach( ( to, from, next ) => {

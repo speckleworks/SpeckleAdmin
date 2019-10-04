@@ -27,6 +27,16 @@
             <v-list-tile-title>Profile</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile @click='toggleDark()'>
+          <v-list-tile-action>
+            <!-- <v-icon>wb_sunny</v-icon> -->
+            <v-icon>{{$store.state.dark ? "wb_sunny" : "nights_stay"}}</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{$store.state.dark ? "Day Mode" : "Dark Mode"}}</v-list-tile-title>
+            <!-- <v-list-tile-sub-title>Login or register</v-list-tile-sub-title> -->
+          </v-list-tile-content>
+        </v-list-tile>
         <v-list-tile v-if='$store.state.isAuth' @click='logout()'>
           <v-list-tile-action>
             <v-icon class='red--text'>exit_to_app</v-icon>
@@ -47,16 +57,6 @@
           <v-list-tile-content>
             <v-list-tile-title>Signin</v-list-tile-title>
             <v-list-tile-sub-title>Login or register</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile @click='toggleDark()'>
-          <v-list-tile-action>
-            <!-- <v-icon>wb_sunny</v-icon> -->
-            <v-icon>{{$store.state.dark ? "wb_sunny" : "nights_stay"}}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>{{$store.state.dark ? "Day Mode" : "Dark Mode"}}</v-list-tile-title>
-            <!-- <v-list-tile-sub-title>Login or register</v-list-tile-sub-title> -->
           </v-list-tile-content>
         </v-list-tile>
       </v-list-group>
@@ -128,24 +128,42 @@
       </v-list-tile>
       <v-divider class='ma-3'></v-divider>
     </v-list>
-    <v-list v-if='$store.state.isAuth'>
-      <v-list-tile to='/plugins'>
+    <v-list v-if='$store.state.isAuth' two-line subheader>
+      <v-list-tile href='https://speckle.systems/docs/web/management' target='_blank'>
         <v-list-tile-action>
-          <v-icon>category</v-icon>
+          <v-icon>help</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>App Help</v-list-tile-title>
+          <v-list-tile-sub-title class='caption'>Help for this web app.</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile href='https://speckle.systems/docs/essentials/start' target='_blank'>
+        <v-list-tile-action>
+          <v-icon>help_outline</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>Speckle Help</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-list-tile to='/feedback'>
-        <v-list-tile-action>
-          <v-icon>feedback</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Feedback</v-list-tile-title>
+          <v-list-tile-sub-title class='caption'>How to get started with Speckle.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
+    <!-- <v-divider></v-divider> -->
+    <v-card class='elevation-0'>
+      <!--             <v-hover>
+        <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} ${dark ? "royal-bg" : "light-bg" }`' dark xxxstyle='position: absolute; bottom:0'> -->
+      <v-card-text>
+        <div class='text-uppercase text-xs-center caption ml-0'>
+          <v-divider class='mb-4'></v-divider>
+          Brought to you by:<br>
+          <a href='https://speckle.works' target="_blank" style="xxxcolor:white; text-decoration: none;"><b>Speckle</b>,
+            <span class=' caption'>the open source data platform for AEC.</span></a>
+          <v-divider class='my-4'></v-divider>
+        </div>
+      </v-card-text>
+      <!--         </v-toolbar>
+      </v-hover> -->
+    </v-card>
   </div>
 </template>
 <script>
