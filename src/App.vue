@@ -1,29 +1,32 @@
 <template>
-  <v-app :dark='dark'>
-    <v-navigation-drawer floating app class='elevation-5' v-model='drawer'>
-      <v-hover>
+  <v-app :dark='$store.state.dark'>
+    <v-navigation-drawer fixed app clipped xxxclass='elevation-5' v-model='drawer'>
+      <!--       <v-hover>
         <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} ${dark ? "royal-bg" : "light-bg" }`' dark xxxstyle='position: absolute; bottom:0'>
           <div class='text-uppercase caption ml-0'>
             <a href='https://speckle.works' target="_blank" style="color:white; text-decoration: none;"><b>Speckle</b>,
               <span class='font-weight-light caption'>the open source data platform for AEC.</span></a>
           </div>
         </v-toolbar>
-      </v-hover>
+      </v-hover> -->
       <nav-drawer></nav-drawer>
     </v-navigation-drawer>
-    <v-toolbar app flat class=''>
+    <v-toolbar fixed app clipped-left clipped-right style='z-index: 100000'>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
-      <div v-if='$route.path.includes("view")' class='mt-1'>
-        <v-btn small round flat @click.native='toggleControlsViewer'>{{$store.state.viewerControls ? "close" :"show"}} controls</v-btn>
-      </div>
       <v-spacer></v-spacer>
-      <v-btn v-if='$store.state.isAuth' small flat @click.native='logout()'>
+      <!--       <v-btn v-if='$store.state.isAuth' small flat @click.native='logout()'>
         Logout
-      </v-btn>
-      <v-btn flat small icon @click.native='toggleDark()'>
+      </v-btn> -->
+<!--       <v-btn flat small icon @click.native='toggleDark()'>
         <v-icon small>wb_sunny</v-icon>
-      </v-btn>
+      </v-btn> -->
+      <div v-if='$route.path.includes("view")' class='mt-1'>
+        <!-- <v-btn small round flat @click.native='toggleControlsViewer'>{{$store.state.viewerControls ? "close" :"show"}} controls</v-btn> -->
+        <v-btn fab small color='primary' @click.native='toggleControlsViewer'>
+          <v-icon>{{$store.state.viewerControls ? "close" :"3d_rotation"}}</v-icon>
+        </v-btn>
+      </div>
     </v-toolbar>
     <v-content>
       <!-- <v-container fluid> -->

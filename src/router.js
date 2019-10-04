@@ -153,7 +153,7 @@ myRouter.afterEach( ( to, from ) => {
   if ( Store.state.server )
     existingQueryObject.server = Store.state.server
 
-  myRouter.replace( { name: to.name, params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
+  myRouter.replace( { params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
 
   console.log( existingQueryObject )
 } )
