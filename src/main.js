@@ -96,20 +96,20 @@ Vue.mixin( {
   methods: {
     getHexFromString: str => ColorHasher.hex( str ),
     appendInfoToUrl( key, info ) {
-      let existingQueryObject = this.$route.query.s ? JSON.parse( window.atob( this.$route.query.s ) ) : {}
+      let existingQueryObject = this.$route.query.s ? JSON.parse( base64url.decode( this.$route.query.s ) ) : {}
       if ( info !== null )
         existingQueryObject[ key ] = info
       else
         delete existingQueryObject[ key ]
 
-      this.$router.replace( { params: this.$route.params, query: { s: window.btoa( JSON.stringify( existingQueryObject ) ) } } )
+      this.$router.replace( { params: this.$route.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
 
       console.log( existingQueryObject )
     },
     getUrlQueryObject( ) {
       if ( !this.$route.query.s )
         return null
-      return this.$route.query.s ? JSON.parse( window.atob( this.$route.query.s ) ) : null
+      return this.$route.query.s ? JSON.parse( base64url.decode( this.$route.query.s ) ) : null
     },
   }
 } )
