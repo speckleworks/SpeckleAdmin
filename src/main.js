@@ -118,11 +118,35 @@ Vue.mixin( {
 import EditableSpan from './components/EditableSpan.vue'
 Vue.component( 'editable-span', EditableSpan )
 
+import Countly from 'countly-sdk-web'
+import VueCountly from 'vue-countly'
+
+
+////////////////////////////////////////////////////////////
+//                                                        //
+// Commment out the 4 lines below to disable telemetry!   //
+//                                                        //
+////////////////////////////////////////////////////////////
+Vue.use( VueCountly, Countly, {
+  app_key: '04ac5c1e31e993f2624e964475dd949e9a3443f5',
+  url: 'https://telemetry.speckle.works',
+} );
+
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
   new Vue( {
     router: Router,
     store: Store,
-    render: h => h( App )
+    render: h => h( App ),
+    created( ) {
+
+      ////////////////////////////////////////////////////////////
+      //                                                        //
+      // Commment out the two lines below to disable telemetry! //
+      //                                                        //
+      ////////////////////////////////////////////////////////////
+      this.$Countly.q.push( [ 'track_sessions' ] )
+      Router.$Countly = this.$Countly
+    }
   } ).$mount( '#app' )
 }

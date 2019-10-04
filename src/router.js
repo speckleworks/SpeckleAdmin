@@ -129,6 +129,10 @@ myRouter.afterEach( ( to, from ) => {
   if ( Store.state.server )
     existingQueryObject.server = Store.state.server
 
+  if ( myRouter.$Countly ) {
+    myRouter.$Countly.q.push( [ 'track_pageview', to.name ] )
+  }
+
   myRouter.replace( { params: to.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
 } )
 
