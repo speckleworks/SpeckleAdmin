@@ -152,9 +152,9 @@ export default class SpeckleRenderer extends EE {
     //
     this.controls.addEventListener( 'change', debounce( function ( ) {
       this.emit( 'camera-pos', {
-        target: { x: this.controls.target.x, y: this.controls.target.y, z: this.controls.target.z },
-        position: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
-        rotation: { x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z }
+        target: [ this.controls.target.x, this.controls.target.y, this.controls.target.z ],
+        position: [ this.camera.position.x, this.camera.position.y, this.camera.position.z ],
+        rotation: [ this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z ]
       } )
     }.bind( this ), 500 ) )
   }

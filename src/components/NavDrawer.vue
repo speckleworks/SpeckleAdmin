@@ -148,10 +148,7 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
-    <!-- <v-divider></v-divider> -->
-    <v-card class='elevation-0'>
-      <!--             <v-hover>
-        <v-toolbar slot-scope="{ hover }" flat prominent :class='`elevation-${hover ? 20 : 0} ${dark ? "royal-bg" : "light-bg" }`' dark xxxstyle='position: absolute; bottom:0'> -->
+    <v-card class='elevation-0'
       <v-card-text>
         <div class='text-uppercase text-xs-center caption ml-0'>
           <v-divider class='mb-4'></v-divider>

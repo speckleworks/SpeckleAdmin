@@ -73,32 +73,41 @@
 import get from 'lodash.get'
 export default {
   name: 'ObjectGroups',
-  props: {},
+  props: {
+    groupKey: {
+      type: String,
+      default: null
+    }
+  },
   watch: {
-    groupKey( newVal, oldVal ) {
-      this.filterText = ''
-      window.renderer.showObjects( [ ] )
-
-      window.renderer.resetColors( { propagateLegend: true } )
-
-      if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
-        console.log( 'its a structural propertyyyyyy' )
-        this.generateGroups( 'structural.result.' + newVal )
-        window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
-        return
-      }
-
-      if ( newVal ) {
-        this.generateGroups( newVal )
-        this.appendInfoToUrl( "groups", { key: newVal } )
-        window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
-      }
-
-      if ( newVal === undefined ) {
-        this.appendInfoToUrl( "groups", null )
+    groupKey: {
+      immediate: true,
+      handler( newVal, oldVal ) {
+        console.log("TEST " + newVal)
+        this.filterText = ''
         window.renderer.showObjects( [ ] )
-      }
 
+        window.renderer.resetColors( { propagateLegend: true } )
+
+        if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
+          console.log( 'its a structural propertyyyyyy' )
+          this.generateGroups( 'structural.result.' + newVal )
+          window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
+          return
+        }
+
+        if ( newVal ) {
+          this.generateGroups( newVal )
+          this.appendInfoToUrl( "groups", { key: newVal } )
+          window.renderer.colorByProperty( { propertyName: newVal, propagateLegend: true, colors: this.coolColors } )
+        }
+
+        if ( newVal === undefined ) {
+          this.appendInfoToUrl( "groups", null )
+          window.renderer.showObjects( [ ] )
+        }
+
+      }
     },
     legend: {
       handler: function ( newVal, oldVal ) {
@@ -139,7 +148,7 @@ export default {
   },
   data( ) {
     return {
-      groupKey: null,
+      // groupKey: null,
       myGroups: [ ],
       loading: false,
       filterText: null,
@@ -231,7 +240,7 @@ export default {
 
   },
   activated( ) {
-    if ( this.groupKey  ){
+    if ( this.groupKey ) {
       this.appendInfoToUrl( "groups", { key: this.groupKey } )
     }
   }

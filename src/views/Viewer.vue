@@ -61,8 +61,6 @@
         </v-flex>
       </v-layout>
     </v-navigation-drawer>
-
-
   </v-container>
 </template>
 <script>
@@ -111,7 +109,26 @@ export default {
       streamsToRemove: [ ],
       selectedFilter: null,
       showTheThing: true,
-      cameraPos: null
+      cameraPos: null,
+      cameraPosToSet: null,
+      groupKeyToSet: null,
+    }
+  },
+  watch: {
+    showLoading( newVal, oldVal ) {
+      console.log( `showLoading is now ${newVal}` )
+      if ( this.cameraPosToSet === null && this.groupKeyToSet === null ) return
+
+      if ( newVal === false ) {
+        if ( this.cameraPosToSet ) {
+          this.renderer.setCamera( {...this.cameraPosToSet }, 600 )
+          this.cameraPosToSet = null
+        }
+        if( this.groupKeyToSet ) {
+          this.selectedFilter = this.groupKeyToSet
+          this.groupKeyToSet = null
+        }
+      }
     }
   },
   methods: {
@@ -170,7 +187,9 @@ export default {
         console.log( `done processing buckets!` )
         this.showLoading = false
 
-        this.renderer.zoomExtents( )
+        if ( this.cameraPosToSet === null )
+          this.renderer.zoomExtents( )
+
         bus.$emit( 'loading-done' )
         return
       }
@@ -341,6 +360,9 @@ export default {
 
     this.fetchStreamsFromRoute( )
     this.appendStreamsToRoute( )
+
+    if ( !this.$store.state.viewerControls )
+      this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
   },
   deactivated( ) {
     console.log( 'de-activated' )
@@ -365,9 +387,9 @@ export default {
 
     let queryObject = this.getUrlQueryObject( )
 
-    // TODO: if query has camera, set the fucking camera position at the end of THE FIRST "LOAD"
-
-    // TODO: if query has fucking group by key, set it at the end of THE FIRST loading done event
+    // query init events (mounted, not activated!)
+    if ( queryObject.camera ) this.cameraPosToSet = queryObject.camera
+    if ( queryObject.groups ) this.groupKeyToSet = queryObject.groups.key
 
     // Set render events
     this.renderer.on( 'select-objects', debounce( function ( ids ) {
