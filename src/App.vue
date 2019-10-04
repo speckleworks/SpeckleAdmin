@@ -3,7 +3,7 @@
     <v-navigation-drawer fixed app clipped xxxclass='elevation-5' v-model='drawer'>
       <nav-drawer></nav-drawer>
     </v-navigation-drawer>
-    <v-toolbar fixed app clipped-left clipped-right style='z-index: 100000'>
+    <v-toolbar fixed app clipped-left clipped-right xxxstyle='z-index: 100000'>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
       <v-spacer></v-spacer>

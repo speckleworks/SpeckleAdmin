@@ -11,10 +11,10 @@
       <v-card v-for='group in myFilteredGroups' :key='group.name' :class='`mb-3 ${ group.isolated ? "elevation-15" : "elevation-1"} ${ group.visible ? "elevation-1" : "elevation-0" }`' v-if='group.objects.length>0'>
         <v-card-text>
           <v-layout align-center>
-            <v-flex xs1>
+            <v-flex xs2>
               <v-avatar size="20" :color="getHexFromString(group.name)"></v-avatar>
             </v-flex>
-            <v-flex class='caption'>
+            <v-flex class='caption text-truncate'>
               <b>{{group.name}}</b>&nbsp;<span class='font-weight-light'>({{group.objects.length}} objects)</span>
             </v-flex>
             <v-flex xs4 class='text-xs-right'>
