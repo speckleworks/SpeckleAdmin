@@ -99,6 +99,7 @@ export default {
         if ( this.structuralKeys.indexOf( newVal ) !== -1 ) {
           console.log( 'its a structural propertyyyyyy' )
           this.generateGroups( 'structural.result.' + newVal )
+          this.appendInfoToUrl( "groups", { key: newVal } )
           window.renderer.colorByVertexArray( { propertyName: newVal, colors: this.rainbowColors } )
           return
         }
