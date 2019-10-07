@@ -5,7 +5,7 @@
     </div>
     <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2'>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed>
       <v-layout row wrap style="height: auto;">
         <v-flex xs12>
           <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
@@ -364,15 +364,6 @@ export default {
 
     this.fetchStreamsFromRoute( )
     this.appendStreamsToRoute( )
-    setTimeout( ( ) => {
-      if ( !this.$store.state.viewerControls )
-        this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
-      else {
-        this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
-        this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
-      }
-
-    }, 100 )
 
   },
   deactivated( ) {
