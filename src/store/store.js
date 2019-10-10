@@ -86,12 +86,18 @@ export default new Vuex.Store( {
               break
             case 'tag':
             case 'tags':
-              let myTags = query.value.split( ',' ).map( t => t.toLowerCase( ) )
+              let myTags = query.value.trim( ).split( ',' ).map( t => t.toLowerCase( ).trim( ) )
+              console.log( myTags )
               base = base.filter( stream => {
                 let streamTags = stream.tags.map( t => t.toLowerCase( ) )
                 return myTags.every( t => streamTags.includes( t ) )
               } )
               break
+            case 'owner':
+              if ( query.value.toLowerCase( ).trim( ) === 'me' ) {
+                base = base.filter( stream => stream.owner === state.user._id )
+              }
+              break;
             case 'mine':
               base = base.filter( stream => stream.owner === state.user._id )
               break;
@@ -161,6 +167,26 @@ export default new Vuex.Store( {
         project.tags.forEach( t => tagSet.add( t ) )
       } )
       return [ ...tagSet ]
+    },
+    allStreamTags: ( state ) => {
+      let tagSet = new Set( )
+      state.streams.forEach( stream => {
+        stream.tags.forEach( t => tagSet.add( t ) )
+      } )
+      return [ ...tagSet ]
+    },
+    allProjectTags: ( state ) => {
+      let tagSet = new Set( )
+      state.projects.forEach( project => {
+        project.tags.forEach( t => tagSet.add( t ) )
+      } )
+      return [ ...tagSet ]
+    },
+    allJobNumbers: ( state ) => {
+      let set = new Set( )
+      state.streams.forEach( stream => set.add( stream.jobNumber ) )
+      state.projects.forEach( project => set.add( project.jobNumber ) )
+      return [ ...set ]
     }
   },
   mutations: {

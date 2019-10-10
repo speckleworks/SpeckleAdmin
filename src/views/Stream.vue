@@ -18,7 +18,7 @@
             Sharing
           </v-tab>
           <v-tab key="History" ripple :to='{name:"stream history"}'>
-            History
+            Versions
           </v-tab>
           <v-tab key="Data" ripple :to='{name:"stream data"}'>
             Data
