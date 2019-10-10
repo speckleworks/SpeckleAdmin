@@ -95,6 +95,7 @@ let ColorHasher = new CH( )
 Vue.mixin( {
   methods: {
     getHexFromString: str => ColorHasher.hex( str ),
+    hexFromString: str => ColorHasher.hex( str ),
     appendInfoToUrl( key, info ) {
       let existingQueryObject = this.$route.query.s ? JSON.parse( base64url.decode( this.$route.query.s ) ) : {}
       if ( info !== null )
