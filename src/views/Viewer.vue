@@ -122,10 +122,16 @@ export default {
 
       if ( newVal === false ) {
         if ( this.cameraPosToSet ) {
+
           this.renderer.computeSceneBoundingSphere( )
-          this.renderer.setFar( )
           this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
           this.cameraPosToSet = null
+
+          setTimeout( ( ) => {
+
+            // this.renderer.setFar( )
+
+          }, 200 )
         }
         if ( this.groupKeyToSet ) {
           this.selectedFilter = this.groupKeyToSet
