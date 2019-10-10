@@ -63,7 +63,7 @@ export default new Vuex.Store( {
     streamClients: ( state ) => ( streamId ) => {
       return state.clients.filter( c => c.streamId === streamId )
     },
-    filteredStreams: ( state ) => ( filters, resourceType ) => {
+    filteredResources: ( state ) => ( filters, resourceType ) => {
 
       if(!resourceType) resourceType = "streams"
 

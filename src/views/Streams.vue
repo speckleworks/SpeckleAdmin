@@ -127,7 +127,7 @@ export default {
       } )
     },
     filteredStreams( ) {
-      return this.$store.getters.filteredStreams( this.filters )
+      return this.$store.getters.filteredResources( this.filters )
     },
     paginatedStreams( ) {
       // return this.filteredStreams.slice( this.startIndex, this.endIndex )

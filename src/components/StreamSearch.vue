@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     filteredStreams( ) {
-      return this.$store.getters.filteredStreams( this.filters ).filter( s => this.streamsToOmit.indexOf( s.streamId ) === -1 )
+      return this.$store.getters.filteredResources( this.filters, "streams" ).filter( s => this.streamsToOmit.indexOf( s.streamId ) === -1 )
     },
     paginatedStreams( ) {
       let toReturn = this.filteredStreams.slice( this.startIndex, this.endIndex )

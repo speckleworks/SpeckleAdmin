@@ -114,7 +114,7 @@ export default {
     },
     filteredProjects( ) {
       if ( this.searchfilter && this.searchfilter !== '' )
-        return this.$store.getters.filteredStreams( this.filters, "projects" )
+        return this.$store.getters.filteredResources( this.filters, "projects" )
       // return this.projects.filter( p => p.name.toLowerCase().includes( this.searchfilter.toLowerCase() ) )
       return this.projects
     },
