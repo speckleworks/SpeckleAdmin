@@ -156,7 +156,8 @@ export default class SpeckleRenderer extends EE {
         position: [ this.camera.position.x, this.camera.position.y, this.camera.position.z ],
         rotation: [ this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z ]
       } )
-    }.bind( this ), 500 ) )
+      this.setFar()
+    }.bind( this ), 200 ) )
   }
 
 
@@ -843,7 +844,7 @@ export default class SpeckleRenderer extends EE {
 
   setFar( ) {
     let camDistance = this.camera.position.distanceTo( this.sceneBoundingSphere.center )
-    this.camera.far = 2 * this.sceneBoundingSphere.radius + camDistance
+    this.camera.far = 3 * this.sceneBoundingSphere.radius + camDistance * 3 // 3 is lucky
     this.camera.updateProjectionMatrix( )
   }
 

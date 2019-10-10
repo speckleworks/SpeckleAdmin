@@ -19,29 +19,38 @@
           </span>
         </v-toolbar>
         <v-layout row wrap>
-          <v-flex xs12 class='pa-5'>
+<!--           <v-flex xs12 class='pa-5'>
             <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='streamChildren.length>0'></vue-slider>
-          </v-flex>
-          <v-flex xs12 class='caption font-weight-light px-5 py-0'>
-            <v-list three-line>
-              <v-list-tile v-for='stream in sizeBound' :to='"/streams/" + stream.streamId' :key='stream.streamId'>
-                <v-list-tile-content>
-                  <v-list-tile-title>
-                    <span class='caption'>
-                      <v-icon small>fingerprint</v-icon> {{stream.streamId}}
-                      &nbsp;<v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon>
-                    </span>&nbsp;
-                    <span class='text-capitalize'>{{stream.name}}</span>
-                  </v-list-tile-title>
-                  <v-list-tile-sub-title class='caption'>
-                    <strong>{{stream.commitMessage ? stream.commitMessage : 'no commit message'}}</strong>
-                  </v-list-tile-sub-title>
-                  <v-list-tile-sub-title class='xxx-font-weight-thin caption'>
-                    last changed <timeago :datetime='stream.updatedAt'></timeago>
-                  </v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
+          </v-flex> -->
+          <v-flex xs12 pa-3>
+            <v-timeline clipped dense>
+              <v-timeline-item v-for="stream in sizeBound" :key="stream.streamId" small :color="hexFromString(stream.streamId)">
+                <template v-slot:opposite>
+                </template>
+                <div class="py-3">
+                  <v-btn icon @click.native='$router.push(`/view/${stream.streamId}`)'>
+                    <v-icon>360</v-icon>
+                  </v-btn>
+                  <span :class="`headline font-weight-bold ${hexFromString(stream.streamId)}--text`">
+                    {{getDate(stream.createdAt)}} {{getTime(stream.createdAt)}}
+                  </span>
+                  <timeago :datetime='stream.createdAt'></timeago>
+                  <p :class="`xxxheadline font-weight-light mb-3 ${hexFromString(stream.streamId)}--text`">
+                    <v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon> &nbsp;
+                    <v-icon small>fingerprint</v-icon> {{stream.streamId}}
+                    <span class='text-capitalize font-weight-bold'>{{stream.name}}</span>
+                  </p>
+                  <div>
+                    <v-combobox @input='updateTags({tags: stream.tags, streamId: stream.streamId})' v-model="stream.tags" :items='allTags' hint='tags' solo persistent-hint small-chips deletable-chips multiple tags>
+                      <template v-slot:no-data>
+                        <p>Add a new tag!</p>
+                      </template>
+                    </v-combobox>
+                    {{stream.commitMessage ? stream.commitMessage : "No commit message."}}
+                  </div>
+                </div>
+              </v-timeline-item>
+            </v-timeline>
           </v-flex>
         </v-layout>
       </v-card>
@@ -65,6 +74,9 @@ export default {
     }
   },
   computed: {
+    allTags( ) {
+      return this.$store.getters.allTags
+    },
     sizeBound( ) {
       return this.timeFiltered.slice( 0, this.currentMax ).reverse( )
     },
@@ -92,6 +104,19 @@ export default {
     }
   },
   methods: {
+    getDate( dateeee ) {
+      let date = new Date( dateeee )
+      return date.toLocaleString( 'en', { year: 'numeric', month: 'long', day: 'numeric' } )
+    },
+    getTime( dateeee ) {
+      let date = new Date( dateeee )
+      return date.toLocaleString( 'en', { timeStyle: "short" } )
+    },
+    updateTags: debounce( function ( e ) {
+      // console.log( e )
+      this.$store.dispatch( 'updateStream', { streamId: e.streamId, tags: e.tags } )
+    }, 500 ),
+
     sliderChanged( args ) {
       console.log( args )
       let ind = this.$refs.timeSlider.getIndex( )
@@ -102,12 +127,12 @@ export default {
       if ( !this.stream.children ) return
       if ( this.stream.children.length === 0 ) return
 
-      this.stream.children.map( streamId => Axios.get( `streams/${streamId}?fields=streamId,updatedAt,owner,name,commitMessage` ) )
+      this.stream.children.map( streamId => Axios.get( `streams/${streamId}?fields=streamId,updatedAt,createdAt,owner,tags,name,commitMessage,description` ) )
         .reduce( ( promiseChain, currentTask ) => {
           return promiseChain.then( chainResults => currentTask.then( currentResult => [ ...chainResults, currentResult.data.resource ] ) )
         }, Promise.resolve( [ ] ) ).then( arr => {
           this.streamChildren = arr
-          this.streamChildren.push( this.stream )
+          // this.streamChildren.push( this.stream )
           this.dates = this.streamChildren
             .map( c => c.updatedAt )
             .sort( ( a, b ) => new Date( b.updatedAt ) - new Date( a.updatedAt ) )

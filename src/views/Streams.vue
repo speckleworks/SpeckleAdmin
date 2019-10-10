@@ -26,10 +26,40 @@
         </p>
       </v-flex>
       <v-flex xs12>
-        <v-text-field solo clearable :hint='searchHint' label="Search for a stream" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
+        <v-text-field solo clearable :xxxhint='searchHint' label="Search for a stream" prepend-inner-icon="search" @input="updateSearch" spellcheck="false" v-model='searchfilter' :loading='isSearching' append-icon="refresh" @click:append="$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )"></v-text-field>
+        <!--       <p class='caption'>
+          How to search for things?
+        </p> -->
         <div v-if='searchfilter && searchfilter!==""'>
           <p class='title font-weight-light my-3 mx-1'>Found {{filteredStreams.length}} streams matching your search criteria.</p>
         </div>
+        <!--       </v-flex>
+      <v-flex xs12> -->
+        <v-expansion-panel>
+          <v-expansion-panel-content>
+            <template v-slot:header>Search Options</template>
+            <v-card class='pa-3'>
+              <v-expansion-panel>
+                <v-expansion-panel-content>
+                  <template v-slot:header>Tags</template>
+                  <v-card class='pa-3'>
+                    <v-chip v-for='tag in allTags' small dense @click='addSearchQuery("tag", tag)'>
+                      {{tag}}
+                    </v-chip>
+                  </v-card>
+                </v-expansion-panel-content>
+                <!-- <v-expansion-panel> -->
+                <v-expansion-panel-content>
+                  <template v-slot:header>Job Numbers</template>
+                  <v-card class='pa-3'>
+                    <v-chip v-for='jnumber in allJobNumbers' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
+                  </v-card>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <!-- {{allTags}} -->
       </v-flex>
     </v-layout>
     <!-- All the stream cards will flow below -->
@@ -85,13 +115,19 @@ export default {
   name: 'StreamsView',
   components: { StreamCard },
   computed: {
+    allTags( ) {
+      return this.$store.getters.allStreamTags
+    },
+    allJobNumbers( ) {
+      return this.$store.getters.allJobNumbersStreams
+    },
     streams( ) {
       return this.$store.state.streams.filter( stream => stream.parent == null && stream.deleted === false ).sort( ( a, b ) => {
         return new Date( b.updatedAt ) - new Date( a.updatedAt );
       } )
     },
     filteredStreams( ) {
-      return this.$store.getters.filteredStreams( this.filters )
+      return this.$store.getters.filteredResources( this.filters )
     },
     paginatedStreams( ) {
       // return this.filteredStreams.slice( this.startIndex, this.endIndex )
@@ -126,6 +162,26 @@ export default {
     }
   },
   methods: {
+    addSearchQuery( key, tag ) {
+      this.pageNumber = 0
+      let tempFilter = `${key}:${tag}`
+      this.searchfilter = tempFilter
+      setTimeout( ( ) => { this.isSearching = false }, 50 )
+      try {
+        let filters = tempFilter.split( ' ' ).map( t => {
+          if ( t.includes( ':' ) )
+            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
+            return { key: 'name', value: t }
+          else
+            return { key: t, value: null }
+        } )
+        this.filters = filters
+      } catch {
+        this.filters = [ { key: 'name', value: e } ]
+      }
+      this.isSearching = false
+    },
     createStream( ) {
       this.$store.dispatch( 'createStream', { name: 'A New Speckle Stream', onlineEditable: true } )
         .then( res => {
@@ -154,7 +210,7 @@ export default {
       } )
       this.clearSelection( )
     },
-    updateSearch: debounce( function( e ) {
+    updateSearch: debounce( function ( e ) {
       this.pageNumber = 0
       this.isSearching = false
       this.searchfilter = e
@@ -195,8 +251,7 @@ export default {
       this.selectedStreams = this.selectedStreams.filter( s => !s.deleted )
     }
   },
-  created( ) {
-  }
+  created( ) {}
 }
 
 </script>

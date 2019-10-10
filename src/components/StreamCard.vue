@@ -21,8 +21,9 @@
         <v-icon small>person_outline</v-icon> {{ allUsers.length }} &nbsp
         <v-icon small>history</v-icon> {{ stream.children.length }} &nbsp
       </v-flex>
-      <v-flex xs12 ma-2 v-if='stream.tags.length > 0'>
-        <v-chip small outline v-for='tag in stream.tags' :key='tag'>{{tag}}</v-chip>
+      <v-flex xs12 ma-2>
+        <v-chip small v-if='stream.jobNumber'><b>JN:</b> {{stream.jobNumber}}</v-chip>
+        <v-chip small v-if='stream.tags.length > 0' outline v-for='tag in stream.tags' :key='tag'>{{tag}}</v-chip>
       </v-flex>
       <v-flex xs12 ma-2>
         <div class="md-caption md-small-hide" v-html='compiledDescription'> </div>

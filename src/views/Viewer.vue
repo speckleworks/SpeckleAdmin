@@ -5,8 +5,9 @@
     </div>
     <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer  v-model="$store.state.viewerControls" right app clipped>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed hide-overlay>
       <v-layout row wrap style="height: auto;">
+        <v-flex xs12 style='height:60px;' class='hidden-sm-and-up'>&nbsp;</v-flex>
         <v-flex xs12>
           <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
             <v-tab key='streams'>
@@ -122,10 +123,17 @@ export default {
 
       if ( newVal === false ) {
         if ( this.cameraPosToSet ) {
-          this.renderer.computeSceneBoundingSphere()
-          this.renderer.setFar()
+
+          this.renderer.computeSceneBoundingSphere( )
+          this.renderer.setFar( )
+
           this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
           this.cameraPosToSet = null
+          setTimeout( ( ) => {
+
+            // this.renderer.setFar( )
+
+          }, 200 )
         }
         if ( this.groupKeyToSet ) {
           this.selectedFilter = this.groupKeyToSet
@@ -365,8 +373,6 @@ export default {
     this.fetchStreamsFromRoute( )
     this.appendStreamsToRoute( )
 
-    if ( !this.$store.state.viewerControls )
-      this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
   },
   deactivated( ) {
     console.log( 'de-activated' )

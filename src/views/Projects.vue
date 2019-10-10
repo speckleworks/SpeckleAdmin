@@ -28,6 +28,30 @@
         <div v-if='searchfilter && searchfilter!==""'>
           <p class='title font-weight-light my-3 mx-1'>Found {{filteredProjects.length}} project{{filteredProjects.length===1?'':'s'}} matching your search criteria.</p>
         </div>
+        <v-expansion-panel>
+          <v-expansion-panel-content>
+            <template v-slot:header>Search Options</template>
+            <v-card class='pa-3'>
+              <v-expansion-panel>
+                <v-expansion-panel-content>
+                  <template v-slot:header>Tags</template>
+                  <v-card class='pa-3'>
+                    <v-chip v-for='tag in allTags' small dense @click='addSearchQuery("tag", tag)'>
+                      {{tag}}
+                    </v-chip>
+                  </v-card>
+                </v-expansion-panel-content>
+                <!-- <v-expansion-panel> -->
+                <v-expansion-panel-content>
+                  <template v-slot:header>Job Numbers</template>
+                  <v-card class='pa-3'>
+                    <v-chip v-for='jnumber in allJobNumbers' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
+                  </v-card>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
     </v-layout>
     <!-- All the project cards will flow below -->
@@ -90,12 +114,19 @@ export default {
     },
     filteredProjects( ) {
       if ( this.searchfilter && this.searchfilter !== '' )
-        return this.projects.filter( p => p.name.toLowerCase().includes( this.searchfilter.toLowerCase() ) )
+        return this.$store.getters.filteredResources( this.filters, "projects" )
+      // return this.projects.filter( p => p.name.toLowerCase().includes( this.searchfilter.toLowerCase() ) )
       return this.projects
     },
     paginatedProjects( ) {
       return this.filteredProjects.slice( this.currentIndex + this.pageNumber * this.sliceSize, this.sliceSize * ( this.pageNumber + 1 ) )
-    }
+    },
+    allTags( ) {
+      return this.$store.getters.allProjectTags
+    },
+    allJobNumbers( ) {
+      return this.$store.getters.allJobNumbersProjects
+    },
   },
   data( ) {
     return {
@@ -104,10 +135,31 @@ export default {
       pageNumber: 0,
       searchfilter: '',
       selectedProjects: [ ],
-      isSearching: false
+      isSearching: false,
+      filters: [ ]
     }
   },
   methods: {
+    addSearchQuery( key, tag ) {
+      this.pageNumber = 0
+      let tempFilter = `${key}:${tag}`
+      this.searchfilter = tempFilter
+      setTimeout( ( ) => { this.isSearching = false }, 50 )
+      try {
+        let filters = tempFilter.split( ' ' ).map( t => {
+          if ( t.includes( ':' ) )
+            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
+            return { key: 'name', value: t }
+          else
+            return { key: t, value: null }
+        } )
+        this.filters = filters
+      } catch {
+        this.filters = [ { key: 'name', value: e } ]
+      }
+      this.isSearching = false
+    },
     selectThis( project ) {
       let index = this.selectedProjects.findIndex( p => p._id === project._id )
       if ( index === -1 )
@@ -138,10 +190,24 @@ export default {
     clearSelection( ) {
       bus.$emit( 'unselect-all-projects' )
     },
-    updateSearch: debounce( function( e ) {
+    updateSearch: debounce( function ( e ) {
       this.pageNumber = 0
       this.isSearching = false
       this.searchfilter = e
+      this.searchfilter = e
+      try {
+        let filters = this.searchfilter.split( ' ' ).map( t => {
+          if ( t.includes( ':' ) )
+            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
+            return { key: 'name', value: t }
+          else
+            return { key: t, value: null }
+        } )
+        this.filters = filters
+      } catch {
+        this.filters = [ { key: 'name', value: e } ]
+      }
     }, 1000 ),
   },
   created( ) {}

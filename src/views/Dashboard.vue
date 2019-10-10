@@ -22,7 +22,7 @@
       <v-flex xs12 v-if='streams.length !== 0 || projects.length !== 0'>
         <search-everything />
       </v-flex>
-      <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
+      <v-flex xs12 md6 lg4 v-if='streams.length !== 0 || projects.length !== 0'>
         <v-card class="elevation-1">
           <v-card-title>
             <v-icon left>
@@ -55,7 +55,7 @@
           </v-card-actions>
         </v-card>
       </v-flex>
-      <v-flex xs12 md6 v-if='streams.length !== 0 || projects.length !== 0'>
+      <v-flex xs12 md6 lg4 v-if='streams.length !== 0 || projects.length !== 0'>
         <v-card class="elevation-1">
           <v-card-title>
             <v-icon left>
@@ -87,7 +87,7 @@
           </v-card-actions>
         </v-card>
       </v-flex>
-      <v-flex xs12 md6>
+      <v-flex xs12 md6 lg4>
         <v-toolbar dense class=' '>
           <v-icon left>
             fiber_new

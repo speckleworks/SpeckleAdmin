@@ -12,7 +12,7 @@
               <span class='caption'>{{user.company}}</span>
             </v-flex>
             <v-flex xs4 class='text-xs-right'>
-              <v-btn depressed :color='hasWritePermission(user._id)?"primary":""' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>{{hasWritePermission(user._id) ? "write" : "read"}}</v-btn>
+              <v-btn depressed :color='hasWritePermission(user._id)?"primary":""' @click.native='changePermission(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>{{hasWritePermission(user._id) ? "edit" : "view"}}</v-btn>
               <v-btn depressed @click.native='removeUser(user._id)' :disabled='user.surname.includes(`(that is you!)`) || globalDisabled || isDisabled(user._id)'>
                 <v-icon>close</v-icon>
               </v-btn>
