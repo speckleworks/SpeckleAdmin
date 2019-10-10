@@ -93,6 +93,9 @@ export default new Vuex.Store( {
                 return myTags.every( t => streamTags.includes( t ) )
               } )
               break
+            case 'jn':
+              base = base.filter( resource => resource.jobNumber === query.value.trim( ) )
+              break
             case 'owner':
               if ( query.value.toLowerCase( ).trim( ) === 'me' ) {
                 base = base.filter( stream => stream.owner === state.user._id )
@@ -161,6 +164,7 @@ export default new Vuex.Store( {
     allTags: ( state ) => {
       let tagSet = new Set( )
       state.streams.forEach( stream => {
+        if ( !stream.deleted )
         stream.tags.forEach( t => tagSet.add( t ) )
       } )
       state.projects.forEach( project => {
@@ -171,7 +175,8 @@ export default new Vuex.Store( {
     allStreamTags: ( state ) => {
       let tagSet = new Set( )
       state.streams.forEach( stream => {
-        stream.tags.forEach( t => tagSet.add( t ) )
+        if ( !stream.deleted )
+          stream.tags.forEach( t => tagSet.add( t ) )
       } )
       return [ ...tagSet ]
     },
@@ -185,6 +190,18 @@ export default new Vuex.Store( {
     allJobNumbers: ( state ) => {
       let set = new Set( )
       state.streams.forEach( stream => set.add( stream.jobNumber ) )
+      state.projects.forEach( project => set.add( project.jobNumber ) )
+      return [ ...set ]
+    },
+    allJobNumbersStreams: ( state ) => {
+      let set = new Set( )
+      state.streams.forEach( stream => set.add( stream.jobNumber ) )
+      // state.projects.forEach( project => set.add( project.jobNumber ) )
+      return [ ...set ]
+    },
+    allJobNumbersProjects: ( state ) => {
+      let set = new Set( )
+      // state.streams.forEach( stream => set.add( stream.jobNumber ) )
       state.projects.forEach( project => set.add( project.jobNumber ) )
       return [ ...set ]
     }
