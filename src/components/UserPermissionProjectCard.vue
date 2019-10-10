@@ -9,11 +9,11 @@
       <v-flex xs4>
         <!-- write streams -->
         <v-btn block depressed small :color='hasWritePermissionStreams?"primary":""' @click.native='changePermissionStreams()' :disabled='!canEdit'>
-          {{ user.isOwner ? "write streams" : hasWritePermissionStreams ? "write streams" : "read streams"}}
+          {{ user.isOwner ? "write streams" : hasWritePermissionStreams ? "edit streams" : "view streams"}}
         </v-btn>
         <!-- write project -->
         <v-btn block depressed small :color='hasWritePermissionProject?"primary":""' @click.native='changePermissionProject()' :disabled='!canEdit'>
-          {{ user.isOwner ? "write project" : hasWritePermissionProject ? "write project" : "read project"}}
+          {{ user.isOwner ? "write project" : hasWritePermissionProject ? "edit project" : "view project"}}
         </v-btn>
         <!-- remove user -->
         <v-btn block flat small @click.native='removeUser()' :disabled='!canEdit'>
@@ -40,7 +40,7 @@ export default {
       return this.project.permissions.canWrite.indexOf( this.user._id ) > -1
     },
     hasWritePermissionProject(){
-      return this.project.canWrite.indexOf( this.user._id ) > -1 
+      return this.project.canWrite.indexOf( this.user._id ) > -1
     }
   },
   data( ) { return {} },
@@ -60,7 +60,7 @@ export default {
 </script>
 <style scoped lang='scss'>
 .disabled {
-  
+
   color: lightgrey
 }
 </style>
