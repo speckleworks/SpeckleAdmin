@@ -90,7 +90,8 @@ export default {
     },
     filteredProjects( ) {
       if ( this.searchfilter && this.searchfilter !== '' )
-        return this.projects.filter( p => p.name.toLowerCase().includes( this.searchfilter.toLowerCase() ) )
+        return this.$store.getters.filteredStreams( this.filters, "projects" )
+      // return this.projects.filter( p => p.name.toLowerCase().includes( this.searchfilter.toLowerCase() ) )
       return this.projects
     },
     paginatedProjects( ) {
@@ -104,7 +105,8 @@ export default {
       pageNumber: 0,
       searchfilter: '',
       selectedProjects: [ ],
-      isSearching: false
+      isSearching: false,
+      filters: [ ]
     }
   },
   methods: {
@@ -138,10 +140,24 @@ export default {
     clearSelection( ) {
       bus.$emit( 'unselect-all-projects' )
     },
-    updateSearch: debounce( function( e ) {
+    updateSearch: debounce( function ( e ) {
       this.pageNumber = 0
       this.isSearching = false
       this.searchfilter = e
+      this.searchfilter = e
+      try {
+        let filters = this.searchfilter.split( ' ' ).map( t => {
+          if ( t.includes( ':' ) )
+            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
+            return { key: 'name', value: t }
+          else
+            return { key: t, value: null }
+        } )
+        this.filters = filters
+      } catch {
+        this.filters = [ { key: 'name', value: e } ]
+      }
     }, 1000 ),
   },
   created( ) {}

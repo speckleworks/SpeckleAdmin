@@ -63,8 +63,18 @@ export default new Vuex.Store( {
     streamClients: ( state ) => ( streamId ) => {
       return state.clients.filter( c => c.streamId === streamId )
     },
-    filteredStreams: ( state ) => ( filters ) => {
-      let base = state.streams.filter( stream => stream.parent == null && stream.deleted === false )
+    filteredStreams: ( state ) => ( filters, resourceType ) => {
+
+      if(!resourceType) resourceType = "streams"
+
+      let base = []
+
+      if(resourceType === "streams")
+        base = state.streams.filter( stream => stream.parent == null && stream.deleted === false )
+
+      if(resourceType === "projects")
+        base = state.projects.filter( project => project.deleted === false )
+
       if ( !filters || filters.length === 0 ) return base
       filters.forEach( query => {
         query.key = query.key.toLowerCase( )
