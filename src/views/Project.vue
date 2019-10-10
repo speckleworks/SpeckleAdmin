@@ -12,7 +12,7 @@
       <v-flex xs12>
         <detail-description :resource='project'></detail-description>
       </v-flex>
-      <v-flex xs12 sm12 lg6>
+      <v-flex xs12 sm12 lg12>
         <v-card class='elevation-0'>
           <v-card-title class='title font-weight-light'>
             <v-icon small left>supervisor_account</v-icon>&nbsp;
@@ -24,7 +24,7 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex xs12 sm12 lg6>
+      <v-flex xs12 sm12 lg12>
         <v-card  class='elevation-0'>
           <v-card-title class='title font-weight-light'>
             <v-icon small left>import_export</v-icon>&nbsp;
