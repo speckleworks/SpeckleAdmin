@@ -5,8 +5,9 @@
     </div>
     <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed hide-overlay>
       <v-layout row wrap style="height: auto;">
+        <v-flex xs12 style='height:60px;' class='hidden-sm-and-up'>&nbsp;</v-flex>
         <v-flex xs12>
           <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
             <v-tab key='streams'>
@@ -124,9 +125,10 @@ export default {
         if ( this.cameraPosToSet ) {
 
           this.renderer.computeSceneBoundingSphere( )
+          this.renderer.setFar( )
+
           this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
           this.cameraPosToSet = null
-
           setTimeout( ( ) => {
 
             // this.renderer.setFar( )
