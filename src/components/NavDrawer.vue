@@ -139,7 +139,7 @@
       </v-list-tile>
     </v-list>
     <v-divider xxxsclass='mb-4'></v-divider>
-    <v-list dense subheader>
+    <v-list dense subheader class='ma-0 pa-0'>
       <v-list-tile @click='toggleDark()'>
         <v-list-tile-action>
           <!-- <v-icon>wb_sunny</v-icon> -->
@@ -151,7 +151,7 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
-    <v-divider xxxsclass='mb-4'></v-divider>
+    <v-divider class='ma-0 pa-0'></v-divider>
     <v-card class='elevation-0' <v-card-text>
       <div class='text-uppercase text-xs-center caption ml-0'>
         <!-- <v-divider class='mb-4'></v-divider> -->
