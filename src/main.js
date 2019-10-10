@@ -105,7 +105,7 @@ Vue.mixin( {
 
       this.$router.replace( { params: this.$route.params, query: { s: base64url( JSON.stringify( existingQueryObject ) ) } } )
 
-      console.log( existingQueryObject )
+      // console.log( existingQueryObject )
     },
     getUrlQueryObject( ) {
       if ( !this.$route.query.s )

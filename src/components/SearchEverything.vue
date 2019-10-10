@@ -4,7 +4,7 @@
       <v-text-field solo clearable @input="updateSearch" label="Search for a stream or project" prepend-inner-icon="search" @click:append="refreshResources()" append-icon="refresh" spellcheck="false" v-model='filterText' :loading='isLoading'></v-text-field>
     </v-flex>
     <v-flex xs12 v-if='filterText' style='position: relative; top: -30px'>
-      <V-card class='xxxtransparent elevation-10'>
+      <v-card class='xxxtransparent elevation-10'>
         <v-layout row wrap>
           <v-flex xs12 md6 pa-3>
             <div class='title font-weight-light mb-3 pl-3'>Streams ({{filteredStreams.length}})</div>
@@ -41,7 +41,7 @@
             <span class='caption pl-3' v-else>No projects with that name found.</span>
           </v-flex>
         </v-layout>
-      </V-card>
+      </v-card>
     </v-flex>
   </v-layout>
 </template>
@@ -53,10 +53,10 @@ export default {
   props: {},
   watch: {
     filterText( val ) {
-      if ( val === '' || val === null ) {
-        this.isLoading = false
-        return
-      }
+      // if ( val === '' || val === null ) {
+      //   this.isLoading = false
+      //   return
+      // }
       this.isLoading = true
     }
   },
@@ -70,25 +70,42 @@ export default {
       } )
     },
     filteredStreams( ) {
-      if ( !this.actualSearchFilter || this.actualSearchFilter === '' ) return [ ]
-      return this.streams.filter( stream => stream.name ? stream.name.toLowerCase( ).includes( this.actualSearchFilter.toLowerCase( ) ) : true ).sort( ( a, b ) => a.updatedAt > b.updatedAt )
+      // if ( !this.actualSearchFilter || this.actualSearchFilter === '' ) return [ ]
+      // return this.streams.filter( stream => stream.name ? stream.name.toLowerCase( ).includes( this.actualSearchFilter.toLowerCase( ) ) : true ).sort( ( a, b ) => a.updatedAt > b.updatedAt )
+      return this.$store.getters.filteredResources( this.filters, "streams" )
     },
     filteredProjects( ) {
-      if ( !this.actualSearchFilter || this.actualSearchFilter === '' ) return [ ]
-      return this.projects.filter( r => r.name ? r.name.toLowerCase( ).includes( this.actualSearchFilter.toLowerCase( ) ) : true ).sort( ( a, b ) => a.updatedAt > b.updatedAt )
+      // if ( !this.actualSearchFilter || this.actualSearchFilter === '' ) return [ ]
+      // return this.projects.filter( r => r.name ? r.name.toLowerCase( ).includes( this.actualSearchFilter.toLowerCase( ) ) : true ).sort( ( a, b ) => a.updatedAt > b.updatedAt )
+      return this.$store.getters.filteredResources( this.filters, "projects" )
     },
   },
   data( ) {
     return {
-      actualSearchFilter: '',
       filterText: '',
       isLoading: false,
+      filters: [ ]
     }
   },
   methods: {
-    updateSearch: debounce( function( e ) {
+    updateSearch: debounce( function ( e ) {
+
       this.isLoading = false
-      this.actualSearchFilter = e
+      this.searchfilter = e
+      try {
+        let filters = this.searchfilter.split( ' ' ).map( t => {
+          if ( t.includes( ':' ) )
+            return { key: t.split( ':' )[ 0 ], value: t.split( ':' )[ 1 ] }
+          else if ( !t.includes( 'public' ) && !t.includes( 'private' ) && !t.includes( 'mine' ) && !t.includes( 'shared' ) ) // TODO: not elegant
+            return { key: 'name', value: t }
+          else
+            return { key: t, value: null }
+        } )
+        this.filters = filters
+        console.log( this.filters )
+      } catch {
+        this.filters = [ { key: 'name', value: e } ]
+      }
     }, 1000 ),
     refreshResources( ) {
       this.$store.dispatch( 'getStreams', 'omit=objects,layers&isComputedResult=false&sort=updatedAt' )

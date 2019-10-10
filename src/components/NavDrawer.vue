@@ -182,6 +182,9 @@ export default {
       localStorage.setItem( 'dark', this.dark )
       this.$store.commit( 'SET_DARK', this.dark )
     },
+  },
+  mounted() {
+    this.dark = this.$store.state.dark
   }
 }
 
