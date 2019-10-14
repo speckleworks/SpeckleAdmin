@@ -22,7 +22,8 @@
       </v-flex>
       <!-- Empty state handler -->
       <v-flex xs12 v-if='streams.length === 0'>
-        <p class='title font-weight-light'>Hmm, you don't have any streams yet. Don't worry! You can create a new one here (big blue button in the lower right corner) or through <router-link to='/plugins'>existing CAD integrations.</router-link>
+        <p class='title font-weight-light'>
+          👋 Hello {{$store.state.user.name}}! It looks like you haven't created any streams yet. Don't forget to check out the <a href='https://speckle.systems/docs/essentials/start' target='_blank'>guide</a>!
         </p>
       </v-flex>
       <v-flex xs12>

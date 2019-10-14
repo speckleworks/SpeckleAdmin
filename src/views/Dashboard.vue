@@ -7,7 +7,7 @@
       </v-flex>
       <v-flex xs12 py-5 class='' v-if='streams.length === 0 && projects.length === 0'>
         <div class='headline font-weight-light mb-4'>
-          👋 Hello {{$store.state.user.name}}! You seem short on <i>data</i> - maybe it's your first time here. If so, why don't you check out the <a href='https://www.speckle.works/log/speckle-guide' target='_blank'>guide for dynamo and grasshopper</a>?
+          👋 Hello {{$store.state.user.name}}! It looks like it's your first time here. Don't forget to check out the <a href='https://speckle.systems/docs/essentials/start' target='_blank'>guide</a>!
         </div>
         <v-divider></v-divider>
         <div class='mt-4 subheading'>

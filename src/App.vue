@@ -7,6 +7,9 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn flat fab small color='' @click.native='toggleControlsViewer'>
+        <v-icon>fullscreen</v-icon>
+      </v-btn>
       <div v-if='$route.path.includes("view")' class='mt-1'>
         <v-btn fab small color='primary' @click.native='toggleControlsViewer'>
           <v-icon>{{$store.state.viewerControls ? "close" :"3d_rotation"}}</v-icon>

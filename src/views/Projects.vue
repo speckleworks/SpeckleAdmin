@@ -20,7 +20,8 @@
       </v-flex>
       <!-- Empty state handler -->
       <v-flex xs12 v-if='projects.length === 0'>
-        <p class='title font-weight-light'>Hmm, you don't have any projects yet. Don't worry! You can create a new one here (big blue button in the lower right corner)!
+        <p class='title font-weight-light'>
+          👋 Hello {{$store.state.user.name}}! It looks like you haven't created any projects yet. Don't forget to check out the <a href='https://speckle.systems/docs/web/management' target='_blank'>guide</a>!
         </p>
       </v-flex>
       <v-flex xs12>
