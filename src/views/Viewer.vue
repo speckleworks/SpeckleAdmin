@@ -33,6 +33,28 @@
               <v-card class='elevation-0 transparent'>
                 <v-card-text>
                   <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
+                  <p class='caption mt-0 pb-2'>
+                    or add by<a @click='showStreamIdDialog=true'> streamId</a>
+                  </p>
+                  <v-dialog v-model="showStreamIdDialog" width="500">
+                    <v-card>
+                      <!--  <v-card-title class="headline grey lighten-2" primary-title>
+                        Privacy Policy
+                      </v-card-title> -->
+                      <v-form @submit.prevent='directAddStream'>
+                        <v-card-text>
+                          <v-text-field style='width: 100%' v-model='customStreamId' name='custom stream id' label='custom stream id'></v-text-field>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn submit @click='directAddStream'>ADD</v-btn>
+                        </v-card-actions>
+                        <v-alert v-model='customDialogErr' dismissible>
+                          Failed to find stream with that id.
+                        </v-alert>
+                      </v-form>
+                    </v-card>
+                  </v-dialog>
                   <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream' @refresh='refreshStream'></stream-card>
                 </v-card-text>
               </v-card>
@@ -98,6 +120,9 @@ export default {
   },
   data( ) {
     return {
+      customStreamId: null,
+      showStreamIdDialog: false,
+      customDialogErr: false,
       showLoading: false,
       looadingProgress: 0,
       loadingIsDeterminate: false,
@@ -151,38 +176,54 @@ export default {
         this.$router.replace( { name: 'viewer', params: { streamIds: streams }, query: { ...this.$route.query } } )
       else this.$router.replace( { name: 'viewer', query: { ...this.$route.query } } )
     },
+    async directAddStream( ) {
+      try {
+        await this.$store.dispatch( 'getStream', { streamId: this.customStreamId } )
+        this.addStream( this.customStreamId )
+        this.customStreamId = null
+        this.showStreamIdDialog = false
+      } catch ( err ) {
+        this.customStreamId = null
+        this.customDialogErr = true
+        // this.showStreamIdDialog = false
+      }
+    },
     async addStream( streamId ) {
       this.showLoading = true
       this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
       this.appendStreamsToRoute( )
-      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
+      try {
+        let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      if ( objectIds.length === 0 ) {
-        this.showLoading = false
-        return
-      }
+        if ( objectIds.length === 0 ) {
+          this.showLoading = false
+          return
+        }
 
-      // loaded already?
-      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
-      let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
-      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
+        // loaded already?
+        let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+        let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
+        this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
 
-      let bucket = [ ],
-        maxReq = 50 // magic number; maximum objects to request in a bucket
+        let bucket = [ ],
+          maxReq = 50 // magic number; maximum objects to request in a bucket
 
-      for ( let i = 0; i < toRequest.length; i++ ) {
-        bucket.push( toRequest[ i ] )
-        if ( i % maxReq === 0 && i !== 0 ) {
+        for ( let i = 0; i < toRequest.length; i++ ) {
+          bucket.push( toRequest[ i ] )
+          if ( i % maxReq === 0 && i !== 0 ) {
+            this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+            bucket = [ ]
+            if ( !this.isRequesting ) this.bucketProcessor( )
+          }
+        }
+
+        // last one
+        if ( bucket.length !== 0 ) {
           this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-          bucket = [ ]
           if ( !this.isRequesting ) this.bucketProcessor( )
         }
-      }
-
-      // last one
-      if ( bucket.length !== 0 ) {
-        this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-        if ( !this.isRequesting ) this.bucketProcessor( )
+      } catch ( err ) {
+        this.showLoading = false
       }
     },
     // Goes through all the request buckets and requests them from the server,
