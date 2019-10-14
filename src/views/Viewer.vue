@@ -3,9 +3,8 @@
     <div style='position: absolute; top:0; width: 100%; z-index: 1000;'>
       <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
     </div>
-    <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed hide-overlay>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' width='400' fixed hide-overlay>
       <v-layout row wrap style="height: auto;">
         <v-flex xs12 style='height:60px;' class='hidden-sm-and-up'>&nbsp;</v-flex>
         <v-flex xs12>
@@ -33,6 +32,25 @@
               <v-card class='elevation-0 transparent'>
                 <v-card-text>
                   <stream-search v-on:selected-stream='addStream' :streams-to-omit='loadedStreamIds'></stream-search>
+                  <p class='caption mt-0 pb-2'>
+                    or add by<a @click='showStreamIdDialog=true'> streamId</a>
+                  </p>
+                  <v-dialog v-model="showStreamIdDialog" width="500">
+                    <v-card>
+                      <v-form @submit.prevent='directAddStream'>
+                        <v-card-text>
+                          <v-text-field style='width: 100%' v-model='customStreamId' name='custom stream id' label='custom stream id'></v-text-field>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn submit @click='directAddStream'>ADD</v-btn>
+                        </v-card-actions>
+                        <v-alert v-model='customDialogErr' dismissible>
+                          Failed to find stream with that id.
+                        </v-alert>
+                      </v-form>
+                    </v-card>
+                  </v-dialog>
                   <stream-card v-for='stream in loadedStreams' :stream='stream' :key='stream.streamId' @remove='removeStream' @refresh='refreshStream'></stream-card>
                 </v-card-text>
               </v-card>
@@ -91,13 +109,12 @@ export default {
     streamIds( ) {
       return this.$store.state.loadedStreamIds
     },
-    shareLink( ) {
-      // let streams = this.$store.state.loadedStreamIds.join( ',' )
-      return window.location
-    }
   },
   data( ) {
     return {
+      customStreamId: null,
+      showStreamIdDialog: false,
+      customDialogErr: false,
       showLoading: false,
       looadingProgress: 0,
       loadingIsDeterminate: false,
@@ -129,11 +146,6 @@ export default {
 
           this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
           this.cameraPosToSet = null
-          setTimeout( ( ) => {
-
-            // this.renderer.setFar( )
-
-          }, 200 )
         }
         if ( this.groupKeyToSet ) {
           this.selectedFilter = this.groupKeyToSet
@@ -151,38 +163,54 @@ export default {
         this.$router.replace( { name: 'viewer', params: { streamIds: streams }, query: { ...this.$route.query } } )
       else this.$router.replace( { name: 'viewer', query: { ...this.$route.query } } )
     },
+    async directAddStream( ) {
+      try {
+        await this.$store.dispatch( 'getStream', { streamId: this.customStreamId } )
+        this.addStream( this.customStreamId )
+        this.customStreamId = null
+        this.showStreamIdDialog = false
+      } catch ( err ) {
+        this.customStreamId = null
+        this.customDialogErr = true
+        // this.showStreamIdDialog = false
+      }
+    },
     async addStream( streamId ) {
       this.showLoading = true
       this.$store.commit( 'ADD_LOADED_STREAMID', streamId )
       this.appendStreamsToRoute( )
-      let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
+      try {
+        let objectIds = await this.$store.dispatch( 'getStreamObjects', streamId )
 
-      if ( objectIds.length === 0 ) {
-        this.showLoading = false
-        return
-      }
+        if ( objectIds.length === 0 ) {
+          this.showLoading = false
+          return
+        }
 
-      // loaded already?
-      let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
-      let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
-      this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
+        // loaded already?
+        let toRequest = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) === -1 )
+        let toUpdate = objectIds.filter( id => this.$store.state.objects.findIndex( o => o._id === id ) !== -1 )
+        this.$store.commit( 'UPDATE_OBJECTS_STREAMS', { objIds: toUpdate, streamToAdd: streamId } )
 
-      let bucket = [ ],
-        maxReq = 50 // magic number; maximum objects to request in a bucket
+        let bucket = [ ],
+          maxReq = 50 // magic number; maximum objects to request in a bucket
 
-      for ( let i = 0; i < toRequest.length; i++ ) {
-        bucket.push( toRequest[ i ] )
-        if ( i % maxReq === 0 && i !== 0 ) {
+        for ( let i = 0; i < toRequest.length; i++ ) {
+          bucket.push( toRequest[ i ] )
+          if ( i % maxReq === 0 && i !== 0 ) {
+            this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
+            bucket = [ ]
+            if ( !this.isRequesting ) this.bucketProcessor( )
+          }
+        }
+
+        // last one
+        if ( bucket.length !== 0 ) {
           this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-          bucket = [ ]
           if ( !this.isRequesting ) this.bucketProcessor( )
         }
-      }
-
-      // last one
-      if ( bucket.length !== 0 ) {
-        this.requestBuckets.push( { objectIds: [ ...bucket ], streamId: streamId } )
-        if ( !this.isRequesting ) this.bucketProcessor( )
+      } catch ( err ) {
+        this.showLoading = false
       }
     },
     // Goes through all the request buckets and requests them from the server,
@@ -401,6 +429,10 @@ export default {
     if ( queryObject.camera ) this.cameraPosToSet = queryObject.camera
     if ( queryObject.groups ) this.groupKeyToSet = queryObject.groups.key
 
+    setTimeout( ( ) => {
+      this.$store.commit( 'SET_VIEWER_CONTROLS', true )
+    }, 100 )
+
     // Set render events
     this.renderer.on( 'select-objects', debounce( function ( ids ) {
       this.$store.commit( 'SET_SELECTED_OBJECTS', { objectIds: ids } )
@@ -436,6 +468,7 @@ export default {
   /*don't ask re below, i just don't like round numbers */
   height: 100%;
   /*z-index: 10000;*/
+  background-color:rgba(170,170,170,0.21);
 }
 
 </style>

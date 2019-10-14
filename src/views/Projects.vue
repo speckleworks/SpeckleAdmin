@@ -20,7 +20,8 @@
       </v-flex>
       <!-- Empty state handler -->
       <v-flex xs12 v-if='projects.length === 0'>
-        <p class='title font-weight-light'>Hmm, you don't have any projects yet. Don't worry! You can create a new one here (big blue button in the lower right corner)!
+        <p class='title font-weight-light'>
+          👋 Hello {{$store.state.user.name}}! It looks like you haven't created any projects yet. Don't forget to check out the <a href='https://speckle.systems/docs/web/management' target='_blank'>guide</a>!
         </p>
       </v-flex>
       <v-flex xs12>
@@ -36,7 +37,7 @@
                 <v-expansion-panel-content>
                   <template v-slot:header>Tags</template>
                   <v-card class='pa-3'>
-                    <v-chip v-for='tag in allTags' small dense @click='addSearchQuery("tag", tag)'>
+                    <v-chip v-for='tag in allTags' :key='tag' small dense @click='addSearchQuery("tag", tag)'>
                       {{tag}}
                     </v-chip>
                   </v-card>
@@ -45,7 +46,7 @@
                 <v-expansion-panel-content>
                   <template v-slot:header>Job Numbers</template>
                   <v-card class='pa-3'>
-                    <v-chip v-for='jnumber in allJobNumbers' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
+                    <v-chip v-for='jnumber in allJobNumbers' :key='jnumber' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
                   </v-card>
                 </v-expansion-panel-content>
               </v-expansion-panel>

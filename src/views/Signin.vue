@@ -36,7 +36,7 @@
                     <v-text-field style='width: 90%' xxx-prepend-inner-icon='developer_board' hint='server url' type="url" v-model='server' name='server' label='server url' placeholder='https://speckle.yourdomain.com'></v-text-field>
                   </v-list-tile-content>
                   <v-list-tile-action>
-                    <v-btn color="black" fab small dark type="submit">
+                    <v-btn color="black" fab small dark type="submit" @click='login()'>
                       <v-icon>arrow_right_alt</v-icon>
                     </v-btn>
                   </v-list-tile-action>
@@ -84,6 +84,7 @@ export default {
       try {
         url = new URL( this.server )
         let originUrl = new URL( window.location.href )
+        localStorage.setItem('__tempServer', url.origin )
         window.open( `${url.origin}/signin?redirectUrl=${ window.encodeURIComponent( location.origin +'/#/signin/callback') }`, 'login screen', 'height=700,width=800' )
       } catch ( err ) {
         this.errorMessage = err.message
