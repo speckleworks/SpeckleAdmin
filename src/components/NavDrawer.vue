@@ -138,7 +138,7 @@
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
-    <v-divider xxxsclass='mb-4'></v-divider>
+    <v-divider xxxsclass='mb-4' v-if='$store.state.isAuth'></v-divider>
     <v-list dense subheader class='ma-0 pa-0'>
       <v-list-tile @click='toggleDark()'>
         <v-list-tile-action>

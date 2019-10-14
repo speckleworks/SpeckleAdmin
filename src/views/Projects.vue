@@ -36,7 +36,7 @@
                 <v-expansion-panel-content>
                   <template v-slot:header>Tags</template>
                   <v-card class='pa-3'>
-                    <v-chip v-for='tag in allTags' small dense @click='addSearchQuery("tag", tag)'>
+                    <v-chip v-for='tag in allTags' :key='tag' small dense @click='addSearchQuery("tag", tag)'>
                       {{tag}}
                     </v-chip>
                   </v-card>
@@ -45,7 +45,7 @@
                 <v-expansion-panel-content>
                   <template v-slot:header>Job Numbers</template>
                   <v-card class='pa-3'>
-                    <v-chip v-for='jnumber in allJobNumbers' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
+                    <v-chip v-for='jnumber in allJobNumbers' :key='jnumber' @click='addSearchQuery("jn", jnumber)'>{{jnumber}}</v-chip>
                   </v-card>
                 </v-expansion-panel-content>
               </v-expansion-panel>
