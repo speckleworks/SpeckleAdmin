@@ -7,8 +7,8 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn flat fab small color='' @click.native='toggleControlsViewer'>
-        <v-icon>fullscreen</v-icon>
+      <v-btn flat fab small color='' @click.native='fullscreen'>
+        <v-icon>{{isFullScreen ? "fullscreen_exit" :"fullscreen"}}</v-icon>
       </v-btn>
       <div v-if='$route.path.includes("view")' class='mt-1'>
         <v-btn fab small color='primary' @click.native='toggleControlsViewer'>
@@ -34,7 +34,8 @@ export default {
   data: _ => ( {
     drawer: true,
     dark: false,
-    viewerControls: true
+    viewerControls: true,
+    isFullScreen: false
   } ),
   methods: {
     toggleDark( ) {
@@ -47,6 +48,25 @@ export default {
     },
     toggleControlsViewer( ) {
       this.$store.commit( 'TOGGLE_VIEWER_CONTROLS' )
+    },
+    fullscreen( ) {
+      if ( document.fullscreenElement ) {
+        document.exitFullscreen()
+        this.isFullScreen = false
+        return
+      }
+
+      let element = document.documentElement
+      this.isFullScreen = true
+      if ( element.requestFullscreen ) {
+        element.requestFullscreen( );
+      } else if ( element.mozRequestFullScreen ) {
+        element.mozRequestFullScreen( );
+      } else if ( element.webkitRequestFullscreen ) {
+        element.webkitRequestFullscreen( );
+      } else if ( element.msRequestFullscreen ) {
+        element.msRequestFullscreen( );
+      }
     }
   },
   created( ) {
