@@ -3,9 +3,8 @@
     <div style='position: absolute; top:0; width: 100%; z-index: 1000;'>
       <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
     </div>
-    <!-- <v-layout style='background: #BDD5FB'></v-layout> -->
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' fixed hide-overlay>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' width='400' fixed hide-overlay>
       <v-layout row wrap style="height: auto;">
         <v-flex xs12 style='height:60px;' class='hidden-sm-and-up'>&nbsp;</v-flex>
         <v-flex xs12>
@@ -38,9 +37,6 @@
                   </p>
                   <v-dialog v-model="showStreamIdDialog" width="500">
                     <v-card>
-                      <!--  <v-card-title class="headline grey lighten-2" primary-title>
-                        Privacy Policy
-                      </v-card-title> -->
                       <v-form @submit.prevent='directAddStream'>
                         <v-card-text>
                           <v-text-field style='width: 100%' v-model='customStreamId' name='custom stream id' label='custom stream id'></v-text-field>
@@ -113,10 +109,6 @@ export default {
     streamIds( ) {
       return this.$store.state.loadedStreamIds
     },
-    shareLink( ) {
-      // let streams = this.$store.state.loadedStreamIds.join( ',' )
-      return window.location
-    }
   },
   data( ) {
     return {
@@ -154,11 +146,6 @@ export default {
 
           this.renderer.setCamera( { ...this.cameraPosToSet }, 1600 )
           this.cameraPosToSet = null
-          setTimeout( ( ) => {
-
-            // this.renderer.setFar( )
-
-          }, 200 )
         }
         if ( this.groupKeyToSet ) {
           this.selectedFilter = this.groupKeyToSet
@@ -442,6 +429,10 @@ export default {
     if ( queryObject.camera ) this.cameraPosToSet = queryObject.camera
     if ( queryObject.groups ) this.groupKeyToSet = queryObject.groups.key
 
+    setTimeout( ( ) => {
+      this.$store.commit( 'SET_VIEWER_CONTROLS', true )
+    }, 100 )
+
     // Set render events
     this.renderer.on( 'select-objects', debounce( function ( ids ) {
       this.$store.commit( 'SET_SELECTED_OBJECTS', { objectIds: ids } )
@@ -477,6 +468,7 @@ export default {
   /*don't ask re below, i just don't like round numbers */
   height: 100%;
   /*z-index: 10000;*/
+  background-color:rgba(170,170,170,0.21);
 }
 
 </style>

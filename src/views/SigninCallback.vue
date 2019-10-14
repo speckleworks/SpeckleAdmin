@@ -52,10 +52,8 @@ export default {
     }
 
     let conn = window.decodeURIComponent( this.$route.query.token )
-    // console.log( conn.split( ':::' ) )
 
     let jwt = conn.split( ':::' )[ 0 ]
-    // let server = conn.split( ':::' )[ 1 ] // This is ignored
     let server = localStorage.getItem( '__tempServer' )
 
     let url = new URL( server )

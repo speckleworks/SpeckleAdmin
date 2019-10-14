@@ -142,27 +142,25 @@
     <v-list dense subheader class='ma-0 pa-0'>
       <v-list-tile @click='toggleDark()'>
         <v-list-tile-action>
-          <!-- <v-icon>wb_sunny</v-icon> -->
+
           <v-icon>{{$store.state.dark ? "wb_sunny" : "nights_stay"}}</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>{{$store.state.dark ? "Day Mode" : "Dark Mode"}}</v-list-tile-title>
-          <!-- <v-list-tile-sub-title>Login or register</v-list-tile-sub-title> -->
+
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
     <v-divider class='ma-0 pa-0'></v-divider>
-    <v-card class='elevation-0' <v-card-text>
-      <div class='text-uppercase text-xs-center caption ml-0'>
-        <!-- <v-divider class='mb-4'></v-divider> -->
+    <v-card class='elevation-0' >
+      <v-card-text>
+      <div class='text-uppercase text-xs-center-xxx caption ml-0 pa-5 ml-2 mt-3 mb-3'>
         Brought to you by:<br>
         <a href='https://speckle.works' target="_blank" style="xxxcolor:white; text-decoration: none;"><b>Speckle</b>,
           <span class=' caption'>the open source data platform for AEC.</span></a>
-        <v-divider class='my-4'></v-divider>
+        <!-- <v-divider class='my-4'></v-divider> -->
       </div>
       </v-card-text>
-      <!--         </v-toolbar>
-      </v-hover> -->
     </v-card>
   </div>
 </template>

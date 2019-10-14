@@ -50,7 +50,7 @@ export default new Vuex.Store( {
     // app dark mode?
     dark: false,
     // toggles viewer controls
-    viewerControls: true,
+    viewerControls: false,
 
     // processor related
     // these are the function names for each block from /src/lambda
@@ -65,14 +65,14 @@ export default new Vuex.Store( {
     },
     filteredResources: ( state ) => ( filters, resourceType ) => {
 
-      if(!resourceType) resourceType = "streams"
+      if ( !resourceType ) resourceType = "streams"
 
-      let base = []
+      let base = [ ]
 
-      if(resourceType === "streams")
+      if ( resourceType === "streams" )
         base = state.streams.filter( stream => stream.parent == null && stream.deleted === false )
 
-      if(resourceType === "projects")
+      if ( resourceType === "projects" )
         base = state.projects.filter( project => project.deleted === false )
 
       if ( !filters || filters.length === 0 ) return base
@@ -175,7 +175,7 @@ export default new Vuex.Store( {
       let tagSet = new Set( )
       state.streams.forEach( stream => {
         if ( !stream.deleted )
-        stream.tags.forEach( t => tagSet.add( t ) )
+          stream.tags.forEach( t => tagSet.add( t ) )
       } )
       state.projects.forEach( project => {
         project.tags.forEach( t => tagSet.add( t ) )
@@ -223,11 +223,13 @@ export default new Vuex.Store( {
     TOGGLE_VIEWER_CONTROLS( state ) {
       state.viewerControls = !state.viewerControls
     },
+    SET_VIEWER_CONTROLS( state, value ) {
+      state.viewerControls = value
+    },
     // Streams
     ADD_STREAMS( state, streams ) {
       streams.forEach( stream => {
         if ( state.streams.findIndex( x => x.streamId === stream.streamId ) === -1 ) {
-          // defensive code (vue 3.0 we're off to typescript baby, can't wait)
           if ( !stream.description ) stream.description = '...'
           if ( !stream.tags ) stream.tags = [ ]
           if ( !stream.jobNumber ) stream.jobNumber = ''
