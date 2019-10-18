@@ -9,11 +9,14 @@
     "dev-all": "vue-cli-service serve & netlify-lambda serve ./src/lambda -t 120"
   },
   "dependencies": {
+    "d3": "^5.12.0",
     "lodash.set": "^4.3.2",
     "md5": "^2.2.1",
     "msal": "^1.1.1",
     "register-service-worker": "^1.5.2",
+    "save-svg-as-png": "^1.4.14",
     "vue": "^2.6.10",
+    "vue-async-computed": "^3.7.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },
@@ -44,7 +47,7 @@
     "uuid": "^3.3.2",
     "vue-countly": "^1.0.0",
     "vue-json-pretty": "^1.6.0",
-    "vue-slider-component": "^2.8.3",
+    "vue-slider-component": "^2.8.16",
     "vue-template-compiler": "^2.6.10",
     "vue-timeago": "^5.0.0",
     "vue-tweet-embed": "^2.2.1",
