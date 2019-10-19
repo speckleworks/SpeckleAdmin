@@ -4,7 +4,6 @@
       <v-card class='elevation-0'>
         <v-toolbar class='elevation-0 transparent' v-if='stream.parent'>
           <v-icon small left>home</v-icon>&nbsp;
-          <!-- <v-icon small left>settings_backup_restore</v-icon>&nbsp; -->
           <span class="title font-weight-light">
             Parent stream: <router-link :to='"/streams/" + stream.parent'>{{stream.parent}}</router-link>
           </span>
@@ -12,7 +11,7 @@
         <v-toolbar class='elevation-0 transparent'>
           <v-icon small left>history</v-icon>&nbsp;
           <span class='title font-weight-light' v-if='stream.children.length>0'>
-            Showing first {{currentMax > sizeBound.length ? sizeBound.length : currentMax}} out of {{timeFiltered.length}} streams in the specified time range.
+            Showing max 30 versions (total: {{streamChildren.length}} versions).
           </span>
           <span class='title font-weight-light' v-else>
             This stream has no history.
@@ -109,10 +108,7 @@ export default {
       return this.$store.getters.allTags
     },
     sizeBound( ) {
-      return this.streamChildren
-    },
-    timeFiltered( ) {
-      return this.streamChildren.slice( this.lowerIndex, this.upperIndex + 1 )
+      return this.streamChildren.slice( 0, 30 )
     },
     stream( ) {
       return this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
@@ -128,10 +124,6 @@ export default {
     return {
       parentStream: null,
       streamChildren: [ ],
-      sliderValue: [ ],
-      lowerIndex: 0,
-      upperIndex: 0,
-      currentMax: 20
     }
   },
   methods: {
@@ -144,7 +136,6 @@ export default {
       return date.toLocaleString( 'en', { timeStyle: "short" } )
     },
     updateTags: debounce( function ( e ) {
-      // console.log( e )
       this.$store.dispatch( 'updateStream', { streamId: e.streamId, tags: e.tags } )
     }, 500 ),
 
@@ -190,13 +181,4 @@ export default {
 
 </script>
 <style lang='scss'>
-.vue-slider-piecewise {
-  z-index: 100 !important;
-  pointer-events: none;
-}
-
-.vue-slider-piecewise-item {
-  z-index: 100 !important;
-}
-
 </style>
