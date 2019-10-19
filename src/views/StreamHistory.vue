@@ -4,7 +4,6 @@
       <v-card class='elevation-0'>
         <v-toolbar class='elevation-0 transparent' v-if='stream.parent'>
           <v-icon small left>home</v-icon>&nbsp;
-          <!-- <v-icon small left>settings_backup_restore</v-icon>&nbsp; -->
           <span class="title font-weight-light">
             Parent stream: <router-link :to='"/streams/" + stream.parent'>{{stream.parent}}</router-link>
           </span>
@@ -12,29 +11,27 @@
         <v-toolbar class='elevation-0 transparent'>
           <v-icon small left>history</v-icon>&nbsp;
           <span class='title font-weight-light' v-if='stream.children.length>0'>
-            Showing first {{currentMax > sizeBound.length ? sizeBound.length : currentMax}} out of {{timeFiltered.length}} streams in the specified time range.
+            Showing max 30 versions (total: {{streamChildren.length}} versions).
           </span>
           <span class='title font-weight-light' v-else>
             This stream has no history.
           </span>
         </v-toolbar>
         <v-layout row wrap>
-<!--           <v-flex xs12 class='pa-5'>
-            <vue-slider ref="timeSlider" lazy @callback='sliderChanged' :data='dates' v-model='sliderValue' piecewise process-dragable :piecewise-label='dates.length < 5 ? true : false' xxxwidth='100%' xxxstyle='margin-left:10%;' :tooltipStyle="{ 'font-size':'11px' }" v-if='streamChildren.length>0'></vue-slider>
-          </v-flex> -->
           <v-flex xs12 pa-3>
             <v-timeline clipped dense>
-              <v-timeline-item v-for="stream in sizeBound" :key="stream.streamId" small :color="hexFromString(stream.streamId)">
-                <template v-slot:opposite>
-                </template>
-                <div class="py-3">
+              <v-timeline-item v-for="(stream, index) in sizeBound" :key="stream.streamId" small :color="hexFromString(stream.streamId)">
+                <div :class='`${index===0 ? "elevation-5" : "elevation-0"} py-3 px-4`'>
                   <v-btn icon @click.native='$router.push(`/view/${stream.streamId}`)'>
                     <v-icon>360</v-icon>
                   </v-btn>
-                  <span :class="`headline font-weight-bold ${hexFromString(stream.streamId)}--text`">
+                  <span :class="`headline font-weight-bold ${hexFromString(stream.streamId)}--text`" v-if='index===0'>
+                    Latest
+                  </span>
+                  <span :class="`headline ${index===0 ? 'font-weight-bold' : ''} ${hexFromString(stream.streamId)}--text`" v-else>
                     {{getDate(stream.createdAt)}} {{getTime(stream.createdAt)}}
                   </span>
-                  <timeago :datetime='stream.createdAt'></timeago>
+                  <timeago :datetime='stream.updatedAt'></timeago>
                   <p :class="`xxxheadline font-weight-light mb-3 ${hexFromString(stream.streamId)}--text`">
                     <v-icon small>{{stream.private ? "lock" : "lock_open"}}</v-icon> &nbsp;
                     <v-icon small>fingerprint</v-icon> {{stream.streamId}}
@@ -47,6 +44,39 @@
                       </template>
                     </v-combobox>
                     {{stream.commitMessage ? stream.commitMessage : "No commit message."}}
+                  </div>
+                  <v-divider class='my-3'></v-divider>
+                  <div v-if='stream.diffResult'>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <span class='green--text' v-on="on">
+                          <v-icon small class='green--text'>add_circle_outline</v-icon><b> {{stream.diffResult.data.objects.inA.length}}</b>
+                        </span> &nbsp;
+                      </template>
+                      <span>Added objects</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <span class='red--text' v-on="on">
+                          <v-icon small class='red--text'>remove_circle_outline</v-icon><b> {{stream.diffResult.data.objects.inB.length}}</b>
+                        </span> &nbsp;
+                      </template>
+                      <span>Removed objects</span>
+                    </v-tooltip>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <span class='' v-on="on"><b><span style='font-size: 20px'>∩</span> {{stream.diffResult.data.objects.common.length}}</b></span> &nbsp;
+                      </template>
+                      <span>Common objects</span>
+                    </v-tooltip>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <span class='grey--text' v-on="on"><b>Σ {{stream.diffResult.data.objects.inA.length + stream.diffResult.data.objects.common.length}}</b></span>
+                      </template>
+                      <span>Total object count</span>
+                    </v-tooltip>
                   </div>
                 </div>
               </v-timeline-item>
@@ -78,10 +108,7 @@ export default {
       return this.$store.getters.allTags
     },
     sizeBound( ) {
-      return this.timeFiltered.slice( 0, this.currentMax ).reverse( )
-    },
-    timeFiltered( ) {
-      return this.streamChildren.slice( this.lowerIndex, this.upperIndex + 1 )
+      return this.streamChildren.slice( 0, 30 )
     },
     stream( ) {
       return this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
@@ -95,12 +122,8 @@ export default {
   },
   data( ) {
     return {
+      parentStream: null,
       streamChildren: [ ],
-      dates: [ ],
-      sliderValue: [ ],
-      lowerIndex: 0,
-      upperIndex: 0,
-      currentMax: 20
     }
   },
   methods: {
@@ -113,7 +136,6 @@ export default {
       return date.toLocaleString( 'en', { timeStyle: "short" } )
     },
     updateTags: debounce( function ( e ) {
-      // console.log( e )
       this.$store.dispatch( 'updateStream', { streamId: e.streamId, tags: e.tags } )
     }, 500 ),
 
@@ -130,35 +152,33 @@ export default {
       this.stream.children.map( streamId => Axios.get( `streams/${streamId}?fields=streamId,updatedAt,createdAt,owner,tags,name,commitMessage,description` ) )
         .reduce( ( promiseChain, currentTask ) => {
           return promiseChain.then( chainResults => currentTask.then( currentResult => [ ...chainResults, currentResult.data.resource ] ) )
-        }, Promise.resolve( [ ] ) ).then( arr => {
+        }, Promise.resolve( [ ] ) ).then( async arr => {
+
+          arr.forEach( s => s.diffResult = { data: { objects: { inA: [ ], common: [ ], inB: [ ] } } } )
+
           this.streamChildren = arr
-          // this.streamChildren.push( this.stream )
-          this.dates = this.streamChildren
-            .map( c => c.updatedAt )
-            .sort( ( a, b ) => new Date( b.updatedAt ) - new Date( a.updatedAt ) )
-            .map( d => ( new Date( d ) ).toLocaleString( 'en' ) )
-          this.sliderValue = [ this.dates[ 0 ], this.dates[ this.dates.length - 1 ] ]
-          this.lowerIndex = 0
-          this.upperIndex = this.dates.length - 1
+          this.streamChildren.push( this.parentStream )
+          this.streamChildren = this.streamChildren.sort( ( a, b ) => new Date( b.updatedAt ) - new Date( a.updatedAt ) )
+          let stringRes = `${this.stream.streamId}\n`
+
+          for ( let i = 0; i < this.streamChildren.length - 1; i++ ) {
+            let currStream = this.streamChildren[ i ]
+            let nextStream = this.streamChildren[ i + 1 ]
+            this.streamChildren[ i ].diffResult = await Axios.get( `streams/${currStream.streamId}/diff/${nextStream.streamId}` )
+            let stats = this.streamChildren[ i ].diffResult.data
+            stringRes += ` \t${stats.objects.inA.length}\t${stats.objects.inB.length}\t${stats.objects.common.length}\t${stats.objects.inA.length + stats.objects.common.length} \n`
+          }
+          console.log( stringRes )
         } )
     }
   },
   mounted( ) {
     console.log( 'hello data' )
-    let stream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
+    this.parentStream = this.$store.state.streams.find( s => s.streamId === this.$route.params.streamId )
     this.fetchData( this.$route.params.streamId )
   }
 }
 
 </script>
 <style lang='scss'>
-.vue-slider-piecewise {
-  z-index: 100 !important;
-  pointer-events: none;
-}
-
-.vue-slider-piecewise-item {
-  z-index: 100 !important;
-}
-
 </style>
