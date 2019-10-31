@@ -12,17 +12,22 @@
         <g id="marker" />
         <g id="circleSender" />
         <g id="circleReceiver" />
+
+        <g id="rectParcoords" />
         <g id="rectStream" />
         <g id="text" />
       </g>
     </svg>
   </div>
+
 </template>
 
 <script src="./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js"></script>
 
 <script>
 import * as d3 from "d3";
+import ParCoords from 'parcoord-es';
+
 export default {
   name: "ForceDirectedLayout",
 
@@ -41,10 +46,27 @@ export default {
     streamTags: Array,
     refocus: Boolean,
     selectedEdgesDisplay: String,
-    selectedGraphLayout: String
+    selectedGraphLayout: String,
+    parcoords_selstreams: Array,
   },
 
   watch: {
+    parcoords_selstreams: function(){
+      console.log(this.$props.parcoords_selstreams)
+      var context = this
+      Array.from(document.querySelector("#rectParcoords").children).forEach(
+        function(d) {
+          console.log(d3.select(d).datum()._id)
+          if(context.$props.parcoords_selstreams.includes(d3.select(d).datum()._id)){
+            
+            d.classList.add("parcoordsSelection")
+          }else{
+            d.classList.remove("parcoordsSelection")
+          }
+
+        }
+      )
+    },
     selectedGraphLayout: function() {
       this.drawGraph.tick();
     },
@@ -1105,6 +1127,27 @@ export default {
         .on("contextmenu", this.contextMenu("client", this.menuClient));
       const rectWidth = 24;
       const rectHeight = 24;
+
+      
+      var rectParcoords = svg
+        .select("#rectParcoords")
+        .selectAll("rect")
+        .data(this.$data.simulation.nodes().filter(d => d.type == "Stream"))
+        .enter()
+        .append("svg:rect")
+        .attr("class", "parcoordsSelection")
+        //.attr("class", "parcoordsSelection")
+        .attr("x", -rectWidth*3 / 2)
+        .attr("y", -rectHeight*3 / 2)
+        .attr("width", rectWidth*3)
+        .attr("height", rectHeight*3)
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .attr("fill", "none")
+        .attr("timestamp", function(d) {
+          return d.createdAt;
+        })
+
       var rect = svg
         .select("#rectStream")
         .selectAll("rect")
@@ -1124,7 +1167,7 @@ export default {
         .on("dblclick", dblclick)
         .call(this.drag(this.$data.simulation))
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
-      //text content.
+
       var text = svg
         .select("#text")
         .selectAll("g")
@@ -1237,7 +1280,7 @@ export default {
         .attr("x", -50)
         .attr("y", 20)
         //.attr("class", "shadow")
-        .style("font-size", "80px")
+        .style("font-size", "50px")
         .text(function(d) {
           var docType = d.values[0].documentType
           if(docType === "Rhino"){
@@ -1322,7 +1365,11 @@ export default {
         
         svg
           .selectAll(".node")
-          .attr("fill", data => parentContext.colour(data.index))
+          .attr("fill", 
+          
+          data => parentContext.colour(data.index)
+          
+          )
           .attr("cx", function(d) {
             return d.x;
             // return (d.x = Math.max(
@@ -1546,6 +1593,9 @@ export default {
         text.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
+        rectParcoords.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        });
 
       }
 
@@ -1564,6 +1614,7 @@ export default {
     // window.addEventListener("keypress", function(e) {
     //   console.log(String.fromCharCode(e.keyCode));
     // });
+
   },
 
   computed: {}
@@ -1589,10 +1640,17 @@ export default {
   cursor: all-scroll;
 }
 
-rect {
+#rectStream {
   cursor: pointer;
   stroke: lightgray;
   stroke-width: 2px;
+}
+
+.parcoordsSelection {
+  stroke: black;
+  stroke-width: 4px;
+  stroke-dasharray: 20,5;
+  /* transition: "visibility 0s, opacity 0.4s linear" */
 }
 
 .tagSelected {
@@ -1619,6 +1677,9 @@ text.shadow {
   stroke-width: 3px;
   stroke-opacity: 0.8;
 }
+
+
+
 
 .d3-context-menu {
   position: absolute;

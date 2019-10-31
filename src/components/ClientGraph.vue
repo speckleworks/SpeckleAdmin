@@ -1,5 +1,7 @@
 <template>
+
   <v-card class="elevation-0">
+    
     <template>
       <v-expansion-panel focusable>
         <v-expansion-panel-content>
@@ -242,8 +244,13 @@
           </v-slide-x-reverse-transition>
         </template>
       </v-autocomplete>
+      
     </v-container>
     <!-- END OF TOOLBAR / SVG CANVAS STARTS HERE -->
+    
+    <div v-if="redrawToggle" id="example" class="parcoords" style="width:100%;height:300px;"></div>
+
+    
     <div id="appClientGraph">
       <svg v-if="!redrawToggle || !result" width="100%" :height="svgHeight" />
       <ForceDirectedLayout
@@ -266,9 +273,12 @@
         :selectedGraphLayout="selectedGraphLayout"
         @triggeredTimeFrame="triggeredTimeFrame"
         @triggeredTags="triggeredTags"
+        :parcoords_selstreams="parcoords_selstreams"
       />
     </div>
+    
   </v-card>
+  
 </template>
 
 
@@ -281,6 +291,8 @@ import axios from "axios";
 import Vue from "vue";
 import AsyncComputed from "vue-async-computed";
 import svgtopng from "save-svg-as-png";
+import ParCoords from 'parcoord-es';
+import './parcoords.css';
 
 Vue.use(AsyncComputed);
 export default {
@@ -334,7 +346,16 @@ export default {
     taggedStreams: [],
     focus: false,
     selectedEdgesDisplay: "Diagonal Horizontal",
-    selectedGraphLayout: "Horizontal"
+    selectedGraphLayout: "Horizontal",
+    parcoords: null,
+    all_userInfo: [],
+    all_userCode: [],
+    all_streamTags: [],
+    all_streamCreatedAt: [],
+    all_streamUpdatedAt: [],
+    parcoords_rawData: [],
+    parcoords_permut_data: [],
+    parcoords_selstreams: []
   }),
   computed: {
     toggle_multiple: function() {
@@ -407,7 +428,11 @@ export default {
       let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
       return createdAts[this.value3[1]];
     },
-    mounted() {},
+    mounted() {
+
+      
+
+    },
     saveAsPNG() {
       svgtopng.saveSvgAsPng(
         document.getElementById("graphLayout"),
@@ -444,20 +469,6 @@ export default {
       var streamLinks = [];
       var nodes = [];
 
-      // let resLogin;
-      // try {
-      //   let resLogin = await axios.post(
-      //     "https://hestia.speckle.works/api/accounts/login",
-      //     { email: "p.poinet@ucl.ac.uk", password: "0403924199" }
-      //   );
-      //   axios.defaults.headers.common["Authorization"] =
-      //     resLogin.data.resource.token;
-      // } catch (err) {
-      //   console.log(err); // from creation.
-      //   return;
-      // }
-
-
       let resProject;
       try {
         resProject = await axios.get(
@@ -467,8 +478,35 @@ export default {
         console.log(err);
         return;
       }
+      
+      let allusersSet = new Set([resProject.data.resource.owner, resProject.data.resource.canRead, resProject.data.resource.canWrite])
+      let allusers = [...allusersSet].flat()
+      allusers = [...new Set(allusers)]
+      //this.$data.all_userInfo = allusers
+      
+      
+      for (var i = 0; i < allusers.length; i++) {   
+          let user = allusers[i]
+          let resOwner
+          try {
+            resOwner = await axios.get(
+              `https://hestia.speckle.works/api/accounts/${user}`
+            )
+          }catch (error) {
+            console.log("Can't access user info");
+          }
+          let userInfo = resOwner.data.resource;
+          //console.log(userInfo)
+
+          let userCode = `${userInfo.name} ${userInfo.surname} @ ${userInfo.company}`
+          this.$data.all_userCode.push(userCode)
+          this.$data.all_userInfo.push(userInfo)
+      }
+      console.log(this.$data.all_userCode)
 
       var projectStreams = resProject.data.resource.streams;
+      var projectPermissions = resProject.data.resource.permissions;
+
       var alltags = [];
       for (var i = 0; i < projectStreams.length; i++) {
         var streamShortID = projectStreams[i];
@@ -481,14 +519,41 @@ export default {
             `https://hestia.speckle.works/api/streams/${streamShortID}`
           );
 
-          stream_id = resStream.data.resource._id;
+
           let streamOwnerID = resStream.data.resource.owner;
+          let resOwner
+          try {
+            resOwner = await axios.get(
+              `https://hestia.speckle.works/api/accounts/${streamOwnerID}`
+            )
+          }catch (error) {
+            console.log("Can't access user info");
+          }
+          let userInfo = resOwner.data.resource;
+
+          // DATA
+          stream_id = resStream.data.resource._id;
+          let streamCanRead = resStream.data.resource.canRead;
+          let streamCanWrite = resStream.data.resource.canWrite;
           let streamCreatedAt = resStream.data.resource.createdAt;
           let streamUpdatedAt = resStream.data.resource.updatedAt;
           let streamName = resStream.data.resource.name;
           let streamTags = resStream.data.resource.tags;
           let objectsNumber = resStream.data.resource.objects.length;
-          this.$data.allStreamTags.concat(streamTags);
+          let units = resStream.data.resource.baseProperties.units;
+          let tolerance = resStream.data.resource.baseProperties.tolerance;
+
+
+//canRead: streamCanRead, canWrite: streamCanWrite, tags: streamTags, 
+          var rawData = {stream_id: stream_id, canRead: streamCanRead, canWrite: streamCanWrite, tags: streamTags, objNum: objectsNumber, owner: streamOwnerID, createdAt: new Date(streamCreatedAt).toLocaleString("en-GB"), updatedAt: new Date(streamUpdatedAt).toLocaleString("en-GB"), units: units, tol: tolerance}
+          this.$data.parcoords_rawData.push(rawData)
+          // COLLECT_ALL
+          
+          // this.$data.all_streamTags.concat(streamTags)
+          // this.$data.all_streamCreatedAt.push(streamCreatedAt)
+          // this.$data.all_streamUpdatedAt.push(streamUpdatedAt)
+
+          
           for (var j = 0; j < streamTags.length; j++) {
             this.$data.allStreamTagsJSON.push({ name: streamTags[j] });
           }
@@ -504,7 +569,11 @@ export default {
             size: "10",
             objectsNumber: objectsNumber,
             name: `🛰️📦${streamName}`,
-            tags: streamTags
+            tags: streamTags,
+            canRead: streamCanRead,
+            canWrite: streamCanWrite,
+            units: units,
+            tolerance: tolerance
           });
         } catch (error) {
           console.log("Can't access stream: " + streamShortID);
@@ -529,10 +598,10 @@ export default {
             }catch (error) {
               console.log("Can't access user info");
             }
-            let userInfo = resOwner.data.resource
 
             
-
+            let userInfo = resOwner.data.resource
+            let clientCanRead = resClient.data.resources[j].canRead;
             let clientCreatedAt = resClient.data.resources[j].createdAt;
             let clientUpdatedAt = resClient.data.resources[j].updatedAt;
             let clientRole = resClient.data.resources[j].role;
@@ -540,6 +609,7 @@ export default {
             let clientDocumentName = resClient.data.resources[j].documentName;
             let clientDocumentID = resClient.data.resources[j].documentGuid;
             let customName = ``;
+
             if (clientRole == "Sender") {
               customName = `🚀`;
             }
@@ -547,9 +617,8 @@ export default {
               customName = `📡`;
             }
 
-            // TO DELETE EXCEPTION FOR DIM
-            // if(clientOwnerID === "5ac0c6f2cc774c3379247c1b"){
-            // }else{
+            // COLLECT ALL
+
 
             nodes.push({
               type: "Client",
@@ -615,7 +684,72 @@ export default {
       //this.dates = createdAts;
       this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]];
       //console.log(JSON.stringify(this.allStreamTagsJSON), 'lol')
-      return [nodes, streamLinks];
+      console.log(this.$data.parcoords_rawData)
+      
+      
+
+ 
+      
+      // find all permutations
+       
+      for (var i = 0; i < this.$data.parcoords_rawData.length; i++) {
+        for(var j = 0; j < this.$data.parcoords_rawData[i].canRead.length; j++){
+          for(var k = 0; k < this.$data.parcoords_rawData[i].canWrite.length; k++){
+            for(var l = 0; l < this.$data.parcoords_rawData[i].tags.length; l++){
+              
+              
+              var index_canRead = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canRead[j]);
+              var index_canWrite = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canWrite[k]);
+              var index_owner = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].owner);
+
+              if(index_canRead == "-1" || index_canWrite == "-1"){
+
+                  // HANDLE CASE IF MORE USER PERMISSIONS IN STREAMS
+
+              }else{
+                var parcoord_permut = {stream_id: this.$data.parcoords_rawData[i].stream_id, canRead: this.$data.all_userCode[index_canRead].split('@')[0], canWrite: this.$data.all_userCode[index_canWrite].split('@')[0], tags: this.$data.parcoords_rawData[i].tags[l], objNum: this.$data.parcoords_rawData[i].objNum, owner: this.$data.all_userCode[index_owner], "owner's company": this.$data.all_userInfo[index_owner].company, createdAt: this.$data.parcoords_rawData[i].createdAt, updatedAt: this.$data.parcoords_rawData[i].updatedAt, units: this.$data.parcoords_rawData[i].units, tol: this.$data.parcoords_rawData[i].tol};
+
+                this.$data.parcoords_permut_data.push(parcoord_permut);
+              }
+
+
+            }
+          }
+        }
+
+        
+
+        // console.log(this.$data.parcoords_rawData[i].canRead)
+        // console.log(this.$data.parcoords_rawData[i][Object.keys(this.$data.parcoords_rawData[i])[0]])
+      }
+      
+      let parcoords_nodupdata = Array.from(new Set(this.$data.parcoords_permut_data))
+
+      // let parcoords_selstreams = parcoords_nodupdata.map(e => e._id)
+      // console.log(parcoords_selstreams)
+      var context = this
+      let parcoords = ParCoords()("#example")
+          .data(
+          parcoords_nodupdata
+          )
+          .render()
+          .createAxes()
+          .reorderable()
+          .brushMode("1D-axes-multi")
+      
+          parcoords.on('brush', function(brushed, args){
+          //console.log(brushed.map(e => e.stream_id))
+          //console.log(context.$data.parcoords_selstreams)
+          context.$data.parcoords_selstreams = Array.from(new Set(brushed.map(e => e.stream_id)))
+          //console.log(Array.from(new Set(brushed.map(e => e.stream_id))))
+
+      })
+
+
+
+      return [nodes, streamLinks], parcoords;
+    
+    
     }
   }
 };
@@ -653,4 +787,5 @@ export default {
 //    opacity: 0.65;
 //    border-color: transparent!important;
 //  }
+
 </style>
