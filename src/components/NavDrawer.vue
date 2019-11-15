@@ -116,6 +116,15 @@
           <v-list-tile-sub-title class='xxx-font-weight-light caption'>Stream processing</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
+      <v-list-tile to='/plugins'>
+        <v-list-tile-action>
+          <v-icon>extensions</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Plugins</v-list-tile-title>
+          <v-list-tile-sub-title class='xxx-font-weight-light caption'>Plugins registered on this server</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
       <v-divider class='ma-3'></v-divider>
     </v-list>
     <v-list v-if='$store.state.isAuth' two-line subheader>
