@@ -12,7 +12,6 @@
         <g id="marker" />
         <g id="circleSender" />
         <g id="circleReceiver" />
-
         <!-- <g id="rectParcoords" /> -->
         <g id="rectStream" />
         <g id="text" />
@@ -158,7 +157,6 @@ export default {
       window.open(viewerUrl, "_blank").focus() 
     },
     brush: function() {
-      console.log(this.brush) 
     },
     switchForce: function() {
       if (this.switchForce) {
@@ -208,8 +206,7 @@ export default {
       }
     },
     clientdatafilter: function() {
-      console.log("ooups") 
-      console.log(this.timeFilter) 
+ 
     },
 
     timeFilter: function() {
@@ -360,9 +357,9 @@ export default {
           }
         }
       ]},
-      menuStream(context){ 
+      menuStream(){ 
             
-            var context = this
+            let context = this
             
             return [
             
@@ -569,8 +566,8 @@ export default {
     },
 
     drawGraph() {
-      let _nodes = this.clientdata[0];
-      let links = this.clientdata[1];
+      let _nodes = this.clientdata[0] 
+      let links = this.clientdata[1] 
 
       // Sorts all nodes by creation timestamps
       _nodes.sort(function(a, b) {
@@ -578,47 +575,44 @@ export default {
           ? -1
           : a.createdAt > b.createdAt
           ? 1
-          : 0;
-      });
+          : 0 
+      }) 
 
-      // console.log(_nodes);
-      // console.log(links);
-
-      let thisContext = this;
+      let thisContext = this 
 
       for (let i = 0; i < links.length; i++) {
         if (links[i].action === "sending") {
           let source = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e._id;
+                return e._id 
               }
             })
-            .indexOf(links[i].source);
+            .indexOf(links[i].source) 
 
           // defines a source per client
           let sourceClient = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e._id;
+                return e._id 
               }
             })
-            .indexOf(links[i].sourceClient);
+            .indexOf(links[i].sourceClient) 
 
           // defines a source per document
           let sourceDoc = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e.documentGuid;
+                return e.documentGuid 
               }
             })
-            .indexOf(links[i].sourceDoc);
+            .indexOf(links[i].sourceDoc) 
 
           let target = _nodes
             .map(function(e) {
-              return e._id;
+              return e._id 
             })
-            .indexOf(links[i].target);
+            .indexOf(links[i].target) 
 
           thisContext.forceLinks.push({
             source,
@@ -627,40 +621,40 @@ export default {
             target,
             type: `sending`,
             display: true
-          });
+          }) 
         }
         if (links[i].action === "receiving") {
           let source = _nodes
             .map(function(e) {
-              return e._id;
+              return e._id 
             })
-            .indexOf(links[i].source);
+            .indexOf(links[i].source) 
 
           let target = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e._id;
+                return e._id 
               }
             })
-            .indexOf(links[i].target);
+            .indexOf(links[i].target) 
 
           // defines a target per document
           let targetDoc = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e.documentGuid;
+                return e.documentGuid 
               }
             })
-            .indexOf(links[i].targetDoc);
+            .indexOf(links[i].targetDoc) 
 
           // defines a target per client
           let targetClient = _nodes
             .map(function(e) {
               if (e.type === "Client") {
-                return e._id;
+                return e._id 
               }
             })
-            .indexOf(links[i].targetClient);
+            .indexOf(links[i].targetClient) 
 
           thisContext.forceLinks.push({
             source,
@@ -669,17 +663,17 @@ export default {
             targetClient,
             type: `receiving`,
             display: true
-          });
+          }) 
         }
       }
 
-      let clientNodes = _nodes.filter(data => data.type == "Client");
-      let parentGroups = this.groupBy(clientNodes, "owner");
+      let clientNodes = _nodes.filter(data => data.type == "Client") 
+      let parentGroups = this.groupBy(clientNodes, "owner") 
 
     
     let circleOwnerData = []
       for (let property in parentGroups) {
-        let parGroup = parentGroups[property];
+        let parGroup = parentGroups[property] 
 
         // let sumX = 0
         // let sumY = 0
@@ -695,7 +689,7 @@ export default {
 
 
       for (let property in parentGroups) {
-        let parGroup = parentGroups[property];
+        let parGroup = parentGroups[property] 
         for (let i = 0; i < parGroup.length - 1; i++) {
           for (let j = i + 1; j < parGroup.length; j++) {
             thisContext.forceLinks.push({
@@ -703,19 +697,19 @@ export default {
               target: parGroup[j],
               type: "ownerForceGroup",
               display: false
-            });
+            }) 
           }
         }
       }
 
 
 
-    let childGroups = this.groupBy(clientNodes, "documentGuid");
+    let childGroups = this.groupBy(clientNodes, "documentGuid") 
 
     
     let circleDocData = []
       for (let property in childGroups) {
-        let childGroup = childGroups[property];
+        let childGroup = childGroups[property] 
         let infoDoc = ""
 
         if(childGroup[0].documentType === "Rhino"){
@@ -775,7 +769,7 @@ export default {
       //     .extent( [ [0,0], [this.$data.svgWidth,this.$props.svgHeight] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
       //   )
 
-      let svg = d3.select("#graphLayout");
+      let svg = d3.select("#graphLayout") 
 
       // let brush = svg.append("g")
       //   .attr("class", "brush");
@@ -796,11 +790,11 @@ export default {
           "link",
           d3.forceLink(thisContext.forceLinks).distance(d => {
             if (d.type == "ownerForceGroup") {
-              return this.documentLinksForce;
+              return this.documentLinksForce 
             } else if (d.type == "documentGuidForceGroup") {
-              return this.documentLinksForce;
+              return this.documentLinksForce 
             } else {
-              return 100;
+              return 100 
             }
           })
         )
@@ -812,79 +806,79 @@ export default {
           "charge",
           d3.forceManyBody().strength(function(d) {
             if (d.type == "ownerForceGroup") {
-              return 200;
+              return 200 
             } else if (d.type == "documentGuidForceGroup") {
-              return 200;
+              return 200 
             } else {
-              return -700;
+              return -700 
             }
           })
         )
-        .on("tick", tick);
+        .on("tick", tick) 
 
       if (this.selectedGraphLayout == "Free") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0))
-          .force("forceY", d3.forceY(0).strength(0));
+          .force("forceY", d3.forceY(0).strength(0)) 
       }
 
       if (this.selectedGraphLayout == "Horizontal") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0))
-          .force("forceY", d3.forceY(0).strength(0.08));
+          .force("forceY", d3.forceY(0).strength(0.08)) 
       }
 
       if (this.selectedGraphLayout == "Vertical") {
         this.$data.simulation
           .force("forceX", d3.forceX(0).strength(0.08))
-          .force("forceY", d3.forceY(0).strength(0));
+          .force("forceY", d3.forceY(0).strength(0)) 
       }
 
       //add zoom capabilities
-      let zoom_handler = d3.zoom().on("zoom", this.zoom_actions);
+      let zoom_handler = d3.zoom().on("zoom", this.zoom_actions) 
 
-      zoom_handler(svg);
+      zoom_handler(svg) 
       // REMOVE ZOOM
-      svg.on("dblclick.zoom", null);
+      svg.on("dblclick.zoom", null) 
       this.$data.simulation.nodes().forEach(function(d) {
-        d.selected = false;
-        d.previouslySelected = false;
-      });
+        d.selected = false 
+        d.previouslySelected = false 
+      }) 
 
       if (this.switchForce) {
         // docs
         let filterLinks = this.forceLinks.filter(
           d => d.type != "documentGuidForceGroup"
-        );
-        this.$data.simulation.force("link").links(filterLinks);
-        this.$data.simulation.alpha(1).restart();
+        ) 
+        this.$data.simulation.force("link").links(filterLinks) 
+        this.$data.simulation.alpha(1).restart() 
       } else {
         let filterLinks = this.forceLinks.filter(
           d => d.type != "ownerForceGroup"
-        );
-        this.$data.simulation.force("link").links(filterLinks);
-        this.$data.simulation.alpha(1).restart();
+        ) 
+        this.$data.simulation.force("link").links(filterLinks) 
+        this.$data.simulation.alpha(1).restart() 
       }
 
       this.$data.colour = d3
         .scaleLinear()
         .domain([0, _nodes.length - 1])
         .interpolate(d3.interpolateHcl)
-        .range([d3.rgb("lightgray"), d3.rgb("blue")]);
+        .range([d3.rgb("lightgray"), d3.rgb("blue")]) 
 
       let xScale = d3
         .scaleLinear()
         .domain([0, this.svgWidth])
-        .range([0, this.svgWidth]);
+        .range([0, this.svgWidth]) 
       let yScale = d3
         .scaleLinear()
         .domain([0, this.svgHeight])
-        .range([0, this.svgHeight]);
+        .range([0, this.svgHeight]) 
 
       // Define the div for the tooltip
-      let divCircle = d3.select(".tooltip").style("opacity", 0);
-      let divOwner = d3.select(".tooltipOwner").style("opacity", 0);
-      let divDoc = d3.select(".tooltipDoc").style("opacity", 0);
+      let divCircle = d3.select(".tooltip").style("opacity", 0) 
+      let divOwner = d3.select(".tooltipOwner").style("opacity", 0) 
+      let divDoc = d3.select(".tooltipDoc").style("opacity", 0) 
       
       svg
         .select("#hullOwner")
@@ -897,16 +891,16 @@ export default {
 
         .on("mouseover", function(d) {
           
-          divOwner.style("opacity", 0.8);
+          divOwner.style("opacity", 0.8) 
           divOwner
             .html(`Owner: ${d.values[0].owner}`)
             .style("left", d3.event.pageX + "px")
-            .style("top", d3.event.pageY - 28 + "px");
+            .style("top", d3.event.pageY - 28 + "px") 
         })
         .on("mouseout", function(d) {
-          divOwner.style("opacity", 0);
-        });
-      svg.select("#hullOwner").selectAll("path");
+          divOwner.style("opacity", 0) 
+        }) 
+      svg.select("#hullOwner").selectAll("path") 
 
       // let childGroups = this.groupBy(clientNodes, "documentGuid");
 
@@ -919,7 +913,7 @@ export default {
         .attr("class", "subhullDoc")
         .on("mouseover", function(d) {
           
-          divDoc.style("opacity", 0.8);
+          divDoc.style("opacity", 0.8) 
           divDoc
             .html(
               `DocumentGuid: ${d.values[0].documentGuid}<br/>
@@ -927,36 +921,35 @@ export default {
             DocumentName: ${d.values[0].documentName}`
             )
             .style("left", d3.event.pageX + "px")
-            .style("top", d3.event.pageY - 28 + "px");
+            .style("top", d3.event.pageY - 28 + "px") 
         })
         .on("mouseout", function(d) {
-          divDoc.style("opacity", 0);
-        });
+          divDoc.style("opacity", 0) 
+        }) 
 
       let groupOwners = d3
         .nest()
         .key(function(d) {
-          return d.owner;
+          return d.owner 
         })
-        .entries(this.simulation.nodes().filter(data => data.type == "Client"));
+        .entries(this.simulation.nodes().filter(data => data.type == "Client")) 
       
       let groupDocs = d3
         .nest()
         .key(function(d) {
-          return d.documentGuid;
+          return d.documentGuid 
         })
-        .entries(this.simulation.nodes().filter(data => data.type == "Client"));
+        .entries(this.simulation.nodes().filter(data => data.type == "Client")) 
 
       let context = this
       let groupPath = function(d) {
-        //console.log(d.values);
         if(d.values.length >= 3){
           return (
             "M" +
             d3
               .polygonHull(
                 d.values.map(function(i) {
-                  return [i.x, i.y];
+                  return [i.x, i.y] 
                 })
               )
               .join("L") +
@@ -967,12 +960,12 @@ export default {
          return (
             context.$data.roundedHull(
                 d.values.map(function(i) {
-                  return [i.x, i.y];
+                  return [i.x, i.y] 
                 })
               )
           )
         }
-      };
+      } 
 
       //
       svg
@@ -992,12 +985,10 @@ export default {
         .attr("viewBox", "0 -5 10 10")
         // handles the size difference between streams and client
         .attr("refX", data => {
-          //console.log(data);
           if (data.type === "sending") {
-            return 21;
+            return 21 
           } else if (data.type === "receiving") {
-            //console.log(data);
-            return 15;
+            return 15 
           }
         })
         .attr("refY", 0)
@@ -1008,9 +999,9 @@ export default {
 
         //.attr("fill", data => this.colour(data.target.index))
         .attr("markerUnits", "userSpaceOnUse")
-        .attr("stroke-linecap", "round");
+        .attr("stroke-linecap", "round") 
       // .append("svg:path")
-      // .attr("d", "M0,-5L10,0L0,5");
+      // .attr("d", "M0,-5L10,0L0,5") 
       let path = svg
         .select("#pathLink")
         .selectAll("path")
@@ -1026,20 +1017,20 @@ export default {
         .attr("stroke-width", data => {
           if (data.source.type === "Stream") {
             if (data.source.objectsNumber > 15) {
-              return 8;
+              return 8 
             } else if (data.source.objectsNumber < 2) {
-              return 3;
+              return 3 
             } else {
-              return data.source.objectsNumber;
+              return data.source.objectsNumber 
             }
           }
           if (data.target.type === "Stream") {
             if (data.target.objectsNumber > 15) {
-              return 8;
+              return 8 
             } else if (data.target.objectsNumber < 2) {
-              return 3;
+              return 3 
             } else {
-              return data.target.objectsNumber;
+              return data.target.objectsNumber 
             }
           }
         })
@@ -1047,12 +1038,12 @@ export default {
         .attr("source_timestamp", data => data.source.createdAt)
         .attr("target_timestamp", data => data.target.createdAt)
         .attr("class", function(d) {
-          return "link " + d.type;
+          return "link " + d.type 
         })
 
         .attr("marker-end", function(d) {
-          return "url(#" + d.type + ")";
-        });
+          return "url(#" + d.type + ")" 
+        }) 
       //
       //
       let circleSender = svg
@@ -1067,25 +1058,25 @@ export default {
         .attr("class", "node")
         .attr("r", 6)
         .attr("timestamp", function(d) {
-          return d.createdAt;
+          return d.createdAt 
         })
         .on("dblclick", dblclick)
         .call(this.drag(this.$data.simulation))
         // .on("mouseover", function(d) {
         //   divCircle.
-        //       style("opacity", .8);
+        //       style("opacity", .8) 
         //       divCircle.html(`Owner: ${d.owner}<br/>
         //       ${d.documentType}: ${d.documentName}<br/>
         //       Created at: ${d.createdAt}<br/>
         //       Updated at: ${d.updatedAt}`)
         //       .style("left", (d3.event.pageX) + "px")
-        //       .style("top", (d3.event.pageY - 28) + "px");
+        //       .style("top", (d3.event.pageY - 28) + "px") 
         //   })
         // .on("mouseout", function(d) {
-        //   divCircle.style("opacity", 0);
+        //   divCircle.style("opacity", 0) 
         // })
         //
-        .on("contextmenu", this.contextMenu("client", this.menuClient));
+        .on("contextmenu", this.contextMenu("client", this.menuClient)) 
       let circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
@@ -1098,27 +1089,27 @@ export default {
         .attr("class", "node")
         .attr("r", 6)
         .attr("timestamp", function(d) {
-          return d.createdAt;
+          return d.createdAt 
         })
         .on("dblclick", dblclick)
         .call(this.drag(this.$data.simulation))
         // .on("mouseover", function(d) {
         //   divCircle.
-        //       style("opacity", .8);
+        //       style("opacity", .8) 
         //       divCircle.html(`Owner: ${d.owner}<br/>
         //       ${d.documentType}: ${d.documentName}<br/>
         //       Created at: ${d.createdAt}<br/>
         //       Updated at: ${d.updatedAt}`)
         //       .style("left", (d3.event.pageX) + "px")
-        //       .style("top", (d3.event.pageY - 28) + "px");
+        //       .style("top", (d3.event.pageY - 28) + "px") 
         //   })
         // .on("mouseout", function(d) {
-        //   divCircle.style("opacity", 0);
+        //   divCircle.style("opacity", 0) 
         // })
         //
-        .on("contextmenu", this.contextMenu("client", this.menuClient));
-      const rectWidth = 24;
-      const rectHeight = 24;
+        .on("contextmenu", this.contextMenu("client", this.menuClient)) 
+      const rectWidth = 24 
+      const rectHeight = 24 
       
 
       
@@ -1138,7 +1129,7 @@ export default {
       //   .attr("ry", 3)
       //   .attr("fill", "none")
       //   .attr("timestamp", function(d) {
-      //     return d.createdAt;
+      //     return d.createdAt 
       //   })
 
       let rect = svg
@@ -1155,11 +1146,11 @@ export default {
         .attr("rx", 3)
         .attr("ry", 3)
         .attr("timestamp", function(d) {
-          return d.createdAt;
+          return d.createdAt 
         })
         .on("dblclick", dblclick)
         .call(this.drag(this.$data.simulation))
-        .on("contextmenu", this.contextMenu("stream", this.menuStream));
+        .on("contextmenu", this.contextMenu("stream", this.menuStream)) 
 
       let text = svg
         .select("#text")
@@ -1168,8 +1159,8 @@ export default {
         .enter()
         .append("svg:g")
         .attr("timestamp", function(d) {
-          return d.createdAt;
-        });
+          return d.createdAt 
+        }) 
       text
         .append("svg:text")
         .attr("x", 8)
@@ -1180,12 +1171,12 @@ export default {
           if (d.type == "Client") {
             return "30px"
           } else {
-            return "30px";
+            return "30px" 
           }
         })
         .text(function(d) {
-          return d.name;
-        });
+          return d.name 
+        }) 
       text
         .append("svg:text")
         .attr("x", 8)
@@ -1195,12 +1186,12 @@ export default {
           if (d.type == "Client") {
             return "30px"
           } else {
-            return "30px";
+            return "30px" 
           }
         })
         .text(function(d) {
-          return d.name;
-        });
+          return d.name 
+        }) 
 
 
 
@@ -1211,10 +1202,10 @@ export default {
         // .data(circleOwnerData)
         // .enter()
         // .append("circle")
-        // .attr("cx", function (d) { return d.cx; })
-        // .attr("cy", function (d) { return d.cy; })
-        // .attr("r", function (d) { return d.radius; })
-        // .style("fill", function (d) { return d.color; })
+        // .attr("cx", function (d) { return d.cx  })
+        // .attr("cy", function (d) { return d.cy  })
+        // .attr("r", function (d) { return d.radius  })
+        // .style("fill", function (d) { return d.color  })
 
       let textOwner = svg
         .select("#textOwner")
@@ -1232,12 +1223,12 @@ export default {
         .attr('x', 0)
         .attr('y', 0)
         .style("font-weight", "800")
-        .text(function(d) { return `${d.userInfo.surname.charAt(0)}${d.userInfo.name.charAt(0)}`; })
+        .text(function(d) { return `${d.userInfo.surname.charAt(0)}${d.userInfo.name.charAt(0)}`  })
         .append('svg:tspan')
         .attr('x', 90)
         .attr('y', 0)
         .style("font-size", "30px")
-        .text(function(d) { return `(${d.userInfo.company})`; })
+        .text(function(d) { return `(${d.userInfo.company})`  })
         .append('svg:tspan')
 
 
@@ -1247,8 +1238,8 @@ export default {
         // .data(circleDocData)
         // .enter()
         // .append("circle")
-        // .attr("r", function (d) { return d.radius; })
-        // .style("fill", function (d) { return d.color; })
+        // .attr("r", function (d) { return d.radius  })
+        // .style("fill", function (d) { return d.color  })
         
     let textDoc = svg
         .select("#textDoc")
@@ -1284,7 +1275,7 @@ export default {
 
 
 
-      let parentContext = this;
+      let parentContext = this 
       function brushstarted() {
         if (d3.event.sourceEvent.type !== "end") {
           svg
@@ -1292,14 +1283,14 @@ export default {
             .selectAll("rect")
             .classed("selected", function(d) {
               return (d.selected = d.previouslySelected =
-                parentContext.$data.shiftKey && d.selected);
-            });
+                parentContext.$data.shiftKey && d.selected) 
+            }) 
         }
       }
 
       function brushed() {
         if (d3.event.sourceEvent.type !== "end") {
-          let selection = d3.event.selection;
+          let selection = d3.event.selection 
           svg
             .select("#rectStream")
             .selectAll("rect")
@@ -1310,30 +1301,29 @@ export default {
                   selection[0][0] <= d.x &&
                   d.x < selection[1][0] &&
                   selection[0][1] <= d.y &&
-                  d.y < selection[1][1]));
-            });
+                  d.y < selection[1][1])) 
+            }) 
         }
       }
 
       function brushended() {
         if (d3.event.selection != null) {
-          d3.select(this).call(d3.event.target.move, null);
+          d3.select(this).call(d3.event.target.move, null) 
         }
       }
 
       function dblclick(d) {
-        d3.select(this).classed("fixed", (d.fixed = !d.fixed));
+        d3.select(this).classed("fixed", (d.fixed = !d.fixed)) 
       }
       function dragstart(d) {
         if (this.toggleFix) {
-          console.log("loll");
-          d3.select(this).classed("fixed", (d.fixed = true));
+          d3.select(this).classed("fixed", (d.fixed = true)) 
         } else {
-          d3.select(this).classed("fixed", (d.fixed = false));
+          d3.select(this).classed("fixed", (d.fixed = false)) 
         }
       }
 
-      //let parentContext = this;
+      //let parentContext = this 
       function tick() {
         
         svg
@@ -1342,11 +1332,11 @@ export default {
           data => parentContext.colour(data.index)
           )
           .attr("cx", function(d) {
-            return d.x;
+            return d.x 
           })
           .attr("cy", function(d) {
-            return d.y;
-          });
+            return d.y 
+          }) 
         
 
         svg
@@ -1381,11 +1371,11 @@ export default {
                   if (j === i && avX && avY) {
                     d3.select(this)
                     .attr("transform", function(d) {
-                      return "translate(" + avX + "," + avY + ")";
+                      return "translate(" + avX + "," + avY + ")" 
                     })
                   }
                 })
-        });
+        }) 
 
 
         svg
@@ -1430,11 +1420,11 @@ export default {
                   if (j == i && avX && avY) {
                     d3.select(this)
                     .attr("transform", function(d) {
-                      return "translate(" + avX + "," + avY + ")";
+                      return "translate(" + avX + "," + avY + ")" 
                     })
                   }
                 })
-        });
+        }) 
         
                 
         svg
@@ -1444,20 +1434,20 @@ export default {
           .attr("d", groupPath)
           .enter()
           .insert("path")
-          .attr("d", groupPath);
+          .attr("d", groupPath) 
         
         path
           .attr("d", function(d) {
             let dx = d.target.x - d.source.x,
               dy = d.target.y - d.source.y,
-              dr = Math.sqrt(dx * dx + dy * dy);
-            let x0 = d.source.x;
-            let y0 = d.source.y;
-            let x1 = d.target.x;
-            let y1 = d.target.y;
-            let xcontrol = x1 * 0.5 + x0 * 0.5;
-            let ycontrol = y1 * 0.5 + y0 * 0.5;
-            let smartDiagonal;
+              dr = Math.sqrt(dx * dx + dy * dy) 
+            let x0 = d.source.x 
+            let y0 = d.source.y 
+            let x1 = d.target.x 
+            let y1 = d.target.y 
+            let xcontrol = x1 * 0.5 + x0 * 0.5 
+            let ycontrol = y1 * 0.5 + y0 * 0.5 
+            let smartDiagonal 
             if (Math.abs(x0 - x1) > Math.abs(y0 - y1)) {
               smartDiagonal = [
                 "M",
@@ -1470,7 +1460,7 @@ export default {
                 y1,
                 x1,
                 y1
-              ].join(" ");
+              ].join(" ") 
             }
             if (Math.abs(y0 - y1) > Math.abs(x0 - x1)) {
               smartDiagonal = [
@@ -1484,7 +1474,7 @@ export default {
                 ycontrol,
                 x0,
                 y0
-              ].join(" ");
+              ].join(" ") 
             }
 
             if (parentContext.selectedEdgesDisplay == "Diagonal Horizontal") {
@@ -1499,7 +1489,7 @@ export default {
                 y1,
                 x1,
                 y1
-              ].join(" ");
+              ].join(" ") 
             }
             if (parentContext.selectedEdgesDisplay == "Diagonal Vertical") {
               return [
@@ -1513,56 +1503,52 @@ export default {
                 ycontrol,
                 x0,
                 y0
-              ].join(" ");
+              ].join(" ") 
             }
             if (parentContext.selectedEdgesDisplay == "Diagonal Smart") {
-              return smartDiagonal;
+              return smartDiagonal 
             }
             if (parentContext.selectedEdgesDisplay == "Line") {
-              return ["M", x0, y0, "L", x1, y1].join(" ");
+              return ["M", x0, y0, "L", x1, y1].join(" ") 
             }
             if (parentContext.selectedEdgesDisplay == "Arc") {
-              return ["M", x0, y0, "A", dr, dr, " 0 0,1 ", x1, y1].join(" ");
+              return ["M", x0, y0, "A", dr, dr, " 0 0,1 ", x1, y1].join(" ") 
             }
           })
-          .attr("stroke", data => parentContext.colour(data.source.index));
+          .attr("stroke", data => parentContext.colour(data.source.index)) 
         //
         // svg.selectAll('marker')
         // .attr('fill', data =>
         //   colour(data.target.index)
-        // );
+        // ) 
         // circleSender.attr("transform", function(d) {
-        //   return "translate(" + d.x + "," + d.y + ")";
+        //   return "translate(" + d.x + "," + d.y + ")" 
         // })
-        // ;
+        //  
         // circleReceiver.attr("transform", function(d) {
-        //   return "translate(" + d.x + "," + d.y + ")";
-        // });
+        //   return "translate(" + d.x + "," + d.y + ")" 
+        // }) 
         rect.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
+          return "translate(" + d.x + "," + d.y + ")" 
+        }) 
         text.attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        });
+          return "translate(" + d.x + "," + d.y + ")" 
+        }) 
 
       }
 
-      this.drawGraph.tick = tick; // create a reference to the inner function
+      this.drawGraph.tick = tick  // create a reference to the inner function
 
-      this.updateDisplayNodes("#circleSender");
-      this.updateDisplayNodes("#circleReceiver");
-      this.updateDisplayNodes("#rectStream");
-      this.updateDisplayNodes("#text");
-      this.updateDisplayLinks("#pathLink");
+      this.updateDisplayNodes("#circleSender") 
+      this.updateDisplayNodes("#circleReceiver") 
+      this.updateDisplayNodes("#rectStream") 
+      this.updateDisplayNodes("#text") 
+      this.updateDisplayLinks("#pathLink") 
     }
   },
   mounted() {
-    this.svgWidth = document.getElementById("clientGraph").offsetWidth;
-    this.drawGraph();
-    // window.addEventListener("keypress", function(e) {
-    //   console.log(String.fromCharCode(e.keyCode));
-    // });
-
+    this.svgWidth = document.getElementById("clientGraph").offsetWidth 
+    this.drawGraph() 
   },
 
   computed: {
@@ -1572,7 +1558,7 @@ export default {
     }
       
   }
-};
+} 
 </script>
 
 <style>
