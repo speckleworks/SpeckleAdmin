@@ -151,8 +151,9 @@ export default {
         }
       );
 
-      var url =
-        "https://hestia.speckle.works/#/view/" + selectedStreams.join(",");
+      //var url = "https://hestia.speckle.works/#/view/" + selectedStreams.join(",");
+      var url = `${this.$store.state.server.substring(0, this.$store.state.server.length - 4)}/#/view/` + selectedStreams.join(",");
+
       window.open(url, "_blank").focus();
     },
     brush: function() {
@@ -229,6 +230,7 @@ export default {
     selectedTaggedStreams: [],
 
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
+    context: this,
     menuStream: [
       {
         title: "View Stream in Viewer",
@@ -254,7 +256,7 @@ export default {
         title: "View Stream Data",
         action: function(d, i) {
           var data = d3.select(d).datum();
-          var url = "https://hestia.speckle.works/api/streams/" + data.streamId;
+          var url = `${this.context.$store.state.server}/streams/` + data.streamId;
           window.open(url, "_blank").focus();
         }
       },

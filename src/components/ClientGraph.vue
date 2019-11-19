@@ -496,7 +496,7 @@ export default {
       let resProject;
       try {
         resProject = await axios.get(
-          `https://hestia.speckle.works/api/projects/${this.project._id}`
+          `${this.$store.state.server}/projects/${this.project._id}`
         );
       } catch (err) {
         console.log(err);
@@ -514,7 +514,7 @@ export default {
           let resOwner
           try {
             resOwner = await axios.get(
-              `https://hestia.speckle.works/api/accounts/${user}`
+              `${this.$store.state.server}/accounts/${user}`
             )
           }catch (error) {
             console.log("Can't access user info");
@@ -539,7 +539,7 @@ export default {
 
         try {
           resStream = await axios.get(
-            `https://hestia.speckle.works/api/streams/${streamShortID}`
+            `${this.$store.state.server}/streams/${streamShortID}`
           );
 
 
@@ -547,7 +547,7 @@ export default {
           let resOwner
           try {
             resOwner = await axios.get(
-              `https://hestia.speckle.works/api/accounts/${streamOwnerID}`
+              `${this.$store.state.server}/accounts/${streamOwnerID}`
             )
           }catch (error) {
             console.log("Can't access user info");
@@ -607,7 +607,7 @@ export default {
         let resClient;
         try {
           resClient = await axios.get(
-            `https://hestia.speckle.works/api/streams/${streamShortID}/clients`
+            `${this.$store.state.server}/streams/${streamShortID}/clients`
           )
 
           for (var j = 0; j < resClient.data.resources.length; j++) {
@@ -617,7 +617,7 @@ export default {
             let resOwner
             try {
               resOwner = await axios.get(
-                `https://hestia.speckle.works/api/accounts/${clientOwnerID}`
+                `${this.$store.state.server}/accounts/${clientOwnerID}`
               )
             }catch (error) {
               console.log("Can't access user info");
