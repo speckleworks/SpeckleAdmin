@@ -114,6 +114,12 @@ let myRouter = new Router( {
       name: 'processor overview',
       component: ( ) => import( './views/Processor.vue' ),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/plugins',
+      name: 'plugins',
+      component: ( ) => import( './views/Plugins.vue'),
+      meta: { requiresAuth: true}
     }
   ],
 } )

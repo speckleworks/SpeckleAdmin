@@ -51,6 +51,8 @@ export default new Vuex.Store( {
     dark: false,
     // toggles viewer controls
     viewerControls: false,
+    // a list of plugins registered with the server
+    plugins: [ ],
 
     // processor related
     // these are the function names for each block from /src/lambda
@@ -531,6 +533,9 @@ export default new Vuex.Store( {
     SET_LEGEND( state, legend ) {
       state.legend = legend
     },
+    ADD_PLUGIN( state, plugin ) {
+      state.plugins.push( plugin )
+    }
   },
   actions: {
     // Streams
@@ -1058,6 +1063,20 @@ export default new Vuex.Store( {
             return reject( err )
           } )
       } )
+    },
+
+    getPlugins( context, payload ) {
+      Axios.get()
+        .then( res => {
+          const plugins = res.data.plugins
+          plugins.forEach( plugin => {
+            context.commit( 'ADD_PLUGIN', plugin )
+          })
+        })
+        .catch ( err => {
+          console.warn ( err )
+          return reject ( err )
+        })
     },
 
     updateLoggedInUser: ( context, payload ) => new Promise( ( resolve, reject ) => {
