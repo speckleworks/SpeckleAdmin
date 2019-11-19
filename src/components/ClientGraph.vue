@@ -1,79 +1,16 @@
 <template>
   <v-card class="elevation-0">
-    <!-- <template>
-      <v-expansion-panel focusable>
-        <v-expansion-panel-content>
-          <template v-slot:header>
-            <span class="title">
-              <b>SpeckleViz&trade;</b> 👁️
-              <span right class="caption font-weight-light">
-                &nbsp; ...need help? click me for more information!
-                <v-icon>contact_support</v-icon>
-              </span>
-            </span>
-          </template>
-          <v-card>
-            <v-card-text class="caption font-weight-light">
-              Welcome to the
-              <b>SPECKLEVIZ&trade;</b> interface!
-              <br />The term
-              <i>Metagraph</i> is composed of the prefix "Meta" (from the Greek
-              <b>μετά-</b> meaning "after" or "beyond") and the suffix "Graph" (from the Greek
-              <b>-γραφω</b> meaning "that is written")
-              <br />In other words, this graph has been created to help you get a better understanding of the
-              <b>data flow</b> between the project's users, streams and documents.
-              <br />
-
-              <br />
-              <b>1. How to read the graph</b>
-              <br />
-              <v-icon>fiber_manual_record</v-icon>Circle nodes represent
-              <b>Senders (S)</b> and
-              <b>Receivers (R)</b>.
-              <br />
-              <v-icon>crop_square</v-icon>Square nodes represent
-              <b>Streams</b>.
-              <br />
-              <v-icon>compare_arrows</v-icon>Arrows represent either data that has been shared to a stream by a user (
-              <v-icon>fiber_manual_record</v-icon>
-              <v-icon>arrow_right_alt</v-icon>
-              <v-icon>crop_square</v-icon>) or data that has been retrieved by a user from a stream (
-              <v-icon>crop_square</v-icon>
-              <v-icon>arrow_right_alt</v-icon>
-              <v-icon>fiber_manual_record</v-icon>).
-              <br />
-              <v-icon>color_lens</v-icon>Generally, both nodes and edges are coloured according to their timestamps (dark blue for the newest created, light grey for the oldest).
-              <br />
-              <br />
-              <b>2. What you can do</b>
-              <br />
-              <v-icon>gesture</v-icon>You can drag nodes around! 😲
-              <br />
-              <v-icon>group_work</v-icon>The clients are grouped either by Document GUID or User GUID. You can switch between the two by using the toggle switch situated on the toolbar.
-              <br />
-              <v-icon>360</v-icon>Right clicking on a stream will direct you to its related viewer interface!
-              <br />
-              <v-icon>timeline</v-icon>Use the slider below the toolbar to select and highlight a specific timeframe of your project!
-              <br />
-              <v-icon>refresh</v-icon>If you add streams to your project, you might want to hit the refresh button as the graph
-              <b>won't update automatically</b>.
-              <br />
-              <v-icon>gps_not_fixed</v-icon>
-              <v-icon>gps_fixed</v-icon>It is possible to anchor/release the graph by clicking on these icons. Double clicking on specific nodes will perform these same actions locally.
-              <br />
-              <v-icon>trending_flat</v-icon>
-              <v-icon>redo</v-icon>The graph's edges can be visualized either by arcs or straight edges.
-              <br />
-              <v-icon>save_alt</v-icon>Finally, you can save your graph as PNG!
-              <br />
-            </v-card-text>
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </template> -->
     <v-card-title class='title font-weight-light'>
+      <div align="center">
       <v-icon small left>import_export</v-icon>&nbsp;
-      <b>SpeckleViz&trade;</b>
+      <b>SpeckleViz&trade;</b>&nbsp;
+      <v-btn class="ml-6" round href="https://speckle.systems/docs/web/speckleviz/" target="_blank">
+        <v-icon left>help_outline</v-icon>
+        need help? read the docs
+        <v-icon right>arrow_right_alt</v-icon>
+      </v-btn>
+      </div>
+  
     </v-card-title>
     <v-container fluid>
       <v-layout>
@@ -180,7 +117,7 @@
         process-dragable
         :piecewise-label="dates.length < 5 ? true : false"
         xxxwidth="100%"
-        xxxstyle="margin-left:10%;"
+        xxxstyle="margin-left:10%"
         :tooltipStyle="{ 'font-size':'11px' }"
         v-if="dates.length>0"
       ></vue-slider>
@@ -198,7 +135,6 @@
         </template>
         <span>Inspect the timeframe</span>
       </v-tooltip>
-      <!-- <div v-if="redrawToggle" id="example" class="parcoords" style="width:100%;height:250px;"></div> -->
       <v-autocomplete
         v-model="allStreamTagsJSON_default"
         :items="allStreamTagsJSON"
@@ -288,7 +224,8 @@ import AsyncComputed from "vue-async-computed"
 import svgtopng from "save-svg-as-png"
 import ParCoords from 'parcoord-es'
 
-Vue.use(AsyncComputed);
+Vue.use(AsyncComputed)
+
 export default {
   name: "ClientGraph",
   components: {
@@ -355,12 +292,12 @@ export default {
   computed: {
     toggle_multiple: function() {
       if (this.switchForce) {
-        return [2];
+        return [2]
       }
       if (!this.switchForce) {
-        return [1];
+        return [1]
       } else {
-        return [1, 2];
+        return [1, 2]
       }
     }
   },
@@ -368,23 +305,23 @@ export default {
   watch: {
     selectedGraphLayout: function() {
       if (this.selectedGraphLayout == "Free") {
-        this.$data.selectedEdgesDisplay = "Diagonal Smart";
+        this.$data.selectedEdgesDisplay = "Diagonal Smart"
       }
       if (this.selectedGraphLayout == "Horizontal") {
-        this.$data.selectedEdgesDisplay = "Diagonal Horizontal";
+        this.$data.selectedEdgesDisplay = "Diagonal Horizontal"
       }
       if (this.selectedGraphLayout == "Vertical") {
-        this.$data.selectedEdgesDisplay = "Diagonal Vertical";
+        this.$data.selectedEdgesDisplay = "Diagonal Vertical"
       }
     },
     sliderValue: function() {
       
-      this.filteredTime = this.sliderValue.map(d => new Date(d).toISOString());
+      this.filteredTime = this.sliderValue.map(d => new Date(d).toISOString())
     },
 
     isUpdating(val) {
       if (val) {
-        setTimeout(() => (this.isUpdating = false), 3000);
+        setTimeout(() => (this.isUpdating = false), 3000)
       }
     }
   },
@@ -406,37 +343,37 @@ export default {
       })
     },
     triggeredTimeFrame(val) {
-      this.streamsInTimeFrame = val;
+      this.streamsInTimeFrame = val 
     },
     triggeredTags(val) {
-      this.taggedStreams = val;
+      this.taggedStreams = val 
     },
 
     remove(item) {
-      const index = this.allStreamTagsJSON_default.indexOf(item.name);
-      if (index >= 0) this.allStreamTagsJSON_default.splice(index, 1);
+      const index = this.allStreamTagsJSON_default.indexOf(item.name) 
+      if (index >= 0) this.allStreamTagsJSON_default.splice(index, 1) 
     },
 
     flatten(arr) {
-      let flat = [];
+      let flat = [] 
       for (let i = 0; i < arr.length; i++) {
-        flat = flat.concat(arr[i]);
+        flat = flat.concat(arr[i])
       }
-      return flat;
+      return flat
     },
     collapseDocuments() {
-      this.documentLinksForce = this.documentLinksForce - 10;
+      this.documentLinksForce = this.documentLinksForce - 10 
     },
     expandDocuments() {
-      this.documentLinksForce = this.documentLinksForce + 10;
+      this.documentLinksForce = this.documentLinksForce + 10 
     },
     getMin() {
-      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
-      return createdAts[this.value3[0]];
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt) 
+      return createdAts[this.value3[0]] 
     },
     getMax() {
-      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
-      return createdAts[this.value3[1]];
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt) 
+      return createdAts[this.value3[1]] 
     },
     mounted() {
 
@@ -448,50 +385,50 @@ export default {
         document.getElementById("graphLayout"),
         "diagram.png",
         { scale: 3 }
-      );
+      ) 
     },
     refocus() {
-      this.$data.focus = !this.$data.focus;
+      this.$data.focus = !this.$data.focus 
     },
     refresh() {
-      this.$asyncComputed.myResolvedValue.update();
-      this.$data.redrawToggle = false;
+      this.$asyncComputed.myResolvedValue.update() 
+      this.$data.redrawToggle = false 
       setTimeout(() => {
-        this.$data.redrawToggle = true;
-      }, 500);
+        this.$data.redrawToggle = true 
+      }, 500) 
     },
     AddResizeListener() {
       //redraw the chart 300ms after the window has been resized
       let context = this
       window.addEventListener("resize", () => {
-        this.$data.redrawToggle = false;
+        this.$data.redrawToggle = false 
           
 
         setTimeout(() => {
-          this.$data.redrawToggle = true;
-        }, 1500);
+          this.$data.redrawToggle = true 
+        }, 1500) 
         
-      });
+      }) 
     }
   },
   updated() {
-    // this.redrawParcoords();
-    this.AddResizeListener();
+    // this.redrawParcoords()
+    this.AddResizeListener()
   },
   asyncComputed: {
     async myResolvedValue() {
-      this.toggleFix = false;
-      let streamLinks = [];
-      let nodes = [];
+      this.toggleFix = false 
+      let streamLinks = [] 
+      let nodes = [] 
 
-      let resProject;
+      let resProject 
       try {
         resProject = await axios.get(
           `${this.$store.state.server}/projects/${this.project._id}`
-        );
+        ) 
       } catch (err) {
-        console.log(err);
-        return;
+        console.log(err) 
+        return 
       }
       
       let allusersSet = new Set([resProject.data.resource.owner, resProject.data.resource.canRead, resProject.data.resource.canWrite])
@@ -508,9 +445,9 @@ export default {
               `${this.$store.state.server}/accounts/${user}`
             )
           }catch (error) {
-            console.log("Can't access user info");
+            console.log("Can't access user info") 
           }
-          let userInfo = resOwner.data.resource;
+          let userInfo = resOwner.data.resource 
           //console.log(userInfo)
 
           let userCode = `${userInfo.name} ${userInfo.surname} @ ${userInfo.company}`
@@ -518,30 +455,29 @@ export default {
           this.$data.all_userInfo.push(userInfo)
       }
 
-      let projectStreams = resProject.data.resource.streams;
-      let projectPermissions = resProject.data.resource.permissions;
+      let projectStreams = resProject.data.resource.streams 
+      let projectPermissions = resProject.data.resource.permissions 
 
-      let alltags = [];
+      let alltags = [] 
       for (let i = 0; i < projectStreams.length; i++) {
-        let streamShortID = projectStreams[i];
-        let stream_id;
-
-        let resStream;
+        let streamShortID = projectStreams[i] 
+        let stream_id 
+        let resStream 
 
         try {
           resStream = await axios.get(
             `${this.$store.state.server}/streams/${streamShortID}`
-          );
+          ) 
 
 
-          let streamOwnerID = resStream.data.resource.owner;
+          let streamOwnerID = resStream.data.resource.owner 
           let resOwner
           try {
             resOwner = await axios.get(
               `${this.$store.state.server}/accounts/${streamOwnerID}`
             )
           }catch (error) {
-            console.log("Can't access user info");
+            console.log("Can't access user info") 
           }
           let userInfo = resOwner.data.resource
 
@@ -572,7 +508,7 @@ export default {
           for (let j = 0; j < streamTags.length; j++) {
             this.$data.allStreamTagsJSON.push({ name: streamTags[j] })
           }
-          alltags.push(streamTags);
+          alltags.push(streamTags) 
 
           nodes.push({
             type: "Stream",
@@ -589,21 +525,21 @@ export default {
             canWrite: streamCanWrite,
             units: units,
             tolerance: tolerance
-          });
+          }) 
         } catch (error) {
           console.log("Can't access stream: " + streamShortID)
         }
 
         //
-        let resClient;
+        let resClient 
         try {
           resClient = await axios.get(
             `${this.$store.state.server}/streams/${streamShortID}/clients`
           )
 
           for (let j = 0; j < resClient.data.resources.length; j++) {
-            let client_id = resClient.data.resources[j]._id;
-            let clientOwnerID = resClient.data.resources[j].owner;
+            let client_id = resClient.data.resources[j]._id 
+            let clientOwnerID = resClient.data.resources[j].owner 
             
             let resOwner
             try {
@@ -611,25 +547,25 @@ export default {
                 `${this.$store.state.server}/accounts/${clientOwnerID}`
               )
             }catch (error) {
-              console.log("Can't access user info");
+              console.log("Can't access user info") 
             }
 
             
             let userInfo = resOwner.data.resource
-            let clientCanRead = resClient.data.resources[j].canRead;
-            let clientCreatedAt = resClient.data.resources[j].createdAt;
-            let clientUpdatedAt = resClient.data.resources[j].updatedAt;
-            let clientRole = resClient.data.resources[j].role;
-            let clientDocumentType = resClient.data.resources[j].documentType;
-            let clientDocumentName = resClient.data.resources[j].documentName;
-            let clientDocumentID = resClient.data.resources[j].documentGuid;
-            let customName = ``;
+            let clientCanRead = resClient.data.resources[j].canRead 
+            let clientCreatedAt = resClient.data.resources[j].createdAt 
+            let clientUpdatedAt = resClient.data.resources[j].updatedAt 
+            let clientRole = resClient.data.resources[j].role 
+            let clientDocumentType = resClient.data.resources[j].documentType 
+            let clientDocumentName = resClient.data.resources[j].documentName 
+            let clientDocumentID = resClient.data.resources[j].documentGuid 
+            let customName = `` 
 
             if (clientRole == "Sender") {
-              customName = `🚀`;
+              customName = `🚀` 
             }
             if (clientRole == "Receiver") {
-              customName = `📡`;
+              customName = `📡` 
             }
 
             nodes.push({
@@ -645,7 +581,7 @@ export default {
               documentName: clientDocumentName,
               documentGuid: clientDocumentID,
               name: customName // S or R labels for Senders and Receivers
-            });
+            }) 
             
 
             if (clientRole == "Receiver") {
@@ -656,7 +592,7 @@ export default {
                 targetClient: client_id,
                 targetDoc: clientDocumentID,
                 action: "receiving"
-              });
+              }) 
             } else if (clientRole == "Sender") {
               streamLinks.push({
                 source: client_id,
@@ -665,35 +601,35 @@ export default {
                 sourceClient: client_id,
                 sourceDoc: clientDocumentID,
                 action: "sending"
-              });
+              }) 
             }
           }
         } catch (error) {
-          console.log("Can't access stream's client from " + streamShortID);
+          console.log("Can't access stream's client from " + streamShortID) 
         }
       }
 
 
-      this.allStreamTags = this.flatten(alltags);
-      this.sortedNodesByCreationDate = nodes;
+      this.allStreamTags = this.flatten(alltags) 
+      this.sortedNodesByCreationDate = nodes 
       this.sortedNodesByCreationDate.sort(function(a, b) {
         return a.createdAt < b.createdAt
           ? -1
           : a.createdAt > b.createdAt
           ? 1
-          : 0;
-      });
+          : 0 
+      }) 
 
-      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt);
+      let createdAts = this.sortedNodesByCreationDate.map(d => d.createdAt) 
 
-      this.result = [nodes, streamLinks];
+      this.result = [nodes, streamLinks] 
       //this.value3 = [0,this.result[0].length-1]
-      this.dates = createdAts;
-      this.dates = createdAts.map(d => new Date(d).toLocaleString("en"));
+      this.dates = createdAts 
+      this.dates = createdAts.map(d => new Date(d).toLocaleString("en")) 
       this.dates = [...new Set(this.dates)]
 
-      //this.dates = createdAts;
-      this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]];
+      
+      this.sliderValue = [this.dates[0], this.dates[this.dates.length - 1]] 
 
 
       // find all permutations
@@ -701,14 +637,14 @@ export default {
         for(let j = 0; j < this.$data.parcoords_rawData[i].canRead.length; j++){
           for(let k = 0; k < this.$data.parcoords_rawData[i].canWrite.length; k++){
             for(let l = 0; l < this.$data.parcoords_rawData[i].tags.length; l++){
-              let index_canRead = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canRead[j]);
-              let index_canWrite = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canWrite[k]);
-              let index_owner = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].owner);
+              let index_canRead = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canRead[j]) 
+              let index_canWrite = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canWrite[k]) 
+              let index_owner = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].owner) 
               if(index_canRead == "-1" || index_canWrite == "-1"){
                   // HANDLE CASE IF MORE USER PERMISSIONS IN STREAMS
               }else{
-                let parcoord_permut = {stream_id: this.$data.parcoords_rawData[i].stream_id, canRead: this.$data.all_userCode[index_canRead].split('@')[0], canWrite: this.$data.all_userCode[index_canWrite].split('@')[0], tags: this.$data.parcoords_rawData[i].tags[l], objNum: this.$data.parcoords_rawData[i].objNum, owner: this.$data.all_userCode[index_owner], "owner's company": this.$data.all_userInfo[index_owner].company, createdAt: this.$data.parcoords_rawData[i].createdAt, updatedAt: this.$data.parcoords_rawData[i].updatedAt, units: this.$data.parcoords_rawData[i].units, tol: this.$data.parcoords_rawData[i].tol};
-                this.$data.parcoords_permut_data.push(parcoord_permut);
+                let parcoord_permut = {stream_id: this.$data.parcoords_rawData[i].stream_id, canRead: this.$data.all_userCode[index_canRead].split('@')[0], canWrite: this.$data.all_userCode[index_canWrite].split('@')[0], tags: this.$data.parcoords_rawData[i].tags[l], objNum: this.$data.parcoords_rawData[i].objNum, owner: this.$data.all_userCode[index_owner], "owner's company": this.$data.all_userInfo[index_owner].company, createdAt: this.$data.parcoords_rawData[i].createdAt, updatedAt: this.$data.parcoords_rawData[i].updatedAt, units: this.$data.parcoords_rawData[i].units, tol: this.$data.parcoords_rawData[i].tol} 
+                this.$data.parcoords_permut_data.push(parcoord_permut) 
               }
             }
           }
@@ -729,10 +665,10 @@ export default {
           parcoords.on('brushend', function(brushed, args){
           context.$data.parcoords_selstreams = Array.from(new Set(brushed.map(e => e.stream_id)))
       })
-      return [nodes, streamLinks];
+      return [nodes, streamLinks] 
     }
   }
-};
+} 
 </script>
 
 <style lang='scss'>

@@ -22,8 +22,9 @@
 </template>
 
 <script>
-import * as d3 from "d3";
-import ParCoords from 'parcoord-es';
+import * as d3 from "d3"
+import ParCoords from 'parcoord-es'
+
 
 export default {
   name: "ForceDirectedLayout",
@@ -62,51 +63,51 @@ export default {
     //   )
     // },
     selectedGraphLayout: function() {
-      this.drawGraph.tick();
+      this.drawGraph.tick()
     },
 
     selectedEdgesDisplay: function() {
-      this.drawGraph.tick();
+      this.drawGraph.tick()
     },
 
     refocus: function() {
-      let container = d3.select(".everything");
+      let container = d3.select(".everything")
       let zoom = d3
         .zoom()
         .scaleExtent([0, 0])
         .on("zoom", () => {
-          container.attr("transform", d3.event.transform);
-        });
+          container.attr("transform", d3.event.transform)
+        })
       d3.select("#graphLayout").call(
         zoom.transform,
         d3.zoomIdentity.translate(0, 0).scale(1)
-      );
+      ) 
     },
     inspectSelectedTags: function() {
-      let taggedStreams = [];
+      let taggedStreams = [] 
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("tagSelected")) {
-            taggedStreams.push(d3.select(d).datum().streamId);
+            taggedStreams.push(d3.select(d).datum().streamId) 
           } else {
           }
         }
-      );
-      let url =
-        "https://hestia.speckle.works/#/view/" + taggedStreams.join(",");
-      window.open(url, "_blank").focus();
+      ) 
+      let base = new URL(this.$store.state.server)
+      let viewerUrl = base.origin + `/#/view/${taggedStreams.join(",")}`
+      window.open(viewerUrl, "_blank").focus() 
     },
     streamTags: function() {
-      let context = this;
+      let context = this 
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
-          let myStreamTags = Array.from(d3.select(d).datum().tags);
+          let myStreamTags = Array.from(d3.select(d).datum().tags) 
           let selected = context.findCommonElement(
             myStreamTags,
             context.streamTags
-          );
+          ) 
           if (selected) {
-            d.classList.remove("tagSelected");
+            d.classList.remove("tagSelected") 
             //context.selectedTaggedStreams.splice( context.selectedTaggedStreams.indexOf(d3.select(d).datum().streamId), 1 )
             if (
               context.selectedTaggedStreams.indexOf(
@@ -118,12 +119,12 @@ export default {
                   d3.select(d).datum().streamId
                 ),
                 1
-              );
+              ) 
             }
-            d.classList.add("tagSelected");
-            context.selectedTaggedStreams.push(d3.select(d).datum().streamId);
+            d.classList.add("tagSelected") 
+            context.selectedTaggedStreams.push(d3.select(d).datum().streamId) 
           } else {
-            d.classList.remove("tagSelected");
+            d.classList.remove("tagSelected") 
             if (
               context.selectedTaggedStreams.indexOf(
                 d3.select(d).datum().streamId
@@ -134,30 +135,30 @@ export default {
                   d3.select(d).datum().streamId
                 ),
                 1
-              );
+              ) 
             }
           }
         }
-      );
-      context.$emit("triggeredTags", context.selectedTaggedStreams);
+      ) 
+      context.$emit("triggeredTags", context.selectedTaggedStreams) 
     },
     inspectTimeframe: function() {
-      let selectedStreams = [];
+      let selectedStreams = [] 
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("selected")) {
-            selectedStreams.push(d3.select(d).datum().streamId);
+            selectedStreams.push(d3.select(d).datum().streamId) 
           }
         }
-      );
+      ) 
 
       let base = new URL(this.$store.state.server)
       let viewerUrl = base.origin + `/#/view/${selectedStreams.join(",")}`
 
-      window.open(viewerUrl, "_blank").focus();
+      window.open(viewerUrl, "_blank").focus() 
     },
     brush: function() {
-      console.log(this.brush);
+      console.log(this.brush) 
     },
     switchForce: function() {
       if (this.switchForce) {
@@ -165,58 +166,58 @@ export default {
           .force("link")
           .links(
             this.forceLinks.filter(d => d.type != "documentGuidForceGroup")
-          );
-        this.$data.simulation.alpha(1).restart();
+          ) 
+        this.$data.simulation.alpha(1).restart() 
       } else {
         this.$data.simulation
           .force("link")
-          .links(this.forceLinks.filter(d => d.type != "ownerForceGroup"));
-        this.$data.simulation.alpha(1).restart();
+          .links(this.forceLinks.filter(d => d.type != "ownerForceGroup")) 
+        this.$data.simulation.alpha(1).restart() 
       }
     },
 
     documentLinksForce: function() {
       this.$data.simulation.force("link").distance(d => {
         if (d.type == "ownerForceGroup") {
-          return this.documentLinksForce;
+          return this.documentLinksForce 
         } else if (d.type == "documentGuidForceGroup") {
-          return this.documentLinksForce;
+          return this.documentLinksForce 
         } else {
-          return 116;
+          return 116 
         }
-      });
-      this.$data.simulation.alpha(1).restart();
+      }) 
+      this.$data.simulation.alpha(1).restart() 
     },
     toggleFix: function() {
       if (this.toggleFix) {
-        this.$data.simulation.stop();
+        this.$data.simulation.stop() 
         d3.selectAll("circle").classed("fixed", d => {
-          d.fixed = true;
-        });
+          d.fixed = true 
+        }) 
         d3.selectAll("rect").classed("fixed", d => {
-          d.fixed = true;
-        });
+          d.fixed = true 
+        }) 
       } else {
-        this.$data.simulation.alphaTarget(0.3).restart();
+        this.$data.simulation.alphaTarget(0.3).restart() 
         d3.selectAll("circle").classed("fixed", d => {
-          d.fixed = false;
-        });
+          d.fixed = false 
+        }) 
         d3.selectAll("rect").classed("fixed", d => {
-          d.fixed = false;
-        });
+          d.fixed = false 
+        }) 
       }
     },
     clientdatafilter: function() {
-      console.log("ooups");
-      console.log(this.timeFilter);
+      console.log("ooups") 
+      console.log(this.timeFilter) 
     },
 
     timeFilter: function() {
-      this.updateDisplayNodes("#circleSender");
-      this.updateDisplayNodes("#circleReceiver");
-      this.updateDisplayNodes("#rectStream");
-      this.updateDisplayNodes("#text");
-      this.updateDisplayLinks("#pathLink");
+      this.updateDisplayNodes("#circleSender") 
+      this.updateDisplayNodes("#circleReceiver") 
+      this.updateDisplayNodes("#rectStream") 
+      this.updateDisplayNodes("#text") 
+      this.updateDisplayLinks("#pathLink") 
     }
   },
 
@@ -230,78 +231,8 @@ export default {
     selectedTaggedStreams: [],
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
     context: this,
-    //baseURL: new URL(this.$store.state.server),
-    menuStream: function(context){ 
-      
-      console.log(context);
-      return [
-      
-      {
-        title: "View Stream in Viewer",
-        action: function(d, i) {
-          let data = d3.select(d).datum()
-          //let url = "https://hestia.speckle.works/#/view/" + data.streamId;
-          console.log(this)
-          let base = new URL(this.$store.state.server)
-          //let viewerUrl = base.origin + `/#/view/${data.streamId}`
-          //window.open(baseURL, "_blank").focus();
-        },
-        disabled: false // optional, defaults to false
-      },
-      {
-        title: "View Stream in Admin",
-        action: function(d, i) {
-          let data = d3.select(d).datum()
-          let url = "https://hestia.speckle.works/#/streams/" + data.streamId
-          window.open(url, "_blank").focus()
-        },
-        disabled: false // optional, defaults to false
-      },
-      {
-        title: "View Stream Data",
-        action: function(d, i) {
-          let data = d3.select(d).datum()
-          let url = `${this.context.$store.state.server}/streams/` + data.streamId
-          window.open(url, "_blank").focus()
-        }
-      },
-      {
-        title: "View Connected Clients",
-        action: function(d, i) {
-          let data = d3.select(d).datum();
-          let url =
-            "https://hestia.speckle.works/api/streams/" +
-            data.streamId +
-            "/clients";
-          window.open(url, "_blank").focus();
-        }
-      }
-    ]},
-    menuClient: [
-      {
-        title: "Client Info",
-        action: function(d, i) {
-          let data = d3.select(d).datum();
-          window.alert(
-            d3.select(d).datum().documentType +
-              ": " +
-              d3.select(d).datum().documentName +
-              "\n" +
-              "Created at" +
-              ": " +
-              d3.select(d).datum().createdAt +
-              "\n" +
-              "Updated at" +
-              ": " +
-              d3.select(d).datum().updatedAt +
-              "\n" +
-              "Owner is" +
-              ": " +
-              d3.select(d).datum().owner
-          );
-        }
-      }
-    ],
+
+
     hullPadding: 11,
 
     roundedHull: function(polyPoints) {
@@ -309,11 +240,11 @@ export default {
       // Returns the SVG path data string representing the polygon, expanded and rounded.
 
       // Handle special cases
-      if (!polyPoints || polyPoints.length < 1) return "";
-      if (polyPoints.length === 1) return this.roundedHull1(polyPoints);
-      if (polyPoints.length === 2) return this.roundedHull2(polyPoints);
+      if (!polyPoints || polyPoints.length < 1) return "" 
+      if (polyPoints.length === 1) return this.roundedHull1(polyPoints) 
+      if (polyPoints.length === 2) return this.roundedHull2(polyPoints) 
 
-      let segments = new Array(polyPoints.length);
+      let segments = new Array(polyPoints.length) 
 
       // Calculate each offset (outwards) segment of the convex hull.
       for (
@@ -324,33 +255,33 @@ export default {
         let p0 =
           segmentIndex === 0
             ? polyPoints[polyPoints.length - 1]
-            : polyPoints[segmentIndex - 1];
-        let p1 = polyPoints[segmentIndex];
+            : polyPoints[segmentIndex - 1]
+        let p1 = polyPoints[segmentIndex]
 
         // Compute the offset vector for the line segment, with length = hullPadding.
-        let offset = vecScale(this.hullPadding, this.unitNormal(p0, p1));
+        let offset = vecScale(this.hullPadding, this.unitNormal(p0, p1))
 
-        segments[segmentIndex] = [this.vecSum(p0, offset), this.vecSum(p1, offset)];
+        segments[segmentIndex] = [this.vecSum(p0, offset), this.vecSum(p1, offset)] 
       }
 
-      let arcData = "A " + [this.hullPadding, this.hullPadding, "0,0,0,"].join(",");
+      let arcData = "A " + [this.hullPadding, this.hullPadding, "0,0,0,"].join(",") 
 
       segments = segments.map(function(segment, index) {
-        let pathFragment = "";
+        let pathFragment = "" 
         if (index === 0) {
-          let pathFragment = "M " + segments[segments.length - 1][1] + " ";
+          let pathFragment = "M " + segments[segments.length - 1][1] + " " 
         }
-        pathFragment += arcData + segment[0] + " L " + segment[1];
+        pathFragment += arcData + segment[0] + " L " + segment[1] 
 
-        return pathFragment;
-      });
+        return pathFragment 
+      }) 
 
-      return segments.join(" ");
+      return segments.join(" ") 
     },
     roundedHull1: function(polyPoints) {
       // Returns the path for a rounded hull around a single point (a circle).
-      let p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding];
-      let p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding];
+      let p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding] 
+      let p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding] 
       return (
         "M " +
         p1 +
@@ -358,19 +289,19 @@ export default {
         [this.hullPadding, this.hullPadding, "0,0,0", p2].join(",") +
         " A " +
         [this.hullPadding, this.hullPadding, "0,0,0", p1].join(",")
-      );
+      ) 
     },
     roundedHull2: function(polyPoints) {
       // Returns the path for a rounded hull around two points (a "capsule" shape).
       let offsetVector = this.vecScale(
         this.hullPadding,
         this.unitNormal(polyPoints[0], polyPoints[1])
-      );
-      let invOffsetVector = this.vecScale(-1, offsetVector);
-      let p0 = this.vecSum(polyPoints[0], offsetVector);
-      let p1 = this.vecSum(polyPoints[1], offsetVector);
-      let p2 = this.vecSum(polyPoints[1], invOffsetVector);
-      let p3 = this.vecSum(polyPoints[0], invOffsetVector);
+      ) 
+      let invOffsetVector = this.vecScale(-1, offsetVector) 
+      let p0 = this.vecSum(polyPoints[0], offsetVector) 
+      let p1 = this.vecSum(polyPoints[1], offsetVector) 
+      let p2 = this.vecSum(polyPoints[1], invOffsetVector) 
+      let p3 = this.vecSum(polyPoints[0], invOffsetVector) 
       return (
         "M " +
         p0 +
@@ -382,80 +313,154 @@ export default {
         p3 +
         " A " +
         [this.hullPadding, this.hullPadding, "0,0,0", p0].join(",")
-      );
+      ) 
     },
     vecScale: function(scale, v) {
       // Returns the vector 'v' scaled by 'scale'.
-      return [scale * v[0], scale * v[1]];
+      return [scale * v[0], scale * v[1]] 
     },
     vecSum: function(pv1, pv2) {
       // Returns the sum of two vectors, or a combination of a point and a vector.
-      return [pv1[0] + pv2[0], pv1[1] + pv2[1]];
+      return [pv1[0] + pv2[0], pv1[1] + pv2[1]] 
     },
     unitNormal: function(p0, p1) {
       // Returns the unit normal to the line segment from p0 to p1.
-      let n = [p0[1] - p1[1], p1[0] - p0[0]];
-      let nLength = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
-      return [n[0] / nLength, n[1] / nLength];
+      let n = [p0[1] - p1[1], p1[0] - p0[0]] 
+      let nLength = Math.sqrt(n[0] * n[0] + n[1] * n[1]) 
+      return [n[0] / nLength, n[1] / nLength] 
     }
   }),
 
   methods: {
+
+    menuClient(){ 
+      
+      return [
+        {
+          title: "Client Info",
+          action: function(d, i) {
+            let data = d3.select(d).datum() 
+            window.alert(
+              d3.select(d).datum().documentType +
+                ": " +
+                d3.select(d).datum().documentName +
+                "\n" +
+                "Created at" +
+                ": " +
+                d3.select(d).datum().createdAt +
+                "\n" +
+                "Updated at" +
+                ": " +
+                d3.select(d).datum().updatedAt +
+                "\n" +
+                "Owner is" +
+                ": " +
+                d3.select(d).datum().owner
+            ) 
+          }
+        }
+      ]},
+      menuStream(context){ 
+            
+            var context = this
+            
+            return [
+            
+            {
+              title: "View Stream in Viewer",
+              action: function(d, i) {
+                let data = d3.select(d).datum()
+                let base = new URL(context.$store.state.server)
+                let viewerUrl = base.origin + `/#/view/${data.streamId}`
+                window.open(viewerUrl, "_blank").focus() 
+              },
+              disabled: false // optional, defaults to false
+            },
+            {
+              title: "View Stream in Admin",
+              action: function(d, i) {
+                let data = d3.select(d).datum()
+                let base = new URL(context.$store.state.server)
+                let adminUrl = base.origin + `/#/streams/${data.streamId}`
+                window.open(adminUrl, "_blank").focus()
+              },
+              disabled: false // optional, defaults to false
+            },
+            {
+              title: "View Stream Data",
+              action: function(d, i) {
+                let data = d3.select(d).datum()
+                let base = new URL(context.$store.state.server)
+                let dataUrl = base + `/streams/${data.streamId}`
+                window.open(dataUrl, "_blank").focus()
+              }
+            },
+            {
+              title: "View Connected Clients",
+              action: function(d, i) {
+                let data = d3.select(d).datum()
+                let base = new URL(context.$store.state.server)
+                let dataUrlClients = base + `/streams/${data.streamId}/clients`
+                window.open(dataUrlClients, "_blank").focus() 
+              }
+            }
+          ]},
+
     zoom_actions() {
-      d3.select(".everything").attr("transform", d3.event.transform);
+      d3.select(".everything").attr("transform", d3.event.transform) 
     },
 
     findCommonElement(array1, array2) {
       for (let i = 0; i < array1.length; i++) {
         for (let j = 0; j < array2.length; j++) {
           if (array1[i] === array2[j]) {
-            return true;
+            return true
           }
         }
       }
-      return false;
+      return false
     },
 
     // Drag events for the whole d3 force simulation
     drag() {
-      let parentContext = this;
+      let parentContext = this 
       function dragstarted(d) {
         if (!d3.event.active)
-          parentContext.simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+          parentContext.simulation.alphaTarget(0.3).restart() 
+        d.fx = d.x 
+        d.fy = d.y 
       }
 
       function dragged(d) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+        d.fx = d3.event.x 
+        d.fy = d3.event.y 
       }
 
       function dragended(d) {
-        if (!d3.event.active) parentContext.simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+        if (!d3.event.active) parentContext.simulation.alphaTarget(0) 
+        d.fx = null 
+        d.fy = null 
       }
 
       return d3
         .drag()
         .on("start", dragstarted)
         .on("drag", dragged)
-        .on("end", dragended);
+        .on("end", dragended) 
     },
 
     updateDisplayLinks(id) {
 
-      let context = this;
+      let context = this 
       Array.from(document.querySelector(id).children).forEach(function(node) {
         let nodeTimeComparerSource =
           new Date(node.getAttribute("source_timestamp"))
             .toISOString()
-            .split(".")[0] + ".000Z";
+            .split(".")[0] + ".000Z" 
         let nodeTimeComparerTarget =
           new Date(node.getAttribute("target_timestamp"))
             .toISOString()
-            .split(".")[0] + ".000Z";
+            .split(".")[0] + ".000Z" 
 
         if (
           nodeTimeComparerSource >= context.timeFilter[0] &&
@@ -463,48 +468,48 @@ export default {
           (nodeTimeComparerTarget >= context.timeFilter[0] &&
             nodeTimeComparerTarget <= context.timeFilter[1])
         ) {
-          node.style.opacity = 1;
-          node.style.transition = "visibility 0s, opacity 0.4s linear";
+          node.style.opacity = 1 
+          node.style.transition = "visibility 0s, opacity 0.4s linear" 
         } else {
-          node.style.opacity = 0.2;
-          node.style.transition = "visibility 0s, opacity 0.4s linear";
+          node.style.opacity = 0.2 
+          node.style.transition = "visibility 0s, opacity 0.4s linear" 
         }
-      });
+      }) 
     },
     updateDisplayNodes(id) {
-      let context = this;
+      let context = this 
 
       Array.from(document.querySelector(id).children).forEach(function(node) {
         let nodeTimeComparer =
           new Date(node.getAttribute("timestamp")).toISOString().split(".")[0] +
-          ".000Z";
+          ".000Z" 
         if (
           nodeTimeComparer >= context.timeFilter[0] &&
           nodeTimeComparer <= context.timeFilter[1]
         ) {
-          node.classList.remove("unselected");
-          node.classList.add("selected");
-          node.style.transition = "visibility 0s, opacity 0.4s linear";
+          node.classList.remove("unselected") 
+          node.classList.add("selected") 
+          node.style.transition = "visibility 0s, opacity 0.4s linear" 
 
-          node.style.opacity = 1;
+          node.style.opacity = 1 
         } else {
           //node.style.display = "none"
-          node.classList.remove("selected");
-          node.classList.add("unselected");
-          node.style.opacity = 0.2;
-          node.style.transition = "visibility 0s, opacity 0.4s linear";
+          node.classList.remove("selected") 
+          node.classList.add("unselected") 
+          node.style.opacity = 0.2 
+          node.style.transition = "visibility 0s, opacity 0.4s linear" 
         }
-      });
+      }) 
 
-      let selectedStreams = [];
+      let selectedStreams = [] 
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("selected")) {
-            selectedStreams.push(d3.select(d).datum().streamId);
+            selectedStreams.push(d3.select(d).datum().streamId) 
           }
         }
-      );
-      context.$emit("triggeredTimeFrame", selectedStreams);
+      ) 
+      context.$emit("triggeredTimeFrame", selectedStreams) 
     },
 
     contextMenu(type, menu, openCallback) {
@@ -513,19 +518,19 @@ export default {
         .data([1])
         .enter()
         .append("div")
-        .attr("class", "d3-context-menu");
+        .attr("class", "d3-context-menu") 
 
       // close menu
       d3.select(".application--wrap").on("click.d3-context-menu", function() {
-        d3.select(".d3-context-menu").style("display", "none");
-      });
+        d3.select(".d3-context-menu").style("display", "none") 
+      }) 
 
       // this gets executed when a contextmenu event occurs
       return function(data, index) {
-        let elm = this;
+        let elm = this 
 
-        d3.selectAll(".d3-context-menu").html("");
-        let list = d3.selectAll(".d3-context-menu").append("ul");
+        d3.selectAll(".d3-context-menu").html("") 
+        let list = d3.selectAll(".d3-context-menu").append("ul") 
         list
           .selectAll("li")
           .data(menu)
@@ -533,34 +538,34 @@ export default {
           .append("li")
           .attr("class", type)
           .html(function(d) {
-            return d.title;
+            return d.title 
           })
           .on("click", function(d, i) {
-            d.action(elm, data, index);
-            d3.select(".d3-context-menu").style("display", "none");
-          });
+            d.action(elm, data, index) 
+            d3.select(".d3-context-menu").style("display", "none") 
+          }) 
 
         // the openCallback allows an action to fire before the menu is displayed
         // an example usage would be closing a tooltip
-        if (openCallback) openCallback(data, index);
+        if (openCallback) openCallback(data, index) 
 
         // display context menu.
         d3.select(".d3-context-menu")
           .style("left", d3.event.pageX - 2 + "px")
           .style("top", d3.event.pageY - 2 + "px")
-          .style("display", "block");
+          .style("display", "block") 
 
-        d3.event.preventDefault();
-      };
+        d3.event.preventDefault() 
+      } 
     },
     groupBy(arr, property) {
       return arr.reduce(function(memo, x) {
         if (!memo[x[property]]) {
-          memo[x[property]] = [];
+          memo[x[property]] = [] 
         }
-        memo[x[property]].push(x);
-        return memo;
-      }, {});
+        memo[x[property]].push(x) 
+        return memo 
+      }, {}) 
     },
 
     drawGraph() {
@@ -1563,7 +1568,7 @@ export default {
   computed: {
     myserver: function () {
       // `this` points to the vm instance
-      return this.$store.state.server
+      return this
     }
       
   }
