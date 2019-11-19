@@ -241,7 +241,8 @@ export default {
         action: function(d, i) {
           let data = d3.select(d).datum()
           //let url = "https://hestia.speckle.works/#/view/" + data.streamId;
-          console.log(myserver)
+          console.log(this)
+          let base = new URL(this.$store.state.server)
           //let viewerUrl = base.origin + `/#/view/${data.streamId}`
           //window.open(baseURL, "_blank").focus();
         },
