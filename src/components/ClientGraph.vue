@@ -295,7 +295,6 @@ import Vue from "vue";
 import AsyncComputed from "vue-async-computed";
 import svgtopng from "save-svg-as-png";
 import ParCoords from 'parcoord-es';
-import './parcoords.css';
 
 Vue.use(AsyncComputed);
 export default {

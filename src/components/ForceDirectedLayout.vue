@@ -19,10 +19,7 @@
       </g>
     </svg>
   </div>
-
 </template>
-
-<script src="./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js"></script>
 
 <script>
 import * as d3 from "d3";
@@ -745,14 +742,10 @@ export default {
 
         //var circCenterDoc = {"radius": 4, "color": "hotpink", "infoDoc": infoDoc}
         
-        
       }
 
       for (var property in childGroups) {
-        
         var childGroup = childGroups[property];
-
-        
         for (let i = 0; i < childGroup.length - 1; i++) {          
           for (let j = i + 1; j < childGroup.length; j++) {
             thisContext.forceLinks.push({
@@ -763,12 +756,6 @@ export default {
             });
           }
         }
-        
-  
-
-
-
-        
       }
 
       // d3.select("#graphLayout")
@@ -886,8 +873,6 @@ export default {
       var divCircle = d3.select(".tooltip").style("opacity", 0);
       var divOwner = d3.select(".tooltipOwner").style("opacity", 0);
       var divDoc = d3.select(".tooltipDoc").style("opacity", 0);
-
-      //
       
       svg
         .select("#hullOwner")
@@ -913,8 +898,6 @@ export default {
 
       var childGroups = this.groupBy(clientNodes, "documentGuid");
 
-
-      
       svg
         .select("#hullDoc")
         .selectAll("path")
