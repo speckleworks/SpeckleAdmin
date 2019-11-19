@@ -250,10 +250,6 @@
       
     </v-container>
     <!-- END OF TOOLBAR / SVG CANVAS STARTS HERE -->
-    
-    
-
-    
     <div id="appClientGraph">
       <svg v-if="!redrawToggle || !result" width="100%" :height="svgHeight" />
       <ForceDirectedLayout
@@ -279,22 +275,18 @@
         :parcoords_selstreams="parcoords_selstreams"
       />
     </div>
-    
   </v-card>
-  
 </template>
 
 
-
-
 <script>
-import ForceDirectedLayout from "./ForceDirectedLayout.vue";
-import VueSlider from "vue-slider-component";
-import axios from "axios";
-import Vue from "vue";
-import AsyncComputed from "vue-async-computed";
-import svgtopng from "save-svg-as-png";
-import ParCoords from 'parcoord-es';
+import ForceDirectedLayout from "./ForceDirectedLayout.vue"
+import VueSlider from "vue-slider-component"
+import axios from "axios"
+import Vue from "vue"
+import AsyncComputed from "vue-async-computed"
+import svgtopng from "save-svg-as-png"
+import ParCoords from 'parcoord-es'
 
 Vue.use(AsyncComputed);
 export default {
@@ -400,7 +392,7 @@ export default {
   methods: {
     redrawParcoords(){
       this.$data.parcoords_selstreams = []
-      var context = this
+      let context = this
       let parcoords = ParCoords()("#example")
           .data(
           context.$data.parcoords_nodupdata
@@ -426,8 +418,8 @@ export default {
     },
 
     flatten(arr) {
-      var flat = [];
-      for (var i = 0; i < arr.length; i++) {
+      let flat = [];
+      for (let i = 0; i < arr.length; i++) {
         flat = flat.concat(arr[i]);
       }
       return flat;
@@ -470,14 +462,13 @@ export default {
     },
     AddResizeListener() {
       //redraw the chart 300ms after the window has been resized
-      var context = this
+      let context = this
       window.addEventListener("resize", () => {
         this.$data.redrawToggle = false;
           
 
         setTimeout(() => {
           this.$data.redrawToggle = true;
-          console.log("lsol")
         }, 1500);
         
       });
@@ -490,8 +481,8 @@ export default {
   asyncComputed: {
     async myResolvedValue() {
       this.toggleFix = false;
-      var streamLinks = [];
-      var nodes = [];
+      let streamLinks = [];
+      let nodes = [];
 
       let resProject;
       try {
@@ -509,7 +500,7 @@ export default {
       //this.$data.all_userInfo = allusers
       
       
-      for (var i = 0; i < allusers.length; i++) {   
+      for (let i = 0; i < allusers.length; i++) {   
           let user = allusers[i]
           let resOwner
           try {
@@ -527,12 +518,12 @@ export default {
           this.$data.all_userInfo.push(userInfo)
       }
 
-      var projectStreams = resProject.data.resource.streams;
-      var projectPermissions = resProject.data.resource.permissions;
+      let projectStreams = resProject.data.resource.streams;
+      let projectPermissions = resProject.data.resource.permissions;
 
-      var alltags = [];
-      for (var i = 0; i < projectStreams.length; i++) {
-        var streamShortID = projectStreams[i];
+      let alltags = [];
+      for (let i = 0; i < projectStreams.length; i++) {
+        let streamShortID = projectStreams[i];
         let stream_id;
 
         let resStream;
@@ -552,22 +543,22 @@ export default {
           }catch (error) {
             console.log("Can't access user info");
           }
-          let userInfo = resOwner.data.resource;
+          let userInfo = resOwner.data.resource
 
 
-          stream_id = resStream.data.resource._id;
-          let streamCanRead = resStream.data.resource.canRead;
-          let streamCanWrite = resStream.data.resource.canWrite;
-          let streamCreatedAt = resStream.data.resource.createdAt;
-          let streamUpdatedAt = resStream.data.resource.updatedAt;
-          let streamName = resStream.data.resource.name;
-          let streamTags = resStream.data.resource.tags;
-          let objectsNumber = resStream.data.resource.objects.length;
-          let units = resStream.data.resource.baseProperties.units;
-          let tolerance = resStream.data.resource.baseProperties.tolerance;
+          stream_id = resStream.data.resource._id
+          let streamCanRead = resStream.data.resource.canRead
+          let streamCanWrite = resStream.data.resource.canWrite
+          let streamCreatedAt = resStream.data.resource.createdAt
+          let streamUpdatedAt = resStream.data.resource.updatedAt
+          let streamName = resStream.data.resource.name
+          let streamTags = resStream.data.resource.tags
+          let objectsNumber = resStream.data.resource.objects.length
+          let units = resStream.data.resource.baseProperties.units
+          let tolerance = resStream.data.resource.baseProperties.tolerance
           
 
-          var rawData = {stream_id: stream_id, canRead: streamCanRead, canWrite: streamCanWrite, tags: streamTags, objNum: objectsNumber, owner: streamOwnerID, createdAt: new Date(streamCreatedAt).toLocaleString("en-GB"), updatedAt: new Date(streamUpdatedAt).toLocaleString("en-GB"), units: units, tol: tolerance}
+          let rawData = {stream_id: stream_id, canRead: streamCanRead, canWrite: streamCanWrite, tags: streamTags, objNum: objectsNumber, owner: streamOwnerID, createdAt: new Date(streamCreatedAt).toLocaleString("en-GB"), updatedAt: new Date(streamUpdatedAt).toLocaleString("en-GB"), units: units, tol: tolerance}
 
           // handles empty array exception
           Object.keys(rawData).forEach((key,i) => 
@@ -578,8 +569,8 @@ export default {
 
           this.$data.parcoords_rawData.push(rawData)
 
-          for (var j = 0; j < streamTags.length; j++) {
-            this.$data.allStreamTagsJSON.push({ name: streamTags[j] });
+          for (let j = 0; j < streamTags.length; j++) {
+            this.$data.allStreamTagsJSON.push({ name: streamTags[j] })
           }
           alltags.push(streamTags);
 
@@ -600,7 +591,7 @@ export default {
             tolerance: tolerance
           });
         } catch (error) {
-          console.log("Can't access stream: " + streamShortID);
+          console.log("Can't access stream: " + streamShortID)
         }
 
         //
@@ -610,7 +601,7 @@ export default {
             `${this.$store.state.server}/streams/${streamShortID}/clients`
           )
 
-          for (var j = 0; j < resClient.data.resources.length; j++) {
+          for (let j = 0; j < resClient.data.resources.length; j++) {
             let client_id = resClient.data.resources[j]._id;
             let clientOwnerID = resClient.data.resources[j].owner;
             
@@ -706,17 +697,17 @@ export default {
 
 
       // find all permutations
-      for (var i = 0; i < this.$data.parcoords_rawData.length; i++) {
-        for(var j = 0; j < this.$data.parcoords_rawData[i].canRead.length; j++){
-          for(var k = 0; k < this.$data.parcoords_rawData[i].canWrite.length; k++){
-            for(var l = 0; l < this.$data.parcoords_rawData[i].tags.length; l++){
-              var index_canRead = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canRead[j]);
-              var index_canWrite = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canWrite[k]);
-              var index_owner = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].owner);
+      for (let i = 0; i < this.$data.parcoords_rawData.length; i++) {
+        for(let j = 0; j < this.$data.parcoords_rawData[i].canRead.length; j++){
+          for(let k = 0; k < this.$data.parcoords_rawData[i].canWrite.length; k++){
+            for(let l = 0; l < this.$data.parcoords_rawData[i].tags.length; l++){
+              let index_canRead = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canRead[j]);
+              let index_canWrite = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].canWrite[k]);
+              let index_owner = this.$data.all_userInfo.map(e => e._id).indexOf(this.$data.parcoords_rawData[i].owner);
               if(index_canRead == "-1" || index_canWrite == "-1"){
                   // HANDLE CASE IF MORE USER PERMISSIONS IN STREAMS
               }else{
-                var parcoord_permut = {stream_id: this.$data.parcoords_rawData[i].stream_id, canRead: this.$data.all_userCode[index_canRead].split('@')[0], canWrite: this.$data.all_userCode[index_canWrite].split('@')[0], tags: this.$data.parcoords_rawData[i].tags[l], objNum: this.$data.parcoords_rawData[i].objNum, owner: this.$data.all_userCode[index_owner], "owner's company": this.$data.all_userInfo[index_owner].company, createdAt: this.$data.parcoords_rawData[i].createdAt, updatedAt: this.$data.parcoords_rawData[i].updatedAt, units: this.$data.parcoords_rawData[i].units, tol: this.$data.parcoords_rawData[i].tol};
+                let parcoord_permut = {stream_id: this.$data.parcoords_rawData[i].stream_id, canRead: this.$data.all_userCode[index_canRead].split('@')[0], canWrite: this.$data.all_userCode[index_canWrite].split('@')[0], tags: this.$data.parcoords_rawData[i].tags[l], objNum: this.$data.parcoords_rawData[i].objNum, owner: this.$data.all_userCode[index_owner], "owner's company": this.$data.all_userInfo[index_owner].company, createdAt: this.$data.parcoords_rawData[i].createdAt, updatedAt: this.$data.parcoords_rawData[i].updatedAt, units: this.$data.parcoords_rawData[i].units, tol: this.$data.parcoords_rawData[i].tol};
                 this.$data.parcoords_permut_data.push(parcoord_permut);
               }
             }
@@ -726,7 +717,7 @@ export default {
       
       this.$data.parcoords_nodupdata = Array.from(new Set(this.$data.parcoords_permut_data))
 
-      var context = this
+      let context = this
       let parcoords = ParCoords()("#example")
           .data(
           context.$data.parcoords_nodupdata

@@ -49,7 +49,7 @@ export default {
 
   watch: {
     // parcoords_selstreams: function(){
-    //   var context = this
+    //   let context = this
     //   Array.from(document.querySelector("#rectParcoords").children).forEach(
     //     function(d) {
     //       if(context.$props.parcoords_selstreams.includes(d3.select(d).datum()._id)){
@@ -70,8 +70,8 @@ export default {
     },
 
     refocus: function() {
-      var container = d3.select(".everything");
-      var zoom = d3
+      let container = d3.select(".everything");
+      let zoom = d3
         .zoom()
         .scaleExtent([0, 0])
         .on("zoom", () => {
@@ -83,7 +83,7 @@ export default {
       );
     },
     inspectSelectedTags: function() {
-      var taggedStreams = [];
+      let taggedStreams = [];
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("tagSelected")) {
@@ -92,16 +92,16 @@ export default {
           }
         }
       );
-      var url =
+      let url =
         "https://hestia.speckle.works/#/view/" + taggedStreams.join(",");
       window.open(url, "_blank").focus();
     },
     streamTags: function() {
-      var context = this;
+      let context = this;
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
-          var myStreamTags = Array.from(d3.select(d).datum().tags);
-          var selected = context.findCommonElement(
+          let myStreamTags = Array.from(d3.select(d).datum().tags);
+          let selected = context.findCommonElement(
             myStreamTags,
             context.streamTags
           );
@@ -142,7 +142,7 @@ export default {
       context.$emit("triggeredTags", context.selectedTaggedStreams);
     },
     inspectTimeframe: function() {
-      var selectedStreams = [];
+      let selectedStreams = [];
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("selected")) {
@@ -151,10 +151,10 @@ export default {
         }
       );
 
-      //var url = "https://hestia.speckle.works/#/view/" + selectedStreams.join(",");
-      var url = `${this.$store.state.server.substring(0, this.$store.state.server.length - 4)}/#/view/` + selectedStreams.join(",");
+      let base = new URL(this.$store.state.server)
+      let viewerUrl = base.origin + `/#/view/${selectedStreams.join(",")}`
 
-      window.open(url, "_blank").focus();
+      window.open(viewerUrl, "_blank").focus();
     },
     brush: function() {
       console.log(this.brush);
@@ -228,55 +228,59 @@ export default {
     groupPath: null,
     simulation: null,
     selectedTaggedStreams: [],
-
     svgWidth: document.getElementById("appClientGraph").offsetWidth,
     context: this,
-    menuStream: [
+    //baseURL: new URL(this.$store.state.server),
+    menuStream: function(context){ 
+      
+      console.log(context);
+      return [
+      
       {
         title: "View Stream in Viewer",
         action: function(d, i) {
-          var data = d3.select(d).datum();
-          console.log(data);
-          var url = "https://hestia.speckle.works/#/view/" + data.streamId;
-          window.open(url, "_blank").focus();
+          let data = d3.select(d).datum()
+          //let url = "https://hestia.speckle.works/#/view/" + data.streamId;
+          console.log(myserver)
+          //let viewerUrl = base.origin + `/#/view/${data.streamId}`
+          //window.open(baseURL, "_blank").focus();
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "View Stream in Admin",
         action: function(d, i) {
-          var data = d3.select(d).datum();
-          console.log(data);
-          var url = "https://hestia.speckle.works/#/streams/" + data.streamId;
-          window.open(url, "_blank").focus();
+          let data = d3.select(d).datum()
+          let url = "https://hestia.speckle.works/#/streams/" + data.streamId
+          window.open(url, "_blank").focus()
         },
         disabled: false // optional, defaults to false
       },
       {
         title: "View Stream Data",
         action: function(d, i) {
-          var data = d3.select(d).datum();
-          var url = `${this.context.$store.state.server}/streams/` + data.streamId;
-          window.open(url, "_blank").focus();
+          let data = d3.select(d).datum()
+          let url = `${this.context.$store.state.server}/streams/` + data.streamId
+          window.open(url, "_blank").focus()
         }
       },
       {
         title: "View Connected Clients",
         action: function(d, i) {
-          var data = d3.select(d).datum();
-          var url =
+          let data = d3.select(d).datum();
+          let url =
             "https://hestia.speckle.works/api/streams/" +
             data.streamId +
             "/clients";
           window.open(url, "_blank").focus();
         }
       }
-    ],
+    ]},
     menuClient: [
       {
         title: "Client Info",
         action: function(d, i) {
-          var data = d3.select(d).datum();
+          let data = d3.select(d).datum();
           window.alert(
             d3.select(d).datum().documentType +
               ": " +
@@ -308,32 +312,32 @@ export default {
       if (polyPoints.length === 1) return this.roundedHull1(polyPoints);
       if (polyPoints.length === 2) return this.roundedHull2(polyPoints);
 
-      var segments = new Array(polyPoints.length);
+      let segments = new Array(polyPoints.length);
 
       // Calculate each offset (outwards) segment of the convex hull.
       for (
-        var segmentIndex = 0;
+        let segmentIndex = 0;
         segmentIndex < segments.length;
         ++segmentIndex
       ) {
-        var p0 =
+        let p0 =
           segmentIndex === 0
             ? polyPoints[polyPoints.length - 1]
             : polyPoints[segmentIndex - 1];
-        var p1 = polyPoints[segmentIndex];
+        let p1 = polyPoints[segmentIndex];
 
         // Compute the offset vector for the line segment, with length = hullPadding.
-        var offset = vecScale(this.hullPadding, this.unitNormal(p0, p1));
+        let offset = vecScale(this.hullPadding, this.unitNormal(p0, p1));
 
         segments[segmentIndex] = [this.vecSum(p0, offset), this.vecSum(p1, offset)];
       }
 
-      var arcData = "A " + [this.hullPadding, this.hullPadding, "0,0,0,"].join(",");
+      let arcData = "A " + [this.hullPadding, this.hullPadding, "0,0,0,"].join(",");
 
       segments = segments.map(function(segment, index) {
-        var pathFragment = "";
+        let pathFragment = "";
         if (index === 0) {
-          var pathFragment = "M " + segments[segments.length - 1][1] + " ";
+          let pathFragment = "M " + segments[segments.length - 1][1] + " ";
         }
         pathFragment += arcData + segment[0] + " L " + segment[1];
 
@@ -344,8 +348,8 @@ export default {
     },
     roundedHull1: function(polyPoints) {
       // Returns the path for a rounded hull around a single point (a circle).
-      var p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding];
-      var p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding];
+      let p1 = [polyPoints[0][0], polyPoints[0][1] - this.hullPadding];
+      let p2 = [polyPoints[0][0], polyPoints[0][1] + this.hullPadding];
       return (
         "M " +
         p1 +
@@ -357,15 +361,15 @@ export default {
     },
     roundedHull2: function(polyPoints) {
       // Returns the path for a rounded hull around two points (a "capsule" shape).
-      var offsetVector = this.vecScale(
+      let offsetVector = this.vecScale(
         this.hullPadding,
         this.unitNormal(polyPoints[0], polyPoints[1])
       );
-      var invOffsetVector = this.vecScale(-1, offsetVector);
-      var p0 = this.vecSum(polyPoints[0], offsetVector);
-      var p1 = this.vecSum(polyPoints[1], offsetVector);
-      var p2 = this.vecSum(polyPoints[1], invOffsetVector);
-      var p3 = this.vecSum(polyPoints[0], invOffsetVector);
+      let invOffsetVector = this.vecScale(-1, offsetVector);
+      let p0 = this.vecSum(polyPoints[0], offsetVector);
+      let p1 = this.vecSum(polyPoints[1], offsetVector);
+      let p2 = this.vecSum(polyPoints[1], invOffsetVector);
+      let p3 = this.vecSum(polyPoints[0], invOffsetVector);
       return (
         "M " +
         p0 +
@@ -389,8 +393,8 @@ export default {
     },
     unitNormal: function(p0, p1) {
       // Returns the unit normal to the line segment from p0 to p1.
-      var n = [p0[1] - p1[1], p1[0] - p0[0]];
-      var nLength = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+      let n = [p0[1] - p1[1], p1[0] - p0[0]];
+      let nLength = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
       return [n[0] / nLength, n[1] / nLength];
     }
   }),
@@ -413,7 +417,7 @@ export default {
 
     // Drag events for the whole d3 force simulation
     drag() {
-      var parentContext = this;
+      let parentContext = this;
       function dragstarted(d) {
         if (!d3.event.active)
           parentContext.simulation.alphaTarget(0.3).restart();
@@ -441,13 +445,13 @@ export default {
 
     updateDisplayLinks(id) {
 
-      var context = this;
+      let context = this;
       Array.from(document.querySelector(id).children).forEach(function(node) {
-        var nodeTimeComparerSource =
+        let nodeTimeComparerSource =
           new Date(node.getAttribute("source_timestamp"))
             .toISOString()
             .split(".")[0] + ".000Z";
-        var nodeTimeComparerTarget =
+        let nodeTimeComparerTarget =
           new Date(node.getAttribute("target_timestamp"))
             .toISOString()
             .split(".")[0] + ".000Z";
@@ -467,10 +471,10 @@ export default {
       });
     },
     updateDisplayNodes(id) {
-      var context = this;
+      let context = this;
 
       Array.from(document.querySelector(id).children).forEach(function(node) {
-        var nodeTimeComparer =
+        let nodeTimeComparer =
           new Date(node.getAttribute("timestamp")).toISOString().split(".")[0] +
           ".000Z";
         if (
@@ -491,7 +495,7 @@ export default {
         }
       });
 
-      var selectedStreams = [];
+      let selectedStreams = [];
       Array.from(document.querySelector("#rectStream").children).forEach(
         function(d) {
           if (d.classList.contains("selected")) {
@@ -517,10 +521,10 @@ export default {
 
       // this gets executed when a contextmenu event occurs
       return function(data, index) {
-        var elm = this;
+        let elm = this;
 
         d3.selectAll(".d3-context-menu").html("");
-        var list = d3.selectAll(".d3-context-menu").append("ul");
+        let list = d3.selectAll(".d3-context-menu").append("ul");
         list
           .selectAll("li")
           .data(menu)
@@ -559,8 +563,8 @@ export default {
     },
 
     drawGraph() {
-      var _nodes = this.clientdata[0];
-      var links = this.clientdata[1];
+      let _nodes = this.clientdata[0];
+      let links = this.clientdata[1];
 
       // Sorts all nodes by creation timestamps
       _nodes.sort(function(a, b) {
@@ -574,7 +578,7 @@ export default {
       // console.log(_nodes);
       // console.log(links);
 
-      var thisContext = this;
+      let thisContext = this;
 
       for (let i = 0; i < links.length; i++) {
         if (links[i].action === "sending") {
@@ -664,28 +668,28 @@ export default {
       }
 
       let clientNodes = _nodes.filter(data => data.type == "Client");
-      var parentGroups = this.groupBy(clientNodes, "owner");
+      let parentGroups = this.groupBy(clientNodes, "owner");
 
     
-    var circleOwnerData = []
-      for (var property in parentGroups) {
-        var parGroup = parentGroups[property];
+    let circleOwnerData = []
+      for (let property in parentGroups) {
+        let parGroup = parentGroups[property];
 
-        // var sumX = 0
-        // var sumY = 0
+        // let sumX = 0
+        // let sumY = 0
         // for (let i = 0; i < parGroup.length; i++) {
         //   sumX += parGroup[i].x
         //   sumY += parGroup[i].y
         // }
-        // var avX = sumX / parGroup.length
-        // var avY = sumY / parGroup.length
-        var circCenterOwner = {"radius": 4, "color": "#7ebff3", userInfo: parGroup[0].userInfo}
+        // let avX = sumX / parGroup.length
+        // let avY = sumY / parGroup.length
+        let circCenterOwner = {"radius": 4, "color": "#7ebff3", userInfo: parGroup[0].userInfo}
         circleOwnerData.push(circCenterOwner)
       }
 
 
-      for (var property in parentGroups) {
-        var parGroup = parentGroups[property];
+      for (let property in parentGroups) {
+        let parGroup = parentGroups[property];
         for (let i = 0; i < parGroup.length - 1; i++) {
           for (let j = i + 1; j < parGroup.length; j++) {
             thisContext.forceLinks.push({
@@ -700,12 +704,12 @@ export default {
 
 
 
-    var childGroups = this.groupBy(clientNodes, "documentGuid");
+    let childGroups = this.groupBy(clientNodes, "documentGuid");
 
     
-    var circleDocData = []
-      for (var property in childGroups) {
-        var childGroup = childGroups[property];
+    let circleDocData = []
+      for (let property in childGroups) {
+        let childGroup = childGroups[property];
         let infoDoc = ""
 
         if(childGroup[0].documentType === "Rhino"){
@@ -733,21 +737,21 @@ export default {
         // }
         
         
-        // var sumX = 0
-        // var sumY = 0
+        // let sumX = 0
+        // let sumY = 0
         // for (let i = 0; i < childGroup.length; i++) {
         //   sumX += childGroup[i].x
         //   sumY += childGroup[i].y
         // }
-        // var avX = sumX / childGroup.length
-        // var avY = sumY / childGroup.length
+        // let avX = sumX / childGroup.length
+        // let avY = sumY / childGroup.length
 
-        //var circCenterDoc = {"radius": 4, "color": "hotpink", "infoDoc": infoDoc}
+        //let circCenterDoc = {"radius": 4, "color": "hotpink", "infoDoc": infoDoc}
         
       }
 
-      for (var property in childGroups) {
-        var childGroup = childGroups[property];
+      for (let property in childGroups) {
+        let childGroup = childGroups[property];
         for (let i = 0; i < childGroup.length - 1; i++) {          
           for (let j = i + 1; j < childGroup.length; j++) {
             thisContext.forceLinks.push({
@@ -765,9 +769,9 @@ export default {
       //     .extent( [ [0,0], [this.$data.svgWidth,this.$props.svgHeight] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
       //   )
 
-      var svg = d3.select("#graphLayout");
+      let svg = d3.select("#graphLayout");
 
-      // var brush = svg.append("g")
+      // let brush = svg.append("g")
       //   .attr("class", "brush");
 
       // if(this.$props.brush){
@@ -831,7 +835,7 @@ export default {
       }
 
       //add zoom capabilities
-      var zoom_handler = d3.zoom().on("zoom", this.zoom_actions);
+      let zoom_handler = d3.zoom().on("zoom", this.zoom_actions);
 
       zoom_handler(svg);
       // REMOVE ZOOM
@@ -843,13 +847,13 @@ export default {
 
       if (this.switchForce) {
         // docs
-        var filterLinks = this.forceLinks.filter(
+        let filterLinks = this.forceLinks.filter(
           d => d.type != "documentGuidForceGroup"
         );
         this.$data.simulation.force("link").links(filterLinks);
         this.$data.simulation.alpha(1).restart();
       } else {
-        var filterLinks = this.forceLinks.filter(
+        let filterLinks = this.forceLinks.filter(
           d => d.type != "ownerForceGroup"
         );
         this.$data.simulation.force("link").links(filterLinks);
@@ -862,19 +866,19 @@ export default {
         .interpolate(d3.interpolateHcl)
         .range([d3.rgb("lightgray"), d3.rgb("blue")]);
 
-      var xScale = d3
+      let xScale = d3
         .scaleLinear()
         .domain([0, this.svgWidth])
         .range([0, this.svgWidth]);
-      var yScale = d3
+      let yScale = d3
         .scaleLinear()
         .domain([0, this.svgHeight])
         .range([0, this.svgHeight]);
 
       // Define the div for the tooltip
-      var divCircle = d3.select(".tooltip").style("opacity", 0);
-      var divOwner = d3.select(".tooltipOwner").style("opacity", 0);
-      var divDoc = d3.select(".tooltipDoc").style("opacity", 0);
+      let divCircle = d3.select(".tooltip").style("opacity", 0);
+      let divOwner = d3.select(".tooltipOwner").style("opacity", 0);
+      let divDoc = d3.select(".tooltipDoc").style("opacity", 0);
       
       svg
         .select("#hullOwner")
@@ -898,7 +902,7 @@ export default {
         });
       svg.select("#hullOwner").selectAll("path");
 
-      var childGroups = this.groupBy(clientNodes, "documentGuid");
+      // let childGroups = this.groupBy(clientNodes, "documentGuid");
 
       svg
         .select("#hullDoc")
@@ -923,22 +927,22 @@ export default {
           divDoc.style("opacity", 0);
         });
 
-      var groupOwners = d3
+      let groupOwners = d3
         .nest()
         .key(function(d) {
           return d.owner;
         })
         .entries(this.simulation.nodes().filter(data => data.type == "Client"));
       
-      var groupDocs = d3
+      let groupDocs = d3
         .nest()
         .key(function(d) {
           return d.documentGuid;
         })
         .entries(this.simulation.nodes().filter(data => data.type == "Client"));
 
-      var context = this
-      var groupPath = function(d) {
+      let context = this
+      let groupPath = function(d) {
         //console.log(d.values);
         if(d.values.length >= 3){
           return (
@@ -1001,7 +1005,7 @@ export default {
         .attr("stroke-linecap", "round");
       // .append("svg:path")
       // .attr("d", "M0,-5L10,0L0,5");
-      var path = svg
+      let path = svg
         .select("#pathLink")
         .selectAll("path")
         .data(
@@ -1045,7 +1049,7 @@ export default {
         });
       //
       //
-      var circleSender = svg
+      let circleSender = svg
         .select("#circleSender")
         .selectAll("circle")
         .data(
@@ -1076,7 +1080,7 @@ export default {
         // })
         //
         .on("contextmenu", this.contextMenu("client", this.menuClient));
-      var circleReceiver = svg
+      let circleReceiver = svg
         .select("#circleReceiver")
         .selectAll("circle")
         .data(
@@ -1112,7 +1116,7 @@ export default {
       
 
       
-      // var rectParcoords = svg
+      // let rectParcoords = svg
       //   .select("#rectParcoords")
       //   .selectAll("rect")
       //   .data(this.$data.simulation.nodes().filter(d => d.type == "Stream"))
@@ -1131,7 +1135,7 @@ export default {
       //     return d.createdAt;
       //   })
 
-      var rect = svg
+      let rect = svg
         .select("#rectStream")
         .selectAll("rect")
         .data(this.$data.simulation.nodes().filter(d => d.type == "Stream"))
@@ -1151,7 +1155,7 @@ export default {
         .call(this.drag(this.$data.simulation))
         .on("contextmenu", this.contextMenu("stream", this.menuStream));
 
-      var text = svg
+      let text = svg
         .select("#text")
         .selectAll("g")
         .data(this.$data.simulation.nodes())
@@ -1195,7 +1199,7 @@ export default {
 
 
 
-    var circleOwner = svg
+    let circleOwner = svg
         .select("#cenOwner")
         .selectAll("circle")
         // .data(circleOwnerData)
@@ -1206,7 +1210,7 @@ export default {
         // .attr("r", function (d) { return d.radius; })
         // .style("fill", function (d) { return d.color; })
 
-      var textOwner = svg
+      let textOwner = svg
         .select("#textOwner")
         .selectAll("text")
         
@@ -1231,7 +1235,7 @@ export default {
         .append('svg:tspan')
 
 
-    var circleDoc = svg
+    let circleDoc = svg
         .select("#cenDoc")
         .selectAll("circle")
         // .data(circleDocData)
@@ -1240,7 +1244,7 @@ export default {
         // .attr("r", function (d) { return d.radius; })
         // .style("fill", function (d) { return d.color; })
         
-    var textDoc = svg
+    let textDoc = svg
         .select("#textDoc")
         .selectAll("text")
         .data(groupDocs)
@@ -1252,7 +1256,7 @@ export default {
         .attr("y", 20)
         .style("font-size", "50px")
         .text(function(d) {
-          var docType = d.values[0].documentType
+          let docType = d.values[0].documentType
           if(docType === "Rhino"){
             return `🦏`
           }
@@ -1274,7 +1278,7 @@ export default {
 
 
 
-      var parentContext = this;
+      let parentContext = this;
       function brushstarted() {
         if (d3.event.sourceEvent.type !== "end") {
           svg
@@ -1289,7 +1293,7 @@ export default {
 
       function brushed() {
         if (d3.event.sourceEvent.type !== "end") {
-          var selection = d3.event.selection;
+          let selection = d3.event.selection;
           svg
             .select("#rectStream")
             .selectAll("rect")
@@ -1323,7 +1327,7 @@ export default {
         }
       }
 
-      var parentContext = this;
+      //let parentContext = this;
       function tick() {
         
         svg
@@ -1344,14 +1348,14 @@ export default {
           .selectAll(".subhullOwner")
           .each(function (d,i) {
 
-              var sumX = 0
-              var sumY = 0
+              let sumX = 0
+              let sumY = 0
               for (let i = 0; i < Object.values(d)[1].length; i++) {
                 sumX += Object.values(d)[1][i].x
                 sumY += Object.values(d)[1][i].y
               }
-              var avX = sumX / Object.values(d)[1].length
-              var avY = sumY / Object.values(d)[1].length
+              let avX = sumX / Object.values(d)[1].length
+              let avY = sumY / Object.values(d)[1].length
 
               svg
                 .select("#cenOwner")
@@ -1393,14 +1397,14 @@ export default {
           .selectAll(".subhullDoc")
           .each(function (d,i) {
 
-              var sumX = 0
-              var sumY = 0
+              let sumX = 0
+              let sumY = 0
               for (let i = 0; i < Object.values(d)[1].length; i++) {
                 sumX += Object.values(d)[1][i].x
                 sumY += Object.values(d)[1][i].y
               }
-              var avX = sumX / Object.values(d)[1].length
-              var avY = sumY / Object.values(d)[1].length
+              let avX = sumX / Object.values(d)[1].length
+              let avY = sumY / Object.values(d)[1].length
 
               svg
                 .select("#cenDoc")
@@ -1438,16 +1442,16 @@ export default {
         
         path
           .attr("d", function(d) {
-            var dx = d.target.x - d.source.x,
+            let dx = d.target.x - d.source.x,
               dy = d.target.y - d.source.y,
               dr = Math.sqrt(dx * dx + dy * dy);
-            var x0 = d.source.x;
-            var y0 = d.source.y;
-            var x1 = d.target.x;
-            var y1 = d.target.y;
-            var xcontrol = x1 * 0.5 + x0 * 0.5;
-            var ycontrol = y1 * 0.5 + y0 * 0.5;
-            var smartDiagonal;
+            let x0 = d.source.x;
+            let y0 = d.source.y;
+            let x1 = d.target.x;
+            let y1 = d.target.y;
+            let xcontrol = x1 * 0.5 + x0 * 0.5;
+            let ycontrol = y1 * 0.5 + y0 * 0.5;
+            let smartDiagonal;
             if (Math.abs(x0 - x1) > Math.abs(y0 - y1)) {
               smartDiagonal = [
                 "M",
@@ -1555,7 +1559,13 @@ export default {
 
   },
 
-  computed: {}
+  computed: {
+    myserver: function () {
+      // `this` points to the vm instance
+      return this.$store.state.server
+    }
+      
+  }
 };
 </script>
 
