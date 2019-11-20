@@ -157,8 +157,9 @@ requireComponent.keys().forEach( ( fileName ) => {
   const route = {
     name: path,
     path: '/plugins/' + path,
-    component: component
-  }
+    component: component,
+    meta: { requiresAuth: true }, //until I figure out how to define this within the component, we play it safe
+    }
   Router.addRoutes( [ route ] )
   Vue.prototype.$pluginRoutes.push( route )
 } )
