@@ -19,6 +19,15 @@
             </v-list-tile-content>
           </v-list-tile>
         </template>
+        <v-list-tile v-if='$store.state.isAuth'>
+          <v-list-tile-action>
+            <v-icon>info</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-sub-title>Server version: {{$store.state.serverManifest.version}}</v-list-tile-sub-title>
+            <v-list-tile-sub-title>App version: {{$store.state.appVersion}}</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
         <v-list-tile to='/profile' v-if='$store.state.isAuth'>
           <v-list-tile-action>
             <v-icon>face</v-icon>

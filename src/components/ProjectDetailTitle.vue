@@ -19,7 +19,7 @@
       <v-flex xs12 class='ma-0 pa-0 mt-3 mb-2'>
         <v-layout row align-center>
           <v-flex xs3 class=''>
-            <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='project.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
+            <v-text-field hint='Project Code' :mask='jnMask' v-model='project.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
           </v-flex>
           <v-flex xs9>
             <v-combobox @input='updateTags' :disabled='!canEdit' v-model="project.tags" :items='allTags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
@@ -41,8 +41,11 @@ export default {
     project: Object
   },
   computed: {
+    jnMask( ) {
+      return this.$store.state.serverManifest.jnMask || "######-##"
+    },
     allProjectStreams( ) {
-      return this.project.streams.join(',')
+      return this.project.streams.join( ',' )
     },
     allTags( ) {
       return this.$store.getters.allTags
