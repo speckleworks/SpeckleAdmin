@@ -24,21 +24,21 @@ const adminStore = {
         }
       } )
     },
-    // UPDATE_STREAM( state, props ) {
-    //   let found = state.streams.find( s => s.streamId === props.streamId )
-    //   if ( !found ) return console.error( 'User not found; aborting update.' )
-    //   Object.keys( props ).forEach( key => {
-    //     found[ key ] = props[ key ]
-    //   } )
-    //   found.updatedAt = ( new Date( ) ).toISOString( )
-    // },
-    // DELETE_STREAM( state, stream ) {
-    //   let index = state.streams.findIndex( s => s.streamId === stream.streamId )
-    //   if ( index > -1 ) {
-    //     state.streams.splice( index, 1 )
-    //   } else
-    //     console.log( `Failed to remove stream ${stream.streamId} from store.` )
-    // },
+    UPDATE_STREAM( state, props ) {
+      let found = state.streams.find( s => s.streamId === props.streamId )
+      if ( !found ) return console.error( 'User not found; aborting update.' )
+      Object.keys( props ).forEach( key => {
+        found[ key ] = props[ key ]
+      } )
+      found.updatedAt = ( new Date( ) ).toISOString( )
+    },
+    DELETE_STREAM( state, stream ) {
+      let index = state.streams.findIndex( s => s.streamId === stream.streamId )
+      if ( index > -1 ) {
+        state.streams.splice( index, 1 )
+      } else
+        console.log( `Failed to remove stream ${stream.streamId} from store.` )
+    },
     //users
     ADD_USERS_ADMIN( state, users ) {
       users.forEach( user => {
