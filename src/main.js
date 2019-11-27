@@ -145,36 +145,40 @@ const requireComponent = require.context(
   /plugin-[\w-]+\.vue$/
 )
 
-// console.log( requireComponent.keys( ) )
-requireComponent.keys( ).forEach( ( fileName ) => {
-  // Get the component config
-  const componentConfig = requireComponent( fileName )
-  // Globally register the component
-  const component = Vue.component( componentConfig.default.name, componentConfig.default || componentConfig )
-  const path = componentConfig.default.name
-    .replace( /([a-z])([A-Z])/g, "$1-$2" )
-    .replace( /\s+/g, "-" )
-    .toLowerCase( );
-
-  const route = {
-    name: path,
-    path: '/plugins/' + path,
-    component: component,
-    meta: { requiresAuth: componentConfig.default.manifest.requiresAuth },
-  }
-  Router.addRoutes( [ route ] )
-  Vue.prototype.$pluginRoutes.push( route )
-
-  if ( componentConfig.default.manifest.registerInNav )
-    Store.state.adminPlugins.push( {
-      name: componentConfig.default.manifest.humanReadableName,
-      description: componentConfig.default.manifest.description,
-      icon: componentConfig.default.manifest.icon,
-      requiresAuth: componentConfig.default.manifest.requiresAuth,
-      route: '/plugins/' + path,
-    } )
-
-} )
+try {
+  // console.log( requireComponent.keys( ) )
+  requireComponent.keys( ).forEach( ( fileName ) => {
+    // Get the component config
+    const componentConfig = requireComponent( fileName )
+    // Globally register the component
+    const component = Vue.component( componentConfig.default.name, componentConfig.default || componentConfig )
+    const path = componentConfig.default.name
+      .replace( /([a-z])([A-Z])/g, "$1-$2" )
+      .replace( /\s+/g, "-" )
+      .toLowerCase( );
+  
+    const route = {
+      name: path,
+      path: '/plugins/' + path,
+      component: component,
+      meta: { requiresAuth: componentConfig.default.manifest.requiresAuth },
+    }
+    Router.addRoutes( [ route ] )
+    Vue.prototype.$pluginRoutes.push( route )
+  
+    if ( componentConfig.default.manifest.registerInNav )
+      Store.state.adminPlugins.push( {
+        name: componentConfig.default.manifest.humanReadableName,
+        description: componentConfig.default.manifest.description,
+        icon: componentConfig.default.manifest.icon,
+        requiresAuth: componentConfig.default.manifest.requiresAuth,
+        route: '/plugins/' + path,
+      } )
+  
+  } )
+} catch (error) {
+  console.error(error)
+}
 
 // The init logic (it's called after we do some auth flows)
 let initApp = ( ) => {
