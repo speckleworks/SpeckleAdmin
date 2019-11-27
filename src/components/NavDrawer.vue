@@ -125,6 +125,17 @@
           <v-list-tile-sub-title class='xxx-font-weight-light caption'>Plugins registered on this server</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
+      <!-- Dynamically add plugin routes -->
+      <v-list-tile v-for='plugin in $store.state.adminPlugins' :to='plugin.route'>
+        <v-list-tile-action>
+          <v-icon>delete_outline</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>{{plugin.name}}</v-list-tile-title>
+          <v-list-tile-sub-title class='xxx-font-weight-light caption'>{{plugin.description}}</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <!-- end plugin routes -->
       <v-divider class='ma-3'></v-divider>
     </v-list>
     <v-list v-if='$store.state.isAuth' two-line subheader>
@@ -151,24 +162,22 @@
     <v-list dense subheader class='ma-0 pa-0'>
       <v-list-tile @click='toggleDark()'>
         <v-list-tile-action>
-
           <v-icon>{{$store.state.dark ? "wb_sunny" : "nights_stay"}}</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>{{$store.state.dark ? "Day Mode" : "Dark Mode"}}</v-list-tile-title>
-
         </v-list-tile-content>
       </v-list-tile>
     </v-list>
     <v-divider class='ma-0 pa-0'></v-divider>
-    <v-card class='elevation-0' >
+    <v-card class='elevation-0'>
       <v-card-text>
-      <div class='text-uppercase text-xs-center-xxx caption ml-0 pa-5 ml-2 mt-3 mb-3'>
-        Brought to you by:<br>
-        <a href='https://speckle.works' target="_blank" style="xxxcolor:white; text-decoration: none;"><b>Speckle</b>,
-          <span class=' caption'>the open source data platform for AEC.</span></a>
-        <!-- <v-divider class='my-4'></v-divider> -->
-      </div>
+        <div class='text-uppercase text-xs-center-xxx caption ml-0 pa-5 ml-2 mt-3 mb-3'>
+          Brought to you by:<br>
+          <a href='https://speckle.works' target="_blank" style="xxxcolor:white; text-decoration: none;"><b>Speckle</b>,
+            <span class=' caption'>the open source data platform for AEC.</span></a>
+          <!-- <v-divider class='my-4'></v-divider> -->
+        </div>
       </v-card-text>
     </v-card>
   </div>
@@ -190,7 +199,7 @@ export default {
       this.$store.commit( 'SET_DARK', this.dark )
     },
   },
-  mounted() {
+  mounted( ) {
     this.dark = this.$store.state.dark
   }
 }

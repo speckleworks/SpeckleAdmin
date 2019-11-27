@@ -135,7 +135,7 @@ Vue.use( VueCountly, Countly, {
 // Automatic 'plugin' component registration:
 // H/T to Chris Fritz...
 
-Vue.prototype.$pluginRoutes = []
+Vue.prototype.$pluginRoutes = [ ]
 const requireComponent = require.context(
   // The relative path of the components folder
   '@/plugins',
@@ -144,24 +144,36 @@ const requireComponent = require.context(
   // The regular expression used to match base component filenames
   /plugin-[\w-]+\.vue$/
 )
-requireComponent.keys().forEach( ( fileName ) => {
+
+// console.log( requireComponent.keys( ) )
+requireComponent.keys( ).forEach( ( fileName ) => {
   // Get the component config
   const componentConfig = requireComponent( fileName )
-  // // Globally register the component
-  const component  = Vue.component( componentConfig.default.name, componentConfig.default || componentConfig )
-  const path =  componentConfig.default.name
+  // Globally register the component
+  const component = Vue.component( componentConfig.default.name, componentConfig.default || componentConfig )
+  const path = componentConfig.default.name
     .replace( /([a-z])([A-Z])/g, "$1-$2" )
     .replace( /\s+/g, "-" )
-    .toLowerCase();
+    .toLowerCase( );
 
   const route = {
     name: path,
     path: '/plugins/' + path,
     component: component,
-    meta: { requiresAuth: true }, //until I figure out how to define this within the component, we play it safe
-    }
+    meta: { requiresAuth: componentConfig.default.manifest.requiresAuth },
+  }
   Router.addRoutes( [ route ] )
   Vue.prototype.$pluginRoutes.push( route )
+
+  if ( componentConfig.default.manifest.registerInNav )
+    Store.state.adminPlugins.push( {
+      name: componentConfig.default.manifest.humanReadableName,
+      description: componentConfig.default.manifest.description,
+      icon: componentConfig.default.manifest.icon,
+      requiresAuth: componentConfig.default.manifest.requiresAuth,
+      route: '/plugins/' + path,
+    } )
+
 } )
 
 // The init logic (it's called after we do some auth flows)
