@@ -128,7 +128,7 @@
       <!-- Dynamically add plugin routes -->
       <v-list-tile v-for='plugin in $store.state.adminPlugins' :to='plugin.route'>
         <v-list-tile-action>
-          <v-icon>delete_outline</v-icon>
+          <v-icon>{{plugin.icon}}</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>{{plugin.name}}</v-list-tile-title>
