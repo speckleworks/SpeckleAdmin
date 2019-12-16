@@ -58,6 +58,7 @@ export default {
       return `${owner.name} ${owner.surname} ${owner.company ? "(" + owner.company + ")" : ''}`
     },
     canEdit( ) {
+      if (this.$store.state.user.role == 'admin') return true
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
     },
     isOwner( ) {

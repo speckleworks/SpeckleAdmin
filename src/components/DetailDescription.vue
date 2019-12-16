@@ -54,6 +54,7 @@ export default {
       return marked( this.resource.description, { sanitize: true } )
     },
     canEdit( ) {
+      if (this.$store.state.user.role == 'admin') return true
       return this.isOwner ? true : this.resource.canWrite.indexOf( this.$store.state.user._id ) !== -1
     },
     isOwner( ) {

@@ -1,6 +1,6 @@
 <template>
   <v-container fluid fill-height>
-    <v-layout align-center justify-center>
+    <v-layout xx-align-center justify-center>
       <v-flex xs11 md6 lg6>
         <form @submit.prevent='login' v-if='$store.state.isAuth === false'>
           <v-card class="elevation-3">
@@ -84,7 +84,7 @@ export default {
       try {
         url = new URL( this.server )
         let originUrl = new URL( window.location.href )
-        localStorage.setItem('__tempServer', url.origin )
+        localStorage.setItem( '__tempServer', url.origin )
         window.open( `${url.origin}/signin?redirectUrl=${ window.encodeURIComponent( location.origin +'/#/signin/callback') }`, 'login screen', 'height=700,width=800' )
       } catch ( err ) {
         this.errorMessage = err.message
@@ -115,6 +115,10 @@ export default {
   mounted( ) {
     this.checkExistingServers( )
     this.checkRedirect( )
+
+    if ( !window.location.href.includes( 'speckle.systems' ) ) {
+      this.server = new URL( window.location.href ).origin
+    }
 
     if ( this.$store.state.isAuth === true ) {
       this.appendInfoToUrl( 'server', { apiUrl: this.$store.state.server } )

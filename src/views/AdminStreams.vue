@@ -38,7 +38,12 @@
             <td>{{ props.item.owner }}</td>
             <td>{{ props.item.private }}</td>
             <td>
-              <v-checkbox disabled hide-details class="align-center justify-left" v-model=props.item.deleted></v-checkbox>
+              <v-checkbox disabled hide-details  v-model=props.item.deleted></v-checkbox>
+            </td>
+            <td>
+              <v-btn icon flat :to='"/streams/"+props.item.streamId'>
+                <v-icon>edit</v-icon>
+              </v-btn>
             </td>
           </tr>
         </template>

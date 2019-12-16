@@ -20,11 +20,13 @@
       <v-flex xs12 class='ma-0 pa-0 mt-3 mb-2'>
         <v-layout row align-center>
           <v-flex xs3 class='pr-4'>
-            <v-text-field hint='Project Code (numbers only)' mask='###### - ##' v-model='stream.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
+            <v-text-field hint='Project Code' :mask='jnMask' v-model='stream.jobNumber' solo persistent-hint :disabled='!canEdit' @input='updateJobNumber'></v-text-field>
           </v-flex>
           <v-flex xs9>
             <v-combobox @input='updateTags' :disabled='!canEdit' v-model="stream.tags" :items='allTags' hint='add or remove tags' solo persistent-hint small-chips deletable-chips multiple tags>
-              <template v-slot:no-data><p>Add a new tag!</p></template>
+              <template v-slot:no-data>
+                <p>Add a new tag!</p>
+              </template>
             </v-combobox>
           </v-flex>
         </v-layout>
@@ -42,10 +44,14 @@ export default {
     stream: Object, // can be alert or info
   },
   computed: {
-    allTags() {
+    jnMask( ) {
+      return this.$store.state.serverManifest.jnMask || "######-##"
+    },
+    allTags( ) {
       return this.$store.getters.allTags
     },
     canEdit( ) {
+      if (this.$store.state.user.role == 'admin') return true
       return this.isOwner ? true : this.stream.canWrite.indexOf( this.$store.state.user._id ) !== -1
     },
     isOwner( ) {

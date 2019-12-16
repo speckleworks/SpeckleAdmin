@@ -172,42 +172,49 @@ export default {
       this.loading = true
 
       let groups = { orphans: { key: 'orphans', name: 'Orphaned Objects', objects: [ ], visible: true, isolated: false } }
-      this.$store.state.objects.forEach( ( obj, index ) => {
-        let propValue = get( obj.properties, key )
-        if ( propValue ) {
-          // if we have the group already
-          if ( groups.hasOwnProperty( propValue ) ) {
-            groups[ propValue ].objects.push( obj._id )
-          } else {
-            groups[ propValue ] = {
-              key: key,
-              name: propValue,
-              objects: [ obj._id ],
-              visible: true,
-              isolated: false
+
+      if ( this.isTextProperty ) {
+
+        this.$store.state.objects.forEach( ( obj, index ) => {
+          let propValue = get( obj.properties, key )
+          if ( propValue ) {
+            // if we have the group already
+            if ( groups.hasOwnProperty( propValue ) ) {
+              groups[ propValue ].objects.push( obj._id )
+            } else {
+              groups[ propValue ] = {
+                key: key,
+                name: propValue,
+                objects: [ obj._id ],
+                visible: true,
+                isolated: false
+              }
             }
+          } else {
+            groups.orphans.objects.push( obj._id )
           }
-        } else {
-          groups.orphans.objects.push( obj._id )
-        }
-        if ( index === this.$store.state.objects.length - 1 ) {
-          this.loading = false
-        }
-      } )
+          if ( index === this.$store.state.objects.length - 1 ) {
+            this.loading = false
+          }
+        } )
+
+      }
       Object.keys( groups ).forEach( key => this.myGroups.push( groups[ key ] ) )
-      // this.myGroups = groups
     },
     filterProp( ) {
-      console.log( this.selectedRange )
       let objIds = [ ]
+
       this.$store.state.objects.forEach( ( obj, index ) => {
         let propValue = get( obj.properties, this.groupKey )
         if ( propValue )
           if ( propValue >= this.selectedRange[ 0 ] && propValue <= this.selectedRange[ 1 ] )
             objIds.push( obj._id )
+
+
         if ( index === this.$store.state.objects.length - 1 ) {
           if ( this.myGroups[ 0 ] && this.myGroups[ 0 ].visible )
             objIds = [ ...objIds, ...this.myGroups[ 0 ].objects ]
+
           window.renderer.isolateObjects( objIds )
           window.renderer.resetColors( { propagateLegend: false } )
           window.renderer.colorByProperty( { propertyName: this.groupKey, propagateLegend: false, colors: this.coolColors } )

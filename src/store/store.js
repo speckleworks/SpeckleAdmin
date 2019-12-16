@@ -20,6 +20,7 @@ import viewer from './viewer.js'
 // main store module
 export default new Vuex.Store( {
   state: {
+    appVersion: '1.0.3',
     // The canonical and correct server url, i.e. `https://speckle.server.com/api`
     server: null,
     // The server description

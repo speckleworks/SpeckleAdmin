@@ -736,7 +736,6 @@ export default class SpeckleRenderer extends EE {
   }
   // leaves only the provided objIds visible
   isolateObjects( objIds ) {
-    console.log( 'isolating' )
     this.scene.children.forEach( obj => {
       if ( !obj.userData._id ) return
       if ( objIds.includes( obj.userData._id ) ) obj.visible = true

@@ -4,9 +4,9 @@
       <v-progress-linear :indeterminate="true" v-show='showLoading' height='2' class='ma-0'></v-progress-linear>
     </div>
     <div class='renderer' ref='render'></div>
-    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped style='z-index: 2' width='400' fixed hide-overlay>
+    <v-navigation-drawer v-model="$store.state.viewerControls" right app clipped stateless style='z-index: 2' width='400' fixed hide-overlay>
       <v-layout row wrap style="height: auto;">
-        <v-flex xs12 style='height:60px;' class='hidden-sm-and-up'>&nbsp;</v-flex>
+        <!-- <v-flex xs12 style='height:60px;' class='hidden-xs-and-up hidden-md-and-up'>&nbsp;</v-flex> -->
         <v-flex xs12>
           <v-tabs grow slider-color='primary' color='rgba(0,0,0,0)' v-model='activeTab'>
             <v-tab key='streams'>
