@@ -33,13 +33,16 @@
             </v-flex>
             <v-layout row wrap>
               <v-flex xs12 sm3 v-for="(plugin, index) in adminPlugins" :key="index">
-                <v-card :to='{name: plugin.name}'>
-                  <v-card-title>
+                <v-card :to='plugin.route'>
+                  <v-card-title class='subheading'>
                     {{plugin.name}}
                   </v-card-title>
+                  <v-card-text class='caption'>
+                    <b>Description:</b> {{plugin.description}}<br>
+                    <b>Route:</b> <code>{{plugin.route}}</code>
+                  </v-card-text>
                 </v-card>
               </v-flex>
-
             </v-layout>
           </v-tab-item>
         </v-tabs>
@@ -60,7 +63,7 @@ export default {
       return this.$store.state.plugins
     },
     adminPlugins() {
-      return this.$pluginRoutes
+      return this.$store.state.adminPlugins
     }
   },
   mounted() {
