@@ -116,7 +116,7 @@
           <v-list-tile-sub-title class='xxx-font-weight-light caption'>Stream processing</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile to='/plugins'>
+      <v-list-tile to='/pluginsadmin'>
         <v-list-tile-action>
           <v-icon>extensions</v-icon>
         </v-list-tile-action>
@@ -126,7 +126,7 @@
         </v-list-tile-content>
       </v-list-tile>
       <!-- Dynamically add plugin routes -->
-      <v-list-tile v-for='plugin in $store.state.adminPlugins' :to='plugin.route'>
+      <v-list-tile v-for='plugin in $store.state.adminPlugins' :to='plugin.route' :key='plugin.route'>
         <v-list-tile-action>
           <v-icon>{{plugin.icon}}</v-icon>
         </v-list-tile-action>
