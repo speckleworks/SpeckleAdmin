@@ -97,16 +97,6 @@
           <v-list-tile-sub-title class='xxx-font-weight-light caption'>The good old recycle bin.</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile v-if='$store.state.user.role==="admin"' to='/admin'>
-        <v-list-tile-action>
-          <v-icon>settings</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Admin</v-list-tile-title>
-          <v-list-tile-sub-title class='xxx-font-weight-light caption'>Server administration</v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-divider class='ma-3'></v-divider>
       <v-list-tile to='/view'>
         <v-list-tile-action>
           <v-icon>360</v-icon>
@@ -125,15 +115,6 @@
           <v-list-tile-sub-title class='xxx-font-weight-light caption'>Stream processing</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile to='/pluginsadmin'>
-        <v-list-tile-action>
-          <v-icon>extensions</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Plugins</v-list-tile-title>
-          <v-list-tile-sub-title class='xxx-font-weight-light caption'>Plugins registered on this server</v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
       <!-- Dynamically add plugin routes -->
       <v-list-tile v-for='plugin in $store.state.adminPlugins' :to='plugin.route' :key='plugin.route'>
         <v-list-tile-action>
@@ -145,9 +126,29 @@
         </v-list-tile-content>
       </v-list-tile>
       <!-- end plugin routes -->
+      <!-- <v-divider class='ma-3'></v-divider> -->
+      <v-divider class='ma-3'></v-divider>
+      <v-list-tile v-if='$store.state.user.role==="admin"' to='/admin'>
+        <v-list-tile-action>
+          <v-icon>settings</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Admin</v-list-tile-title>
+          <v-list-tile-sub-title class='xxx-font-weight-light caption'>Server administration</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile to='/pluginsadmin'>
+        <v-list-tile-action>
+          <v-icon>extensions</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Plugins</v-list-tile-title>
+          <v-list-tile-sub-title class='xxx-font-weight-light caption'>Plugins registered on this server</v-list-tile-sub-title>
+        </v-list-tile-content>
+      </v-list-tile>
       <v-divider class='ma-3'></v-divider>
     </v-list>
-    <v-list v-if='$store.state.isAuth' two-line subheader>
+    <v-list xxxv-if='$store.state.isAuth' two-line subheader>
       <v-list-tile href='https://speckle.systems/docs/web/management' target='_blank'>
         <v-list-tile-action>
           <v-icon>help</v-icon>
