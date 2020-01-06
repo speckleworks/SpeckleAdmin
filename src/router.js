@@ -116,7 +116,7 @@ let myRouter = new Router( {
       meta: { requiresAuth: true },
     },
     {
-      path: '/plugins',
+      path: '/pluginsadmin',
       name: 'plugins',
       component: ( ) => import( './views/Plugins.vue'),
       meta: { requiresAuth: true}

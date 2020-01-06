@@ -54,7 +54,8 @@ export default new Vuex.Store( {
     viewerControls: false,
     // a list of plugins registered with the server
     plugins: [ ],
-
+    // a list of plugins registered with the app
+    adminPlugins: [],
     // processor related
     // these are the function names for each block from /src/lambda
     // if you want to add your own lambda, add the function/file name to the list to expose it
