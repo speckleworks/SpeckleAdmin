@@ -1050,7 +1050,7 @@ export default {
         .select("#circleSender")
         .selectAll("circle")
         .data(
-          this.$data.simulation.nodes().filter(data => data.role == "Sender")
+          this.$data.simulation.nodes().filter(data => data.role == "Sender" || "sender")
         )
         .enter()
         .append("svg:circle")
@@ -1081,7 +1081,7 @@ export default {
         .select("#circleReceiver")
         .selectAll("circle")
         .data(
-          this.$data.simulation.nodes().filter(data => data.role == "Receiver")
+          this.$data.simulation.nodes().filter(data => data.role == "Receiver" || "receiver")
         )
         .enter()
         .append("svg:circle")
