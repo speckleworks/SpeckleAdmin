@@ -1260,6 +1260,9 @@ export default {
           else if(docType === "Dynamo"){
             return `🔧`
           }
+          else if(docType === "Excel"){
+            return `📊`
+          }
           else if(docType === "GSA"){
             return `💎`
           }
