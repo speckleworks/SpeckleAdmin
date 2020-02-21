@@ -561,10 +561,10 @@ export default {
             let clientDocumentID = resClient.data.resources[j].documentGuid 
             let customName = `` 
 
-            if (clientRole == "Sender" || "sender") {
+            if (clientRole == "Sender" || clientRole == "sender") {
               customName = `🚀` 
             }
-            if (clientRole == "Receiver" || "receiver") {
+            if (clientRole == "Receiver" || clientRole == "receiver") {
               customName = `📡` 
             }
 
@@ -584,7 +584,7 @@ export default {
             }) 
             
 
-            if (clientRole == "Receiver" || "receiver") {
+            if (clientRole == "Receiver" || clientRole == "receiver") {
               streamLinks.push({
                 source: stream_id,
                 target: client_id,
@@ -593,7 +593,7 @@ export default {
                 targetDoc: clientDocumentID,
                 action: "receiving"
               }) 
-            } else if (clientRole == "Sender" || "sender") {
+            } else if (clientRole == "Sender" || clientRole == "sender") {
               streamLinks.push({
                 source: client_id,
                 target: stream_id,
