@@ -1180,7 +1180,6 @@ export default {
           }
         })
         .text(function(d) {
-          if(d.type == "Client")
           return d.name 
         }) 
       text
