@@ -23,7 +23,12 @@
 <script>
 import * as d3 from "d3"
 import ParCoords from 'parcoord-es'
-
+import MicrosoftExcel from "../../public/img/icons/MicrosoftExcel.svg"
+import Grasshopper3D from "../../public/img/icons/Grasshopper3D.svg"
+import Rhino3D from "../../public/img/icons/Rhino3D.svg"
+import GSA from "../../public/img/icons/GSA.svg"
+import Revit from "../../public/img/icons/Revit.svg"
+import Dynamo from "../../public/img/icons/Dynamo.svg"
 
 export default {
   name: "ForceDirectedLayout",
@@ -1175,6 +1180,7 @@ export default {
           }
         })
         .text(function(d) {
+          if(d.type == "Client")
           return d.name 
         }) 
       text
@@ -1235,7 +1241,7 @@ export default {
     let circleDoc = svg
         .select("#cenDoc")
         .selectAll("circle")
-        // .data(circleDocData)
+        .data(circleDocData)
         // .enter()
         // .append("circle")
         // .attr("r", function (d) { return d.radius  })
@@ -1248,30 +1254,57 @@ export default {
         .enter()      
         .append("svg:g")
       textDoc
-        .append("svg:text")
-        .attr("x", -20)
-        .attr("y", 20)
-        .style("font-size", "50px")
-        .text(function(d) {
+        .append("svg:image")
+        .attr("xlink:href", function (d) { 
           let docType = d.values[0].documentType
-          if(docType === "Rhino"){
-            return `🦏`
+
+         if(docType === "Rhino"){
+            return Rhino3D
           }
           else if(docType === "Dynamo"){
-            return `🔧`
+            return Dynamo
           }
           else if(docType === "Excel"){
-            return `📊`
+            return MicrosoftExcel
           }
           else if(docType === "GSA"){
-            return `💎`
+             return GSA
           }
           else if(docType === "Grasshopper"){
-            return `🦗`
+            return Grasshopper3D
           }else{
-            return docType
+            return "404"
           }
-        })
+          
+          })
+        .attr("width", 150)
+        .attr("height", 150)
+        .attr("x", -75)
+        .attr("y", -75)
+        
+        // .style("font-size", "50px")
+        // .text(function(d) {
+        //   let docType = d.values[0].documentType
+        //   if(docType === "Rhino"){
+        //     return `🦏`
+        //   }
+        //   else if(docType === "Dynamo"){
+        //     return `🔧`
+        //   }
+        //   else if(docType === "Excel"){
+        //     //return `📊`
+        //     return `<line></line>`
+
+        //   }
+        //   else if(docType === "GSA"){
+        //     return `💎`
+        //   }
+        //   else if(docType === "Grasshopper"){
+        //     return `🦗`
+        //   }else{
+        //     return docType
+        //   }
+        // })
 
 
 
@@ -1418,7 +1451,7 @@ export default {
             
               svg
                 .select("#textDoc")
-                .selectAll("text")
+                .selectAll("image")
                 .each(function (d, j) {
                   if (j == i && avX && avY) {
                     d3.select(this)
