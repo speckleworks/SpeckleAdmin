@@ -1,6 +1,19 @@
 <template>
   <v-layout row wrap>
+    <v-flex xs12>
+      Selected Objects:
+      <v-btn flat icon small @click.native="hideSelectedObjects()" :color='"grey"'>
+        <v-icon>remove_red_eye</v-icon>
+      </v-btn>
+      <v-btn flat icon small @click.native="unhideAllObjects()" :color='""'>
+        <v-icon>remove_red_eye</v-icon>
+      </v-btn>
+      <v-btn flat icon small @click.native='toggleIsolation()' :color='selectedObjects.isolated ? "":"grey"'>
+        <v-icon>location_searching</v-icon>
+      </v-btn>
+    </v-flex>
     <v-flex xs12 class='caption' v-if='selectedObjectsId.length===0'>
+      <p>
         There are no selected objects. You can select objects in the 3d model:
         <ul>
           <li>by clicking on them;</li>
@@ -61,7 +74,26 @@ export default {
       pageNumber: 0,
     }
   },
-  methods: {}
+  methods: {
+    hideSelectedObjects() {
+      if (this.$store.state.selectedObjects.length !== 0)
+        window.renderer.hideObjects(this.$store.state.selectedObjects)
+    },
+    unhideAllObjects() {
+      window.renderer.showObjects( [ ] )
+      this.selectedObjects.isolated = false
+    },
+    toggleIsolation() {
+      if (this.selectedObjects.isolated) {
+        window.renderer.showObjects(this.$store.state.selectedObjects)
+        this.selectedObjects.isolated = false
+      }
+      else {
+        window.renderer.isolateObjects(this.$store.state.selectedObjects)
+        this.selectedObjects.isolated = true
+      }
+    }
+  }
 }
 
 </script>
