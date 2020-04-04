@@ -60,7 +60,7 @@
 </template>
 <script>
 import ObjectDetails from "@/components/ViewerObjectDetails.vue";
-import TransformControls from "three/examples/jsm/controls/TransformControls";
+import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 export default {
   name: "SelectedObjects",
   components: { ObjectDetails },
@@ -114,32 +114,33 @@ export default {
         this.selectedObjects.isolated = true;
       }
     },
-    createPlaneStencilGroup ( geometries, plane, renderOrder ) {
+    createPlaneStencilGroup( geometries, plane, renderOrder ) {
       let group = new THREE.Group()
-      let baseMat = new THREE.MeshBasicMaterial()
-      baseMat.depthWrite = false
-      baseMat.depthTest = false
-      baseMat.colorWrite = false
-      baseMat.stencilWrite = true
-      baseMat.stencilFunc = THREE.AlwaysStencilFunc
+      for ( let geometry of geometries ) {
+        
+        let baseMat = new THREE.MeshBasicMaterial()
+        baseMat.depthWrite = false
+        baseMat.depthTest = false
+        baseMat.colorWrite = false
+        baseMat.stencilWrite = true
+        baseMat.stencilFunc = THREE.AlwaysStencilFunc
 
-      // back faces
-      let mat0 = baseMat.clone()
-      mat0.side = THREE.BackSide
-      mat0.clippingPlanes = [ plane ]
-      mat0.stencilFail = THREE.IncrementWrapStencilOp
-      mat0.stencilZFail = THREE.IncrementWrapStencilOp
-      mat0.stencilZPass = THREE.IncrementWrapStencilOp
+        // back faces
+        let mat0 = baseMat.clone()
+        mat0.side = THREE.BackSide
+        mat0.clippingPlanes = [ plane ]
+        mat0.stencilFail = THREE.IncrementWrapStencilOp
+        mat0.stencilZFail = THREE.IncrementWrapStencilOp
+        mat0.stencilZPass = THREE.IncrementWrapStencilOp
 
-      // front faces
-      let mat1 = baseMat.clone()
-      mat1.side = THREE.FrontSide
-      mat1.clippingPlanes = [ plane ]
-      mat1.stencilFail = THREE.DecrementWrapStencilOp
-      mat1.stencilZFail = THREE.DecrementWrapStencilOp
-      mat1.stencilZPass = THREE.DecrementWrapStencilOp
+        // front faces
+        let mat1 = baseMat.clone()
+        mat1.side = THREE.FrontSide
+        mat1.clippingPlanes = [ plane ]
+        mat1.stencilFail = THREE.DecrementWrapStencilOp
+        mat1.stencilZFail = THREE.DecrementWrapStencilOp
+        mat1.stencilZPass = THREE.DecrementWrapStencilOp
 
-      for ( let geometry in geometries ) {
         let mesh0 = new THREE.Mesh( geometry, mat0 )
         mesh0.renderOrder = renderOrder
         group.add( mesh0 )
@@ -150,20 +151,24 @@ export default {
       }
       return group
     },
-    addPlaneControls( po ) {
-      let control = new TransformControls( this.camera, this.renderer.domElement )
-      control.addEventListener( 'change', window.renderer.render )
+    addPlaneTransformControl( po ) {
+      let control = new TransformControls( window.renderer.camera, window.renderer.domObject )
+      control.addEventListener( 'change', () =>{
+        window.renderer.render(window.renderer.scene, window.renderer.camera)
+      } )
       control.addEventListener( 'dragging-changed', function ( event ) {
         window.renderer.controls.enabled = !event.value
       } )
       control.attach( po )
+      window.renderer.planeTransformControls.push(control)
       window.renderer.scene.add( control )
     },
     initSectionBox() {
+      window.renderer.localClippingEnabled = true
       console.log("Click section box");
       console.log(window.renderer.scene.children);
       let object = new THREE.Group();
-      window.renderer.scene.add(object);
+      // window.renderer.scene.add(object);
       let geometries = [];
       for (let obj of window.renderer.scene.children) {
         if (obj.type === "Mesh") geometries.push(obj.geometry);
@@ -172,11 +177,11 @@ export default {
       console.log(geometries);
       let defaultDistantToOrigin = 50000;
       let planes = [
-        new THREE.Plane(new THREE.Vector3(-1, 0, 0), -defaultDistantToOrigin),
+        new THREE.Plane(new THREE.Vector3(-1, 0, 0), defaultDistantToOrigin),
         new THREE.Plane(new THREE.Vector3(1, 0, 0), defaultDistantToOrigin),
-        new THREE.Plane(new THREE.Vector3(0, -1, 0), -defaultDistantToOrigin),
+        new THREE.Plane(new THREE.Vector3(0, -1, 0), defaultDistantToOrigin),
         new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), defaultDistantToOrigin ),
-        new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), -defaultDistantToOrigin ),
+        new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), defaultDistantToOrigin ),
         new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), defaultDistantToOrigin )
       ];
       let planeHelpers = planes.map(
@@ -188,6 +193,7 @@ export default {
       });
       let planeObjects = [];
       let planeGeom = new THREE.PlaneBufferGeometry(40000, 40000);
+      // for ( let geometry of geometries) {
       for (let i = 0; i < 6; i++) {
         let poGroup = new THREE.Group();
         let plane = planes[i];
@@ -210,14 +216,15 @@ export default {
           renderer.clearStencil();
         };
         po.renderOrder = i + 1.1;
-        object.add(stencilGroup);
+        object.add(stencilGroup);        
         poGroup.add(po);
         planeObjects.push(po);
-        window.renderer.scene.add(poGroup);
-        console.log(poGroup);
-        addPlaneControls(poGroup);
+        window.renderer.scene.add(po);
       }
-      window.renderer.render(window.renderer.scene, window.renderer.camera)
+      for (let plane of planes) {
+        this.addPlaneTransformControl(plane);
+      }        
+      // }
     },
   }
 };
