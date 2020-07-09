@@ -1271,6 +1271,9 @@ export default {
           }
           else if(docType === "Grasshopper"){
             return Grasshopper3D
+          }
+          else if(docType === "Revit"){
+            return Revit
           }else{
             return "404"
           }

@@ -519,7 +519,7 @@ export default {
             updatedAt: streamUpdatedAt,
             size: "10",
             objectsNumber: objectsNumber,
-            name: `🛰️📦${streamName}`,
+            name: `${streamName}`,
             tags: streamTags,
             canRead: streamCanRead,
             canWrite: streamCanWrite,
