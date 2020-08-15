@@ -15,7 +15,7 @@
           <ul>
             <li><a href='https://discourse.speckle.works' target="_blank">Discourse</a></li>
             <li><a href='https://slacker.speckle.works' target="_blank">Slack</a></li>
-            <li><a href='https://twitter.com/speckle_works' target="_blank">Twitter</a></li>
+            <li><a href='https://twitter.com/SpeckleSystems' target="_blank">Twitter</a></li>
           </ul>
         </div>
       </v-flex>
@@ -97,13 +97,13 @@
           </span>
           <v-spacer></v-spacer>
           <!-- <v-toolbar-items>
-            <v-btn flat href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle!</v-btn>
+            <v-btn flat href='https://twitter.com/SpeckleSystems' target='_blank'>Follow Speckle!</v-btn>
           </v-toolbar-items> -->
         </v-toolbar>
         <v-card style='max-height: 560px; overflow-y: auto;'>
-          <Timeline :id="'speckle_works'" :sourceType="'profile'" :options="{ theme: $store.state.dark ? 'dark' : '', tweetLimit: 10 }" />
+          <Timeline :id="'specklesystems'" :sourceType="'profile'" :options="{ theme: $store.state.dark ? 'dark' : '', tweetLimit: 10 }" />
         </v-card>
-        <v-btn block large xxxcolor='black' href='https://twitter.com/speckle_works' target='_blank'>Follow Speckle For More!</v-btn>
+        <v-btn block large xxxcolor='black' href='https://twitter.com/SpeckleSystems' target='_blank'>Follow Speckle For More!</v-btn>
       </v-flex>
     </v-layout>
   </v-container>
