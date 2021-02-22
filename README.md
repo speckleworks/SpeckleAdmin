@@ -4,6 +4,13 @@
 
 A simple front-end admin application for speckle. Demo: check it out live [here](https://app.speckle.systems)!
 
+## ⚠️ IMPORTANT ⚠️
+
+Speckle v1 has reached EOL and is no longer mainatined. Check out our brand new 👉 [Speckle v2](https://github.com/specklesystems)!
+Read more about the announcemnt [here](https://speckle.systems/blog/speckle2-vision-and-faq) and check out or new [website](https://speckle.systems).
+
+
+
 ![SpeckleAdmin](https://user-images.githubusercontent.com/7696515/57015016-79c5f500-6c0a-11e9-9bfe-7af41e6ffd4f.png)
 
 The easiest way to use SpeckleAdmin is to navigate to https://app.speckle.systems and login at your server. Data will strictly be transferred between the client (the app in your browser) and your server. This works within private networks, amongst firewalls, etc. as long as you have a SSL certificate for your server (ie, non-http*s* server adresses will not work). 
