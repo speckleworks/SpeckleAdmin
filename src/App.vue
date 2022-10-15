@@ -3,7 +3,30 @@
     <v-navigation-drawer fixed app clipped xxxclass='elevation-5' v-model='drawer'>
       <nav-drawer></nav-drawer>
     </v-navigation-drawer>
-    <v-toolbar fixed app clipped-left clipped-right xxxstyle='z-index: 100000'>
+    <v-snackbar
+      v-model="snackbar"
+      top
+      auto-height
+      color="danger"
+      :timeout="60*60*1000"
+    >
+    <div>
+      <h2>Hello there! This frontend application for Speckle 1.0 will be retired by 15 November 2022.</h2>
+      <p>You can continue using the free 1.0 server (hestia) by going to <a href="https://hestia.speckle.works">https://hestia.speckle.works</a>.</p>
+      <p>Nevertheless, the Speckle team recommends you move to 2.0! For more info, contact us at hello [at] speckle [dot] systems.</p>
+      <v-btn color="blue" style="width:70%; margin-left: 0px;" href="https://speckle.xyz">Go to Speckle 2.0</v-btn>
+      <v-btn flat color="primary" @click="snackbar = false">Close</v-btn>
+    </div>
+      <!-- <v-btn
+        color="primary"
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn> -->
+    </v-snackbar>
+
+
+    <v-toolbar app clipped-left clipped-right>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class='text-uppercase font-weight-light'>{{$route.name}}</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -35,7 +58,8 @@ export default {
     drawer: true,
     dark: false,
     viewerControls: true,
-    isFullScreen: false
+    isFullScreen: false,
+    snackbar: true
   } ),
   methods: {
     toggleDark( ) {
