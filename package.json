@@ -42,7 +42,7 @@
     "sass-loader": "^7.1.0",
     "save-svg-as-png": "^1.4.14",
     "sockette": "^2.0.5",
-    "three": "^0.103.0",
+    "three": "^0.125.0",
     "threejs-orbit-controls": "^1.0.3",
     "uuid": "^3.3.2",
     "vue-async-computed": "^3.7.0",
