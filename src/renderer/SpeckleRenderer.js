@@ -28,6 +28,7 @@ export default class SpeckleRenderer extends EE {
     this.hemiLight = null
     this.flashLight = null
     this.shadowLight = null
+    this.planeTransformControls = []
 
     this.raycaster = null
     this.mouse = null
