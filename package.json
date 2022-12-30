@@ -28,7 +28,7 @@
     "countly-sdk-web": "^19.8.0",
     "d3": "^5.12.0",
     "event-emitter-es6": "^1.1.5",
-    "flat": "^4.1.0",
+    "flat": "^5.0.1",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "lodash.union": "^4.6.0",
